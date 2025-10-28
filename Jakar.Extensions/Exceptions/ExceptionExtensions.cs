@@ -3,7 +3,7 @@
 
 public static class ExceptionExtensions
 {
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException(nameof(e)); }
@@ -18,7 +18,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         Dictionary<string, object?> dictionary = new();
@@ -29,12 +29,15 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static ExceptionDetails Details( this     Exception e ) => new(e);
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    public static ExceptionDetails Details( this Exception e ) => new(e, false);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static IEnumerable<string> Frames( StackTrace trace )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    public static ExceptionDetails FullDetails( this Exception e ) => new(e);
+
+
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static IEnumerable<string> Frames( StackTrace trace )
     {
         foreach ( StackFrame frame in trace.GetFrames() )
         {
@@ -63,8 +66,7 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string         CallStack( StackTrace trace )  => string.Join("->", Frames(trace));
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static string Frame( StackFrame frame )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException(nameof(frame.GetMethod));
         string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Types.MethodClass));
@@ -78,29 +80,11 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static Dictionary<string, JToken?> GetData( this Exception e )
-    {
-        Dictionary<string, JToken?> data = new();
-
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( DictionaryEntry pair in e.Data )
-        {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-            string? key = pair.Key?.ToString();
-            if ( key is null ) { continue; }
-
-            data[key] = pair.Value is null
-                            ? null
-                            : JToken.FromObject(pair.Value);
-        }
-
-        return data;
-    }
+    [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    public static JsonNode? GetData( this Exception e ) => JsonSerializer.SerializeToNode(e.Data, JakarExtensionsContext.Default.IDictionary);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
         dict = new Dictionary<string, string?>(10);
@@ -108,11 +92,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details<TValue>( this Exception e, in TValue dict )
         where TValue : class, IDictionary<string, string?>
     {
-        dict[nameof(Type)]               = e.GetType().FullName;
+        dict[nameof(Type)] = e.GetType()
+                              .FullName;
+
         dict[nameof(e.Source)]           = e.Source;
         dict[nameof(e.Message)]          = e.Message;
         dict[nameof(e.StackTrace)]       = e.StackTrace;
@@ -122,12 +108,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
                {
-                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Type)] = e.GetType()
+                                     .FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,
@@ -158,48 +145,49 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+    [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref JsonObject dictionary )
         where TValue : Exception
     {
         foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
         {
             string key = info.Name;
-
             if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
 
-
             object? value = info.GetValue(e, null);
-
-            dictionary[key] = value is not null
-                                  ? JToken.FromObject(value)
-                                  : null;
+            dictionary[key] = JsonSerializer.SerializeToNode(value, JakarExtensionsContext.Default.Object);
         }
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed"), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
     {
-        dict = new Dictionary<string, JToken?>
+        JsonArray            array = new();
+        ReadOnlySpan<string> lines = e.StackTrace?.SplitAndTrimLines();
+
+        foreach ( string line in lines )
+        {
+            JsonNode node = line;
+            array.Add(node);
+        }
+
+        dict = new JsonObject
                {
-                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Type)] = e.GetType()
+                                     .FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,
                    [nameof(Exception.Message)]    = e.Message,
-                   [nameof(Exception.Data)]       = JToken.FromObject(e.GetData()),
-                   [nameof(Exception.StackTrace)] = JToken.FromObject(e.StackTrace?.SplitAndTrimLines() ?? [])
+                   [nameof(Exception.Data)]       = e.GetData(),
+                   [nameof(Exception.StackTrace)] = array
                };
-
 
         if ( includeFullMethodInfo )
         {
             MethodDetails? info = e.MethodInfo();
-
-            dict[nameof(Exception.TargetSite)] = info is not null
-                                                     ? JToken.FromObject(info)
-                                                     : null;
+            dict[nameof(Exception.TargetSite)] = info?.ToJsonNode();
         }
         else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
@@ -208,7 +196,7 @@ public static class ExceptionExtensions
 
 
 /*
-    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref JsonObject dictionary )
         where TValue : Exception
     {
         foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
@@ -224,9 +212,9 @@ public static class ExceptionExtensions
 
 
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
+    public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
     {
-        dict = new Dictionary<string, JToken?>
+        dict = new JsonObject
                {
                    [nameof(Type)] = e.GetType().FullName,
                    [nameof(Exception.HResult)] = e.HResult,

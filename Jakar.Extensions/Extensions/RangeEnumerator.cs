@@ -9,7 +9,7 @@ public ref struct RangeEnumerator
 
     public RangeEnumerator( Range range )
     {
-        __range  = range;
+        __range = range;
         Current = __range.Start.Value - 1;
     }
 

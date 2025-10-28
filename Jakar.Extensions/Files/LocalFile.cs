@@ -1,8 +1,5 @@
 ﻿// unset
 
-using AsyncAwaitBestPractices;
-
-
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1584
 
@@ -12,27 +9,29 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
 {
-    public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
-    public readonly              string   FullPath     = info.FullName;
-    private                      bool     __isTemporary;
-    [JsonIgnore] public readonly FileInfo Info = info;
+    public readonly              Encoding                  FileEncoding = encoding ?? Encoding.Default;
+    [JsonIgnore] public readonly FileInfo                  Info         = info;
+    public readonly              string                    FullPath     = info.FullName;
+    private                      bool                      __isTemporary;
+    public static                JsonTypeInfo<LocalFile[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileArray;
 
 
-    public string           ContentType     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Mime.ToContentType(); }
-    public DateTimeOffset   CreationTimeUtc { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.CreationTimeUtc; }
-    public string?          DirectoryName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.DirectoryName; }
-    public bool             DoesNotExist    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !Exists; }
-    public bool             Exists          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Exists; }
-    public string           Extension       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Extension; }
-    bool TempFile.ITempFile.IsTemporary     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTemporary; set => __isTemporary = value; }
-    public DateTimeOffset   LastAccess      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.LastAccessTime; }
-    public MimeType         Mime            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Extension.FromExtension(); }
-    public string           Name            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Name; }
+    public static JsonSerializerContext   JsonContext     => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LocalFile> JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
+    public        string                  ContentType     => Mime.ToContentType();
+    public        DateTimeOffset          CreationTimeUtc => Info.CreationTimeUtc;
+    public        string?                 DirectoryName   => Info.DirectoryName;
+    public        bool                    DoesNotExist    => !Exists;
+    public        bool                    Exists          => Info.Exists;
+    public        string                  Extension       => Info.Extension;
+    bool TempFile.ITempFile.              IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset                 LastAccess      => Info.LastAccessTime;
+    public MimeType                       Mime            => Extension.FromExtension();
+    public string                         Name            => Info.Name;
 
-    [JsonIgnore]
-    public LocalDirectory? Parent
+    [JsonIgnore] public LocalDirectory? Parent
     {
         get
         {
@@ -43,7 +42,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
                        : new LocalDirectory(parent);
         }
     }
-    public string Root { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Directory.GetDirectoryRoot(FullPath); }
+    public string Root => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
@@ -505,10 +504,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
         for ( int i = 0; i < files.Length; i++ )
         {
-            LocalFile            file   = files[i];
-            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
-            await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
+            LocalFile          file   = files[i];
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
 
             await stream.WriteAsync(data, token);
         }
@@ -524,9 +525,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
         foreach ( LocalFile file in files )
         {
-            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
-            await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
 
             await stream.WriteAsync(data, token);
         }
@@ -752,7 +755,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         await using StreamWriter writer        = new(stream, FileEncoding);
 
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(payload.Length);
-        payload.AsSpan().CopyTo(owner.Memory.Span);
+
+        payload.AsSpan()
+               .CopyTo(owner.Memory.Span);
+
         await writer.WriteAsync(owner.Memory, token);
     }
 
@@ -836,13 +842,20 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using StreamReader     stream        = new(file, FileEncoding);
         return await stream.ReadToEndAsync(token);
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] 
+
     async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using StreamReader  stream        = new(OpenRead(), FileEncoding);
         string              content       = await stream.ReadToEndAsync(token);
         return content.FromJson<TValue>();
+    }
+    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using StreamReader  stream        = new(OpenRead(), FileEncoding);
+        string              content       = await stream.ReadToEndAsync(token);
+        return content.FromJson(info);
     }
 
     async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
@@ -879,10 +892,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? string.Empty; }
+        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? EMPTY; }
     }
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     TValue IReadHandler.AsJson<TValue>( in TelemetrySpan parent = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -913,8 +926,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         IReadHandler        handler       = this;
         return handler.AsMemory();
     }
-    [Pure, MustDisposeResource]
-    Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
+    [Pure] [MustDisposeResource] Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    file          = OpenRead();
@@ -978,61 +990,6 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
 
 
-    [Serializable]
-    public class Collection : ObservableCollection<LocalFile>
-    {
-        public Collection() : base() { }
-        public Collection( params ReadOnlySpan<LocalFile> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
-    {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentQueue : ConcurrentQueue<LocalFile>
-    {
-        public ConcurrentQueue() : base() { }
-        public ConcurrentQueue( params ReadOnlySpan<LocalFile> values ) : base()
-        {
-            foreach ( LocalFile value in values ) { Enqueue(value); }
-        }
-    }
-
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    [Serializable]
-    public class Deque : ConcurrentDeque<LocalFile>
-    {
-        public Deque() : base() { }
-        public Deque( params ReadOnlySpan<LocalFile> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class Files( int capacity ) : List<LocalFile>(capacity)
-    {
-        public Files() : this(DEFAULT_CAPACITY) { }
-        public Files( params ReadOnlySpan<LocalFile> values ) : this(values.Length)
-        {
-            foreach ( LocalFile value in values ) { Add(value); }
-        }
-    }
-
-
-
     public interface IAsyncReadHandler
     {
         IAsyncEnumerable<string> AsLines( CancellationToken token = default );
@@ -1063,15 +1020,23 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// </returns>
         ValueTask<string> AsString( CancellationToken token = default );
 
-        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
-        /// <exception cref="JsonReaderException"> if an error  deserialization occurs </exception>
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
+            where TValue : IJsonModel<TValue>;
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
+        /// <typeparam name="TValue"> </typeparam>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <typeparamref name="TValue"/>
+        /// </returns>
+        ValueTask<TValue> AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default );
     }
 
 
@@ -1100,8 +1065,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <see cref="ReadOnlySpan{byte}"/>
         /// </returns>
-        [MustDisposeResource]
-        Buffer<byte> AsSpan( in TelemetrySpan parent = default );
+        [MustDisposeResource] Buffer<byte> AsSpan( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1118,87 +1082,24 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-        TValue AsJson<TValue>( in TelemetrySpan parent = default );
+        TValue AsJson<TValue>( in TelemetrySpan parent = default )
+            where TValue : IJsonModel<TValue>;
     }
 
 
 
-    [Serializable]
-    public class Queue : Queue<LocalFile>
+    public sealed class PathComparer : IComparer<LocalFile>
     {
-        public Queue() : base() { }
-        public Queue( params ReadOnlySpan<LocalFile> values ) : base()
+        public static readonly PathComparer Default = new();
+        public int Compare( LocalFile? x, LocalFile? y )
         {
-            foreach ( LocalFile value in values ) { Enqueue(value); }
-        }
-    }
+            if ( ReferenceEquals(x, y) ) { return 0; }
 
+            if ( y is null ) { return 1; }
 
+            if ( x is null ) { return -1; }
 
-    [Serializable]
-    public class Set( int capacity ) : HashSet<LocalFile>(capacity)
-    {
-        public Set() : this(DEFAULT_CAPACITY) { }
-        public Set( params ReadOnlySpan<LocalFile> values ) : this(values.Length)
-        {
-            foreach ( LocalFile value in values ) { Add(value); }
-        }
-    }
-
-
-
-    /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
-    [Serializable]
-    public class Watcher : ConcurrentObservableCollection<LocalFile>
-    {
-        private readonly LocalDirectory.Watcher           __watcher;
-        private readonly WeakEventManager<ErrorEventArgs> __errorEventManager = new();
-
-
-        public event ErrorEventHandler? Error { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this, x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this, x)); }
-
-
-        public Watcher( LocalDirectory.Watcher watcher ) : base(watcher.Directory.GetFiles())
-        {
-            __watcher                     =  watcher;
-            __watcher.Created             += OnCreated;
-            __watcher.Changed             += OnChanged;
-            __watcher.Deleted             += OnDeleted;
-            __watcher.Renamed             += OnRenamed;
-            __watcher.Error               += OnError;
-            __watcher.EnableRaisingEvents =  true;
-        }
-        private void OnChanged( object sender, FileSystemEventArgs e )
-        {
-            LocalFile file = new(e.FullPath);
-            AddOrUpdate(file);
-        }
-        private void OnCreated( object sender, FileSystemEventArgs e ) => Add(e.FullPath);
-        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove(e.FullPath);
-        private void OnError( object   sender, ErrorEventArgs      e ) => __errorEventManager.RaiseEvent(e, nameof(Error));
-        private void OnRenamed( object sender, RenamedEventArgs e )
-        {
-            LocalFile? file = Values.FirstOrDefault(x => x.FullPath == e.OldFullPath);
-            if ( file is not null ) { Remove(file); }
-
-            Add(e.FullPath);
-        }
-
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            __watcher.EnableRaisingEvents = false;
-
-            __watcher.Created -= OnCreated;
-            __watcher.Changed -= OnChanged;
-            __watcher.Deleted -= OnDeleted;
-            __watcher.Renamed -= OnRenamed;
-            __watcher.Error   -= OnError;
-
-            __watcher.Dispose();
-            GC.SuppressFinalize(this);
+            return string.Compare(x.FullPath, y.FullPath, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

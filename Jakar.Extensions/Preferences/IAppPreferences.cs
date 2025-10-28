@@ -22,8 +22,8 @@ public interface IAppPreferences : IAsyncDisposable
 
     TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? alternateKey = null )
         where TValue : IParsable<TValue>, IFormattable;
-    string Get( string key, string sharedName,   string? alternateKey = null, string  defaultValue = EMPTY );
-    Uri    Get( string key, Uri    defaultValue, string  sharedName,          string? alternateKey = null );
-    bool   Get( string key, bool   defaultValue, string  sharedName,          string? alternateKey = null );
-    bool?  Get( string key, bool?  defaultValue, string  sharedName,          string? alternateKey = null );
+    string Get( string key, string sharedName,   string defaultValue = EMPTY, string? alternateKey = null );
+    Uri    Get( string key, Uri    defaultValue, string sharedName,           string? alternateKey = null );
+    bool   Get( string key, bool   defaultValue, string sharedName,           string? alternateKey = null );
+    bool?  Get( string key, bool?  defaultValue, string sharedName,           string? alternateKey = null );
 }

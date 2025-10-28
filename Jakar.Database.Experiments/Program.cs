@@ -1,7 +1,7 @@
 ﻿using Jakar.Database;
 
 
-[assembly: Experimental( "SqlTableBuilder" )]
+[assembly: Experimental("SqlTableBuilder")]
 
 
 try
@@ -14,12 +14,13 @@ try
 #pragma warning restore OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     */
 
+    await TestDatabase.TestAsync();
 
     // Tests.Test_Hashes();
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    TestDatabase.TestAsync();
+    // TODO: TestDatabase.TestAsync();
 
     // JsonTest.Run();
 
@@ -44,7 +45,7 @@ finally { "Bye".WriteToConsole(); }
 //     //
 //     // .Where( x => x.DisplayName.Contains( "Czech", StringComparison.OrdinalIgnoreCase ) )
 //    .Where( x => x.AppVersion is not null )
-//    .ToPrettyJson()
+//    .Toson()
 //    .WriteToConsole();
 
 

@@ -5,8 +5,9 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
+		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>9.17.2</Version>
+		<Version>9.19.1</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -37,11 +38,17 @@
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>link</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="SorterEqualizer\**" />
 		<Compile Remove="WeakEventManagers\**" />
+		<EmbeddedResource Remove="SorterEqualizer\**" />
 		<EmbeddedResource Remove="WeakEventManagers\**" />
+		<None Remove="SorterEqualizer\**" />
 		<None Remove="WeakEventManagers\**" />
 	</ItemGroup>
 
@@ -65,6 +72,10 @@
 		</None>
 	</ItemGroup>
 
+	<PropertyGroup>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DocumentationFile>bin\Release\Jakar.Extensions.xml</DocumentationFile>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -84,18 +95,18 @@
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
- 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Http" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
-		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="Nito.Collections.Deque" />
- 		<PackageReference Include="Otp.NET" />
+		<PackageReference Include="Otp.NET" />
 		<PackageReference Include="Portable.BouncyCastle" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Formatting.Compact" />
@@ -107,8 +118,10 @@
 		<PackageReference Include="System.ComponentModel.Annotations" />
 		<PackageReference Include="System.IO.Hashing" />
 		<PackageReference Include="System.Net.Http" />
+		<PackageReference Include="System.Net.Http.Json" />
 		<PackageReference Include="System.Text.Encoding.CodePages" />
 		<PackageReference Include="System.Text.Encodings.Web" />
+		<PackageReference Include="System.Text.Json" />
 		<PackageReference Include="System.Text.RegularExpressions" />
 		<PackageReference Include="System.Threading.Tasks" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" />
@@ -121,8 +134,8 @@
 		<PackageReference Include="ValueOf" />
 		<PackageReference Include="ZLinq" />
 		<PackageReference Include="ZLinq.DropInGenerator">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="ZLinq.FileSystem" />
 		<PackageReference Include="ZXing.Net" />

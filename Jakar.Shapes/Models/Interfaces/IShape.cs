@@ -4,13 +4,12 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSelf>
+public interface IShape<TSelf> : IValidator, IFormattable, IJsonModel<TSelf>, IEqualComparable<TSelf>
     where TSelf : IShape<TSelf>
 {
     public abstract static ref readonly TSelf Invalid { get; }
-    public abstract static ref readonly TSelf Zero    { get; }
     public abstract static ref readonly TSelf One     { get; }
-    public                              bool  IsNaN   { get; }
+    public abstract static ref readonly TSelf Zero    { get; }
 
 
     public abstract static TSelf operator +( TSelf self, int                              other );
@@ -43,20 +42,16 @@ public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSel
 
 public interface IShapeSize
 {
-    public double Width  { get; }
-    public double Height { get; }
-
-
-    public void Deconstruct( out double width, out double height );
+    public double       Height { get; }
+    public ReadOnlySize Size   { get; }
+    public double       Width  { get; }
 }
 
 
 
 public interface IShapeLocation
 {
-    public double X { get; }
-    public double Y { get; }
-
-
-    public void Deconstruct( out double x, out double y );
+    public ReadOnlyPoint Location { get; }
+    public double        X        { get; }
+    public double        Y        { get; }
 }

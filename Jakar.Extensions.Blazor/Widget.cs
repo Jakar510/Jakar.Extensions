@@ -20,15 +20,15 @@ public interface IWidget : IWidget<LoginUserState, ModelErrorState>, IModelState
 
 public abstract class Widget : ComponentBase, IWidget
 {
-    [CascadingParameter( Name = ModelErrorState.KEY )] public required ModelErrorState State { get; set; }
-    [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
+    [CascadingParameter(Name = ModelErrorState.KEY)] public required ModelErrorState State { get; set; }
+    [CascadingParameter(Name = LoginUserState.KEY)]  public required LoginUserState  User  { get; set; }
 
     // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
 }
 
 
 
-public class BlazorSetting<T>( T value ) : ObservableClass
+public class BlazorSetting<T>( T value ) : BaseClass
 {
     private T __value = value;
     public T Value

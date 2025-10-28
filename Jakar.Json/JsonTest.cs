@@ -74,13 +74,13 @@ public sealed record JsonTest( string Name, double Number, params JsonTest[] Chi
     public int JsonSize() => Name.Length + 100 + Children.Sum( x => x.JsonSize() );
     void IJsonizer.Serialize( ref JWriter writer )
     {
-        JObject node = writer.AddObject();
+        JsonObject node = writer.AddObject();
         Serialize( ref node );
     }
-    public void Serialize( ref JObject parent ) => parent.Add( Name ).AddNumber( Number ).AddArray( Children ).Complete();
-    public void Serialize( ref JArray parent )
+    public void Serialize( ref JsonObject parent ) => parent.Add( Name ).AddNumber( Number ).AddArray( Children ).Complete();
+    public void Serialize( ref JsonArray parent )
     {
-        JObject node = parent.AddObject();
+        JsonObject node = parent.AddObject();
         Serialize( ref node );
     }
     public void Deserialize( ref JReader writer ) { }

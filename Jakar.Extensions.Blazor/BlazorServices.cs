@@ -16,12 +16,12 @@ namespace Jakar.Extensions.Blazor;
 
 public sealed class BlazorServices( ProtectedLocalStorage protectedLocalStorage, ProtectedSessionStorage sessionStorage, NavigationManager navigation, BlazoredServices blazored, RadzenServices radzen, MudServices mud )
 {
+    public readonly BlazoredServices        blazored              = blazored;
+    public readonly MudServices             mud                   = mud;
+    public readonly NavigationManager       navigation            = navigation;
     public readonly ProtectedLocalStorage   protectedLocalStorage = protectedLocalStorage;
     public readonly ProtectedSessionStorage sessionStorage        = sessionStorage;
-    public readonly NavigationManager       navigation            = navigation;
-    public readonly BlazoredServices        blazored              = blazored;
     public readonly RadzenServices          radzen                = radzen;
-    public readonly MudServices             mud                   = mud;
 
     public static BlazorServices Create( IServiceProvider provider )
     {
@@ -40,9 +40,9 @@ public sealed class BlazorServices( ProtectedLocalStorage protectedLocalStorage,
 
 public sealed class BlazoredServices( IModalService modal, IToastService toasts, ILocalStorageService localStorage )
 {
+    public readonly ILocalStorageService localStorage = localStorage;
     public readonly IModalService        modal        = modal;
     public readonly IToastService        toasts       = toasts;
-    public readonly ILocalStorageService localStorage = localStorage;
 
     public static BlazoredServices Create( IServiceProvider provider ) => new(provider.GetRequiredService<IModalService>(), provider.GetRequiredService<IToastService>(), provider.GetRequiredService<ILocalStorageService>());
 }
@@ -52,9 +52,9 @@ public sealed class BlazoredServices( IModalService modal, IToastService toasts,
 public sealed class RadzenServices( ContextMenuService contextMenus, TooltipService tooltips, NotificationService notifications, DialogService dialogs )
 {
     public readonly ContextMenuService  contextMenus  = contextMenus;
-    public readonly TooltipService      tooltips      = tooltips;
-    public readonly NotificationService notifications = notifications;
     public readonly DialogService       dialogs       = dialogs;
+    public readonly NotificationService notifications = notifications;
+    public readonly TooltipService      tooltips      = tooltips;
 
     public static RadzenServices Create( IServiceProvider provider ) => new(provider.GetRequiredService<ContextMenuService>(), provider.GetRequiredService<TooltipService>(), provider.GetRequiredService<NotificationService>(), provider.GetRequiredService<DialogService>());
 }
@@ -79,21 +79,21 @@ public sealed class MudServices( CookieThemeService           cookieTheme,
                                  IPopoverService              popover )
 {
     public readonly CookieThemeService           cookieTheme                 = cookieTheme;
-    public readonly QueryStringThemeService      queryStringTheme            = queryStringTheme;
-    public readonly IDialogService               mudDialogs                  = mudDialogs;
-    public readonly ISnackbar                    snackbar                    = snackbar;
     public readonly IBrowserViewportService      browserViewport             = browserViewport;
-    public readonly IResizeObserver              resizeObserver              = resizeObserver;
-    public readonly IKeyInterceptorService       keyInterceptor              = keyInterceptor;
-    public readonly IJsEventFactory              jsEventFactory              = jsEventFactory;
+    public readonly IDialogService               mudDialogs                  = mudDialogs;
+    public readonly IEventListenerFactory        eventListenerFactory        = eventListenerFactory;
     public readonly IJsApiService                jsApi                       = jsApi;
+    public readonly IJsEventFactory              jsEventFactory              = jsEventFactory;
+    public readonly IKeyInterceptorService       keyInterceptor              = keyInterceptor;
+    public readonly ILocalizationEnumInterceptor localizationEnumInterceptor = localizationEnumInterceptor;
+    public readonly ILocalizationInterceptor     localizationInterceptor     = localizationInterceptor;
+    public readonly IPopoverService              popover                     = popover;
+    public readonly IResizeObserver              resizeObserver              = resizeObserver;
+    public readonly IScrollListenerFactory       scrollListenerFactory       = scrollListenerFactory;
     public readonly IScrollManager               scrollManager               = scrollManager;
     public readonly IScrollSpyFactory            scrollSpyFactory            = scrollSpyFactory;
-    public readonly IScrollListenerFactory       scrollListenerFactory       = scrollListenerFactory;
-    public readonly IEventListenerFactory        eventListenerFactory        = eventListenerFactory;
-    public readonly ILocalizationInterceptor     localizationInterceptor     = localizationInterceptor;
-    public readonly ILocalizationEnumInterceptor localizationEnumInterceptor = localizationEnumInterceptor;
-    public readonly IPopoverService              popover                     = popover;
+    public readonly ISnackbar                    snackbar                    = snackbar;
+    public readonly QueryStringThemeService      queryStringTheme            = queryStringTheme;
 
     public static MudServices Create( IServiceProvider provider ) => new(provider.GetRequiredService<CookieThemeService>(),
                                                                          provider.GetRequiredService<QueryStringThemeService>(),

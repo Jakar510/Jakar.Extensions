@@ -5,40 +5,40 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask<ErrorOrResult<TClass>> Single( RecordID<TClass>          id,  CancellationToken  token                               = default ) => this.Call(Single, id,  token);
-    public ValueTask<ErrorOrResult<TClass>> Single( string                    sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call(Single, sql, parameters, token);
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( RecordID<TClass> id,  CancellationToken  token                               = default ) => this.Call(SingleOrDefault, id,  token);
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( string           sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call(SingleOrDefault, sql, parameters, token);
+    public ValueTask<ErrorOrResult<TSelf>> Single( RecordID<TSelf>          id,  CancellationToken  token                               = default ) => this.Call(Single, id,  token);
+    public ValueTask<ErrorOrResult<TSelf>> Single( string                   sql, PostgresParameters parameters, CancellationToken token = default ) => this.Call(Single, sql, parameters, token);
+    public ValueTask<ErrorOrResult<TSelf>> SingleOrDefault( RecordID<TSelf> id,  CancellationToken  token                               = default ) => this.Call(SingleOrDefault, id,  token);
+    public ValueTask<ErrorOrResult<TSelf>> SingleOrDefault( string          sql, PostgresParameters parameters, CancellationToken token = default ) => this.Call(SingleOrDefault, sql, parameters, token);
 
 
-    public ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => Single(connection, transaction, SQLCache.Get(in id),           token);
-    public ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => Single(connection, transaction, new SqlCommand(sql, parameters), token);
-    public virtual async ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<TSelf>> Single( NpgsqlConnection connection, NpgsqlTransaction? transaction, RecordID<TSelf> id,  CancellationToken  token                               = default ) => Single(connection, transaction, SqlCommand<TSelf>.Get(in id),           token);
+    public ValueTask<ErrorOrResult<TSelf>> Single( NpgsqlConnection connection, NpgsqlTransaction? transaction, string          sql, PostgresParameters parameters, CancellationToken token = default ) => Single(connection, transaction, new SqlCommand<TSelf>(sql, parameters), token);
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Single( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> command, CancellationToken token = default )
     {
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QuerySingleAsync<TClass>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.SingleAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => SingleOrDefault(connection, transaction, SQLCache.Get(in id),           token);
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => SingleOrDefault(connection, transaction, new SqlCommand(sql, parameters), token);
-    public virtual async ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<TSelf>> SingleOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, RecordID<TSelf> id,  CancellationToken  token                               = default ) => SingleOrDefault(connection, transaction, SqlCommand<TSelf>.Get(in id),           token);
+    public ValueTask<ErrorOrResult<TSelf>> SingleOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, string          sql, PostgresParameters parameters, CancellationToken token = default ) => SingleOrDefault(connection, transaction, new SqlCommand<TSelf>(sql, parameters), token);
+    public virtual async ValueTask<ErrorOrResult<TSelf>> SingleOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> command, CancellationToken token = default )
     {
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TClass?           record  = await connection.QuerySingleOrDefaultAsync<TClass>(command);
-
-            return record is null
-                       ? Error.NotFound()
-                       : record;
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.SingleOrDefaultAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

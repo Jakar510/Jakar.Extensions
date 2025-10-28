@@ -2,10 +2,6 @@
 // 03/06/2023  12:59 AM
 
 
-using Status = Jakar.Extensions.Status;
-
-
-
 namespace Jakar.Database;
 
 
@@ -20,13 +16,13 @@ public static class ErrorOrResults
     public static UnprocessableEntity    UnprocessableEntity { get; } = TypedResults.UnprocessableEntity();
 
 
-    public static JsonResult<TValue> ToJsonResult<TValue>( this TValue value, Status status = Status.Ok ) => new(value, status.AsInt());
-    public static JsonResult<Errors> ToJsonResult( this         Error  value ) => new(Errors.Create([value]), value.GetStatus());
-    public static JsonResult<Errors> ToJsonResult( this         Errors value ) => new(value, value.GetStatus());
+    public static JsonResult<TValue> ToJsonResult<TValue>( this TValue value, Status status = Status.Ok ) => JsonResult<TValue>.Create(value, status);
+    public static JsonResult<Errors> ToJsonResult( this         Error  value ) => JsonResult<Errors>.Create(Errors.Create([value]), Errors.JsonTypeInfo, value.GetStatus());
+    public static JsonResult<Errors> ToJsonResult( this         Errors value ) => JsonResult<Errors>.Create(value,                  Errors.JsonTypeInfo, value.GetStatus());
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.value);
+    public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
+    public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
 
 
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
@@ -41,24 +37,35 @@ public static class ErrorOrResults
             ? errors.ToModelStateDictionary()
             : null;
     public static SerializableError ToSerializableError( this Errors errors ) => new(errors.ToModelStateDictionary());
+
+
     public static ModelStateDictionary ToModelStateDictionary( this Errors errors )
     {
         ModelStateDictionary state = new();
-        foreach ( Error error in errors.Details.AsSpan() ) { error.ToModelStateDictionary(state); }
+        foreach ( Error error in errors.Details.AsSpan() ) { state.Add(error); }
 
         return state;
     }
-
-
     public static ModelStateDictionary ToModelStateDictionary( this Error error )
     {
-        ModelStateDictionary state = new();
-        error.ToModelStateDictionary(state);
+        ModelStateDictionary state = new() { error };
         return state;
     }
-    public static void ToModelStateDictionary( this Error error, in ModelStateDictionary state )
+
+
+    public static void Add( this ModelStateDictionary state, Errors errors )
     {
-        foreach ( string? e in error.Errors ) { state.TryAddModelError(nameof(Error.Errors), e ?? NULL); }
+        foreach ( Error error in errors.Details.AsSpan() ) { state.Add(error); }
+    }
+    public static void Add( this ModelStateDictionary state, Error error )
+    {
+        if ( error.Errors is not null )
+        {
+            StringTags tags = error.Errors.Value;
+            foreach ( string e in tags.Values ) { state.TryAddModelError(nameof(Error.Errors), e); }
+
+            foreach ( Pair e in tags.Tags ) { state.TryAddModelError(e.Key, e.Value ?? NULL); }
+        }
 
         state.TryAddModelError(nameof(Error.Detail),     error.Detail                 ?? NULL);
         state.TryAddModelError(nameof(Error.Type),       error.Type                   ?? NULL);
@@ -78,17 +85,17 @@ public static class ErrorOrResults
         ErrorOrResult<TValue> errorOrResult = await result.ConfigureAwait(false);
         return errorOrResult.ToResult();
     }
-    public static JsonResult<Error>  ToResult( this Error  error ) => new(error, (int)( error.StatusCode ?? Status.Ok ));
-    public static JsonResult<Errors> ToResult( this Errors error ) => new(error, (int)error.GetStatus());
+    public static JsonResult<Errors> ToResult( this Error  value ) => JsonResult<Errors>.Create(Errors.Create([value]), Errors.JsonTypeInfo, value.GetStatus());
+    public static JsonResult<Errors> ToResult( this Errors value ) => JsonResult<Errors>.Create(value,                  Errors.JsonTypeInfo, value.GetStatus());
     public static Results<JsonResult<TValue>, JsonResult<Errors>> ToResult<TValue>( this ErrorOrResult<TValue> result ) =>
         result.TryGetValue(out TValue? value, out Errors? errors)
-            ? new JsonResult<TValue>(value, Errors.GetStatus(errors))
+            ? JsonResult<TValue>.Create(value, Errors.GetStatus(errors))
             : errors.ToResult();
 
 
     public static ActionResult<TValue> ToActionResult<TValue>( this ErrorOrResult<TValue> result ) => result.TryGetValue(out TValue? value, out Errors? errors)
-                                                                                                                       ? new ObjectResult(value) { StatusCode  = (int)Errors.GetStatus(errors) }
-                                                                                                                       : new ObjectResult(errors) { StatusCode = (int)errors.GetStatus() };
+                                                                                                          ? new ObjectResult(value) { StatusCode  = (int)Errors.GetStatus(errors) }
+                                                                                                          : new ObjectResult(errors) { StatusCode = (int)errors.GetStatus() };
     public static ObjectResult ToActionResult( this Error  error ) => new(error) { StatusCode = (int)( error.StatusCode ?? Status.Ok ) };
     public static ObjectResult ToActionResult( this Errors error ) => new(error) { StatusCode = (int)error.GetStatus() };
     public static async Task<ActionResult<TValue>> ToActionResult<TValue>( this Task<ErrorOrResult<TValue>> result )

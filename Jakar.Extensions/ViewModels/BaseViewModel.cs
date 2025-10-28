@@ -4,10 +4,10 @@
 namespace Jakar.Extensions;
 
 
-public abstract class BaseViewModel : ObservableClass, IChangeable
+public abstract class BaseViewModel : BaseClass, IChangeable
 {
     private bool    __isBusy;
-    private string? __title = string.Empty;
+    private string? __title = EMPTY;
 
 
     public virtual bool IsBusy
@@ -15,14 +15,14 @@ public abstract class BaseViewModel : ObservableClass, IChangeable
         get => __isBusy;
         set
         {
-            if ( SetProperty( ref __isBusy, value ) ) { OnPropertyChanged( nameof(IsNotBusy) ); }
+            if ( SetProperty(ref __isBusy, value) ) { OnPropertyChanged(nameof(IsNotBusy)); }
         }
     }
 
     public bool IsNotBusy => !IsBusy;
 
 
-    public string? Title { get => __title; set => SetProperty( ref __title, value ); }
+    public string? Title { get => __title; set => SetProperty(ref __title, value); }
 
 
     protected BaseViewModel() { }

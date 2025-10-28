@@ -12,15 +12,15 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
-        report( __currentScope.Value );
+        report(__currentScope.Value);
         return;
 
         void report( Scope? current )
         {
             if ( current is null ) { return; }
 
-            report( current.parent );
-            callback( current.state, state );
+            report(current.parent);
+            callback(current.state, state);
         }
     }
 
@@ -37,8 +37,8 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
     private sealed class Scope( ScopeProvider provider, object? state, Scope? parent ) : IDisposable
     {
-        public readonly  object?       state     = state;
-        public readonly  Scope?        parent    = parent;
+        public readonly  object?       state      = state;
+        public readonly  Scope?        parent     = parent;
         private readonly ScopeProvider __provider = provider;
         private          bool          __isDisposed;
 
@@ -48,7 +48,7 @@ public sealed class ScopeProvider : IExternalScopeProvider
             if ( __isDisposed ) { return; }
 
             __provider.__currentScope.Value = parent;
-            __isDisposed                   = true;
+            __isDisposed                    = true;
         }
     }
 }
@@ -63,19 +63,19 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
-        report( __currentScope.Value );
+        report(__currentScope.Value);
         return;
 
         void report( Scope? current )
         {
             if ( current is null ) { return; }
 
-            report( current.parent );
-            callback( current.state, state );
+            report(current.parent);
+            callback(current.state, state);
         }
     }
 
-    IDisposable IExternalScopeProvider.Push( object? state ) => Push( (TValue?)state );
+    IDisposable IExternalScopeProvider.Push( object? state ) => Push((TValue?)state);
     public IDisposable Push( TValue? state )
     {
         Scope? parent   = __currentScope.Value;
@@ -90,8 +90,8 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
     private sealed class Scope( ScopeProvider<TValue> provider, TValue? state, Scope? parent ) : IDisposable
     {
         private readonly ScopeProvider<TValue> __provider = provider;
-        public readonly  Scope?                parent    = parent;
-        public readonly  TValue?               state     = state;
+        public readonly  Scope?                parent     = parent;
+        public readonly  TValue?               state      = state;
         private          bool                  __isDisposed;
 
 
@@ -101,7 +101,7 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
             if ( __isDisposed ) { return; }
 
             __provider.__currentScope.Value = parent;
-            __isDisposed                   = true;
+            __isDisposed                    = true;
         }
     }
 }

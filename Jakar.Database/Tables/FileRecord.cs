@@ -2,10 +2,15 @@
 // 4/2/2024  17:43
 
 
+using TelemetrySpan = Jakar.Extensions.TelemetrySpan;
+
+
+
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record FileRecord( string?              FileName,
                                  string?              FileDescription,
                                  string?              FileType,
@@ -16,11 +21,24 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
-                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), IDbReaderMapping<FileRecord>, IFileData<Guid>, IFileMetaData
+                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
 {
-    public const               string                        TABLE_NAME = "Files";
-    public static              string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    public const  string                     TABLE_NAME = "files";
+    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
+    public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<FileRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;
+
+
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Default.WithColumn<string?>(nameof(FileName), ColumnOptions.Nullable, 256)
+                                                                                                           .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, 1024)
+                                                                                                           .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, 256)
+                                                                                                           .WithColumn<long>(nameof(FileSize))
+                                                                                                           .WithColumn<string>(nameof(Hash),        length: MAX_FIXED)
+                                                                                                           .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
+                                                                                                           .WithColumn<string>(nameof(FullPath),    length: MAX_FIXED)
+                                                                                                           .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }
@@ -33,8 +51,7 @@ public sealed record FileRecord( string?              FileName,
         where TFileMetaData : class, IFileMetaData<TFileMetaData> => TFileData.Create(this, TFileMetaData.Create(this));
 
 
-    [Pure]
-    public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
+    [Pure] public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( string.IsNullOrWhiteSpace(FullPath) ) { return new FileData(this, FileMetaData.Create(this)); }
@@ -43,13 +60,14 @@ public sealed record FileRecord( string?              FileName,
         if ( MimeType != file.Mime ) { throw new InvalidOperationException($"{nameof(MimeType)} mismatch. Got {file.Mime} but expected {MimeType}"); }
 
         return file.Mime.IsText()
-                   ? await file.ReadAsync().AsString(token)
-                   : await file.ReadAsync().AsBytes(token);
+                   ? await file.ReadAsync()
+                               .AsString(token)
+                   : await file.ReadAsync()
+                               .AsBytes(token);
     }
 
 
-    [Pure]
-    public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
+    [Pure] public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
     {
         OneOf<byte[], string, FileData> data = await Read(token);
         if ( data.IsT2 ) { return data.AsT2; }
@@ -77,8 +95,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public async ValueTask<FileRecord> Update( LocalFile file, CancellationToken token = default )
+    [Pure] public async ValueTask<FileRecord> Update( LocalFile file, CancellationToken token = default )
     {
         if ( FullPath != file.FullPath ) { throw new InvalidOperationException($"{nameof(FullPath)} mismatch. Got {file.FullPath} but expected {FullPath}"); }
 
@@ -98,10 +115,9 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(FileName),        FileName);
         parameters.Add(nameof(FileDescription), FileDescription);
         parameters.Add(nameof(FileType),        FileType);
@@ -117,8 +133,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public static FileRecord Create( DbDataReader reader )
+    [Pure] public static FileRecord Create( DbDataReader reader )
     {
         string?              name         = reader.GetFieldValue<string?>(nameof(FileName));
         string?              description  = reader.GetFieldValue<string?>(nameof(FileDescription));
@@ -187,7 +202,7 @@ public sealed record FileRecord( string?              FileName,
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(AdditionalData);
         hashCode.Add(FileName);
@@ -206,4 +221,29 @@ public sealed record FileRecord( string?              FileName,
     public static bool operator >=( FileRecord left, FileRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( FileRecord  left, FileRecord right ) => left.CompareTo(right) < 0;
     public static bool operator <=( FileRecord left, FileRecord right ) => left.CompareTo(right) <= 0;
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<FileRecord>(5,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (
+                                            {nameof(FileName).SqlColumnName()}        varchar({FILE_NAME})  NULL UNIQUE,
+                                            {nameof(FileDescription).SqlColumnName()} varchar({MAX_FIXED})  NULL,
+                                            {nameof(FileType).SqlColumnName()}        varchar(TYPE)         NULL,
+                                            {nameof(FullPath).SqlColumnName()}        varchar({MAX_FIXED})  NULL UNIQUE,
+                                            {nameof(FileSize).SqlColumnName()}        bigint                NOT NULL,
+                                            {nameof(Hash).SqlColumnName()}             varchar({MAX_FIXED}) NOT NULL,
+                                            {nameof(MimeType).SqlColumnName()}        varchar(TYPE)         NULL,
+                                            {nameof(Payload).SqlColumnName()}          text                 NOT NULL,
+                                            {nameof(ID).SqlColumnName()}               uuid                 NOT NULL PRIMARY KEY,
+                                            {nameof(DateCreated).SqlColumnName()}     timestamptz           NOT NULL DEFAULT SYSUTCDATETIME(),
+                                            {nameof(LastModified).SqlColumnName()}    timestamptz           NULL,
+                                            FOREIGN KEY({nameof(MimeType).SqlColumnName()}) REFERENCES {nameof(MimeType).SqlColumnName()}(id) ON DELETE SET NULL
+                                            );
+
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 }

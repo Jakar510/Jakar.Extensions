@@ -10,7 +10,7 @@ public static partial class AsyncLinq
     {
         foreach ( TElement element in enumerable )
         {
-            if ( selector( element, value ) ) { return element; }
+            if ( selector(element, value) ) { return element; }
         }
 
         return default;
@@ -19,7 +19,7 @@ public static partial class AsyncLinq
     {
         foreach ( TElement element in enumerable )
         {
-            if ( selector( element, value ) ) { return element; }
+            if ( selector(element, value) ) { return element; }
         }
 
         return default;
@@ -28,15 +28,16 @@ public static partial class AsyncLinq
 
     public static TElement? Single<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
     {
-        Enumerable.Range( 0, 10 ).AsAsyncEnumerable();
+        Enumerable.Range(0, 10)
+                  .AsAsyncEnumerable();
 
         TElement? result = default;
 
         foreach ( TElement element in enumerable )
         {
-            if ( !selector( element, value ) ) { continue; }
+            if ( !selector(element, value) ) { continue; }
 
-            if ( result is not null ) { throw new InvalidOperationException( $"{nameof(enumerable)} has multiple results" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"{nameof(enumerable)} has multiple results"); }
 
             result = element;
             break;
@@ -50,7 +51,7 @@ public static partial class AsyncLinq
 
         foreach ( TElement element in enumerable )
         {
-            if ( !selector( element, value ) ) { continue; }
+            if ( !selector(element, value) ) { continue; }
 
             if ( result is not null ) { return default; }
 

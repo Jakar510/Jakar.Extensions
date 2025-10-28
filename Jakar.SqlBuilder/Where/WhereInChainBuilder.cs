@@ -20,21 +20,23 @@ public struct WhereInChainBuilder<TNext>
 
     public WhereClauseBuilder<TNext> Next()
     {
-        __builder.AddRange( ',', __cache );
-        __builder.VerifyParentheses().NewLine();
+        __builder.AddRange(',', __cache);
+
+        __builder.VerifyParentheses()
+                 .NewLine();
 
         return __next;
     }
 
     public WhereInChainBuilder<TNext> With( string? value )
     {
-        __cache.Add( $"'{value ?? NULL}'" );
+        __cache.Add($"'{value ?? NULL}'");
         return this;
     }
     public WhereInChainBuilder<TNext> With<TValue>( TValue value )
         where TValue : struct
     {
-        __cache.Add( value.ToString() ?? "''" );
+        __cache.Add(value.ToString() ?? "''");
         return this;
     }
 

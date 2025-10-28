@@ -5,7 +5,7 @@
 		<name>Jakar.Extensions</name>
 	</assembly>
 	<members>
-		<member name="M:Jakar.Extensions.IObservableObject.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.IObservableObject.SetProperty``1(``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary>
 				<para> Checks the values with <paramref name="equalityComparer" /> . </para>
 				Then calls <see cref="M:Jakar.Extensions.IObservableObject.OnPropertyChanging(System.String)" /> , sets the value, then calls
@@ -21,28 +21,28 @@
 			</returns>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{System.Threading.Tasks.Task},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{System.Threading.Tasks.Task},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Windows.Input.ICommand,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Windows.Input.ICommand,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action,System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.Action,System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action{``0},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action{``0},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Buffer`1.Grow(System.UInt32)">
@@ -4676,7 +4676,7 @@
 			<typeparam name="TElement"> </typeparam>
 		</member>
 		<member name="TValue:Jakar.Extensions.AppVersion">
-			<summary> See <see cref="TValue:Jakar.Extensions.AppVersion.Format" /> for formatting details. </summary>
+			<summary> See <see cref="TValue:Jakar.Extensions.AppVersionFormat" /> for formatting details. </summary>
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.TryParse(System.ReadOnlySpan{System.Char},Jakar.Extensions.AppVersion@)">
 			<summary> </summary>
@@ -4686,8 +4686,8 @@
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.ToVersion">
 			<summary>
-				If the <see cref="P:Jakar.Extensions.AppVersion.Scheme" /> is any of [ <see cref="F:Jakar.Extensions.AppVersion.Format.Singular" /> ,
-				<see cref="F:Jakar.Extensions.AppVersion.Format.DetailedRevisions" /> , <see cref="F:Jakar.Extensions.AppVersion.Format.Complete" /> ], will throw
+				If the <see cref="P:Jakar.Extensions.AppVersion.Scheme" /> is any of [ <see cref="F:Jakar.Extensions.AppVersionFormat.Singular" /> ,
+				<see cref="F:Jakar.Extensions.AppVersionFormat.DetailedRevisions" /> , <see cref="F:Jakar.Extensions.AppVersionFormat.Complete" /> ], will throw
 				<see cref="TValue:System.InvalidOperationException" />
 			</summary>
 			<returns> </returns>
@@ -4745,22 +4745,22 @@
 			</returns>
 			<exception cref="TValue:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Singular">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Singular">
 			<summary> Major </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Minimal">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Minimal">
 			<summary> Major.Minor </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Typical">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Typical">
 			<summary> Major.Minor.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Detailed">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Detailed">
 			<summary> Major.Minor.Maintenance.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.DetailedRevisions">
+		<member name="F:Jakar.Extensions.AppVersionFormat.DetailedRevisions">
 			<summary> Major.Minor.Maintenance.MajorRevision.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Complete">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Complete">
 			<summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
 		</member>
 		<member name="TValue:Jakar.Extensions.NullScope">
@@ -4786,16 +4786,16 @@
 			</summary>
 			<typeparam name="TValue"> The value type. </typeparam>
 		</member>
-		<member name="TValue:Jakar.Extensions.Tokens">
+		<member name="TValue:Jakar.Extensions.SessionToken">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="M:Jakar.Extensions.Tokens.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String)">
+		<member name="M:Jakar.Extensions.SessionToken.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="TValue:Jakar.Extensions.Tokens`1">
+		<member name="TValue:Jakar.Extensions.SessionToken`1">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="M:Jakar.Extensions.Tokens`1.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String,System.Guid,`0)">
+		<member name="M:Jakar.Extensions.SessionToken`1.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String,System.Guid,`0)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
 		<member name="TValue:Jakar.Extensions.ValidValueOf`2">

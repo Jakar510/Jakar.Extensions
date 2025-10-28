@@ -11,5 +11,5 @@ namespace Jakar.SettingsView.Maui.Sv;
 public class SvEditorCell : ValueCellBase<string>
 {
     public sealed override WidgetType            Type   => WidgetType.Editor;
-    public override        ErrorOrResult<string> Save() => Value ?? string.Empty;
+    public override        ErrorOrResult<string> Save() => Value ?? EMPTY;
 }

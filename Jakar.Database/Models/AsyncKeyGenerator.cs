@@ -7,13 +7,13 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, CancellationToken token = default ) : IAsyncEnumerator<RecordID<TClass>>, IAsyncEnumerable<RecordID<TClass>>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+public sealed class AsyncKeyGenerator<TSelf>( DbTable<TSelf> table, CancellationToken token = default ) : IAsyncEnumerator<RecordID<TSelf>>, IAsyncEnumerable<RecordID<TSelf>>
+    where TSelf : class, ITableRecord<TSelf>
 {
-    private readonly DbTable<TClass>      __table = table;
-    private          CancellationToken    __token = token;
-    private          KeyGenerator<TClass> __generator;
-    public           RecordID<TClass>     Current { get; private set; }
+    private readonly DbTable<TSelf>      __table = table;
+    private          CancellationToken   __token = token;
+    private          KeyGenerator<TSelf> __generator;
+    public           RecordID<TSelf>     Current { get; private set; }
 
 
     public ValueTask DisposeAsync()
@@ -26,7 +26,7 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
 
 
     public ValueTask<bool> MoveNextAsync() => __table.Call(MoveNextAsync, __token);
-    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
+    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token )
     {
         if ( token.IsCancellationRequested )
         {
@@ -36,8 +36,8 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
 
         if ( __generator.IsEmpty )
         {
-            IEnumerable<RecordPair<TClass>> pairs = await __table.SortedIDs(connection, transaction, token);
-            __generator = KeyGenerator<TClass>.Create(pairs);
+            IEnumerable<RecordPair<TSelf>> pairs = await __table.SortedIDs(connection, transaction, token);
+            __generator = KeyGenerator<TSelf>.Create(pairs);
         }
 
         if ( __generator.MoveNext() ) { Current = __generator.Current; }
@@ -47,12 +47,12 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
             __generator = default;
         }
 
-        return Current.value != Guid.Empty;
+        return Current.Value != Guid.Empty;
     }
 
 
-    IAsyncEnumerator<RecordID<TClass>> IAsyncEnumerable<RecordID<TClass>>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation(token);
-    public AsyncKeyGenerator<TClass> WithCancellation( CancellationToken token )
+    IAsyncEnumerator<RecordID<TSelf>> IAsyncEnumerable<RecordID<TSelf>>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation(token);
+    public AsyncKeyGenerator<TSelf> WithCancellation( CancellationToken token )
     {
         __token = token;
         return this;

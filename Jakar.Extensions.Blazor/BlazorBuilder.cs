@@ -40,29 +40,29 @@ public static class BlazorBuilder
 {
     public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<AuthorizationOptions>? authorization = null, Action<AuthenticationOptions>? authentication = null, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null, Action<MudServicesConfiguration>? mudConfiguration = null )
     {
-        services.AddAuthentication( x =>
-                                    {
-                                        x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                                        authentication?.Invoke( x );
-                                    } );
+        services.AddAuthentication(x =>
+                                   {
+                                       x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                                       authentication?.Invoke(x);
+                                   });
 
-        if ( authorization is not null ) { services.AddAuthorization( authorization ); }
+        if ( authorization is not null ) { services.AddAuthorization(authorization); }
         else { services.AddAuthorization(); }
 
         services.TryAddCascadingValueScopedNamed<LoginUserState>();
         services.TryAddCascadingValueScopedNamed<ModelErrorState>();
 
-        if ( mudConfiguration is not null ) { services.AddMudServices( mudConfiguration ); }
+        if ( mudConfiguration is not null ) { services.AddMudServices(mudConfiguration); }
         else { services.AddMudServices(); }
 
         services.AddBlazoredModal();
         services.AddBlazoredToast();
-        services.AddBlazoredLocalStorage( configureLocal );
-        services.AddBlazoredSessionStorage( configureSession );
+        services.AddBlazoredLocalStorage(configureLocal);
+        services.AddBlazoredSessionStorage(configureSession);
         services.AddRadzenComponents();
         services.AddRadzenCookieThemeService();
         services.AddRadzenQueryStringThemeService();
-        services.TryAddScoped( BlazorServices.Create );
+        services.TryAddScoped(BlazorServices.Create);
         return services;
     }
 }

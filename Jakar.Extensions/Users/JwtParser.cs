@@ -14,9 +14,6 @@ namespace Jakar.Extensions;
 
 public sealed class JwtParser( SigningCredentials credentials, TokenValidationParameters parameters, string appName, string issuer, AppVersion version )
 {
-    public const            string                                  SESSION       = "Session";
-    public const            string                                  VERIFY_DEVICE = "VerifyDevice";
-    public const            string                                  VERIFY_EMAIL  = "VerifyEmail";
     private static readonly ConcurrentDictionary<string, JwtParser> __parsers     = new(StringComparer.Ordinal);
     private readonly        AppVersion                              __version     = version;
     private readonly        JsonWebTokenHandler                     __handler     = new();
@@ -26,7 +23,6 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     private readonly        TokenValidationParameters               __parameters  = parameters;
 
 
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -36,7 +32,6 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     }
 
 
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
     public static async ValueTask<JwtParser> CreateAsync<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -47,33 +42,33 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     }
 
 
-    public Tokens<Guid> CreateToken( UserModel          user, ISessionID<Guid> request, string authenticationType ) => CreateToken<UserModel, UserAddress, GroupModel, RoleModel, Guid>(user, request, authenticationType);
-    public Tokens<long> CreateToken( UserLong.UserModel user, ISessionID<long> request, string authenticationType ) => CreateToken<UserLong.UserModel, UserLong.UserAddress, UserLong.GroupModel, UserLong.RoleModel, long>(user, request, authenticationType);
-    public Tokens<TID> CreateToken<TID, TAddress, TGroupModel, TRoleModel>( IUserData<TID, TAddress, TGroupModel, TRoleModel> user, ISessionID<TID> request, string authenticationType )
+    public SessionToken CreateToken<TRequest>( UserModel user, TRequest request, string authenticationType )
+        where TRequest : ISessionID<Guid> => CreateToken<TRequest, UserModel, Guid>(user, request, authenticationType);
+    public SessionToken CreateToken<TRequest>( UserLong.UserModel user, TRequest request, string authenticationType )
+        where TRequest : ISessionID<long> => CreateToken<TRequest, UserLong.UserModel, long>(user, request, authenticationType);
+
+
+    public SessionToken CreateToken<TRequest, TUser, TID>( TUser user, TRequest request, string authenticationType )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TID>, IEquatable<TAddress>
+        where TRequest : ISessionID<TID>
+        where TUser : IUserData
     {
         ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
-        return CreateToken(user, request, identity);
+
+        return request switch
+               {
+                   ISessionID<long> idLong => CreateToken(in user, in idLong,       in identity),
+                   ISessionID<Guid> idGuid => CreateToken(in user, idGuid.DeviceID, idGuid.SessionID, in identity),
+                   _                       => throw new ExpectedValueTypeException(request, typeof(ISessionID<Guid>), typeof(ISessionID<long>))
+               };
     }
-    public Tokens<TID> CreateToken<TUser, TAddress, TGroupModel, TRoleModel, TID>( TUser user, ISessionID<TID> request, string authenticationType )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>
-        where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TID>, IEquatable<TAddress>
-    {
-        ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
-        return CreateToken(user, request, identity);
-    }
-    public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in ISessionID<TID> request, in ClaimsIdentity identity )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID> => CreateToken(user, request.DeviceID, request.SessionID, identity);
-    public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in Guid deviceID, in TID sessionID, in ClaimsIdentity identity )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID>
+
+
+    public SessionToken CreateToken<TRequest, TUser>( in TUser user, in TRequest request, in ClaimsIdentity identity )
+        where TRequest : ISessionID<long>
+        where TUser : IUserData => CreateToken(user, request.DeviceID, request.SessionID.AsGuid(), identity);
+    public SessionToken CreateToken<TUser>( in TUser user, in string deviceID, in Guid sessionID, in ClaimsIdentity identity )
+        where TUser : IUserData
     {
         DateTimeOffset now            = DateTimeOffset.UtcNow;
         DateTimeOffset notBefore      = now - TimeSpan.FromMinutes(2);
@@ -81,7 +76,17 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
         DateTimeOffset refreshExpires = user.GetExpires(now, TimeSpan.FromDays(90));
         string         accessToken    = CreateToken(in expires,        in notBefore, identity);
         string         refreshToken   = CreateToken(in refreshExpires, in notBefore, identity);
-        return new Tokens<TID>(user.UserID, user.FullName, __version, accessToken, refreshToken, deviceID, sessionID);
+
+        return new SessionToken
+               {
+                   UserID       = user.UserID,
+                   AccessToken  = accessToken,
+                   RefreshToken = refreshToken,
+                   DeviceID     = deviceID,
+                   SessionID    = sessionID,
+                   FullName     = user.FullName,
+                   Version      = __version
+               };
     }
     public string CreateToken( ref readonly DateTimeOffset expires, ref readonly DateTimeOffset notBefore, in ClaimsIdentity identity ) =>
         __handler.CreateToken(new SecurityTokenDescriptor
@@ -103,28 +108,22 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
 public static class JwtParserExtensions
 {
-    public const string JWT            = "JWT";
-    public const string JWT_KEY        = "JWT.key";
-    public const string VALID_AUDIENCE = "TokenValidationParameters:ValidAudience";
-    public const string VALID_ISSUER   = "TokenValidationParameters:ValidIssuer";
-
-
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
     private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string?             value         = configuration.GetValue<string>(fileKey);
+        string?             value         = configuration[fileKey];
 
         if ( !string.IsNullOrWhiteSpace(value) )
         {
             LocalFile file = value;
 
             return file.Exists
-                       ? await file.ReadAsync().AsBytes(token)
+                       ? await file.ReadAsync()
+                                   .AsBytes(token)
                        : throw new FileNotFoundException(file.FullPath);
         }
 
-        value = configuration.GetValue<string>(jwt);
+        value = configuration[jwt];
 
         return !string.IsNullOrWhiteSpace(value)
                    ? Encoding.UTF8.GetBytes(value)
@@ -132,13 +131,8 @@ public static class JwtParserExtensions
     }
 
 
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
-    public static async ValueTask<SigningCredentials> GetSigningCredentials( this IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey), algorithm);
-
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
-    public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey));
-
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
+    public static async ValueTask<SigningCredentials>   GetSigningCredentials( this   IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt     = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey), algorithm);
+    public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt       = JWT,                                    string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey));
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IWebAppSettings settings, string authenticationType, string? audience = null, string? issuer = null, string jwt = JWT, string fileKey = JWT_KEY, TimeSpan? clockSkew = null )
     {
         IConfiguration       configuration = settings.Configuration;
@@ -146,7 +140,6 @@ public static class JwtParserExtensions
         return await configuration.GetTokenValidationParameters(authenticationType, key, audience, issuer, clockSkew);
     }
 
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IConfiguration configuration, string authenticationType, SymmetricSecurityKey? key = null, string? audience = null, string? issuer = null, TimeSpan? clockSkew = null )
     {
         key      ??= await configuration.GetSymmetricSecurityKey();

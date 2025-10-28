@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public sealed class XmlNodeAttribute( string name, XmlInclude include = XmlInclude.All ) : Attribute
@@ -12,7 +8,7 @@ public sealed class XmlNodeAttribute( string name, XmlInclude include = XmlInclu
     public bool       Properties { get; init; }
 
 
-    public XmlNodeAttribute( Type type ) : this( type.Name ) { }
+    public XmlNodeAttribute( Type type ) : this(type.Name) { }
 
     public static XmlNodeAttribute Default( Type type ) => new(type.Name);
 
@@ -34,9 +30,9 @@ public sealed class XmlNodeAttribute( string name, XmlInclude include = XmlInclu
 
         return flags;
     }
-    internal bool ShouldIncludeAttributes() => (Include & XmlInclude.Attributes) > 0;
-    internal bool ShouldIncludeFields()     => (Include & XmlInclude.Fields)     > 0;
+    internal bool ShouldIncludeAttributes() => ( Include & XmlInclude.Attributes ) > 0;
+    internal bool ShouldIncludeFields()     => ( Include & XmlInclude.Fields )     > 0;
 
 
-    internal bool ShouldIncludeProperties() => (Include & XmlInclude.Properties) > 0;
+    internal bool ShouldIncludeProperties() => ( Include & XmlInclude.Properties ) > 0;
 }

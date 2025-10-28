@@ -5,36 +5,36 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask<ErrorOrResult<TClass>> First( CancellationToken          token = default ) => this.Call(First,          token);
-    public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call(FirstOrDefault, token);
+    public ValueTask<ErrorOrResult<TSelf>> First( CancellationToken          token = default ) => this.Call(First,          token);
+    public ValueTask<ErrorOrResult<TSelf>> FirstOrDefault( CancellationToken token = default ) => this.Call(FirstOrDefault, token);
 
 
-    public virtual async ValueTask<ErrorOrResult<TClass>> First( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> First( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetFirst();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QueryFirstAsync<TClass>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.FirstAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
-    public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> FirstOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetFirst();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TClass?           record  = await connection.QueryFirstOrDefaultAsync<TClass>(command);
-
-            return record is null
-                       ? Error.NotFound()
-                       : record;
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.FirstOrDefaultAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

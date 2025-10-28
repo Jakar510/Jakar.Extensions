@@ -5,56 +5,58 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask<ErrorOrResult<TClass>>           Next( RecordPair<TClass>     pair, CancellationToken token = default ) => this.Call(Next,   pair, token);
-    public ValueTask<Guid?>                           NextID( RecordPair<TClass>   pair, CancellationToken token = default ) => this.Call(NextID, pair, token);
-    public ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( CancellationToken token = default ) => this.Call(SortedIDs, token);
+    public ValueTask<ErrorOrResult<TSelf>>           Next( RecordPair<TSelf>      pair, CancellationToken token = default ) => this.Call(Next,   pair, token);
+    public ValueTask<Guid?>                          NextID( RecordPair<TSelf>    pair, CancellationToken token = default ) => this.Call(NextID, pair, token);
+    public ValueTask<IEnumerable<RecordPair<TSelf>>> SortedIDs( CancellationToken token = default ) => this.Call(SortedIDs, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Next( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Next( NpgsqlConnection connection, NpgsqlTransaction? transaction, RecordPair<TSelf> pair, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetNext(in pair);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetNext(in pair);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TClass?           record  = await connection.ExecuteScalarAsync<TClass>(command);
-
-            return record is null
-                       ? Error.NotFound()
-                       : record;
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.SingleAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<RecordPair<TSelf>>> SortedIDs( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetSortedID();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetSortedID();
 
         try
         {
-            CommandDefinition               command = _database.GetCommand(in sql, transaction, token);
-            IEnumerable<RecordPair<TClass>> pairs   = await connection.QueryAsync<RecordPair<TClass>>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            List<RecordPair<TSelf>>      pairs  = [];
+            while ( await reader.ReadAsync(token) ) { pairs.Add(RecordPair<TSelf>.Create(reader)); }
+
             return pairs;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, NpgsqlTransaction? transaction, RecordPair<TSelf> pair, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetNextID(in pair);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetNextID(in pair);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.ExecuteScalarAsync<Guid>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            Guid?                        id     = null;
+            if ( await reader.ReadAsync(token) ) { id = reader.GetGuid(0); }
+
+            return id;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

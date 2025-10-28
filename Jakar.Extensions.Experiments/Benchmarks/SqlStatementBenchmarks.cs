@@ -30,7 +30,11 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
     public IEnumerable<long> Ids
@@ -38,58 +42,54 @@ public class SqlStatementBenchmarks
         get
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach ( int i in Enumerable.Range( 1, 10 ) ) { yield return i; }
+            foreach ( int i in Enumerable.Range(1, 10) ) { yield return i; }
         }
     }
     public string TableName { get; set; } = nameof(TableName);
 
 
-    [Benchmark]
-    public void Test_ValueStringBuilder()
+    [Benchmark] public void Test_ValueStringBuilder()
     {
         using ValueStringBuilder sb = new();
     }
 
 
-    [Benchmark]
-    public void Test_Join()
+    [Benchmark] public void Test_Join()
     {
         using ValueStringBuilder sb = new();
-        sb.AppendJoin( ", ", Ids );
+        sb.AppendJoin(", ", Ids);
     }
 
 
-    [Benchmark]
-    public void Test_GetEnumerator()
+    [Benchmark] public void Test_GetEnumerator()
     {
         using IEnumerator<long> sb = Ids.GetEnumerator();
     }
 
 
-    [Benchmark]
-    public ReadOnlySpan<char> Test_VSB()
+    [Benchmark] public ReadOnlySpan<char> Test_VSB()
     {
-        using ValueStringBuilder sb = new( "DELETE FROM " );
-        sb.Append( TableName );
-        sb.Append( "WHERE ID in ( " );
-        sb.AppendJoin( ", ", Ids );
-        sb.Append( " )" );
+        using ValueStringBuilder sb = new("DELETE FROM ");
+        sb.Append(TableName);
+        sb.Append("WHERE ID in ( ");
+        sb.AppendJoin(", ", Ids);
+        sb.Append(" )");
         return sb.Result;
     }
 
 
-    [Benchmark] public string Test_Span() => Test_VSB().ToString();
+    [Benchmark] public string Test_Span() => Test_VSB()
+       .ToString();
 
 
-    [Benchmark] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', Ids )} )";
+    [Benchmark] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join(',', Ids)} )";
 
 
-    [Benchmark]
-    public string Test_StringBuilder()
+    [Benchmark] public string Test_StringBuilder()
     {
         StringBuilder sb = new($"DELETE FROM {TableName} WHERE ID in ( ");
-        sb.AppendJoin( ", ", Ids );
-        sb.Append( " )" );
+        sb.AppendJoin(", ", Ids);
+        sb.Append(" )");
         return sb.ToString();
     }
 }

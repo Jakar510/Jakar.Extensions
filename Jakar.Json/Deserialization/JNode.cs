@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Json.Deserialization;
 
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public readonly ref struct JNode( in ReadOnlyMemory<char> span )
 {
     private readonly ReadOnlyMemory<char> _span = span;
@@ -34,9 +34,9 @@ public readonly ref struct JNode( in ReadOnlyMemory<char> span )
                 return false;
             }
 
-            if ( span.Contains( '{' ) && MemoryExtensions.EndsWith( span, '}' ) )
+            if ( span.Contains('{') && span.EndsWith('}') )
             {
-                int start = _span.Span.IndexOf( '{' );
+                int start = _span.Span.IndexOf('{');
             }
 
             // else if ( MemoryExtensions.EndsWith( span, '[' ) && MemoryExtensions.EndsWith( span, ']' ) ) { }

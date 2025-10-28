@@ -6,7 +6,8 @@ using ZLinq.Linq;
 namespace Jakar.Extensions;
 
 
-[Serializable, DebuggerDisplay(nameof(DisplayName))]
+[Serializable]
+[DebuggerDisplay(nameof(DisplayName))]
 public sealed class Language : BaseClass, IEqualComparable<Language>
 {
     private readonly CultureInfo __culture;
@@ -83,30 +84,14 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
 
     [Serializable]
-    public class Collection : ObservableCollection<Language>
-    {
-        public Collection() : base(Buffers.DEFAULT_CAPACITY) { }
-        public Collection( int                   capacity ) : base(capacity) { }
-        public Collection( IEnumerable<Language> items ) : base(items) { }
-        public Collection( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
-                                                                                                                    ? count
-                                                                                                                    : Buffers.DEFAULT_CAPACITY)
-        {
-            foreach ( Language language in enumerable ) { Add(language); }
-        }
-    }
-
-
-
-    [Serializable]
     public class Items : List<Language>
     {
-        public Items() : base(Buffers.DEFAULT_CAPACITY) { }
+        public Items() : base(DEFAULT_CAPACITY) { }
         public Items( int                   capacity ) : base(capacity) { }
         public Items( IEnumerable<Language> items ) : base(items) => Sort(Comparer<Language>.Default);
         public Items( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
                                                                                                                ? count
-                                                                                                               : Buffers.DEFAULT_CAPACITY)
+                                                                                                               : DEFAULT_CAPACITY)
         {
             foreach ( Language language in enumerable ) { Add(language); }
         }
@@ -137,11 +122,19 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
     #region Lists
 
-    public static Items NeutralCultures  => new(CultureInfo.GetCultures(CultureTypes.NeutralCultures).AsValueEnumerable().Select(Create));
-    public static Items SpecificCultures => new(CultureInfo.GetCultures(CultureTypes.SpecificCultures).AsValueEnumerable().Select(Create));
-    public static Items All              => new(CultureInfo.GetCultures(CultureTypes.AllCultures).AsValueEnumerable().Select(Create));
+    public static Items NeutralCultures => new(CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+                                                          .AsValueEnumerable()
+                                                          .Select(Create));
 
-    public static Collection Supported { get; } =
+    public static Items SpecificCultures => new(CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                                                           .AsValueEnumerable()
+                                                           .Select(Create));
+
+    public static Items All => new(CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                              .AsValueEnumerable()
+                                              .Select(Create));
+
+    public static LanguageCollection Supported { get; } =
         [
             Arabic,
             Chinese,
@@ -160,4 +153,44 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
         ];
 
     #endregion
+}
+
+
+
+[Serializable]
+public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
+{
+    public static JsonTypeInfo<LanguageCollection[]> JsonArrayInfo => JakarExtensionsContext.Default.LanguageCollectionArray;
+    public static JsonSerializerContext              JsonContext   => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LanguageCollection>   JsonTypeInfo  => JakarExtensionsContext.Default.LanguageCollection;
+
+
+    public LanguageCollection() : base(DEFAULT_CAPACITY) { }
+    public LanguageCollection( int                           capacity ) : base(capacity) { }
+    public LanguageCollection( IEnumerable<Language>         items ) : base(items) { }
+    public LanguageCollection( params ReadOnlySpan<Language> items ) : base(items) { }
+    public LanguageCollection( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
+                                                                                                                        ? count
+                                                                                                                        : DEFAULT_CAPACITY)
+    {
+        foreach ( Language language in enumerable ) { Add(language); }
+    }
+    public static implicit operator LanguageCollection( List<Language>           values ) => new(values);
+    public static implicit operator LanguageCollection( HashSet<Language>        values ) => new(values);
+    public static implicit operator LanguageCollection( ConcurrentBag<Language>  values ) => new(values);
+    public static implicit operator LanguageCollection( Collection<Language>     values ) => new(values);
+    public static implicit operator LanguageCollection( Language[]               values ) => new(values.AsSpan());
+    public static implicit operator LanguageCollection( ImmutableArray<Language> values ) => new(values.AsSpan());
+    public static implicit operator LanguageCollection( ReadOnlyMemory<Language> values ) => new(values.Span);
+    public static implicit operator LanguageCollection( ReadOnlySpan<Language>   values ) => new(values);
+
+
+    public override int  GetHashCode()                                                      => RuntimeHelpers.GetHashCode(this);
+    public override bool Equals( object?                  other )                           => ReferenceEquals(this, other) || ( other is LanguageCollection x && Equals(x) );
+    public static   bool operator ==( LanguageCollection? left, LanguageCollection? right ) => EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static   bool operator !=( LanguageCollection? left, LanguageCollection? right ) => !EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static   bool operator >( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) <= 0;
 }

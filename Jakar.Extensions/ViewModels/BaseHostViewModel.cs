@@ -27,11 +27,11 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         get => __host ?? HostInfo?.OriginalString;
         set
         {
-            if ( !SetProperty( ref __host, value ) ) { return; }
+            if ( !SetProperty(ref __host, value) ) { return; }
 
-            Uri.TryCreate( value, UriKind.Absolute, out __hostInfo );
-            OnPropertyChanged( nameof(IsValidHost) );
-            OnPropertyChanged( nameof(HostInfo) );
+            Uri.TryCreate(value, UriKind.Absolute, out __hostInfo);
+            OnPropertyChanged(nameof(IsValidHost));
+            OnPropertyChanged(nameof(HostInfo));
         }
     }
     public virtual Uri? HostInfo
@@ -39,18 +39,18 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         get => __hostInfo ?? _defaultHostInfo;
         set
         {
-            if ( !SetProperty( ref __hostInfo, value ) ) { return; }
+            if ( !SetProperty(ref __hostInfo, value) ) { return; }
 
-            SetProperty( ref __host, value?.OriginalString, StringComparer.OrdinalIgnoreCase, nameof(Host) );
-            OnPropertyChanged( nameof(IsValidHost) );
+            SetProperty(ref __host, value?.OriginalString, nameof(Host));
+            OnPropertyChanged(nameof(IsValidHost));
         }
     }
     Uri IHostInfo.      HostInfo    => __hostInfo ?? _defaultHostInfo;
-    public virtual bool IsValidHost { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => HostInfo?.IsAbsoluteUri is true && HostInfo.Scheme.StartsWith( "http", StringComparison.OrdinalIgnoreCase ); }
+    public virtual bool IsValidHost { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => HostInfo?.IsAbsoluteUri is true && HostInfo.Scheme.StartsWith("http", StringComparison.OrdinalIgnoreCase); }
 
 
-    protected BaseHostViewModel( Uri defaultHostInfo, Uri? hostInfo = null ) : this( null, defaultHostInfo, hostInfo ) { }
-    protected BaseHostViewModel( string? title, Uri defaultHostInfo, Uri? hostInfo = null ) : base( title )
+    protected BaseHostViewModel( Uri defaultHostInfo, Uri? hostInfo = null ) : this(null, defaultHostInfo, hostInfo) { }
+    protected BaseHostViewModel( string? title, Uri defaultHostInfo, Uri? hostInfo = null ) : base(title)
     {
         _defaultHostInfo = defaultHostInfo;
         HostInfo         = hostInfo;

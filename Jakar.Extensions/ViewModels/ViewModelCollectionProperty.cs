@@ -4,25 +4,25 @@
 namespace Jakar.Extensions;
 
 
-public class ViewModelCollectionProperty<TCommand, TValue>( IEqualityComparer<TValue?> equalityComparer, OneOf<Handler<TValue>, HandlerAsync<TValue>, None> onSelected, TValue value ) : ViewModelProperty<TCommand, TValue>( equalityComparer, onSelected, value )
+public class ViewModelCollectionProperty<TCommand, TValue>( OneOf<Handler<TValue>, HandlerAsync<TValue>, None> onSelected, TValue value ) : ViewModelProperty<TCommand, TValue>(onSelected, value)
     where TValue : IEquatable<TValue>
     where TCommand : class, ICommand
 {
     public ObservableCollection<TValue> Values { get; } = new(DEFAULT_CAPACITY);
-    public ViewModelCollectionProperty( IEqualityComparer<TValue?> equalityComparer, TValue value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
-    
-    
+    public ViewModelCollectionProperty( TValue value ) : this(Properties.EmptyCommand, value) { }
+
+
     public void With( params ReadOnlySpan<TValue> values )
     {
         Values.Clear();
-        Values.Add( values );
+        Values.Add(values);
     }
 }
 
 
 
-public class StringCollectionProperty<TCommand>( IEqualityComparer<string?> equalityComparer, OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : ViewModelCollectionProperty<TCommand, string>( equalityComparer, onSelected, value )
+public class StringCollectionProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : ViewModelCollectionProperty<TCommand, string>(onSelected, value)
     where TCommand : class, ICommand
 {
-    public StringCollectionProperty( IEqualityComparer<string?> equalityComparer, string value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
+    public StringCollectionProperty( string value ) : this(Properties.EmptyCommand, value) { }
 }

@@ -10,9 +10,9 @@ namespace Jakar.SettingsView.Abstractions;
 
 public interface ISectionBorder : IDisposable
 {
-    public string  Title      { get; set; }
-    public double  FontSize   { get; set; }
     public string? FontFamily { get; set; }
+    public double  FontSize   { get; set; }
+    public string  Title      { get; set; }
 }
 
 

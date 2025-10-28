@@ -54,13 +54,13 @@
     private bool                   __isVisible;
     private RenderFragment<string> __footerContent = GetContent;
     private RenderFragment<string> __headerContent = GetContent;
-    private string                 __footerTitle   = string.Empty;
-    private string                 __headerTitle   = string.Empty;
+    private string                 __footerTitle   = EMPTY;
+    private string                 __headerTitle   = EMPTY;
     private string?                __icon;
 
 
     [Parameter]                                                   public          string                               ID                      { get; init; } = GetID();
-    [Parameter]                                                   public          string                               Class                   { get; set; }  = string.Empty;
+    [Parameter]                                                   public          string                               Class                   { get; set; }  = EMPTY;
     [Parameter]                                                   public          EventCallback<string>                ClassChanged            { get; set; }
     [Parameter]                                                   public          IList<CellBase>                      Cells                   { get; set; } = new ObservableCollection<CellBase>();
     [CascadingParameter(Name = SV_SECTION_HEADER_ICON_COLLAPSED)] public          string?                              CollapsedIcon           { get; set; }
@@ -73,12 +73,12 @@
     [Parameter]                                                   public          RenderFragment<string>?              HeaderContent           { get; set; }
     [Parameter]                                                   public          EventCallback<string>                HeaderContentChanged    { get; set; }
     [Parameter]                                                   public          Expression<Func<string>>?            HeaderContentExpression { get; set; }
-    [Parameter, EditorRequired]                                   public required string                               HeaderTitle             { get; set; }
+    [Parameter] [EditorRequired]                                  public required string                               HeaderTitle             { get; set; }
     [Parameter]                                                   public          string?                              FooterClass             { get; set; }
     [Parameter]                                                   public          RenderFragment<string>?              FooterContent           { get; set; }
     [Parameter]                                                   public          EventCallback<string>                FooterContentChanged    { get; set; }
     [Parameter]                                                   public          Expression<Func<string>>?            FooterContentExpression { get; set; }
-    [Parameter, EditorRequired]                                   public required string                               FooterTitle             { get; set; }
+    [Parameter] [EditorRequired]                                  public required string                               FooterTitle             { get; set; }
     [Parameter]                                                   public          bool                                 IsExpandable            { get; set; } = true;
     [Parameter]                                                   public          EventCallback<bool>                  IsExpandableChanged     { get; set; }
     [Parameter]                                                   public          Expression<Func<bool>>?              IsExpandableExpression  { get; set; }
@@ -164,8 +164,8 @@
         __isExpanded = isExpanded;
 
         __icon = isExpanded
-                    ? ExpandedIcon
-                    : CollapsedIcon;
+                     ? ExpandedIcon
+                     : CollapsedIcon;
 
         await ExpandedChanged.InvokeAsync(isExpanded);
     }

@@ -3,16 +3,17 @@
 
 public static class MimeTypes
 {
-    public static readonly FrozenSet<MimeType>                All                   = Enum.GetValues<MimeType>().ToFrozenSet();
-    public static readonly FrozenDictionary<string, MimeType> ReverseNames          = All.ToFrozenDictionary( ToStringFast, SelectSelf );
-    public static readonly FrozenDictionary<MimeType, string> Names                 = All.ToFrozenDictionary( SelectSelf,   ToStringFast );
-    public static readonly FrozenDictionary<MimeType, string> ContentNames          = All.ToFrozenDictionary( SelectSelf,   ToContentType );
-    public static readonly FrozenDictionary<MimeType, string> Extensions            = All.ToFrozenDictionary( SelectSelf,   ToExtension );
-    public static readonly FrozenDictionary<MimeType, string> ExtensionsWithPeriods = All.ToFrozenDictionary( SelectSelf,   static x => $".{x.ToExtension()}" );
+    public static readonly FrozenSet<MimeType> All = Enum.GetValues<MimeType>()
+                                                         .ToFrozenSet();
+    public static readonly FrozenDictionary<string, MimeType> ReverseNames          = All.ToFrozenDictionary(ToStringFast, SelectSelf);
+    public static readonly FrozenDictionary<MimeType, string> Names                 = All.ToFrozenDictionary(SelectSelf,   ToStringFast);
+    public static readonly FrozenDictionary<MimeType, string> ContentNames          = All.ToFrozenDictionary(SelectSelf,   ToContentType);
+    public static readonly FrozenDictionary<MimeType, string> Extensions            = All.ToFrozenDictionary(SelectSelf,   ToExtension);
+    public static readonly FrozenDictionary<MimeType, string> ExtensionsWithPeriods = All.ToFrozenDictionary(SelectSelf,   static x => $".{x.ToExtension()}");
     private static         int?                               __maxLength;
 
 
-    public static int MaxLength => __maxLength ??= Names.Values.Max( static x => x.Length );
+    public static int MaxLength => __maxLength ??= Names.Values.Max(static x => x.Length);
 
     private static TValue SelectSelf<TValue>( TValue v ) => v;
 
@@ -22,7 +23,8 @@ public static class MimeTypes
     /// <returns>
     ///     <see cref="MimeType"/>
     /// </returns>
-    public static MimeType FromExtension( this string mime ) => mime.AsSpan().FromExtension();
+    public static MimeType FromExtension( this string mime ) => mime.AsSpan()
+                                                                    .FromExtension();
 
 
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>
@@ -30,11 +32,10 @@ public static class MimeTypes
     /// <returns>
     ///     <see cref="MimeType"/>
     /// </returns>
-    [SuppressMessage( "ReSharper", "ReplaceSequenceEqualWithConstantPattern" )]
-    public static MimeType FromExtension( this ReadOnlySpan<char> mime )
+    [SuppressMessage("ReSharper", "ReplaceSequenceEqualWithConstantPattern")] public static MimeType FromExtension( this ReadOnlySpan<char> mime )
     {
         Span<char> span = stackalloc char[mime.Length];
-        mime.ToLowerInvariant( span );
+        mime.ToLowerInvariant(span);
 
         return span switch
                {
@@ -193,7 +194,7 @@ public static class MimeTypes
                                                                    MimeType.FormData          => nameof(MimeType.FormData),
                                                                    MimeType.Licenses          => nameof(MimeType.Licenses),
                                                                    MimeType.Dll               => nameof(MimeType.Dll),
-                                                                   _                          => throw new OutOfRangeException( mime )
+                                                                   _                          => throw new OutOfRangeException(mime)
                                                                };
 
 
@@ -363,7 +364,7 @@ public static class MimeTypes
             MimeType.OpenType          => MimeTypeNames.Font.OPEN_TYPE,
             MimeType.FormData          => MimeTypeNames.MultiPart.FORM_DATA,
             MimeType.NotSet            => EMPTY,
-            _                          => throw new OutOfRangeException( mime )
+            _                          => throw new OutOfRangeException(mime)
         };
 
 
@@ -457,7 +458,7 @@ public static class MimeTypes
             MimeType.FormData          => "fd",
             MimeType.Unknown           => "dat",
             MimeType.NotSet            => "file",
-            _                          => throw OutOfRangeException.Create( mime )
+            _                          => throw OutOfRangeException.Create(mime)
         };
 
 
@@ -469,7 +470,7 @@ public static class MimeTypes
     /// </returns>
     public static string ToFileName( this MimeType mime, string fileName )
     {
-        if ( string.IsNullOrWhiteSpace( fileName ) ) { throw new NullReferenceException( nameof(mime) ); }
+        if ( string.IsNullOrWhiteSpace(fileName) ) { throw new NullReferenceException(nameof(mime)); }
 
         return $"{fileName}.{mime.ToExtension()}";
     }
@@ -487,8 +488,8 @@ public static class MimeTypes
         // TODO: get more uri schemes
         mime switch
         {
-            MimeType.NotSet  => throw new OutOfRangeException( mime, "Must be a valid MimeType, not MimeType.NotSet" ),
-            MimeType.Unknown => throw new OutOfRangeException( mime, "Cannot discern UriScheme for MimeType.Unknown" ),
+            MimeType.NotSet  => throw new OutOfRangeException(mime, "Must be a valid MimeType, not MimeType.NotSet"),
+            MimeType.Unknown => throw new OutOfRangeException(mime, "Cannot discern UriScheme for MimeType.Unknown"),
             MimeType.Doc     => "ms-word",
             MimeType.Docx    => "ms-word",
             MimeType.Xls     => "ms-excel",
@@ -501,15 +502,16 @@ public static class MimeTypes
         };
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAnyBinary( this      MimeType mime ) => mime.IsBinary() || mime.IsPDF()    || mime.IsAudio() || mime.IsVideo() || mime.IsFont() || mime.IsCompressedFile() || mime.IsOfficeDocument();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsApplication( this    MimeType mime ) => mime.IsPDF()    || mime.IsBinary() || mime is MimeType.UrlEncodedContent or MimeType.Soap or MimeType.Rtf or MimeType.XmlApp or MimeType.Xul or MimeType.JavaScript or MimeType.Vbs or MimeType.Json;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsText( this           MimeType mime ) => mime is MimeType.Text or MimeType.PlainText or MimeType.Html or MimeType.Xml or MimeType.Xaml or MimeType.RichText or MimeType.Css or MimeType.Csv or MimeType.Ini or MimeType.Config or MimeType.Cfg or MimeType.Json or MimeType.UrlEncodedContent or MimeType.JavaScript or MimeType.Base64 or MimeType.Vbs or MimeType.Rtf or MimeType.Calendar;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsBinary( this         MimeType mime ) => mime is MimeType.Binary or MimeType.Stream;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsPDF( this            MimeType mime ) => mime is MimeType.Pdf or MimeType.Sds or MimeType.Sds or MimeType.Tds or MimeType.Coa or MimeType.Licenses;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAudio( this          MimeType mime ) => mime is MimeType.ThreeGppAudio or MimeType.ThreeGpp2Audio or MimeType.Aac or MimeType.MpegAudio or MimeType.Mp3 or MimeType.Weba or MimeType.Wav;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsVideo( this          MimeType mime ) => mime is MimeType.ThreeGppVideo or MimeType.ThreeGpp2Video or MimeType.Mp4 or MimeType.MpegVideo or MimeType.Mpeg4 or MimeType.Webm or MimeType.H264 or MimeType.Avi or MimeType.Mov or MimeType.Mpg or MimeType.Ogg or MimeType.Mkv;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsImage( this          MimeType mime ) => mime is MimeType.Gif or MimeType.Tiff or MimeType.Png or MimeType.Jpeg or MimeType.Bmp or MimeType.Webp or MimeType.Icon or MimeType.Svg;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsFont( this           MimeType mime ) => mime is MimeType.TrueType or MimeType.OpenType;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsCompressedFile( this MimeType mime ) => mime is MimeType.Zip or MimeType.SevenZip or MimeType.Bzip or MimeType.Bzip2 or MimeType.Gzip or MimeType.Tar;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOfficeDocument( this MimeType mime ) => mime is MimeType.Doc or MimeType.Docx or MimeType.Xls or MimeType.Xlsx or MimeType.Ppt or MimeType.Pptx;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsAnyBinary( this   MimeType mime ) => mime.IsBinary() || mime.IsPDF()    || mime.IsAudio() || mime.IsVideo() || mime.IsFont() || mime.IsCompressedFile() || mime.IsOfficeDocument();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsApplication( this MimeType mime ) => mime.IsPDF()    || mime.IsBinary() || mime is MimeType.UrlEncodedContent or MimeType.Soap or MimeType.Rtf or MimeType.XmlApp or MimeType.Xul or MimeType.JavaScript or MimeType.Vbs or MimeType.Json;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsText( this MimeType mime ) =>
+        mime is MimeType.Text or MimeType.PlainText or MimeType.Html or MimeType.Xml or MimeType.Xaml or MimeType.RichText or MimeType.Css or MimeType.Csv or MimeType.Ini or MimeType.Config or MimeType.Cfg or MimeType.Json or MimeType.UrlEncodedContent or MimeType.JavaScript or MimeType.Base64 or MimeType.Vbs or MimeType.Rtf or MimeType.Calendar;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsBinary( this         MimeType mime ) => mime is MimeType.Binary or MimeType.Stream;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsPDF( this            MimeType mime ) => mime is MimeType.Pdf or MimeType.Sds or MimeType.Sds or MimeType.Tds or MimeType.Coa or MimeType.Licenses;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsAudio( this          MimeType mime ) => mime is MimeType.ThreeGppAudio or MimeType.ThreeGpp2Audio or MimeType.Aac or MimeType.MpegAudio or MimeType.Mp3 or MimeType.Weba or MimeType.Wav;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsVideo( this          MimeType mime ) => mime is MimeType.ThreeGppVideo or MimeType.ThreeGpp2Video or MimeType.Mp4 or MimeType.MpegVideo or MimeType.Mpeg4 or MimeType.Webm or MimeType.H264 or MimeType.Avi or MimeType.Mov or MimeType.Mpg or MimeType.Ogg or MimeType.Mkv;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsImage( this          MimeType mime ) => mime is MimeType.Gif or MimeType.Tiff or MimeType.Png or MimeType.Jpeg or MimeType.Bmp or MimeType.Webp or MimeType.Icon or MimeType.Svg;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsFont( this           MimeType mime ) => mime is MimeType.TrueType or MimeType.OpenType;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsCompressedFile( this MimeType mime ) => mime is MimeType.Zip or MimeType.SevenZip or MimeType.Bzip or MimeType.Bzip2 or MimeType.Gzip or MimeType.Tar;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsOfficeDocument( this MimeType mime ) => mime is MimeType.Doc or MimeType.Docx or MimeType.Xls or MimeType.Xlsx or MimeType.Ppt or MimeType.Pptx;
 }

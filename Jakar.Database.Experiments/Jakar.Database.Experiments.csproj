@@ -22,9 +22,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" />
+		<PackageReference Include="BenchmarkDotNet.Exporters.Plotting" />
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="Hashids.net" />
-		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" />
 	</ItemGroup>
 
 	<ItemGroup>

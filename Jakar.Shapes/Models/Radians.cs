@@ -7,12 +7,14 @@ namespace Jakar.Shapes;
 [DefaultValue(nameof(Zero))]
 public readonly record struct Radians( double Value ) : IFormattable, IMathOperators<Radians, double>
 {
-    public const           double    MAX_VALUE = 2       * Math.PI;
     public const           double    INCREMENT = Math.PI / 180;
+    public const           double    MAX_VALUE = 2       * Math.PI;
     public static readonly Radians   Zero      = new(0.0);
     public static readonly Radians   One       = new(INCREMENT);
     public static readonly Radians[] Angles    = CreateAngles();
-    public readonly        double    Value     = Value;
+
+
+    public readonly double Value = Value;
 
 
     public static implicit operator Radians( Degrees degrees ) => new(degrees.Value * INCREMENT);
@@ -24,7 +26,8 @@ public readonly record struct Radians( double Value ) : IFormattable, IMathOpera
     {
         Radians[] array = GC.AllocateUninitializedArray<Radians>(360);
 
-        for ( int i = 0; i < array.Length; i++ ) array[i] = new Radians(i * INCREMENT);
+        for ( int i = 0; i < array.Length; i++ ) { array[i] = new Radians(i * INCREMENT); }
+
         return array;
     }
     public static Radians Normalize( double value )

@@ -4,75 +4,71 @@
 namespace Jakar.Database;
 
 
-// ReSharper disable once InconsistentNaming
-public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset dateCreated ) : IRecordPair, IEqualityOperators<RecordPair<TClass>>, IComparisonOperators<RecordPair<TClass>>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+[Serializable]
+[method: JsonConstructor]
+public readonly struct RecordPair<TSelf>( RecordID<TSelf> id, DateTimeOffset dateCreated ) : IEqualComparable<RecordPair<TSelf>>, IRecordPair<TSelf>
+    where TSelf : ITableRecord<TSelf>
 {
-    public readonly  RecordID<TClass> id          = id;
-    public readonly  DateTimeOffset   dateCreated = dateCreated;
-    private readonly int              _hash       = HashCode.Combine(id, dateCreated);
+    public readonly  RecordID<TSelf> ID          = id;
+    public readonly  DateTimeOffset  DateCreated = dateCreated;
+    private readonly int             __hash      = HashCode.Combine(id, dateCreated);
 
 
-    public static ValueSorter<RecordPair<TClass>> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ValueSorter<RecordPair<TClass>>.Default; }
+    public static ReadOnlyMemory<PropertyInfo>             ClassProperties  { get; } = typeof(RecordPair<TSelf>).GetProperties();
+    public static int                                      PropertyCount    { get; } = 2;
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = TSelf.PropertyMetaData;
+    public static string                                   TableName        => TSelf.TableName;
+    Guid IUniqueID<Guid>.                                  ID               => ID.Value;
+    RecordID<TSelf> IRecordPair<TSelf>.                    ID               => ID;
+    DateTimeOffset IDateCreated.                           DateCreated      => DateCreated;
 
 
-    public static string    TableName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TClass.TableName; }
-    Guid IUniqueID<Guid>.   ID          => id.value;
-    public RecordID<TClass> ID          => id;
-    public DateTimeOffset   DateCreated => dateCreated;
+    public UInt128 GetHash() => ID.GetHash() | new UInt128(0, (ulong)DateCreated.GetHashCode());
 
 
-    public int CompareTo( RecordPair<TClass> other )
+    public int CompareTo( object? other ) => other is RecordPair<TSelf> pair
+                                                 ? CompareTo(pair)
+                                                 : throw new ExpectedValueTypeException(other, typeof(RecordPair<TSelf>));
+    public          int  CompareTo( RecordPair<TSelf> other ) => DateCreated.CompareTo(other.DateCreated);
+    public          bool Equals( RecordPair<TSelf>    other ) => ID.Equals(other.ID)             && DateCreated.Equals(other.DateCreated);
+    public override bool Equals( object?              other ) => other is RecordPair<TSelf> pair && Equals(pair);
+    public override int  GetHashCode()                        => __hash;
+
+
+    public static implicit operator RecordPair<TSelf>( (RecordID<TSelf> id, DateTimeOffset dateCreated) value ) => new(value.id, value.dateCreated);
+    public static implicit operator (RecordID<TSelf> id, DateTimeOffset dateCreated)( RecordPair<TSelf> value ) => ( value.ID, value.DateCreated );
+    public static implicit operator KeyValuePair<RecordID<TSelf>, DateTimeOffset>( RecordPair<TSelf>    value ) => new(value.ID, value.DateCreated);
+    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair<TSelf>               value ) => new(value.ID.Value, value.DateCreated);
+
+
+    public static MigrationRecord CreateTable( ulong migrationID ) => throw new NotImplementedException("Not Implemented by design");
+    [Pure] public static RecordPair<TSelf> Create( DbDataReader reader )
     {
-        int idComparison = id.CompareTo(other.id);
-        if ( idComparison != 0 ) { return idComparison; }
-
-        return dateCreated.CompareTo(other.dateCreated);
+        DateTimeOffset  dateCreated = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
+        RecordID<TSelf> id          = RecordID<TSelf>.ID(reader);
+        return new RecordPair<TSelf>(id, dateCreated);
     }
-    public          bool Equals( RecordPair<TClass>     other ) => id.Equals(other.id) && dateCreated.Equals(other.dateCreated);
-    public          int  CompareTo( RecordPair<TClass>? other ) => 0;
-    public          bool Equals( RecordPair<TClass>?    other ) => false;
-    public override bool Equals( object?                obj )   => obj is RecordPair<TClass> other && Equals(other);
-    public override int  GetHashCode()                          => _hash;
-    public          int  CompareTo( object? obj )               => 0;
-
-
-    public static implicit operator RecordPair<TClass>( (RecordID<TClass> id, DateTimeOffset dateCreated) value ) => new(value.id, value.dateCreated);
-    public static implicit operator (RecordID<TClass> id, DateTimeOffset dateCreated)( RecordPair<TClass> value ) => ( value.id, value.dateCreated );
-    public static implicit operator KeyValuePair<RecordID<TClass>, DateTimeOffset>( RecordPair<TClass>    value ) => new(value.id, value.dateCreated);
-    public static implicit operator KeyValuePair<Guid, DateTimeOffset>( RecordPair<TClass>                value ) => new(value.id.value, value.dateCreated);
-
-
-    [Pure]
-    public static RecordPair<TClass> Create( DbDataReader reader )
-    {
-        DateTimeOffset   dateCreated = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
-        RecordID<TClass> id          = RecordID<TClass>.ID(reader);
-        return new RecordPair<TClass>(id, dateCreated);
-    }
-    [Pure]
-    public static async IAsyncEnumerable<RecordPair<TClass>> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    [Pure] public static async IAsyncEnumerable<RecordPair<TSelf>> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
     }
 
 
-    [Pure]
-    public DynamicParameters ToDynamicParameters()
+    [Pure] public PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = new();
-        parameters.Add(nameof(ID),          id);
-        parameters.Add(nameof(DateCreated), dateCreated);
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
+        parameters.Add(nameof(ID),          ID);
+        parameters.Add(nameof(DateCreated), DateCreated);
         return parameters;
     }
 
 
-    public static bool operator ==( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.Equals(left, right);
-    public static bool operator !=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator ==( RecordPair<TClass>? left, RecordPair<TClass>? right ) => Sorter.Equals(left, right);
-    public static bool operator !=( RecordPair<TClass>? left, RecordPair<TClass>? right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( RecordPair<TClass>   left, RecordPair<TClass>  right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( RecordPair<TClass>   left, RecordPair<TClass>  right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( RecordPair<TSelf>? left, RecordPair<TSelf>? right ) => Nullable.Equals(left, right);
+    public static bool operator !=( RecordPair<TSelf>? left, RecordPair<TSelf>? right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( RecordPair<TSelf>  left, RecordPair<TSelf>  right ) => EqualityComparer<RecordPair<TSelf>>.Default.Equals(left, right);
+    public static bool operator !=( RecordPair<TSelf>  left, RecordPair<TSelf>  right ) => !EqualityComparer<RecordPair<TSelf>>.Default.Equals(left, right);
+    public static bool operator >( RecordPair<TSelf>   left, RecordPair<TSelf>  right ) => Comparer<RecordPair<TSelf>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( RecordPair<TSelf>  left, RecordPair<TSelf>  right ) => Comparer<RecordPair<TSelf>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( RecordPair<TSelf>   left, RecordPair<TSelf>  right ) => Comparer<RecordPair<TSelf>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( RecordPair<TSelf>  left, RecordPair<TSelf>  right ) => Comparer<RecordPair<TSelf>>.Default.Compare(left, right) <= 0;
 }

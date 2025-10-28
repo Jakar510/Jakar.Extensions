@@ -1,10 +1,14 @@
 // Jakar.Extensions :: Jakar.Database
 // 12/22/2023  12:5
 
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+
+
 namespace Jakar.Database;
 
 
-public static class DbLog
+public static class DbLog // TODO: Jakar.Extensions.SelfLogger
 {
     private const           string                                                    EMPTY                    = "";
     private static readonly Action<ILogger, string, string, Exception?>               __errorCallback          = LoggerMessage.Define<string, string>(LogLevel.Error,    new EventId(1,                 nameof(Error)),    "{ClassName}.{Caller}", new LogDefineOptions { SkipEnabledCheck                                          = true });
@@ -27,16 +31,20 @@ public static class DbLog
     {
         if ( logger.IsEnabled(LogLevel.Information) ) { __senderCallback(logger, remoteIP, className, caller, null); }
     }
-    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) { Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, className, caller); }
+    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) { Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? EMPTY, className, caller); }
     public static void Sender<TValue>( ILogger logger, HttpContext context, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
     {
-        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, typeof(TValue).Name, caller);
+        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? EMPTY, typeof(TValue).Name, caller);
     }
     public static void Sender<TValue>( ILogger logger, HttpContext context, TValue cls, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
     {
-        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, cls.GetType().Name, caller);
+        Sender(logger,
+               context.Connection.RemoteIpAddress?.ToString() ?? EMPTY,
+               cls.GetType()
+                  .Name,
+               caller);
     }
 
 
@@ -53,7 +61,16 @@ public static class DbLog
         where TValue : notnull
         where TService : notnull
     {
-        ServiceStopped(logger, t.GetType().Name, token.IsCancellationRequested, cls.GetType().FullName ?? cls.GetType().Name, e, caller);
+        ServiceStopped(logger,
+                       t.GetType()
+                        .Name,
+                       token.IsCancellationRequested,
+                       cls.GetType()
+                          .FullName ??
+                       cls.GetType()
+                          .Name,
+                       e,
+                       caller);
     }
 
 
@@ -70,7 +87,15 @@ public static class DbLog
         where TValue : notnull
         where TService : notnull
     {
-        ServiceError(logger, e, t.GetType().Name, cls.GetType().FullName ?? cls.GetType().Name, caller);
+        ServiceError(logger,
+                     e,
+                     t.GetType()
+                      .Name,
+                     cls.GetType()
+                        .FullName ??
+                     cls.GetType()
+                        .Name,
+                     caller);
     }
 
 
@@ -86,7 +111,11 @@ public static class DbLog
     public static void Error<TValue>( ILogger logger, Exception e, TValue cls, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
     {
-        Error(logger, e, cls.GetType().Name, caller);
+        Error(logger,
+              e,
+              cls.GetType()
+                 .Name,
+              caller);
     }
 
 

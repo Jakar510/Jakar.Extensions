@@ -1,7 +1,8 @@
 ﻿// TrueLogic :: TrueLogic.Common
 // 10/22/2024  13:10
 
-using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -9,7 +10,7 @@ namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
-public readonly partial struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness>, IMathOperators<ReadOnlyThickness>
+public readonly struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness>, IMathOperators<ReadOnlyThickness>
 {
     public static readonly ReadOnlyThickness Invalid             = new(double.NaN, double.NaN, double.NaN, double.NaN);
     public static readonly ReadOnlyThickness Zero                = new(0);
@@ -22,6 +23,9 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public readonly        double            VerticalThickness   = top  + bottom;
 
 
+    public static       JsonSerializerContext                       JsonContext         => JakarShapesContext.Default;
+    public static       JsonTypeInfo<ReadOnlyThickness>             JsonTypeInfo        => JakarShapesContext.Default.ReadOnlyThickness;
+    public static       JsonTypeInfo<ReadOnlyThickness[]>           JsonArrayInfo       => JakarShapesContext.Default.ReadOnlyThicknessArray;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Zero                => ref Zero;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Invalid             => ref Invalid;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.One                 => ref One;
@@ -38,6 +42,27 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
 
     public ReadOnlyThickness( double uniformSize ) : this(uniformSize, uniformSize, uniformSize, uniformSize) { }
     public ReadOnlyThickness( double horizontalSize, double verticalSize ) : this(horizontalSize / 2, verticalSize / 2, horizontalSize / 2, verticalSize / 2) { }
+
+
+    public static bool TryFromJson( string? json, out ReadOnlyThickness result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
+    }
+    public static ReadOnlyThickness FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 
 
     public void Deconstruct( out float  left,             out float  top, out float right, out float bottom ) => ( left, top, right, bottom ) = ( Left.AsFloat(), Top.AsFloat(), Right.AsFloat(), Bottom.AsFloat() );
@@ -115,8 +140,4 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public static ReadOnlyThickness operator -( ReadOnlyThickness self, (int xOffset, int yOffset)       value ) => new(self.Left - value.xOffset, self.Top - value.yOffset, self.Right - value.xOffset, self.Bottom - value.yOffset);
     public static ReadOnlyThickness operator /( ReadOnlyThickness self, (int xOffset, int yOffset)       value ) => new(self.Left / value.xOffset, self.Top / value.yOffset, self.Right / value.xOffset, self.Bottom / value.yOffset);
     public static ReadOnlyThickness operator *( ReadOnlyThickness self, (int xOffset, int yOffset)       value ) => new(self.Left * value.xOffset, self.Top * value.yOffset, self.Right * value.xOffset, self.Bottom * value.yOffset);
-
-
-
-    [JsonSourceGenerationOptions(WriteIndented = true), JsonSerializable(typeof(ReadOnlyThickness))] public partial class Context : JsonSerializerContext;
 }

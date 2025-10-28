@@ -92,7 +92,6 @@
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" />
 		<PackageReference Include="AiForms.Maui.SettingsView" />
 		<PackageReference Include="Jakar.Extensions" />
-		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="WifiManager.Maui" />
 		<PackageReference Include="Xam.Plugin.Media" />
 	</ItemGroup>

@@ -22,10 +22,10 @@ public class RecordNotFoundException : NotFoundException
 
 
 
-public class RecordNotFoundException<TClass> : RecordNotFoundException
-    where TClass : BaseRecord
+public class RecordNotFoundException<TSelf> : RecordNotFoundException
+    where TSelf : BaseRecord
 {
     public RecordNotFoundException() : base() { }
-    public RecordNotFoundException( TClass record ) : base(record.ToString()) { }
+    public RecordNotFoundException( TSelf  record ) : base(record.ToString()) { }
     public RecordNotFoundException( string message, Exception inner ) : base(message, inner) { }
 }

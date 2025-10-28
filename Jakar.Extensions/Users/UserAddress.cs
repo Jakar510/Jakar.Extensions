@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IAddress<out TID> : IUniqueID<TID>
+public interface IAddress<out TID> : IUniqueID<TID>, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public            string? Address         { get; }
@@ -19,40 +19,36 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 
-public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqualComparable<TClass>
+public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : class, IAddress<TClass, TID>
+    where TSelf : class, IAddress<TSelf, TID>
 {
-    public abstract static TClass Create( Match         match );
-    public abstract static TClass Create( IAddress<TID> address );
-    public abstract static TClass Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default );
+    public abstract static TSelf Create( Match         match );
+    public abstract static TSelf Create( IAddress<TID> address );
+    public abstract static TSelf Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default );
 }
 
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, JsonModels.IJsonModel
+public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
+    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    private bool                          __isPrimary;
-    private IDictionary<string, JToken?>? __additionalData;
-    private string                        __city            = string.Empty;
-    private string                        __country         = string.Empty;
-    private string                        __line1           = string.Empty;
-    private string                        __line2           = string.Empty;
-    private string                        __postalCode      = string.Empty;
-    private string                        __stateOrProvince = string.Empty;
-    private string?                       __address;
-    private TID                           __id;
+    private bool    __isPrimary;
+    private string  __city            = EMPTY;
+    private string  __country         = EMPTY;
+    private string  __line1           = EMPTY;
+    private string  __line2           = EMPTY;
+    private string  __postalCode      = EMPTY;
+    private string  __stateOrProvince = EMPTY;
+    private string? __address;
+    private TID     __id;
 
 
-    [JsonExtensionData]              public IDictionary<string, JToken?>? AdditionalData { get => __additionalData;         set => SetProperty(ref __additionalData, value); }
-    [StringLength(UNICODE_CAPACITY)] public string?                       Address        { get => __address ??= ToString(); set => SetProperty(ref __address,        value); }
+    [Required] [StringLength(ADDRESS)] public string? Address { get => __address ??= ToString(); set => SetProperty(ref __address, value); }
 
-
-    [StringLength(UNICODE_CAPACITY)]
-    public string City
+    [Required] [StringLength(CITY)] public string City
     {
         get => __city;
         set
@@ -61,9 +57,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)]
-    public string Country
+    [Required] [StringLength(COUNTRY)] public string Country
     {
         get => __country;
         set
@@ -77,8 +71,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
     public bool IsPrimary { get => __isPrimary; set => SetProperty(ref __isPrimary, value); }
 
 
-    [JsonIgnore]
-    public bool IsValidAddress
+    [JsonIgnore] public bool IsValidAddress
     {
         get
         {
@@ -97,9 +90,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)]
-    public string Line1
+    [Required] [StringLength(LINE1)] public string Line1
     {
         get => __line1;
         set
@@ -108,9 +99,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)]
-    public string Line2
+    [StringLength(LINE2)] public string Line2
     {
         get => __line2;
         set
@@ -119,9 +108,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         }
     }
 
-
-    [Required, StringLength(UNICODE_CAPACITY)]
-    public string PostalCode
+    [Required] [StringLength(POSTAL_CODE)] public string PostalCode
     {
         get => __postalCode;
         set
@@ -130,9 +117,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)]
-    public string StateOrProvince
+    [Required] [StringLength(STATE_OR_PROVINCE)] public string StateOrProvince
     {
         get => __stateOrProvince;
         set
@@ -172,7 +157,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -198,60 +183,10 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
 
         return 0;
     }
-    public override bool Equals( TClass? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 
         return ReferenceEquals(this, other) || ( string.Equals(Line1, other.Line1, StringComparison.Ordinal) && string.Equals(Line2, other.Line2, StringComparison.Ordinal) && string.Equals(City, other.City, StringComparison.Ordinal) && string.Equals(PostalCode, other.PostalCode, StringComparison.Ordinal) && string.Equals(StateOrProvince, other.StateOrProvince, StringComparison.Ordinal) );
     }
-}
-
-
-
-[Serializable]
-public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>, IEqualComparable<UserAddress<TID>>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public UserAddress() { }
-    public UserAddress( Match                            match ) : base(match) { }
-    public UserAddress( IAddress<TID>                    address ) : base(address) { }
-    public UserAddress( string                           line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) : base(line1, line2, city, stateOrProvince, postalCode, country, id) { }
-    public static UserAddress<TID> Create( Match         match )                                                                                                         => new(match);
-    public static UserAddress<TID> Create( IAddress<TID> address )                                                                                                       => new(address);
-    public static UserAddress<TID> Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) => new(line1, line2, city, stateOrProvince, postalCode, country, id);
-    public new static UserAddress<TID> Parse( string value, IFormatProvider? provider )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        Match               match         = Validate.Re.Address.Match(value);
-        return new UserAddress<TID>(match);
-    }
-    public new static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress<TID>? result )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        try
-        {
-            result = !string.IsNullOrWhiteSpace(value)
-                         ? Parse(value, provider)
-                         : null;
-
-            return result is not null;
-        }
-        catch ( Exception e )
-        {
-            telemetrySpan.AddException(e);
-            result = null;
-            return false;
-        }
-    }
-
-
-    public override bool Equals( object? other )                            => other is UserAddress<TID> x && Equals(x);
-    public override int  GetHashCode()                                      => HashCode.Combine(Line1, Line2, City, PostalCode, Country, ID);
-    public static   bool operator ==( UserAddress<TID>? left, UserAddress<TID>? right ) => EqualityComparer<UserAddress<TID>>.Default.Equals(left, right);
-    public static   bool operator !=( UserAddress<TID>? left, UserAddress<TID>? right ) => !EqualityComparer<UserAddress<TID>>.Default.Equals(left, right);
-    public static   bool operator >( UserAddress<TID>   left, UserAddress<TID>  right ) => left.CompareTo(right) > 0;
-    public static   bool operator >=( UserAddress<TID>  left, UserAddress<TID>  right ) => left.CompareTo(right) >= 0;
-    public static   bool operator <( UserAddress<TID>   left, UserAddress<TID>  right ) => left.CompareTo(right) < 0;
-    public static   bool operator <=( UserAddress<TID>  left, UserAddress<TID>  right ) => left.CompareTo(right) <= 0;
 }

@@ -1,23 +1,13 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿namespace Jakar.Database;
 
 
-
-namespace Jakar.Database;
-
-
-public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
+public class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
 {
     public static readonly StringValues RoleNames   = new([nameof(RoleRecord.NormalizedName), nameof(RoleRecord.NameOfRole)]);
     private readonly       Database     __dbContext = dbContext;
 
 
     public void Dispose() { }
-
-    public static void Register( IServiceCollection builder )
-    {
-        builder.AddSingleton<RoleStore>();
-        builder.AddTransient<IRoleStore<RoleRecord>>(static provider => provider.GetRequiredService<RoleStore>());
-    }
 
 
     public async Task<IdentityResult> CreateAsync( RoleRecord role, CancellationToken token )
@@ -67,8 +57,8 @@ public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
     public async Task<string?> GetNormalizedRoleNameAsync( RoleRecord role, CancellationToken token )                         => await ValueTask.FromResult(role.NameOfRole);
     public async Task<string>  GetRoleIdAsync( RoleRecord             role, CancellationToken token )                         => await ValueTask.FromResult(role.ID.ToString());
     public async Task<string?> GetRoleNameAsync( RoleRecord           role, CancellationToken token )                         => await ValueTask.FromResult(role.NameOfRole);
-    public async Task          SetNormalizedRoleNameAsync( RoleRecord role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NormalizedName = name ?? string.Empty }, token);
-    public async Task          SetRoleNameAsync( RoleRecord           role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NameOfRole = name     ?? string.Empty }, token);
+    public async Task          SetNormalizedRoleNameAsync( RoleRecord role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NormalizedName = name ?? EMPTY }, token);
+    public async Task          SetRoleNameAsync( RoleRecord           role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NameOfRole = name     ?? EMPTY }, token);
 
 
     public async Task<IdentityResult> UpdateAsync( RoleRecord role, CancellationToken token )

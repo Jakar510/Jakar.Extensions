@@ -13,22 +13,23 @@ public struct WhereConditionBuilder<TNext>( in TNext next, ref EasySqlBuilder bu
 
     public TNext Done()
     {
-        __builder.AddRange( ',', __cache );
+        __builder.AddRange(',', __cache);
 
-        __builder.VerifyParentheses().NewLine();
+        __builder.VerifyParentheses()
+                 .NewLine();
 
         return __next;
     }
 
     public WhereConditionBuilder<TNext> With( string columnName, string? value )
     {
-        __cache.Add( $"{columnName}={value ?? NULL}" );
+        __cache.Add($"{columnName}={value ?? NULL}");
         return this;
     }
     public WhereConditionBuilder<TNext> With<TValue>( string columnName, TValue value )
         where TValue : struct
     {
-        __cache.Add( $"{columnName}={value}" );
+        __cache.Add($"{columnName}={value}");
         return this;
     }
 }

@@ -1,3 +1,0 @@
-# Jakar.Extensions.Serilog
-
-TBD

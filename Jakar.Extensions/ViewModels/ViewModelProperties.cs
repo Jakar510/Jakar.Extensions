@@ -19,39 +19,39 @@ public static class Properties
 
 
     public static ViewModelProperty<TCommand, bool> Bool<TCommand>( bool value )
-        where TCommand : class, ICommand => new(ValueSorter<bool>.Default, value);
+        where TCommand : class, ICommand => new(value);
     public static EmailProperty<TCommand> Email<TCommand>( MaskedTextProvider? mask, string value = EMPTY )
-        where TCommand : class, ICommand => new(StringComparer.Ordinal, value, mask);
+        where TCommand : class, ICommand => new(value, mask);
     public static StringProperty<TCommand> String<TCommand>( string value = EMPTY )
-        where TCommand : class, ICommand => new(StringComparer.Ordinal, value);
+        where TCommand : class, ICommand => new(value);
     public static PhoneNumberProperty<TCommand> PhoneNumber<TCommand>( string value = EMPTY )
-        where TCommand : class, ICommand => new(StringComparer.Ordinal, value);
+        where TCommand : class, ICommand => new(value);
     public static PasswordProperty<TCommand> Password<TCommand>( string value = EMPTY )
-        where TCommand : class, ICommand => new(StringComparer.Ordinal, value);
+        where TCommand : class, ICommand => new(value);
 
 
     public static StringCollectionProperty<TCommand> Strings<TCommand>( string value = EMPTY )
-        where TCommand : class, ICommand => new(StringComparer.Ordinal, value);
+        where TCommand : class, ICommand => new(value);
     public static ViewModelCollectionProperty<TCommand, TValue> Collection<TCommand, TValue>( TValue value )
         where TValue : IEquatable<TValue>
-        where TCommand : class, ICommand => new(EqualityComparer<TValue?>.Default, EmptyCommand, value);
+        where TCommand : class, ICommand => new(EmptyCommand, value);
     public static ViewModelCollectionProperty<TCommand, TValue> Collection<TCommand, TValue>( Handler<TValue> onSelected, TValue value )
         where TValue : IEquatable<TValue>
-        where TCommand : class, ICommand => new(EqualityComparer<TValue?>.Default, onSelected, value);
+        where TCommand : class, ICommand => new(onSelected, value);
     public static ViewModelCollectionProperty<TCommand, TValue> Collection<TCommand, TValue>( HandlerAsync<TValue> onSelected, TValue value )
         where TValue : IEquatable<TValue>
-        where TCommand : class, ICommand => new(EqualityComparer<TValue?>.Default, onSelected, value);
+        where TCommand : class, ICommand => new(onSelected, value);
 
 
-    public static TValue NoCoerceValue<TValue>( TValue                  value ) => value;
-    public static bool   HasValue( [NotNullWhen(        true )] string? value ) => !string.IsNullOrWhiteSpace( value );
-    public static bool   HasValue<TValue>( [NotNullWhen(true )] TValue? value ) => value is not null;
-    public static bool   CheckIsEmail( [NotNullWhen(    true )] string? value ) => HasValue( value ) && value.IsEmailAddress();
+    public static TValue NoCoerceValue<TValue>( TValue                 value ) => value;
+    public static bool   HasValue( [NotNullWhen(        true)] string? value ) => !string.IsNullOrWhiteSpace(value);
+    public static bool   HasValue<TValue>( [NotNullWhen(true)] TValue? value ) => value is not null;
+    public static bool   CheckIsEmail( [NotNullWhen(    true)] string? value ) => HasValue(value) && value.IsEmailAddress();
 }
 
 
 
-public class ViewModelProperty<TCommand>() : ObservableClass()
+public class ViewModelProperty<TCommand>() : BaseClass()
     where TCommand : class, ICommand
 {
     private bool      __isEnabled = true;
@@ -64,14 +64,14 @@ public class ViewModelProperty<TCommand>() : ObservableClass()
     private TCommand? __command;
 
 
-    public TCommand? Command          { get => __command;          set => SetProperty( ref __command,          value ); }
-    public object?   CommandParameter { get => __commandParameter; set => SetProperty( ref __commandParameter, value ); }
-    public string?   Description      { get => __description;      set => SetProperty( ref __description,      value ); }
-    public string?   Hint             { get => __hint;             set => SetProperty( ref __hint,             value ); }
-    public bool      IsEnabled        { get => __isEnabled;        set => SetProperty( ref __isEnabled,        value ); }
-    public bool      IsVisible        { get => __isVisible;        set => SetProperty( ref __isVisible,        value ); }
-    public string?   Placeholder      { get => __placeholder;      set => SetProperty( ref __placeholder,      value ); }
-    public string?   Title            { get => __title;            set => SetProperty( ref __title,            value ); }
+    public TCommand? Command          { get => __command;          set => SetProperty(ref __command,          value); }
+    public object?   CommandParameter { get => __commandParameter; set => SetProperty(ref __commandParameter, value); }
+    public string?   Description      { get => __description;      set => SetProperty(ref __description,      value); }
+    public string?   Hint             { get => __hint;             set => SetProperty(ref __hint,             value); }
+    public bool      IsEnabled        { get => __isEnabled;        set => SetProperty(ref __isEnabled,        value); }
+    public bool      IsVisible        { get => __isVisible;        set => SetProperty(ref __isVisible,        value); }
+    public string?   Placeholder      { get => __placeholder;      set => SetProperty(ref __placeholder,      value); }
+    public string?   Title            { get => __title;            set => SetProperty(ref __title,            value); }
 }
 
 
@@ -80,38 +80,36 @@ public class ViewModelProperty<TCommand, TValue> : ViewModelProperty<TCommand>, 
     where TValue : IEquatable<TValue>
     where TCommand : class, ICommand
 {
-    private readonly IEqualityComparer<TValue?> __equalityComparer;
-    private          TValue?                    __value;
+    private TValue? __value;
 
 
     public static Func<Handler<TValue>, TCommand?>      ActionToCommand { get; set; } = static x => null;
     public static Func<HandlerAsync<TValue>, TCommand?> FuncToCommand   { get; set; } = static x => null;
-    public        bool                                  IsValid         => HasValue( __value );
-    public        TValue?                               Value           { get => __value; set => SetValue( value ); }
+    public        bool                                  IsValid         => HasValue(__value);
+    public        TValue?                               Value           { get => __value; set => SetValue(value); }
 
 
-    public ViewModelProperty( IEqualityComparer<TValue?> equalityComparer, TValue value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
-    public ViewModelProperty( IEqualityComparer<TValue?> equalityComparer, OneOf<Handler<TValue>, HandlerAsync<TValue>, None> onSelected, TValue value ) : base()
+    public ViewModelProperty( TValue value ) : this(Properties.EmptyCommand, value) { }
+    public ViewModelProperty( OneOf<Handler<TValue>, HandlerAsync<TValue>, None> onSelected, TValue value ) : base()
     {
-        __equalityComparer = equalityComparer;
-        __value            = value;
-        Command           = onSelected.Match( ActionToCommand, FuncToCommand, none => null );
+        __value = value;
+        Command = onSelected.Match(ActionToCommand, FuncToCommand, none => null);
     }
     public static implicit operator TValue?( ViewModelProperty<TCommand, TValue> property ) => property.Value;
 
 
-    protected virtual bool    HasValue( [NotNullWhen( true )]                  TValue? value ) => value is not null;
-    protected virtual TValue? CoerceValue( [NotNullIfNotNull( nameof(value) )] TValue? value ) => value;
+    protected virtual bool    HasValue( [NotNullWhen(true)]                  TValue? value ) => value is not null;
+    protected virtual TValue? CoerceValue( [NotNullIfNotNull(nameof(value))] TValue? value ) => value;
     protected virtual bool? SetValue( TValue? value, [CallerMemberName] string propertyName = EMPTY )
     {
         try
         {
-            value = CoerceValue( value );
+            value = CoerceValue(value);
 
-            return SetProperty( ref __value, value, __equalityComparer, propertyName )
+            return SetProperty(ref __value, value, propertyName)
                        ? IsValid
                        : null;
         }
-        finally { OnPropertyChanged( nameof(IsValid) ); }
+        finally { OnPropertyChanged(nameof(IsValid)); }
     }
 }

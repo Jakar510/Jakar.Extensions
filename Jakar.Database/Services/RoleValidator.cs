@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public sealed class RoleValidator : RoleValidator<RoleRecord>
+public class RoleValidator : RoleValidator<RoleRecord>
 {
     public override Task<IdentityResult> ValidateAsync( RoleManager<RoleRecord> manager, RoleRecord role )
     {

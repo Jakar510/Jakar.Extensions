@@ -2,7 +2,6 @@
 // 02/27/2025  11:02
 
 
-using Serilog.Core;
 using Serilog.Events;
 using ZLinq;
 
@@ -16,11 +15,9 @@ public static class Enricher
     private static readonly ConcurrentDictionary<string, LogEventProperty> __sourceContexts = new();
 
 
-    /// <summary>
-    /// Gets the span unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span unique identifier.</returns>
+    /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span unique identifier. </returns>
     public static string GetSpanID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -30,17 +27,15 @@ public static class Enricher
                              ActivityIdFormat.Hierarchical => activity.Id,
                              ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
                              ActivityIdFormat.Unknown      => null,
-                             _                             => null,
+                             _                             => null
                          };
 
-        return spanId ?? string.Empty;
+        return spanId ?? EMPTY;
     }
 
-    /// <summary>
-    /// Gets the span trace unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span trace unique identifier.</returns>
+    /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span trace unique identifier. </returns>
     public static string GetTraceID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -50,17 +45,15 @@ public static class Enricher
                               ActivityIdFormat.Hierarchical => activity.RootId,
                               ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
                               ActivityIdFormat.Unknown      => null,
-                              _                             => null,
+                              _                             => null
                           };
 
-        return traceId ?? string.Empty;
+        return traceId ?? EMPTY;
     }
 
-    /// <summary>
-    /// Gets the span parent unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span parent unique identifier.</returns>
+    /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span parent unique identifier. </returns>
     public static string GetParentID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -70,15 +63,15 @@ public static class Enricher
                                ActivityIdFormat.Hierarchical => activity.ParentId,
                                ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
                                ActivityIdFormat.Unknown      => null,
-                               _                             => null,
+                               _                             => null
                            };
 
-        return parentId ?? string.Empty;
+        return parentId ?? EMPTY;
     }
 
 
     public static void             TryEnrich( this         LogEvent log, string sourceContext ) => log.AddPropertyIfAbsent(__sourceContexts.GetOrAdd(sourceContext, GetSourceProperty));
-    public static LogEventProperty GetSourceProperty( this string   sourceContext ) => new(Constants.SourceContextPropertyName, new ScalarValue(sourceContext));
+    public static LogEventProperty GetSourceProperty( this string   sourceContext ) => new(Serilog.Core.Constants.SourceContextPropertyName, new ScalarValue(sourceContext));
 
 
     public static LogEventProperty GetProperty( string?           value, string name ) => new(name, new ScalarValue(value));
@@ -96,36 +89,19 @@ public static class Enricher
     public static LogEventProperty GetProperty( in Guid           value, string name ) => new(name, new ScalarValue(value));
     public static LogEventProperty GetProperty( AppVersion        value, string name ) => new(name, new ScalarValue(value.ToString()));
     public static LogEventProperty GetProperty<TEnum>( TEnum value, string name )
-        where TEnum : struct, Enum => new(name, new ScalarValue(value.ToString()));
+        where TEnum : unmanaged, Enum => new(name, new ScalarValue(value.ToString()));
 
 
-    public static LogEventProperty GetProperty( in ReadOnlySpan<GCGenerationInfo> value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
-    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan>         value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
-
-
-    public static LogEventProperty GetProperty( in GCMemoryInfo value, string name ) => new(name,
-                                                                                            new StructureValue([
-                                                                                                                   GetProperty(value.Compacted,                    nameof(value.Compacted)),
-                                                                                                                   GetProperty(value.HighMemoryLoadThresholdBytes, nameof(value.HighMemoryLoadThresholdBytes)),
-                                                                                                                   GetProperty(value.MemoryLoadBytes,              nameof(value.MemoryLoadBytes)),
-                                                                                                                   GetProperty(value.TotalAvailableMemoryBytes,    nameof(value.TotalAvailableMemoryBytes)),
-                                                                                                                   GetProperty(value.HeapSizeBytes,                nameof(value.HeapSizeBytes)),
-                                                                                                                   GetProperty(value.FragmentedBytes,              nameof(value.FragmentedBytes)),
-                                                                                                                   GetProperty(value.Generation,                   nameof(value.Generation)),
-                                                                                                                   GetProperty(value.Concurrent,                   nameof(value.Concurrent)),
-                                                                                                                   GetProperty(value.TotalCommittedBytes,          nameof(value.TotalCommittedBytes)),
-                                                                                                                   GetProperty(value.PromotedBytes,                nameof(value.PromotedBytes)),
-                                                                                                                   GetProperty(value.PinnedObjectsCount,           nameof(value.PinnedObjectsCount)),
-                                                                                                                   GetProperty(value.FinalizationPendingCount,     nameof(value.FinalizationPendingCount)),
-                                                                                                                   GetProperty(value.PauseTimePercentage,          nameof(value.PauseTimePercentage)),
-                                                                                                                   GetProperty(value.GenerationInfo,               nameof(value.GenerationInfo)),
-                                                                                                                   GetProperty(value.PauseDurations,               nameof(value.PauseDurations)),
-                                                                                                               ]));
-    public static LogEventProperty GetProperty( in GCGenerationInfo value, string name ) => new(name, new StructureValue([GetProperty(value.SizeBeforeBytes, nameof(value.SizeBeforeBytes)), GetProperty(value.FragmentationBeforeBytes, nameof(value.FragmentationBeforeBytes)), GetProperty(value.SizeAfterBytes, nameof(value.SizeAfterBytes)), GetProperty(value.FragmentationAfterBytes, nameof(value.FragmentationAfterBytes)),]));
-    public static LogEventProperty GetProperty( in AppInformation   info ) => new(nameof(AppInformation), new StructureValue([GetProperty(info.Version, nameof(AppInformation.Version)), GetProperty(info.AppID,    nameof(AppInformation.AppID)), GetProperty(info.AppName,                          nameof(AppInformation.AppName)), GetProperty(info.PackageName,                     nameof(AppInformation.PackageName))]));
-    public static LogEventProperty GetProperty( in ThreadInfo       info ) => new(nameof(ThreadInfo), new StructureValue([GetProperty(info.Name,        nameof(ThreadInfo.Name)), GetProperty(info.ManagedThreadID, nameof(ThreadInfo.ManagedThreadID)), GetProperty(info.CurrentCulture.DisplayName, nameof(ThreadInfo.CurrentCulture)), GetProperty(info.CurrentUICulture.DisplayName, nameof(ThreadInfo.CurrentUICulture))]));
-    public static LogEventProperty GetProperty( in GcInfo info ) =>
-        new(nameof(GcInfo), new StructureValue([GetProperty(info.TotalMemory, nameof(GcInfo.TotalMemory)), GetProperty(info.TotalPauseDuration, nameof(GcInfo.TotalPauseDuration)), GetProperty(info.TotalAllocatedBytes, nameof(GcInfo.TotalAllocatedBytes)), GetProperty(info.AllocatedBytesForCurrentThread, nameof(GcInfo.AllocatedBytesForCurrentThread)), GetProperty(info.Info, nameof(GcInfo.Info))]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<GcGenerationInformation> value, string name ) => new(name,
+                                                                                                                     new SequenceValue([
+                                                                                                                                           ..value.AsValueEnumerable()
+                                                                                                                                                  .Select(static v => v.GetProperty())
+                                                                                                                                       ]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan> value, string name ) => new(name,
+                                                                                                      new SequenceValue([
+                                                                                                                            ..value.AsValueEnumerable()
+                                                                                                                                   .Select(v => new ScalarValue(v))
+                                                                                                                        ]));
 
 
     public static LogEventProperty GetProperty( string?                                    description, ActivityStatusCode code ) => new(nameof(Activity.Status), new StructureValue([GetProperty(description, "Description"), GetProperty(code, "Code")]));

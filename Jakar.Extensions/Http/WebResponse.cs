@@ -1,36 +1,33 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using Microsoft.Extensions.Primitives;
-
-
-
 namespace Jakar.Extensions;
 
 
-[IsNotJsonSerializable, SuppressMessage("ReSharper", "NotAccessedField.Global")]
+[NotSerializable]
+[SuppressMessage("ReSharper", "NotAccessedField.Global")]
 public sealed class WebResponse<TValue>
 {
-    public readonly DateTimeOffset? Expires;
-    public readonly DateTimeOffset? LastModified;
-    public readonly Exception?      Exception;
-    public readonly List<string>    Allow;
-    public readonly List<string>    ContentEncoding;
-    public readonly long?           ContentLength;
-    public readonly OneOfErrors     Errors;
-    public readonly Status          StatusCode;
-    public readonly string?         ContentType;
-    public readonly string?         Method;
-    public readonly string?         Sender;
-    public readonly string?         Server;
-    public readonly string?         StatusDescription;
-    public readonly TValue?         Payload;
-    public readonly Uri?            Location;
-    public readonly Uri?            URL;
+    public readonly DateTimeOffset?   Expires;
+    public readonly DateTimeOffset?   LastModified;
+    public readonly ExceptionDetails? Exception;
+    public readonly List<string>      Allow;
+    public readonly List<string>      ContentEncoding;
+    public readonly long?             ContentLength;
+    public readonly OneOfErrors       Errors;
+    public readonly Status            StatusCode;
+    public readonly string?           ContentType;
+    public readonly string?           Method;
+    public readonly string?           Sender;
+    public readonly string?           Server;
+    public readonly string?           StatusDescription;
+    public readonly TValue?           Payload;
+    public readonly Uri?              Location;
+    public readonly Uri?              URL;
 
 
-    [JsonIgnore, MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
-    public                                                        bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
+    public                                                         bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this(response, default, null, error) { }
@@ -61,7 +58,6 @@ public sealed class WebResponse<TValue>
 
     /// <summary> Gets the payload if available; otherwise throws. </summary>
     /// <exception cref="HttpRequestException"> </exception>
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     public TValue GetPayload()
     {
         EnsureSuccessStatusCode();
@@ -102,17 +98,16 @@ public sealed class WebResponse<TValue>
         errorMessage = Errors;
         return false;
     }
-    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString(Formatting.Indented)), GetError, static x => x);
-    private Errors GetError( string detail ) => Error.Create(Exception, ErrorMessage(), URL?.OriginalString, StringValues.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(Formatting.Indented), static x => x, static x => x.GetMessage());
+    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
+    private Errors GetError( string detail ) => Error.Create(Exception?.Value, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
+    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public override string ToString() => this.ToJson(Formatting.Indented);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode ) { return; }
 
-        throw new HttpRequestException(this.ToPrettyJson(), Exception);
+        throw new HttpRequestException(ToString(), Exception);
     }
 
 
@@ -219,7 +214,7 @@ public sealed class WebResponse<TValue>
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = OneOfErrors.UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using StreamReader reader       = new(stream);
@@ -238,7 +233,7 @@ public sealed class WebResponse<TValue>
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = OneOfErrors.UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using StreamReader reader       = new(stream);

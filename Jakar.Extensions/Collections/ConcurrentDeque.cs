@@ -11,40 +11,40 @@ public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue
     {
         get
         {
-            lock (_lock) { return _values.Count; }
+            lock ( _lock ) { return _values.Count; }
         }
     }
-    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+    public bool IsEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count == 0; }
     public TValue Next
     {
         get
         {
-            lock (_lock) { return _values[^1]; }
+            lock ( _lock ) { return _values[^1]; }
         }
     }
 
 
-    public ConcurrentDeque( params ReadOnlySpan<TValue> values ) : this( values.Length )
+    public ConcurrentDeque( params ReadOnlySpan<TValue> values ) : this(values.Length)
     {
-        foreach ( TValue x in values ) { _values.AddToBack( x ); }
+        foreach ( TValue x in values ) { _values.AddToBack(x); }
     }
 
 
     public virtual void Add( TValue value )
     {
-        lock (_lock) { _values.AddToBack( value ); }
+        lock ( _lock ) { _values.AddToBack(value); }
     }
     public virtual ValueTask AddAsync( TValue value )
     {
-        lock (_lock) { _values.AddToBack( value ); }
+        lock ( _lock ) { _values.AddToBack(value); }
 
         return ValueTask.CompletedTask;
     }
 
 
-    public virtual bool Remove( [NotNullWhen( true )] out TValue? value )
+    public virtual bool Remove( [NotNullWhen(true)] out TValue? value )
     {
-        lock (_lock)
+        lock ( _lock )
         {
             if ( _values.Count > 0 )
             {
@@ -65,7 +65,7 @@ public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue
     {
         TValue? value = default;
 
-        lock (_lock)
+        lock ( _lock )
         {
             if ( _values.Count > 0 )
             {
@@ -75,17 +75,17 @@ public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue
             }
         }
 
-        return ValueTask.FromResult( value );
+        return ValueTask.FromResult(value);
     }
 
 
     public virtual void Clear()
     {
-        lock (_lock) { _values.Clear(); }
+        lock ( _lock ) { _values.Clear(); }
     }
     public virtual ValueTask ClearAsync()
     {
-        lock (_lock)
+        lock ( _lock )
         {
             _values.Clear();
             return ValueTask.CompletedTask;
@@ -95,20 +95,20 @@ public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue
 
     public virtual bool Contains( TValue obj )
     {
-        lock (_lock) { return _values.Contains( obj ); }
+        lock ( _lock ) { return _values.Contains(obj); }
     }
     public virtual ValueTask<bool> ContainsAsync( TValue obj )
     {
-        lock (_lock) { return ValueTask.FromResult( _values.Contains( obj ) ); }
+        lock ( _lock ) { return ValueTask.FromResult(_values.Contains(obj)); }
     }
 
 
     public IEnumerator<TValue> GetEnumerator()
     {
         TValue[] values;
-        lock (_lock) { values = _values.ToArray(); }
+        lock ( _lock ) { values = _values.ToArray(); }
 
-        foreach ( var value in values ) { yield return value; }
+        foreach ( TValue value in values ) { yield return value; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

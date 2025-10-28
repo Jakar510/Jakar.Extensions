@@ -8,49 +8,45 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     <para> Based on System.Text.ValueStringBuilder </para>
 /// </summary>
-public ref struct ValueStringBuilder
+public ref struct ValueStringBuilder : IDisposable
 {
     private Buffer<char> __chars;
 
 
-    public readonly bool       IsEmpty  { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => __chars.IsEmpty; }
-    public readonly int        Capacity { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => __chars.Capacity; }
-    public readonly Span<char> Next     { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => __chars.Next; }
-    public readonly Span<char> Span     { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
-    public readonly Span<char> this[ Range range ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[range]; }
-    public ref char this[ Index            index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref __chars[index]; }
-    public ref char this[ int              index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref __chars[index]; }
-    public readonly ReadOnlySpan<char> Result { [MethodImpl(     MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
-    public          int                Length { [MethodImpl(     MethodImplOptions.AggressiveInlining)] readonly get => __chars.Length; set => __chars.Length = value; }
+    public readonly bool       IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.IsEmpty; }
+    public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Capacity; }
+    public readonly Span<char> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Next; }
+    public readonly Span<char> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
+    public readonly Span<char> this[ Range range ] => __chars[range];
+    public ref char this[ Index            index ] => ref __chars[index];
+    public ref char this[ int              index ] => ref __chars[index];
+    public readonly ReadOnlySpan<char> Result { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
+    public          int                Length { [MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get => __chars.Length; set => __chars.Length = value; }
     public readonly ReadOnlySpan<char> Values => __chars.Values;
 
 
     public ValueStringBuilder() : this(DEFAULT_CAPACITY) { }
     public ValueStringBuilder( int                       initialCapacity ) => __chars = new Buffer<char>(initialCapacity);
     public ValueStringBuilder( params ReadOnlySpan<char> span ) => __chars = new Buffer<char>(span);
-
-
-    // public ValueStringBuilder(  ReadOnlySpan<char> span ) : this(span, false) { }
-    // public ValueStringBuilder(  ReadOnlySpan<char> span,  bool isReadOnly ) : this(Buffer<char>.Create(span, isReadOnly)) { }
-    // public ValueStringBuilder(  Buffer<char>       buffer ) => _chars = buffer;
-
-
     public void Dispose() => __chars.Dispose();
 
 
+    public ValueStringBuilder Reset()
+    {
+        __chars.Span.Fill('\0');
+        return this;
+    }
     public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format )   => EnsureCapacity(Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
     public void EnsureCapacity( int                                     capacity ) => __chars.EnsureCapacity(capacity);
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ref char GetPinnableReference() => ref __chars.Span.GetPinnableReference();
+    [Pure] public readonly ref char GetPinnableReference() => ref __chars.Span.GetPinnableReference();
 
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref char GetPinnableReference( bool terminate )
+    [Pure] public ref char GetPinnableReference( bool terminate )
     {
         if ( terminate ) { return ref GetPinnableReference('\0'); }
 
@@ -60,8 +56,7 @@ public ref struct ValueStringBuilder
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref char GetPinnableReference( char terminate )
+    [Pure] public ref char GetPinnableReference( char terminate )
     {
         EnsureCapacity(Length + 1);
         __chars[++Length] = terminate;
@@ -82,11 +77,6 @@ public ref struct ValueStringBuilder
     [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => __chars.Span;
     [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => __chars[start..];
     [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => __chars.Span.Slice(start, length);
-    public ValueStringBuilder Reset()
-    {
-        __chars.Span.Fill('\0');
-        return this;
-    }
 
 
     public bool TryCopyTo( scoped ref Span<char> destination, out int charsWritten )
@@ -194,7 +184,7 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-    public ValueStringBuilder Append( params ReadOnlySpan<char> value )
+    public ValueStringBuilder Append( ReadOnlySpan<char> value )
     {
         __chars.Add(value);
         return this;
@@ -288,8 +278,7 @@ public ref struct ValueStringBuilder
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
@@ -299,7 +288,7 @@ public ref struct ValueStringBuilder
         {
             if ( !enumerator.Current.TryFormat(Next, out int charsWritten, format, provider) ) { continue; }
 
-            __chars.Length  += charsWritten;
+            __chars.Length += charsWritten;
             shouldContinue =  enumerator.MoveNext();
 
             if ( shouldContinue ) { __chars.Add(separator); }
@@ -307,9 +296,7 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
@@ -319,17 +306,30 @@ public ref struct ValueStringBuilder
         {
             if ( !enumerator.Current.TryFormat(__chars.Next, out int charsWritten, format, provider) ) { continue; }
 
-            __chars.Length  += charsWritten;
+            __chars.Length += charsWritten;
             shouldContinue =  enumerator.MoveNext();
             if ( shouldContinue ) { __chars.Add(separator); }
         }
 
         return this;
     }
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
+    {
+        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
+        bool                      shouldContinue = enumerator.MoveNext();
 
+        while ( shouldContinue )
+        {
+            if ( enumerator.Current is not null ) { AppendSpanFormattable(enumerator.Current, format, provider); }
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+            shouldContinue = enumerator.MoveNext();
+            if ( shouldContinue ) { __chars.Add(separator); }
+        }
+
+        return this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
@@ -347,27 +347,7 @@ public ref struct ValueStringBuilder
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
-        where TValue : ISpanFormattable
-    {
-        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
-        bool                      shouldContinue = enumerator.MoveNext();
-
-        while ( shouldContinue )
-        {
-            if ( enumerator.Current is not null ) { AppendSpanFormattable(enumerator.Current, format, provider); }
-
-            shouldContinue = enumerator.MoveNext();
-            if ( shouldContinue ) { __chars.Add(separator); }
-        }
-
-        return this;
-    }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         EnsureCapacity<TValue>(in format);
@@ -395,9 +375,9 @@ public ref struct ValueStringBuilder
         if ( formatSpan.IsEmpty ) { throw new ArgumentNullException(nameof(formatSpan)); }
 
         EnsureCapacity<TValue>(in formatSpan);
-        int  pos             = 0;
-        char ch              = '\0';
-        var  customFormatter = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
+        int               pos             = 0;
+        char              ch              = '\0';
+        ICustomFormatter? customFormatter = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
 
         while ( true )
         {
@@ -602,7 +582,7 @@ public ref struct ValueStringBuilder
             }
 
             // Append it to the final output of the Format String.
-            s ??= string.Empty;
+            s ??= EMPTY;
             int pad = width - s.Length;
             if ( !leftJustify && pad > 0 ) { Append(' ', pad); }
 

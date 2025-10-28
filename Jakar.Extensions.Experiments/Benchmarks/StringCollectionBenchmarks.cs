@@ -43,35 +43,38 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class StringCollectionBenchmarks
 {
     private ImmutableArray<string> __array;
     private int                    __count;
     private ReadOnlyMemory<string> __memory;
-    private string[]               __values = GetArray( 10 );
+    private string[]               __values = GetArray(10);
 
 
-    [Params( 10, 1000, 10_000, 100_000 )]
-    public int Count
+    [Params(10, 1000, 10_000, 100_000)] public int Count
     {
         get => __count;
         set
         {
             __count  = value;
-            __values = GetArray( 10000 );
+            __values = GetArray(10000);
             __array  = [..__values];
             __memory = __values;
         }
     }
 
 
-    [Benchmark] public bool CheckArraySpan()            => AreSpanEqual( __values, __values );
-    [Benchmark] public bool CheckArrayString()          => AreStringEqual( __values, __values );
-    [Benchmark] public bool CheckImmutableArraySpan()   => AreSpanEqual( __array, __array );
-    [Benchmark] public bool CheckImmutableArrayString() => AreStringEqual( __array, __array );
-    [Benchmark] public bool CheckMemorySpan()           => AreSpanEqual( __memory, __memory );
-    [Benchmark] public bool CheckMemoryString()         => AreStringEqual( __memory, __memory );
+    [Benchmark] public bool CheckArraySpan()            => AreSpanEqual(__values, __values);
+    [Benchmark] public bool CheckArrayString()          => AreStringEqual(__values, __values);
+    [Benchmark] public bool CheckImmutableArraySpan()   => AreSpanEqual(__array, __array);
+    [Benchmark] public bool CheckImmutableArrayString() => AreStringEqual(__array, __array);
+    [Benchmark] public bool CheckMemorySpan()           => AreSpanEqual(__memory, __memory);
+    [Benchmark] public bool CheckMemoryString()         => AreStringEqual(__memory, __memory);
 
 
     private static bool AreStringEqual( in ReadOnlyMemory<string> left, in ReadOnlyMemory<string> right )
@@ -82,7 +85,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.Span )
             {
-                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
+                if ( !string.Equals(parameter, otherParameter, StringComparison.Ordinal) ) { return false; }
             }
         }
 
@@ -96,7 +99,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.Span )
             {
-                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
+                if ( !parameter.SequenceEqual(otherParameter) ) { return false; }
             }
         }
 
@@ -110,7 +113,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.AsSpan() )
             {
-                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
+                if ( !string.Equals(parameter, otherParameter, StringComparison.Ordinal) ) { return false; }
             }
         }
 
@@ -124,7 +127,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.AsSpan() )
             {
-                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
+                if ( !parameter.SequenceEqual(otherParameter) ) { return false; }
             }
         }
 
@@ -138,7 +141,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.AsSpan() )
             {
-                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
+                if ( !string.Equals(parameter, otherParameter, StringComparison.Ordinal) ) { return false; }
             }
         }
 
@@ -152,7 +155,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.AsSpan() )
             {
-                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
+                if ( !parameter.SequenceEqual(otherParameter) ) { return false; }
             }
         }
 
@@ -160,9 +163,10 @@ public class StringCollectionBenchmarks
     }
 
 
-    private static string[] GetArray( int count ) => GetValues( count ).ToArray( count );
+    private static string[] GetArray( int count ) => GetValues(count)
+       .ToArray(count);
     private static IEnumerable<string> GetValues( int count )
     {
-        for ( int i = 0; i < count; i++ ) { yield return Randoms.RandomString( Random.Shared.Next( 10, 50 ) ); }
+        for ( int i = 0; i < count; i++ ) { yield return Randoms.RandomString(Random.Shared.Next(10, 50)); }
     }
 }

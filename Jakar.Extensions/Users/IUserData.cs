@@ -5,19 +5,14 @@
 namespace Jakar.Extensions;
 
 
-public interface IUserID<out TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+public interface IUserID
 {
-    public TID UserID { get; }
+    public Guid UserID { get; }
 }
 
 
 
-public interface IUserID : IUserID<Guid>;
-
-
-
-public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonModels.IJsonModel
+public interface IUserData : IUserName, IUserID, IUserRights, IValidator, IJsonModel
 {
     public                string            Company             { get; set; }
     public                string            Department          { get; set; }
@@ -36,10 +31,10 @@ public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonMo
 
 
     public static string GetFullName( IUserData    data ) => $"{data.FirstName} {data.LastName}".Trim();
-    public static string GetDescription( IUserData data ) => GetDescription( data.Department, data.Title, data.Company );
+    public static string GetDescription( IUserData data ) => GetDescription(data.Department, data.Title, data.Company);
     public static string GetDescription( scoped in ReadOnlySpan<char> department, scoped in ReadOnlySpan<char> title, scoped in ReadOnlySpan<char> company )
     {
-        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return string.Empty; }
+        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return EMPTY; }
 
         if ( !department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
 
@@ -107,36 +102,36 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 
 
-public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>
+public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID>, IEqualComparable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : class, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
+    where TSelf : class, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
 {
-    public TClass With( IEnumerable<TAddress>            values );
-    public TClass With( params ReadOnlySpan<TAddress>    values );
-    public TClass With( IEnumerable<TGroupModel>         values );
-    public TClass With( params ReadOnlySpan<TGroupModel> values );
-    public TClass With( IEnumerable<TRoleModel>          values );
-    public TClass With( params ReadOnlySpan<TRoleModel>  values );
-    public TClass With( IDictionary<string, JToken?>?    data );
-    public TClass With<TValue>( TValue value )
+    public TSelf With( IEnumerable<TAddress>            values );
+    public TSelf With( params ReadOnlySpan<TAddress>    values );
+    public TSelf With( IEnumerable<TGroupModel>         values );
+    public TSelf With( params ReadOnlySpan<TGroupModel> values );
+    public TSelf With( IEnumerable<TRoleModel>          values );
+    public TSelf With( params ReadOnlySpan<TRoleModel>  values );
+    public TSelf With( JsonObject?                      data );
+    public TSelf With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 
 
-    public abstract static TClass            Create( IUserData<TID>      model, IEnumerable<TAddress>            addresses, IEnumerable<TGroupModel>            groups, IEnumerable<TRoleModel>            roles );
-    public abstract static TClass            Create( IUserData<TID>      model, scoped in ReadOnlySpan<TAddress> addresses, scoped in ReadOnlySpan<TGroupModel> groups, scoped in ReadOnlySpan<TRoleModel> roles );
-    public abstract static ValueTask<TClass> CreateAsync( IUserData<TID> model, IAsyncEnumerable<TAddress>       addresses, IAsyncEnumerable<TGroupModel>       groups, IAsyncEnumerable<TRoleModel>       roles, CancellationToken token = default );
+    public abstract static TSelf            Create( IUserData<TID>      model, IEnumerable<TAddress>            addresses, IEnumerable<TGroupModel>            groups, IEnumerable<TRoleModel>            roles );
+    public abstract static TSelf            Create( IUserData<TID>      model, scoped in ReadOnlySpan<TAddress> addresses, scoped in ReadOnlySpan<TGroupModel> groups, scoped in ReadOnlySpan<TRoleModel> roles );
+    public abstract static ValueTask<TSelf> CreateAsync( IUserData<TID> model, IAsyncEnumerable<TAddress>       addresses, IAsyncEnumerable<TGroupModel>       groups, IAsyncEnumerable<TRoleModel>       roles, CancellationToken token = default );
 }
 
 
 
-public interface ICreateUserModel<TClass, TID> : IUserData<TID>, IEqualComparable<TClass>
+public interface ICreateUserModel<TSelf, TID> : IUserData<TID>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : class, ICreateUserModel<TClass, TID>
+    where TSelf : class, ICreateUserModel<TSelf, TID>
 {
-    public abstract static TClass Create( IUserData<TID> model );
+    public abstract static TSelf Create( IUserData<TID> model );
 }
 
 
@@ -175,12 +170,4 @@ public interface IUserRecord<TID> : IUserDetailsModel<TID>
     public DateTimeOffset? LastModified   { get; set; }
     public string          PasswordHash   { get; set; }
     public TID?            SubscriptionID { get; set; }
-}
-
-
-
-public interface ISessionID<out TID> : IDeviceID
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public TID SessionID { get; }
 }

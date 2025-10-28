@@ -12,5 +12,3 @@ global using Jakar.Extensions;
 global using Jakar.Json.Deserialization;
 global using Jakar.Json.Serialization;
 global using JetBrains.Annotations;
-global using Newtonsoft.Json;
-global using Newtonsoft.Json.Serialization;

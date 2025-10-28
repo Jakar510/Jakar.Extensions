@@ -1,29 +1,44 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
+
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
-public sealed record UserLoginProviderRecord( [property: StringLength(                       int.MaxValue)] string  LoginProvider,
-                                              [property: StringLength(                       int.MaxValue)] string? ProviderDisplayName,
-                                              [property: ProtectedPersonalData, StringLength(int.MaxValue)] string  ProviderKey,
-                                              [property: ProtectedPersonalData]                             string? Value,
-                                              RecordID<UserLoginProviderRecord>                                     ID,
-                                              RecordID<UserRecord>?                                                 CreatedBy,
-                                              DateTimeOffset                                                        DateCreated,
-                                              DateTimeOffset?                                                       LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<UserLoginProviderRecord>
+[Serializable]
+[Table(TABLE_NAME)]
+public sealed record UserLoginProviderRecord( [property: StringLength(                                  MAX_FIXED)] string  LoginProvider,
+                                              [property: StringLength(                                  MAX_FIXED)] string? ProviderDisplayName,
+                                              [property: ProtectedPersonalData] [property: StringLength(MAX_FIXED)] string  ProviderKey,
+                                              [property: ProtectedPersonalData] [property: StringLength(MAX_FIXED)] string? Value,
+                                              RecordID<UserLoginProviderRecord>                                             ID,
+                                              RecordID<UserRecord>?                                                         CreatedBy,
+                                              DateTimeOffset                                                                DateCreated,
+                                              DateTimeOffset?                                                               LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
-    public const  string TABLE_NAME = "user_login_providers";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                                  TABLE_NAME = "user_login_providers";
+    public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
+    public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
+
+
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<UserLoginProviderRecord>.Default.WithColumn<string>(nameof(LoginProvider), length: MAX_FIXED)
+                                                                                                                        .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, MAX_FIXED)
+                                                                                                                        .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)
+                                                                                                                        .WithColumn<string>(nameof(Value),               length: MAX_FIXED)
+                                                                                                                        .With_CreatedBy()
+                                                                                                                        .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
-    public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, EMPTY, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
+
+
+    public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(LoginProvider),       LoginProvider);
         parameters.Add(nameof(ProviderDisplayName), ProviderDisplayName);
         parameters.Add(nameof(ProviderKey),         ProviderKey);
@@ -31,8 +46,28 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         return parameters;
     }
 
-    [Pure]
-    public static UserLoginProviderRecord Create( DbDataReader reader )
+
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
+                                                        $"create {TABLE_NAME} table",
+                                                        $"""
+                                                         CREATE TABLE {TABLE_NAME}
+                                                         (
+                                                         {nameof(LoginProvider).SqlColumnName()}       char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ProviderDisplayName).SqlColumnName()} char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ProviderKey).SqlColumnName()}         char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(Value).SqlColumnName()}               char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ID).SqlColumnName()}                  uuid              PRIMARY KEY,
+                                                         {nameof(DateCreated).SqlColumnName()}         timestamptz       NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                         {nameof(LastModified).SqlColumnName()}        timestamptz                 
+                                                         );
+
+                                                         CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                         BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                                         FOR EACH ROW
+                                                         EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                         """);
+    [Pure] public static UserLoginProviderRecord Create( DbDataReader reader )
     {
         string                            loginProvider       = reader.GetFieldValue<string>(nameof(LoginProvider));
         string                            providerDisplayName = reader.GetFieldValue<string>(nameof(ProviderDisplayName));
@@ -47,18 +82,17 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     }
 
 
-    public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
+    public static PostgresParameters GetDynamicParameters( UserRecord user, string value )
     {
-        DynamicParameters parameters = new();
-        parameters.Add(nameof(CreatedBy), user.ID.value);
+        PostgresParameters parameters = PostgresParameters.Create<UserLoginProviderRecord>();
+        parameters.Add(nameof(CreatedBy), user.ID.Value);
         parameters.Add(nameof(Value),     value);
         return parameters;
     }
-    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters(user, info.LoginProvider, info.ProviderKey);
-    [Pure]
-    public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
+    [Pure] public static PostgresParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters(user, info.LoginProvider, info.ProviderKey);
+    [Pure] public static PostgresParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
-        DynamicParameters parameters = GetDynamicParameters(user);
+        PostgresParameters parameters = GetDynamicParameters(user);
         parameters.Add(nameof(ProviderKey),   providerKey);
         parameters.Add(nameof(LoginProvider), loginProvider);
         return parameters;
@@ -81,7 +115,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(LoginProvider,       StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(ProviderDisplayName, StringComparer.InvariantCultureIgnoreCase);
@@ -100,14 +134,14 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                                                                                   {
                                                                                                       UserId        = value.CreatedBy?.ToString() ?? throw new NullReferenceException(nameof(value.CreatedBy)),
                                                                                                       LoginProvider = value.LoginProvider,
-                                                                                                      Name          = value.ProviderDisplayName ?? string.Empty,
+                                                                                                      Name          = value.ProviderDisplayName ?? EMPTY,
                                                                                                       Value         = value.ProviderKey
                                                                                                   };
     public static implicit operator IdentityUserToken<Guid>( UserLoginProviderRecord value ) => new()
                                                                                                 {
-                                                                                                    UserId        = value.CreatedBy?.value ?? Guid.Empty,
+                                                                                                    UserId        = value.CreatedBy?.Value ?? Guid.Empty,
                                                                                                     LoginProvider = value.LoginProvider,
-                                                                                                    Name          = value.ProviderDisplayName ?? string.Empty,
+                                                                                                    Name          = value.ProviderDisplayName ?? EMPTY,
                                                                                                     Value         = value.ProviderKey
                                                                                                 };
 }

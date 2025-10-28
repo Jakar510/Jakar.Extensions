@@ -5,13 +5,13 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface IThickness<TSelf> : IShape<TSelf>
-    where TSelf : IThickness<TSelf>
+    where TSelf : struct, IThickness<TSelf>
 {
     public double Bottom              { get; }
+    public double HorizontalThickness { get; }
     public double Left                { get; }
     public double Right               { get; }
     public double Top                 { get; }
-    public double HorizontalThickness { get; }
     public double VerticalThickness   { get; }
 
 

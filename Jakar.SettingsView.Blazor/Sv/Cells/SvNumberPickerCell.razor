@@ -17,7 +17,7 @@
         @Hint
     </div>
     <div class="@SV_CELL_BODY_VALUE_ENTRY"
-          id="@ID-value" >
+         id="@ID-value" >
         @ValueText
     </div>
 
@@ -30,10 +30,10 @@
     // ReSharper disable once CSharpWarnings::CS8618
     private OptionsPopup<double> __selector;
 
-    public override                             WidgetType            Type       => WidgetType.NumberPicker;
-    [Parameter]                 public          IList<double>         Values     { get; set; } = new ObservableCollection<double>();
-    [Parameter]                 public          Func<double, string>? Formatter  { get; set; }
-    [Parameter, EditorRequired] public required string                PopupTitle { get; set; }
+    public override                              WidgetType            Type       => WidgetType.NumberPicker;
+    [Parameter]                  public          IList<double>         Values     { get; set; } = new ObservableCollection<double>();
+    [Parameter]                  public          Func<double, string>? Formatter  { get; set; }
+    [Parameter] [EditorRequired] public required string                PopupTitle { get; set; }
 
 
     protected override void OnParametersSet()
@@ -41,12 +41,12 @@
         Formatter ??= DefaultFormatter;
 
         __selector = new OptionsPopup<double>
-                    {
-                        ID        = ID,
-                        Close     = new EventCallback<double>(this, SetValue),
-                        Title     = PopupTitle,
-                        Formatter = Formatter
-                    };
+                     {
+                         ID        = ID,
+                         Close     = new EventCallback<double>(this, SetValue),
+                         Title     = PopupTitle,
+                         Formatter = Formatter
+                     };
     }
 
     public        string DefaultFormatter( double x ) => x.ToString(CurrentCulture);

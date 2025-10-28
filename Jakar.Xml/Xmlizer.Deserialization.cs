@@ -1,12 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:13 PM
 
-using System;
-using System.Collections.Generic;
-using Jakar.Xml.Serialization;
-
-
-
 namespace Jakar.Xml;
 
 
@@ -14,10 +8,10 @@ public static partial class Xmlizer
 {
     public static string Serialize<TValue>( TValue obj, in IDictionary<string, string>? attributes = null )
     {
-        if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
+        if ( obj is null ) { throw new NullReferenceException(nameof(obj)); }
 
-        Type type   = typeof(TValue);
-        XWriter  writer = new();
+        Type    type   = typeof(TValue);
+        XWriter writer = new();
 
         return writer.ToString();
     }

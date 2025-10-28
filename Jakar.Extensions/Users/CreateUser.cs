@@ -6,19 +6,18 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
+public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
+    where TSelf : CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TSelf>, IJsonModel<TSelf>, new()
 {
-    private string __confirmPassword = string.Empty;
-    private string __userPassword    = string.Empty;
+    private string __confirmPassword = EMPTY;
+    private string __userPassword    = EMPTY;
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
-    public virtual string ConfirmPassword
+    [Required] [StringLength(PASSWORD)] public virtual string ConfirmPassword
     {
         get => __confirmPassword;
         set
@@ -28,12 +27,11 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [JsonIgnore]                                                                     public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.IsValid                         && IsValidPassword; }
-    [JsonIgnore, MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
+    [JsonIgnore]                                                                      public override bool IsValid         => base.IsValid                         && IsValidPassword;
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password);
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
-    public virtual string Password
+    [Required] [StringLength(PASSWORD)] public virtual string Password
     {
         get => __userPassword;
         set
@@ -43,10 +41,9 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
-    public override string UserName
+    [Required] [StringLength(USER_NAME)] public override string UserName
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.UserName;
+        get => base.UserName;
         set
         {
             base.UserName = value;
@@ -55,41 +52,44 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
+    public AppVersion Version { get; set; } = AppVersion.Default;
+
+
     protected CreateUserModel() : base() { }
     protected CreateUserModel( IUserData<TID> value ) : base(value) { }
     protected CreateUserModel( string         firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static TClass Register( string email, string password )
+    public static TSelf Register( string email, string password )
     {
-        TClass user = new()
-                      {
-                          Password        = password,
-                          ConfirmPassword = password,
-                          UserName        = email,
-                          Email           = email
-                      };
+        TSelf user = new()
+                     {
+                         Password        = password,
+                         ConfirmPassword = password,
+                         UserName        = email,
+                         Email           = email
+                     };
 
         Debug.Assert(user.IsValid);
         return user;
     }
-    public static TClass Register( string userName, string password, string email )
+    public static TSelf Register( string userName, string password, string email )
     {
-        TClass user = new()
-                      {
-                          Password        = password,
-                          ConfirmPassword = password,
-                          UserName        = userName,
-                          Email           = email
-                      };
+        TSelf user = new()
+                     {
+                         Password        = password,
+                         ConfirmPassword = password,
+                         UserName        = userName,
+                         Email           = email
+                     };
 
         Debug.Assert(user.IsValid);
         return user;
     }
 
 
-    public LoginRequest         GetLoginRequest()                       => new(UserName, Password);
-    public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value ) => new(UserName, Password, value);
+    public LoginRequest      GetLoginRequest()                         => new(UserName, Password);
+    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password, uri.ToString());
 
 
     public virtual bool Validate( ICollection<string> errors )
@@ -105,5 +105,3 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
         return errors.Count == 0;
     }
 }
-
- 

@@ -42,7 +42,7 @@
     public override    WidgetType                   Type             => WidgetType.Date;
     [Parameter] public bool                         AllowClear       { get; set; }
     [Parameter] public int                          TabIndex         { get; set; }
-    [Parameter] public string                       InputClass       { get; set; } = string.Empty;
+    [Parameter] public string                       InputClass       { get; set; } = EMPTY;
     [Parameter] public DateTime?                    InitialViewDate  { get; set; }
     [Parameter] public Action<DateRenderEventArgs>? DateRender       { get; set; }
     [Parameter] public DateTimeKind                 Kind             { get; set; } = DateTimeKind.Local;
@@ -59,7 +59,7 @@
     [Parameter] public bool                         ShowTimeOkButton { get; set; }
     [Parameter] public string                       DateFormat       { get; set; } = DATE_TIME_FORMAT;
     [Parameter] public string                       HourFormat       { get; set; } = "12";
-    [Parameter] public string                       Placeholder      { get; set; } = string.Empty;
+    [Parameter] public string                       Placeholder      { get; set; } = EMPTY;
 
 
     protected override Task OnParametersSetAsync()

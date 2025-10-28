@@ -4,7 +4,8 @@
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public static class Languages
 {
-    public static readonly FrozenSet<SupportedLanguage>                All               = Enum.GetValues<SupportedLanguage>().ToFrozenSet();
+    public static readonly FrozenSet<SupportedLanguage> All = Enum.GetValues<SupportedLanguage>()
+                                                                  .ToFrozenSet();
     public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary(ToStringFast, SelectSelf);
     public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary(SelectSelf,   GetShortName);
     public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary(GetShortName, SelectSelf);
@@ -38,7 +39,7 @@ public static class Languages
                                                                            SupportedLanguage.Korean      => "한국어 - Korean",
                                                                            SupportedLanguage.Arabic      => "عربى - Arabic",
                                                                            SupportedLanguage.Unspecified => nameof(SupportedLanguage.Unspecified),
-                                                                           _                             => string.Empty
+                                                                           _                             => EMPTY
                                                                        };
 
     public static string GetShortName( this SupportedLanguage language ) => language switch
@@ -57,7 +58,7 @@ public static class Languages
                                                                                 SupportedLanguage.Dutch       => "nl",
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
-                                                                                SupportedLanguage.Unspecified => string.Empty,
+                                                                                SupportedLanguage.Unspecified => EMPTY,
                                                                                 _                             => throw new OutOfRangeException(language)
                                                                             };
 

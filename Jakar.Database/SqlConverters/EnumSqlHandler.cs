@@ -2,11 +2,14 @@
 
 
 public class EnumSqlHandler<TValue> : SqlConverter<EnumSqlHandler<TValue>, TValue>
-    where TValue : struct, Enum
+    where TValue : unmanaged, Enum
 {
-    public static readonly FrozenDictionary<long, TValue>   Longs  = Enum.GetValues<TValue>().ToFrozenDictionary(GetLong,    SelectSelf);
-    public static readonly FrozenDictionary<string, TValue> Names  = Enum.GetValues<TValue>().ToFrozenDictionary(GetString,  SelectSelf);
-    public static readonly FrozenDictionary<TValue, string> Values = Enum.GetValues<TValue>().ToFrozenDictionary(SelectSelf, GetString);
+    public static readonly FrozenDictionary<long, TValue> Longs = Enum.GetValues<TValue>()
+                                                                      .ToFrozenDictionary(GetLong, SelectSelf);
+    public static readonly FrozenDictionary<string, TValue> Names = Enum.GetValues<TValue>()
+                                                                        .ToFrozenDictionary(GetString, SelectSelf);
+    public static readonly FrozenDictionary<TValue, string> Values = Enum.GetValues<TValue>()
+                                                                         .ToFrozenDictionary(SelectSelf, GetString);
 
 
     public EnumSqlHandler() { }
@@ -16,7 +19,7 @@ public class EnumSqlHandler<TValue> : SqlConverter<EnumSqlHandler<TValue>, TValu
     private static TValue SelectSelf( TValue v ) => v;
 
 
-    public static TValue Parse( string? value ) => Names.TryGetValue(value ?? string.Empty, out TValue result)
+    public static TValue Parse( string? value ) => Names.TryGetValue(value ?? EMPTY, out TValue result)
                                                        ? result
                                                        : Enum.TryParse(value, true, out result)
                                                            ? result

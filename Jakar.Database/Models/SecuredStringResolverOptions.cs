@@ -36,7 +36,9 @@ public readonly struct SecuredStringResolverOptions
     public static implicit operator SecuredStringResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => new(value);
 
 
-    public static SecuredString GetSecuredString( IConfiguration configuration, string key = DEFAULT_SQL_CONNECTION_STRING_KEY, string section = DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY ) => configuration.GetSection(section).GetValue<string?>(key) ?? throw new KeyNotFoundException(key);
+    public static SecuredString GetSecuredString( IConfiguration configuration, string key = DEFAULT_SQL_CONNECTION_STRING_KEY, string section = DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY ) => configuration.GetSection(section)
+                                                                                                                                                                                                             .GetValue<string?>(key) ??
+                                                                                                                                                                                                throw new KeyNotFoundException(key);
     public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token, string key = DEFAULT_SQL_CONNECTION_STRING_KEY, string section = DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY )
     {
         if ( __value0 is not null ) { return await __value0(token); }
@@ -53,6 +55,8 @@ public readonly struct SecuredStringResolverOptions
 
         if ( __value6 is not null ) { return __value6; }
 
-        return configuration.GetSection(section).GetValue<string?>(key) ?? throw new KeyNotFoundException(key);
+        return configuration.GetSection(section)
+                            .GetValue<string?>(key) ??
+               throw new KeyNotFoundException(key);
     }
 }

@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
-    [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+    [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
     public class Builder( IHostInfo value ) : IHttpClientFactory
     {
         private readonly IHostInfo                       __hostInfo = value;
@@ -45,18 +45,18 @@ public partial class WebRequester
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
-        public static Builder Create( Uri             value ) => Create( new HostHolder( value ) );
-        public static Builder Create( Func<IHostInfo> value ) => Create( new HostHolder( value ) );
-        public static Builder Create( Func<Uri>       value ) => Create( new HostHolder( value ) );
+        public static Builder Create( Uri             value ) => Create(new HostHolder(value));
+        public static Builder Create( Func<IHostInfo> value ) => Create(new HostHolder(value));
+        public static Builder Create( Func<Uri>       value ) => Create(new HostHolder(value));
 
 
-        [Pure] public Builder Reset() => Create( __hostInfo );
+        [Pure] public Builder Reset() => Create(__hostInfo);
 
 
         protected virtual HttpClient GetClient()
         {
             HttpClient client = new(GetHandler());
-            foreach ( (string key, IEnumerable<string> value) in __headers ) { client.DefaultRequestHeaders.Add( key, value ); }
+            foreach ( ( string key, IEnumerable<string> value ) in __headers ) { client.DefaultRequestHeaders.Add(key, value); }
 
             client.DefaultRequestHeaders.Authorization = __authenticationHeader;
             if ( __connectTimeout.HasValue ) { client.Timeout = __connectTimeout.Value; }
@@ -124,26 +124,26 @@ public partial class WebRequester
 
         public Builder With_Header( string name, IEnumerable<string?> values )
         {
-            __headers.Add( name, values );
+            __headers.Add(name, values);
             return this;
         }
         public Builder With_Header( string name, string? value )
         {
-            __headers.Add( name, value );
+            __headers.Add(name, value);
             return this;
         }
 
 
         public Builder With_MaxResponseContentBufferSize( int value )
         {
-            __maxResponseContentBufferSize = Math.Max( 0, value );
+            __maxResponseContentBufferSize = Math.Max(0, value);
             return this;
         }
 
 
-        public Builder With_Retry()                                                        => With_Retry( RetryPolicy.Default );
-        public Builder With_Retry( ushort   maxRetires )                                   => With_Retry( RetryPolicy.Create( maxRetires ) );
-        public Builder With_Retry( TimeSpan delay, TimeSpan scale, ushort maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
+        public Builder With_Retry()                                                        => With_Retry(RetryPolicy.Default);
+        public Builder With_Retry( ushort   maxRetires )                                   => With_Retry(RetryPolicy.Create(maxRetires));
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale, ushort maxRetires = 3 ) => With_Retry(new RetryPolicy(delay, scale, maxRetires));
         public Builder With_Retry( RetryPolicy policy )
         {
             __retryPolicy = policy;
@@ -191,13 +191,13 @@ public partial class WebRequester
         }
 
 
-        public Builder With_Credentials( string scheme, string? value ) => With_Credentials( new AuthenticationHeaderValue( scheme, value ) );
+        public Builder With_Credentials( string scheme, string? value ) => With_Credentials(new AuthenticationHeaderValue(scheme, value));
         public Builder With_Credentials( AuthenticationHeaderValue? value )
         {
             __authenticationHeader = value;
             return this;
         }
-        public Builder With_Credentials( ICredentials? value ) => With_Credentials( value, value is not null );
+        public Builder With_Credentials( ICredentials? value ) => With_Credentials(value, value is not null);
         public Builder With_Credentials( ICredentials? value, bool preAuthenticate )
         {
             __credentials     = value;
@@ -209,14 +209,14 @@ public partial class WebRequester
         public Builder With_Cookie( Uri url, Cookie value )
         {
             __cookieContainer ??= new CookieContainer();
-            __cookieContainer.Add( url, value );
+            __cookieContainer.Add(url, value);
             __useCookies = true;
             return this;
         }
         public Builder With_Cookie( params ReadOnlySpan<Cookie> value )
         {
             CookieContainer container = __cookieContainer ??= new CookieContainer();
-            foreach ( Cookie cookie in value ) { container.Add( cookie ); }
+            foreach ( Cookie cookie in value ) { container.Add(cookie); }
 
             __useCookies = true;
             return this;
@@ -229,9 +229,9 @@ public partial class WebRequester
         }
 
 
-        public Builder With_Timeout( int    minutes )      => With_Timeout( TimeSpan.FromMinutes( minutes ) );
-        public Builder With_Timeout( float  seconds )      => With_Timeout( TimeSpan.FromSeconds( seconds ) );
-        public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
+        public Builder With_Timeout( int    minutes )      => With_Timeout(TimeSpan.FromMinutes(minutes));
+        public Builder With_Timeout( float  seconds )      => With_Timeout(TimeSpan.FromSeconds(seconds));
+        public Builder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
         public Builder With_Timeout( TimeSpan value )
         {
             __connectTimeout = value;
@@ -247,11 +247,11 @@ public partial class WebRequester
 
 
         public Builder With_KeepAlive( int pingDelayMinutes, int pingTimeoutMinutes, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
-            With_KeepAlive( TimeSpan.FromMinutes( pingDelayMinutes ), TimeSpan.FromMinutes( pingTimeoutMinutes ), policy );
+            With_KeepAlive(TimeSpan.FromMinutes(pingDelayMinutes), TimeSpan.FromMinutes(pingTimeoutMinutes), policy);
         public Builder With_KeepAlive( float pingDelaySeconds, float pingTimeoutSeconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
-            With_KeepAlive( TimeSpan.FromSeconds( pingDelaySeconds ), TimeSpan.FromSeconds( pingTimeoutSeconds ), policy );
+            With_KeepAlive(TimeSpan.FromSeconds(pingDelaySeconds), TimeSpan.FromSeconds(pingTimeoutSeconds), policy);
         public Builder With_KeepAlive( double pingDelayMilliseconds, double pingTimeoutMilliseconds, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests ) =>
-            With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
+            With_KeepAlive(TimeSpan.FromMilliseconds(pingDelayMilliseconds), TimeSpan.FromMilliseconds(pingTimeoutMilliseconds), policy);
         public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
             __keepAlivePingDelay   = pingDelay;
@@ -268,9 +268,9 @@ public partial class WebRequester
         }
 
 
-        public Builder With_PooledConnectionIdleTimeout( int    minutes )      => With_PooledConnectionIdleTimeout( TimeSpan.FromMinutes( minutes ) );
-        public Builder With_PooledConnectionIdleTimeout( float  seconds )      => With_PooledConnectionIdleTimeout( TimeSpan.FromSeconds( seconds ) );
-        public Builder With_PooledConnectionIdleTimeout( double milliseconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMilliseconds( milliseconds ) );
+        public Builder With_PooledConnectionIdleTimeout( int    minutes )      => With_PooledConnectionIdleTimeout(TimeSpan.FromMinutes(minutes));
+        public Builder With_PooledConnectionIdleTimeout( float  seconds )      => With_PooledConnectionIdleTimeout(TimeSpan.FromSeconds(seconds));
+        public Builder With_PooledConnectionIdleTimeout( double milliseconds ) => With_PooledConnectionIdleTimeout(TimeSpan.FromMilliseconds(milliseconds));
         public Builder With_PooledConnectionIdleTimeout( TimeSpan value )
         {
             __pooledConnectionIdleTimeout = value;
@@ -278,9 +278,9 @@ public partial class WebRequester
         }
 
 
-        public Builder With_PooledConnectionLifetime( int    minutes )      => With_PooledConnectionLifetime( TimeSpan.FromMinutes( minutes ) );
-        public Builder With_PooledConnectionLifetime( float  seconds )      => With_PooledConnectionLifetime( TimeSpan.FromSeconds( seconds ) );
-        public Builder With_PooledConnectionLifetime( double milliseconds ) => With_PooledConnectionLifetime( TimeSpan.FromMilliseconds( milliseconds ) );
+        public Builder With_PooledConnectionLifetime( int    minutes )      => With_PooledConnectionLifetime(TimeSpan.FromMinutes(minutes));
+        public Builder With_PooledConnectionLifetime( float  seconds )      => With_PooledConnectionLifetime(TimeSpan.FromSeconds(seconds));
+        public Builder With_PooledConnectionLifetime( double milliseconds ) => With_PooledConnectionLifetime(TimeSpan.FromMilliseconds(milliseconds));
         public Builder With_PooledConnectionLifetime( TimeSpan value )
         {
             __pooledConnectionLifetime = value;
@@ -288,9 +288,9 @@ public partial class WebRequester
         }
 
 
-        public Builder With_ResponseDrainTimeout( int    minutes )      => With_ResponseDrainTimeout( TimeSpan.FromMinutes( minutes ) );
-        public Builder With_ResponseDrainTimeout( float  seconds )      => With_ResponseDrainTimeout( TimeSpan.FromSeconds( seconds ) );
-        public Builder With_ResponseDrainTimeout( double milliseconds ) => With_ResponseDrainTimeout( TimeSpan.FromMilliseconds( milliseconds ) );
+        public Builder With_ResponseDrainTimeout( int    minutes )      => With_ResponseDrainTimeout(TimeSpan.FromMinutes(minutes));
+        public Builder With_ResponseDrainTimeout( float  seconds )      => With_ResponseDrainTimeout(TimeSpan.FromSeconds(seconds));
+        public Builder With_ResponseDrainTimeout( double milliseconds ) => With_ResponseDrainTimeout(TimeSpan.FromMilliseconds(milliseconds));
         public Builder With_ResponseDrainTimeout( TimeSpan value )
         {
             __responseDrainTimeout = value;
@@ -302,7 +302,11 @@ public partial class WebRequester
         public sealed class HostHolder( OneOf<Uri, Func<Uri>, Func<IHostInfo>> hostInfo ) : IHostInfo
         {
             private readonly OneOf<Uri, Func<Uri>, Func<IHostInfo>> __hostInfo = hostInfo;
-            public           Uri                                    HostInfo => __hostInfo.Match( static x => x, static x => x(), static x => x().HostInfo );
+
+            public Uri HostInfo => __hostInfo.Match(static x => x,
+                                                    static x => x(),
+                                                    static x => x()
+                                                       .HostInfo);
         }
     }
 }

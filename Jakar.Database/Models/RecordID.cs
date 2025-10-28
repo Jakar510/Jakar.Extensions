@@ -6,51 +6,47 @@ namespace Jakar.Database;
 
 
 [DefaultMember(nameof(Empty))]
-public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TClass>>, IComparable<RecordID<TClass>>, ISpanFormattable, ISpanParsable<RecordID<TClass>>, IRegisterDapperTypeHandlers
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparable<RecordID<TSelf>>, ISpanFormattable, ISpanParsable<RecordID<TSelf>>, IRegisterDapperTypeHandlers
+    where TSelf : ITableRecord<TSelf>
 {
-    public static readonly RecordID<TClass> Empty = new(Guid.Empty);
-    public readonly        string           key   = $"{TClass.TableName}:{value}";
-    public readonly        Guid             value = value;
-    public                 Guid             Value => value;
+    public static readonly RecordID<TSelf> Empty = new(Guid.Empty);
+    public readonly        string          key;
+    public readonly        Guid            Value;
 
 
-    public static ValueSorter<RecordID<TClass>> Sorter { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => ValueSorter<RecordID<TClass>>.Default; }
+    public RecordID( Guid id )
+    {
+        key   = $"{TSelf.TableName}:{id}";
+        Value = id;
+    }
 
 
-    [Pure] public static RecordID<TClass>  New()                                                                     => New(DateTimeOffset.UtcNow);
-    [Pure] public static RecordID<TClass>  New( DateTimeOffset                           timeStamp )                 => Create(Guid.CreateVersion7(timeStamp));
-    [Pure] public static RecordID<TClass>  Parse( string                                 value )                     => Create(Guid.Parse(value));
-    [Pure] public static RecordID<TClass>  Parse( scoped ref readonly ReadOnlySpan<char> value )                     => Create(Guid.Parse(value));
-    [Pure] public static RecordID<TClass>  ID( DbDataReader                              reader )                    => Create(reader, nameof(IRecordPair.ID));
-    [Pure] public static RecordID<TClass>? CreatedBy( DbDataReader                       reader )                    => TryCreate(reader, nameof(IOwnedTableRecord.CreatedBy));
-    [Pure] public static RecordID<TClass>? TryCreate( DbDataReader                       reader, string columnName ) => TryCreate(reader.GetFieldValue<Guid?>(columnName));
-
-
-    [Pure] public static RecordID<TClass> Create( DbDataReader reader, string columnName ) => Create(reader.GetFieldValue<Guid>(columnName));
-    [Pure] public static RecordID<TClass> Create( Guid         id ) => new(id);
-    [Pure]
-    public static RecordID<TClass> Create( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                            ? new RecordID<TClass>(id.Value)
-                                                                                            : New();
-    [Pure]
-    public static RecordID<TClass> Create<TValue>( TValue id )
+    [Pure] public static RecordID<TSelf>  New()                                                        => New(DateTimeOffset.UtcNow);
+    [Pure] public static RecordID<TSelf>  New( DateTimeOffset              timeStamp )                 => Create(Guid.CreateVersion7(timeStamp));
+    [Pure] public static RecordID<TSelf>  Parse( string                    value )                     => Create(Guid.Parse(value));
+    [Pure] public static RecordID<TSelf>  Parse( params ReadOnlySpan<char> value )                     => Create(Guid.Parse(value));
+    [Pure] public static RecordID<TSelf>  ID( DbDataReader                 reader )                    => Create(reader, nameof(IDateCreated.ID));
+    [Pure] public static RecordID<TSelf>? CreatedBy( DbDataReader          reader )                    => TryCreate(reader, nameof(ICreatedBy.CreatedBy));
+    [Pure] public static RecordID<TSelf>? TryCreate( DbDataReader          reader, string columnName ) => TryCreate(reader.GetFieldValue<Guid?>(columnName));
+    [Pure] public static RecordID<TSelf>  Create( DbDataReader             reader, string columnName ) => Create(reader.GetFieldValue<Guid>(columnName));
+    [Pure] public static RecordID<TSelf>  Create( Guid                     id ) => new(id);
+    [Pure] public static RecordID<TSelf> Create( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
+                                                                                                  ? new RecordID<TSelf>(id.Value)
+                                                                                                  : New();
+    [Pure] public static RecordID<TSelf> Create<TValue>( TValue id )
         where TValue : IUniqueID<Guid> => Create(id.ID);
-    [Pure]
-    public static IEnumerable<RecordID<TClass>> Create<TValue>( IEnumerable<TValue> ids )
+    [Pure] public static IEnumerable<RecordID<TSelf>> Create<TValue>( IEnumerable<TValue> ids )
         where TValue : IUniqueID<Guid> => ids.Select(Create);
-    [Pure]
-    public static IAsyncEnumerable<RecordID<TClass>> Create<TValue>( IAsyncEnumerable<TValue> ids )
+    [Pure] public static IAsyncEnumerable<RecordID<TSelf>> Create<TValue>( IAsyncEnumerable<TValue> ids )
         where TValue : IUniqueID<Guid> => ids.Select(Create);
-    [Pure]
-    public static RecordID<TClass>? TryCreate( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                                ? new RecordID<TClass>(id.Value)
-                                                                                                : default;
+    [Pure] public static RecordID<TSelf>? TryCreate( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
+                                                                                                      ? new RecordID<TSelf>(id.Value)
+                                                                                                      : default;
 
 
-    public static RecordID<TClass> Parse( string                         value, IFormatProvider?     provider ) => new(Guid.Parse(value, provider));
-    public static bool             TryParse( [NotNullWhen(true)] string? value, out RecordID<TClass> result )   => TryParse(value, null, out result);
-    public static bool TryParse( [NotNullWhen(            true)] string? value, IFormatProvider? provider, out RecordID<TClass> result )
+    public static RecordID<TSelf> Parse( string                         value, IFormatProvider?    provider ) => new(Guid.Parse(value, provider));
+    public static bool            TryParse( [NotNullWhen(true)] string? value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
+    public static bool TryParse( [NotNullWhen(           true)] string? value, IFormatProvider? provider, out RecordID<TSelf> result )
     {
         if ( Guid.TryParse(value, provider, out Guid guid) )
         {
@@ -63,9 +59,9 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     }
 
 
-    public static RecordID<TClass> Parse( ReadOnlySpan<char>    value, IFormatProvider?     provider ) => new(Guid.Parse(value, provider));
-    public static bool             TryParse( ReadOnlySpan<char> value, out RecordID<TClass> result )   => TryParse(value, null, out result);
-    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, out RecordID<TClass> result )
+    public static RecordID<TSelf> Parse( ReadOnlySpan<char>    value, IFormatProvider?    provider ) => new(Guid.Parse(value, provider));
+    public static bool            TryParse( ReadOnlySpan<char> value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
+    public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, out RecordID<TSelf> result )
     {
         if ( Guid.TryParse(value, provider, out Guid guid) )
         {
@@ -78,33 +74,53 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     }
 
 
-    public static implicit operator RecordID<TClass>( TClass record ) => new(record.ID.value);
+    public static implicit operator RecordID<TSelf>( TSelf record ) => record.ID;
 
 
-    [Pure]
-    public DynamicParameters ToDynamicParameters()
+    public UInt128 GetHash() => key.Hash128();
+    [Pure] public PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = new();
-        parameters.Add(nameof(IRecordPair.ID), value);
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
+        parameters.Add(nameof(IDateCreated.ID), Value);
         return parameters;
     }
 
 
-    public          bool   IsValid()                                                                                                                      => !Guid.Empty.Equals(value);
-    public          bool   IsNotValid()                                                                                                                   => Guid.Empty.Equals(value);
-    public override string ToString()                                                                                                                     => value.ToString();
-    public          string ToString( string?           format,      IFormatProvider? formatProvider )                                                     => value.ToString(format, formatProvider);
-    public          bool   TryFormat( Span<char>       destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => value.TryFormat(destination, out charsWritten, format);
-    public          bool   Equals( RecordID<TClass>    other )         => value.Equals(other.value);
-    public          int    CompareTo( RecordID<TClass> other )         => value.CompareTo(other.value);
-    public override int    GetHashCode()                               => value.GetHashCode();
-    public override bool   Equals( [NotNullWhen(true)] object? other ) => other is RecordID<TClass> id && Equals(id);
+    public bool IsValid()    => !Guid.Empty.Equals(Value);
+    public bool IsNotValid() => Guid.Empty.Equals(Value);
 
 
-    public static bool operator true( RecordID<TClass>  recordID )              => recordID.IsValid();
-    public static bool operator false( RecordID<TClass> recordID )              => recordID.IsNotValid();
-    public static bool operator ==( RecordID<TClass>    a, RecordID<TClass> b ) => a.Equals(b);
-    public static bool operator !=( RecordID<TClass>    a, RecordID<TClass> b ) => !a.Equals(b);
+    public override string ToString() => Value.ToString();
+    public string ToString( string? format, IFormatProvider? formatProvider ) => string.Equals(format, "b64", StringComparison.InvariantCultureIgnoreCase)
+                                                                                     ? Value.ToBase64()
+                                                                                     : Value.ToString(format, formatProvider);
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+    {
+        if ( format is not "b64" ) { return Value.TryFormat(destination, out charsWritten, format); }
+
+        ReadOnlySpan<char> span = Value.ToBase64();
+        span.CopyTo(destination);
+        charsWritten = span.Length;
+        return span.Length > 0;
+    }
+
+
+    public          bool Equals( RecordID<TSelf>    other )          => Value.Equals(other.Value);
+    public          int  CompareTo( RecordID<TSelf> other )          => Value.CompareTo(other.Value);
+    public override int  GetHashCode()                               => Value.GetHashCode();
+    public override bool Equals( [NotNullWhen(true)] object? other ) => other is RecordID<TSelf> id && Equals(id);
+
+
+    public static bool operator true( RecordID<TSelf>  recordID )                     => recordID.IsValid();
+    public static bool operator false( RecordID<TSelf> recordID )                     => recordID.IsNotValid();
+    public static bool operator ==( RecordID<TSelf>?   left, RecordID<TSelf>? right ) => Nullable.Equals(left, right);
+    public static bool operator !=( RecordID<TSelf>?   left, RecordID<TSelf>? right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( RecordID<TSelf>    left, RecordID<TSelf>  right ) => EqualityComparer<RecordID<TSelf>>.Default.Equals(left, right);
+    public static bool operator !=( RecordID<TSelf>    left, RecordID<TSelf>  right ) => !EqualityComparer<RecordID<TSelf>>.Default.Equals(left, right);
+    public static bool operator >( RecordID<TSelf>     left, RecordID<TSelf>  right ) => Comparer<RecordID<TSelf>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( RecordID<TSelf>    left, RecordID<TSelf>  right ) => Comparer<RecordID<TSelf>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( RecordID<TSelf>     left, RecordID<TSelf>  right ) => Comparer<RecordID<TSelf>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( RecordID<TSelf>    left, RecordID<TSelf>  right ) => Comparer<RecordID<TSelf>>.Default.Compare(left, right) <= 0;
 
 
     public static void RegisterDapperTypeHandlers()
@@ -115,48 +131,49 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
 
 
 
-    public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TClass>>
+    public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TSelf>>
     {
-        public override void SetValue( IDbDataParameter parameter, RecordID<TClass> value ) => parameter.Value = value.value;
+        public override void SetValue( IDbDataParameter parameter, RecordID<TSelf> value ) => parameter.Value = value.Value;
 
-        public override RecordID<TClass> Parse( object value ) =>
+        public override RecordID<TSelf> Parse( object value ) =>
             value switch
             {
-                Guid guidValue                                                                                            => new RecordID<TClass>(guidValue),
-                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TClass>(result),
-                _                                                                                                         => throw new InvalidCastException($"Unable to cast object of type {value.GetType()} to RecordID<TClass>")
+                Guid guidValue                                                                                            => new RecordID<TSelf>(guidValue),
+                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TSelf>(result),
+                _                                                                                                         => throw new InvalidCastException($"Unable to cast object of type {value.GetType()} to RecordID<TSelf>")
             };
     }
 
 
 
-    public class JsonNetConverter : JsonConverter<RecordID<TClass>>
+    public class JsonNetConverter : JsonConverter<RecordID<TSelf>>
     {
-        public override RecordID<TClass> ReadJson( JsonReader reader, Type objectType, RecordID<TClass> existingValue, bool hasExistingValue, JsonSerializer serializer )
+        public override RecordID<TSelf> Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
         {
-            Guid? guid = serializer.Deserialize<Guid?>(reader);
+            Guid? guid = reader.TryGetGuid(out Guid id)
+                             ? id
+                             : null;
 
             return guid.HasValue
-                       ? new RecordID<TClass>(guid.Value)
+                       ? new RecordID<TSelf>(guid.Value)
                        : default;
         }
-
-        public override void WriteJson( JsonWriter writer, RecordID<TClass> value, JsonSerializer serializer ) => serializer.Serialize(writer, value.value);
+        public override void Write( Utf8JsonWriter writer, RecordID<TSelf> id, JsonSerializerOptions options ) => writer.WriteStringValue(id.Value);
     }
 
 
 
-    public class NullableDapperTypeHandler : SqlConverter<NullableDapperTypeHandler, RecordID<TClass>?>
+    public class NullableDapperTypeHandler : SqlConverter<NullableDapperTypeHandler, RecordID<TSelf>?>
     {
-        public override void SetValue( IDbDataParameter parameter, RecordID<TClass>? value ) => parameter.Value = value?.value;
+        public override void SetValue( IDbDataParameter parameter, RecordID<TSelf>? id ) => parameter.Value = id?.Value;
 
-        public override RecordID<TClass>? Parse( object value ) =>
+        public override RecordID<TSelf>? Parse( object value ) =>
             value switch
             {
                 null                                                                                                      => default,
-                Guid guidValue                                                                                            => new RecordID<TClass>(guidValue),
-                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TClass>(result),
-                _                                                                                                         => throw new InvalidCastException($"Unable to cast object of type {value.GetType()} to RecordID<TClass>")
+                Guid guidValue                                                                                            => new RecordID<TSelf>(guidValue),
+                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TSelf>(result),
+                _                                                                                                         => throw new InvalidCastException($"Unable to cast object of type {value.GetType()} to RecordID<TSelf>")
             };
     }
 
@@ -169,8 +186,8 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
         public override object? ConvertFrom( ITypeDescriptorContext? context, CultureInfo? culture, object value ) =>
             value switch
             {
-                Guid guidValue                                                                                            => new RecordID<TClass>(guidValue),
-                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TClass>(result),
+                Guid guidValue                                                                                            => new RecordID<TSelf>(guidValue),
+                string stringValue when !string.IsNullOrEmpty(stringValue) && Guid.TryParse(stringValue, out Guid result) => new RecordID<TSelf>(result),
                 _                                                                                                         => base.ConvertFrom(context, culture, value)
             };
 
@@ -178,11 +195,11 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
 
         public override object? ConvertTo( ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType )
         {
-            if ( value is RecordID<TClass> idValue )
+            if ( value is RecordID<TSelf> idValue )
             {
-                if ( destinationType == typeof(Guid) ) { return idValue.value; }
+                if ( destinationType == typeof(Guid) ) { return idValue.Value; }
 
-                if ( destinationType == typeof(string) ) { return idValue.value.ToString(); }
+                if ( destinationType == typeof(string) ) { return idValue.ToString(); }
             }
 
             return base.ConvertTo(context, culture, value, destinationType);

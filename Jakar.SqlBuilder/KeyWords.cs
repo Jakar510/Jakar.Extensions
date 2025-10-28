@@ -53,14 +53,12 @@ public static class KeyWords
     public const string WHERE              = nameof(WHERE);
 
 
-    public static string GetName( this    Type   type )                  => type.GetTableName();
-    public static string GetName<TValue>( this TValue      _ )                     => typeof(TValue).GetTableName();
-    public static string GetName<TValue>( this string columnName, TValue    _ )    => $"{typeof(TValue).GetTableName()}.{columnName}";
-    public static string GetName( this    string columnName, Type type ) => $"{type.GetTableName()}.{columnName}";
-    public static string? GetName<TValue>( [NotNullIfNotNull( nameof(columnName) )] this string? columnName )
-    {
-        return columnName is null
-                   ? null
-                   : $"{typeof(TValue).GetTableName()}.{columnName}";
-    }
+    public static string GetName( this         Type   type )                    => type.GetTableName();
+    public static string GetName<TValue>( this TValue _ )                       => typeof(TValue).GetTableName();
+    public static string GetName<TValue>( this string columnName, TValue _ )    => $"{typeof(TValue).GetTableName()}.{columnName}";
+    public static string GetName( this         string columnName, Type   type ) => $"{type.GetTableName()}.{columnName}";
+    public static string? GetName<TValue>( [NotNullIfNotNull(nameof(columnName))] this string? columnName ) =>
+        columnName is null
+            ? null
+            : $"{typeof(TValue).GetTableName()}.{columnName}";
 }

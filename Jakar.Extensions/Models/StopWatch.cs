@@ -11,7 +11,7 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     private readonly long        __start  = Stopwatch.GetTimestamp();
 
 
-    public TimeSpan Elapsed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp()); }
+    public TimeSpan Elapsed => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp());
 
 
     public void Dispose()
@@ -22,7 +22,7 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     public override string ToString() => SpanDuration.ToString(Elapsed, $"[{__caller}] ");
 
 
-    public static StopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => new(caller);
+    public static StopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => Start(Console.Out, caller);
     public static StopWatch Start( TextWriter                writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
 }
 
@@ -41,12 +41,10 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
         FormattableString result = $"{format} {Value} {Unit}";
         return result.ToString(formatProvider);
     }
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-    {
-        return format.IsNullOrWhiteSpace()
-                   ? destination.TryWrite(provider, $"{Value} {Unit}",          out charsWritten)
-                   : destination.TryWrite(provider, $"{format} {Value} {Unit}", out charsWritten);
-    }
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider = null ) =>
+        format.IsNullOrWhiteSpace()
+            ? destination.TryWrite(provider, $"{Value} {Unit}",          out charsWritten)
+            : destination.TryWrite(provider, $"{format} {Value} {Unit}", out charsWritten);
     public override                 string ToString()                                    => $"{Value} {Unit}";
     public static implicit operator SpanDuration( (double value, Range unit)  tuple )    => new(tuple.value, tuple.unit);
     public static implicit operator SpanDuration( KeyValuePair<double, Range> tuple )    => new(tuple.Key, tuple.Value);
@@ -69,7 +67,8 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
     }
 
 
-    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span).ToString(format);
+    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span)
+       .ToString(format);
     public static SpanDuration Create( in TimeSpan span )
     {
         if ( span.Days != 0 ) { return new SpanDuration(span.TotalDays, Range.Days); }
@@ -94,6 +93,6 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
         Minutes,
         Seconds,
         Milliseconds,
-        Microseconds,
+        Microseconds
     }
 }

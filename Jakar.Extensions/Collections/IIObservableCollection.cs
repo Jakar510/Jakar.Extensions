@@ -6,13 +6,13 @@ namespace Jakar.Extensions;
 
 public interface IBuffer<TValue> : ICollection<TValue>, IDisposable
 {
-    int  Capacity   { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
-    bool IsEmpty    { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
-    bool IsNotEmpty { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
-    ref TValue this[ int     index ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
-    ref TValue this[ Index   index ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
-    Span<TValue> this[ Range range ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
-    Span<TValue> this[ int   start, int length ] { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    int  Capacity   { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; }
+    bool IsEmpty    { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; }
+    bool IsNotEmpty { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; }
+    ref TValue this[ int     index ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    ref TValue this[ Index   index ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    Span<TValue> this[ Range range ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
+    Span<TValue> this[ int   start, int length ] { [Pure] get; }
     Span<TValue> Next { [Pure] get; }
     Span<TValue> Span { [Pure] get; }
 

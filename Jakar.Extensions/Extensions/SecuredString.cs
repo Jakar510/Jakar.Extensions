@@ -8,8 +8,10 @@ using Microsoft.Extensions.Configuration;
 namespace Jakar.Extensions;
 
 
-public sealed record SecuredString( SecureString Value ) : IDisposable
+[NotSerializable]
+public sealed class SecuredString( SecureString value ) : IDisposable
 {
+    public readonly                 SecureString Value = value ?? throw new ArgumentNullException(nameof(value));
     public static implicit operator string( SecuredString               wrapper ) => wrapper.ToString();
     public static implicit operator ReadOnlySpan<char>( SecuredString   wrapper ) => wrapper.ToString();
     public static implicit operator SecuredString( string               value )   => new(value.ToSecureString());
@@ -24,6 +26,7 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
 
 
 
+    [NotSerializable]
     public readonly struct ResolverOptions
     {
         private readonly Func<CancellationToken, Task<SecuredString>>?                      __value0 = null;
@@ -54,25 +57,27 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
         public static implicit operator ResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => new(value);
 
 
-        [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
+        [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
         public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token = default, string key = "Default", string section = "ConnectionStrings" )
         {
             using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-            if ( __value0 is not null ) { return await __value0( token ); }
+            if ( __value0 is not null ) { return await __value0(token); }
 
-            if ( __value1 is not null ) { return await __value1( token ); }
+            if ( __value1 is not null ) { return await __value1(token); }
 
-            if ( __value2 is not null ) { return await __value2( configuration, token ); }
+            if ( __value2 is not null ) { return await __value2(configuration, token); }
 
-            if ( __value3 is not null ) { return await __value3( configuration, token ); }
+            if ( __value3 is not null ) { return await __value3(configuration, token); }
 
-            if ( __value4 is not null ) { return __value4( configuration ); }
+            if ( __value4 is not null ) { return __value4(configuration); }
 
             if ( __value5 is not null ) { return __value5(); }
 
             if ( __value6 is not null ) { return __value6; }
 
-            return configuration.GetSection( section ).GetValue<string?>( key ) ?? throw new KeyNotFoundException( key );
+            return configuration.GetSection(section)
+                                .GetValue<string?>(key) ??
+                   throw new KeyNotFoundException(key);
         }
     }
 }

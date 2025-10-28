@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace Jakar.Extensions.Tests.Collections;
 
 
-[TestFixture, TestOf(typeof(ConcurrentObservableCollection<>))]
+[TestFixture]
+[TestOf(typeof(ConcurrentObservableCollection<>))]
 
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
@@ -15,24 +16,19 @@ public class ConcurrentObservableCollection_Tests : Assert
     internal static Comparer<int> Sorter => Comparer<int>.Default;
 
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public void IndexOf( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public void IndexOf( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, collection.IndexOf(value));
-        return;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public void LastIndexOf( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public void LastIndexOf( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, collection.LastIndexOf(value));
-        return;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public void Find( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public void Find( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, collection.Find(match));
@@ -41,8 +37,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         bool match( ref readonly int x ) => x == value;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public void FindLast( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public void FindLast( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, collection.FindLast(match));
@@ -51,11 +46,14 @@ public class ConcurrentObservableCollection_Tests : Assert
         bool match( ref readonly int x ) => x == value;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public void FindAll( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public void FindAll( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
-        this.AreEqual(1,     collection.FindAll(match).Length);
+
+        this.AreEqual(1,
+                      collection.FindAll(match)
+                                .Length);
+
         this.AreEqual(value, collection.FindAll(match)[0]);
         return;
 
@@ -63,22 +61,19 @@ public class ConcurrentObservableCollection_Tests : Assert
     }
 
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public async Task IndexOfAsync( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public async Task IndexOfAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, await collection.IndexOfAsync(value));
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public async Task LastIndexOfAsync( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public async Task LastIndexOfAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, await collection.LastIndexOfAsync(value));
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public async Task FindAsync( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public async Task FindAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, await collection.FindAsync(match));
@@ -87,8 +82,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         bool match( ref readonly int x ) => x == value;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public async Task FindLastAsync( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public async Task FindLastAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(value, await collection.FindLastAsync(match));
@@ -97,8 +91,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         bool match( ref readonly int x ) => x == value;
     }
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
-    public async Task FindAllAsync( int value )
+    [Test] [TestCase(10)] [TestCase(20)] [TestCase(30)] [TestCase(40)] public async Task FindAllAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
         this.AreEqual(1,     ( await collection.FindAllAsync(match) ).Length);
@@ -109,10 +102,13 @@ public class ConcurrentObservableCollection_Tests : Assert
     }
 
 
-    [Test]
-    public void Sort()
+    [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array  = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([
+                                            ..Enumerable.Range(0, 100)
+                                                        .Select(static x => Random.Shared.Next(1000))
+                                        ]);
+
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
@@ -125,10 +121,13 @@ public class ConcurrentObservableCollection_Tests : Assert
         this.AreEqual(sorted.Span, collection.ToArray());
     }
 
-    [Test]
-    public async Task SortAsync()
+    [Test] public async Task SortAsync()
     {
-        ReadOnlyMemory<int> array  = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([
+                                            ..Enumerable.Range(0, 100)
+                                                        .Select(static x => Random.Shared.Next(1000))
+                                        ]);
+
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
@@ -148,7 +147,7 @@ public class ConcurrentObservableCollection_Tests : Assert
     }
 
 
-    [Test, TestCase(1), TestCase(2), TestCase(3), TestCase(4), TestCase("1"), TestCase("2"), TestCase("3"), TestCase("4")]
+    [Test] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase("1")] [TestCase("2")] [TestCase("3")] [TestCase("4")]
     public void Run<TValue>( TValue value )
         where TValue : IEquatable<TValue>
     {
@@ -162,7 +161,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         collection.Clear();
         this.AreEqual(collection.Count, 0);
     }
-    [Test, TestCase(1), TestCase(2), TestCase(3), TestCase(4), TestCase("1"), TestCase("2"), TestCase("3"), TestCase("4")]
+    [Test] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase("1")] [TestCase("2")] [TestCase("3")] [TestCase("4")]
     public async Task RunAsync<TValue>( TValue value )
         where TValue : IEquatable<TValue>
     {

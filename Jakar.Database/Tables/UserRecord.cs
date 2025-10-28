@@ -1,113 +1,196 @@
-﻿using Microsoft.Extensions.Primitives;
-using Status = Jakar.Extensions.Status;
+﻿namespace Jakar.Database;
 
 
-
-namespace Jakar.Database;
-
-
-[Serializable, Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public sealed record UserRecord( string                        UserName,
-                                 string                        FirstName,
-                                 string                        LastName,
-                                 string                        FullName,
-                                 string                        Gender,
-                                 string                        Description,
-                                 string                        Company,
-                                 string                        Department,
-                                 string                        Title,
-                                 string                        Website,
-                                 SupportedLanguage             PreferredLanguage,
-                                 string                        Email,
-                                 bool                          IsEmailConfirmed,
-                                 string                        PhoneNumber,
-                                 string                        Ext,
-                                 bool                          IsPhoneNumberConfirmed,
-                                 string                        AuthenticatorKey,
-                                 bool                          IsTwoFactorEnabled,
-                                 bool                          IsActive,
-                                 bool                          IsDisabled,
-                                 Guid?                         SubscriptionID,
-                                 DateTimeOffset?               SubscriptionExpires,
-                                 DateTimeOffset?               LastBadAttempt,
-                                 DateTimeOffset?               LastLogin,
-                                 int?                          BadLogins,
-                                 bool                          IsLocked,
-                                 DateTimeOffset?               LockDate,
-                                 DateTimeOffset?               LockoutEnd,
-                                 string                        RefreshToken,
-                                 DateTimeOffset?               RefreshTokenExpiryTime,
-                                 Guid?                         SessionID,
-                                 string                        SecurityStamp,
-                                 string                        ConcurrencyStamp,
-                                 string                        Rights,
-                                 RecordID<UserRecord>?         EscalateTo,
-                                 IDictionary<string, JToken?>? AdditionalData,
-                                 string                        PasswordHash,
-                                 RecordID<FileRecord>?         ImageID,
-                                 RecordID<UserRecord>          ID,
-                                 RecordID<UserRecord>?         CreatedBy,
-                                 DateTimeOffset                DateCreated,
-                                 DateTimeOffset?               LastModified = null ) : OwnedTableRecord<UserRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
+public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord, IUserID
 {
-    public override                                                                                  int                           GetHashCode() => HashCode.Combine(base.GetHashCode(), UserName, FullName, FirstName, LastName);
-    public const                                                                                     int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
-    public const                                                                                     int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
-    public const                                                                                     int                           MAX_PASSWORD_SIZE                   = 250;
-    public const                                                                                     string                        TABLE_NAME                          = "users";
-    public static readonly                                                                           TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours(6);
-    private                                                                                          IDictionary<string, JToken?>? __additionalData                    = AdditionalData;
-    public static                                                                                    string                        TableName              { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_TEXT_CAPACITY), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData         { get => __additionalData; set => __additionalData = value; }
-    [StringLength(                       Constants.ANSI_CAPACITY)]                            public string                        AuthenticatorKey       { get;                     set; } = AuthenticatorKey;
-    public                                                                                           int?                          BadLogins              { get;                     set; } = BadLogins;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public                         string                        Company                { get;                     set; } = Company;
-    [StringLength(                       Constants.ANSI_CAPACITY)]    public                         string                        ConcurrencyStamp       { get;                     set; } = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                                    CreatedBy              => CreatedBy?.value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Department             { get; set; } = Department;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Description            { get; set; } = Description;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Email                  { get; set; } = Email;
-    public                                                                   RecordID<UserRecord>?                                 EscalateTo             { get; set; } = EscalateTo;
-    Guid? IEscalateToUser<Guid>.                                                                                                   EscalateTo             => EscalateTo?.value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Ext                    { get; set; } = Ext;
-    [ProtectedPersonalData, StringLength(2000)]                       public string                                                FirstName              { get; set; } = FirstName;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                FullName               { get; set; } = FullName;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Gender                 { get; set; } = Gender;
-    Guid? IImageID<Guid>.                                                                                                          ImageID                => ImageID?.value;
-    public   RecordID<FileRecord>?                                                                                                 ImageID                { get; set; } = ImageID;
-    public   bool                                                                                                                  IsActive               { get; set; } = IsActive;
-    public   bool                                                                                                                  IsDisabled             { get; set; } = IsDisabled;
-    public   bool                                                                                                                  IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
-    public   bool                                                                                                                  IsLocked               { get; set; } = IsLocked;
-    public   bool                                                                                                                  IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
-    public   bool                                                                                                                  IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
-    internal bool                                                                                                                  IsValid                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
-    bool IValidator.                                                                                                               IsValid                => IsValid;
-    public DateTimeOffset?                                                                                                         LastBadAttempt         { get;                  set; } = LastBadAttempt;
-    public DateTimeOffset?                                                                                                         LastLogin              { get;                  set; } = LastLogin;
-    DateTimeOffset? IUserRecord<Guid>.                                                                                             LastModified           { get => _lastModified; set => _lastModified = value; }
-    [ProtectedPersonalData, StringLength(2000)] public                        string                                               LastName               { get;                  set; } = LastName;
-    public                                                                    DateTimeOffset?                                      LockDate               { get;                  set; } = LockDate;
-    public                                                                    DateTimeOffset?                                      LockoutEnd             { get;                  set; } = LockoutEnd;
-    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE)] public string                                               PasswordHash           { get;                  set; } = PasswordHash;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)]  public string                                               PhoneNumber            { get;                  set; } = PhoneNumber;
-    [StringLength(                       512)]                         public SupportedLanguage                                    PreferredLanguage      { get;                  set; } = PreferredLanguage;
-    [StringLength(                       Constants.ANSI_CAPACITY)]     public string                                               RefreshToken           { get;                  set; } = RefreshToken;
-    public                                                                    DateTimeOffset?                                      RefreshTokenExpiryTime { get;                  set; } = RefreshTokenExpiryTime;
-    [StringLength(IUserRights.MAX_SIZE)]    public                            string                                               Rights                 { get;                  set; } = Rights;
-    [StringLength(Constants.ANSI_CAPACITY)] public                            string                                               SecurityStamp          { get;                  set; } = SecurityStamp;
-    public                                                                    Guid?                                                SessionID              { get;                  set; } = SessionID;
-    public                                                                    DateTimeOffset?                                      SubscriptionExpires    { get;                  set; } = SubscriptionExpires;
-    public                                                                    Guid?                                                SubscriptionID         { get;                  set; } = SubscriptionID;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public  string                                               Title                  { get;                  set; } = Title;
-    Guid IUserID<Guid>.                                                                                                            UserID                 => ID.value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Website                { get; set; } = Website;
+    public const           string   TABLE_NAME         = "users";
+    public static readonly TimeSpan DefaultLockoutTime = TimeSpan.FromHours(6);
 
 
-    public override DynamicParameters ToDynamicParameters()
+    public static JsonTypeInfo<UserRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRecordArray;
+    public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecord;
+
+
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<UserRecord>.Default.WithColumn<string>(nameof(UserName), ColumnOptions.Indexed, USER_NAME)
+                                                                                                           .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
+                                                                                                           .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)
+                                                                                                           .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, FULL_NAME)
+                                                                                                           .WithColumn<string>(nameof(Gender),      length: GENDER)
+                                                                                                           .WithColumn<string>(nameof(Description), length: DESCRIPTION)
+                                                                                                           .WithColumn<string>(nameof(Company),     length: COMPANY)
+                                                                                                           .WithColumn<string>(nameof(Department),  length: DEPARTMENT)
+                                                                                                           .WithColumn<string>(nameof(Title),       length: TITLE)
+                                                                                                           .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
+                                                                                                           .WithColumn<string>(nameof(Email), length: EMAIL)
+                                                                                                           .WithColumn<bool>(nameof(IsEmailConfirmed))
+                                                                                                           .WithColumn<string>(nameof(PhoneNumber), length: PHONE)
+                                                                                                           .WithColumn<string>(nameof(Ext),         length: PHONE_EXT)
+                                                                                                           .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
+                                                                                                           .WithColumn<string>(nameof(AuthenticatorKey), length: AUTHENTICATOR_KEY)
+                                                                                                           .WithColumn<bool>(nameof(IsTwoFactorEnabled))
+                                                                                                           .WithColumn<bool>(nameof(IsActive))
+                                                                                                           .WithColumn<bool>(nameof(IsDisabled))
+                                                                                                           .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
+                                                                                                           .WithColumn<int?>(nameof(BadLogins))
+                                                                                                           .WithColumn<bool>(nameof(IsLocked))
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
+                                                                                                           .WithColumn<string>(nameof(RefreshToken),                    length: REFRESH_TOKEN)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
+                                                                                                           .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
+                                                                                                           .WithColumn<string>(nameof(SecurityStamp),                   length: SECURITY_STAMP)
+                                                                                                           .WithColumn<string>(nameof(ConcurrencyStamp),                length: CONCURRENCY_STAMP)
+                                                                                                           .WithColumn<string>(nameof(Rights),                          length: RIGHTS)
+                                                                                                           .WithColumn<string>(nameof(PasswordHash),                    length: HASH)
+                                                                                                           .WithForeignKey<UserRecord>(nameof(EscalateTo))
+                                                                                                           .WithForeignKey<FileRecord>(nameof(ImageID))
+                                                                                                           .With_AdditionalData()
+                                                                                                           .With_CreatedBy()
+                                                                                                           .Build();
+
+    public static                                                             string             TableName              => TABLE_NAME;
+    [ProtectedPersonalData] [StringLength(MAX_SIZE)]          public override JsonObject?        AdditionalData         { get => _additionalData; set => _additionalData = value; }
+    [StringLength(                        AUTHENTICATOR_KEY)] public          string             AuthenticatorKey       { get;                    set; }
+    public                                                                    int?               BadLogins              { get;                    set; }
+    [ProtectedPersonalData] [StringLength(COMPANY)]           public          string             Company                { get;                    set; }
+    [StringLength(                        CONCURRENCY_STAMP)] public          string             ConcurrencyStamp       { get;                    set; }
+    Guid? ICreatedByUser<Guid>.                                                                  CreatedBy              => CreatedBy?.Value;
+    [ProtectedPersonalData] [StringLength(DEPARTMENT)]  public string                            Department             { get; set; }
+    [ProtectedPersonalData] [StringLength(DESCRIPTION)] public string                            Description            { get; set; }
+    [ProtectedPersonalData] [StringLength(EMAIL)]       public string                            Email                  { get; set; }
+    public                                                     RecordID<UserRecord>?             EscalateTo             { get; set; }
+    Guid? IEscalateToUser<Guid>.                                                                 EscalateTo             => EscalateTo?.Value;
+    [ProtectedPersonalData] [StringLength(PHONE_EXT)]  public string                             Ext                    { get; set; }
+    [ProtectedPersonalData] [StringLength(FIRST_NAME)] public string                             FirstName              { get; set; }
+    [ProtectedPersonalData] [StringLength(FULL_NAME)]  public string                             FullName               { get; set; }
+    [ProtectedPersonalData] [StringLength(GENDER)]     public string                             Gender                 { get; set; }
+    Guid? IImageID<Guid>.                                                                        ImageID                => ImageID?.Value;
+    public   RecordID<FileRecord>?                                                               ImageID                { get; set; }
+    public   bool                                                                                IsActive               { get; set; }
+    public   bool                                                                                IsDisabled             { get; set; }
+    public   bool                                                                                IsEmailConfirmed       { get; set; }
+    public   bool                                                                                IsLocked               { get; set; }
+    public   bool                                                                                IsPhoneNumberConfirmed { get; set; }
+    public   bool                                                                                IsTwoFactorEnabled     { get; set; }
+    internal bool                                                                                IsValid                => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid();
+    bool IValidator.                                                                             IsValid                => IsValid;
+    public DateTimeOffset?                                                                       LastBadAttempt         { get;                  set; }
+    public DateTimeOffset?                                                                       LastLogin              { get;                  set; }
+    DateTimeOffset? IUserRecord<Guid>.                                                           LastModified           { get => _lastModified; set => _lastModified = value; }
+    [ProtectedPersonalData] [StringLength(2000)] public                        string            LastName               { get;                  set; }
+    public                                                                     DateTimeOffset?   LockDate               { get;                  set; }
+    public                                                                     DateTimeOffset?   LockoutEnd             { get;                  set; }
+    [StringLength(                        ENCRYPTED_MAX_PASSWORD_SIZE)] public string            PasswordHash           { get;                  set; }
+    [ProtectedPersonalData] [StringLength(PHONE)]                       public string            PhoneNumber            { get;                  set; }
+    public                                                                     SupportedLanguage PreferredLanguage      { get;                  set; }
+    [StringLength(REFRESH_TOKEN)] public                                       string            RefreshToken           { get;                  set; }
+    public                                                                     DateTimeOffset?   RefreshTokenExpiryTime { get;                  set; }
+    [StringLength(RIGHTS)]         public                                      UserRights        Rights                 { get;                  set; }
+    [StringLength(SECURITY_STAMP)] public                                      string            SecurityStamp          { get;                  set; }
+    public                                                                     Guid?             SessionID              { get;                  set; }
+    public                                                                     DateTimeOffset?   SubscriptionExpires    { get;                  set; }
+    public                                                                     Guid?             SubscriptionID         { get;                  set; }
+    [ProtectedPersonalData] [StringLength(TITLE)] public                       string            Title                  { get;                  set; }
+    public                                                                     Guid              UserID                 => ID.Value;
+    public                                                                     string            UserName               { get; init; }
+    [ProtectedPersonalData] [StringLength(WEBSITE)] public                     string            Website                { get; set; }
+
+
+    [JsonConstructor] public UserRecord( string                UserName,
+                                         string                FirstName,
+                                         string                LastName,
+                                         string                FullName,
+                                         string                Gender,
+                                         string                Description,
+                                         string                Company,
+                                         string                Department,
+                                         string                Title,
+                                         string                Website,
+                                         SupportedLanguage     PreferredLanguage,
+                                         string                Email,
+                                         bool                  IsEmailConfirmed,
+                                         string                PhoneNumber,
+                                         string                Ext,
+                                         bool                  IsPhoneNumberConfirmed,
+                                         string                AuthenticatorKey,
+                                         bool                  IsTwoFactorEnabled,
+                                         bool                  IsActive,
+                                         bool                  IsDisabled,
+                                         Guid?                 SubscriptionID,
+                                         DateTimeOffset?       SubscriptionExpires,
+                                         DateTimeOffset?       LastBadAttempt,
+                                         DateTimeOffset?       LastLogin,
+                                         int?                  BadLogins,
+                                         bool                  IsLocked,
+                                         DateTimeOffset?       LockDate,
+                                         DateTimeOffset?       LockoutEnd,
+                                         string                RefreshToken,
+                                         DateTimeOffset?       RefreshTokenExpiryTime,
+                                         Guid?                 SessionID,
+                                         string                SecurityStamp,
+                                         string                ConcurrencyStamp,
+                                         UserRights            Rights,
+                                         RecordID<UserRecord>? EscalateTo,
+                                         JsonObject?           AdditionalData,
+                                         string                PasswordHash,
+                                         RecordID<FileRecord>? ImageID,
+                                         RecordID<UserRecord>  ID,
+                                         RecordID<UserRecord>? CreatedBy,
+                                         DateTimeOffset        DateCreated,
+                                         DateTimeOffset?       LastModified = null
+    ) : base(in CreatedBy, in ID, in DateCreated, in LastModified)
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        this.UserName               = UserName;
+        this.AdditionalData         = AdditionalData;
+        this.AuthenticatorKey       = AuthenticatorKey;
+        this.BadLogins              = BadLogins;
+        this.Company                = Company;
+        this.ConcurrencyStamp       = ConcurrencyStamp;
+        this.Department             = Department;
+        this.Description            = Description;
+        this.Email                  = Email;
+        this.EscalateTo             = EscalateTo;
+        this.Ext                    = Ext;
+        this.FirstName              = FirstName;
+        this.FullName               = FullName;
+        this.Gender                 = Gender;
+        this.ImageID                = ImageID;
+        this.IsActive               = IsActive;
+        this.IsDisabled             = IsDisabled;
+        this.IsEmailConfirmed       = IsEmailConfirmed;
+        this.IsLocked               = IsLocked;
+        this.IsPhoneNumberConfirmed = IsPhoneNumberConfirmed;
+        this.IsTwoFactorEnabled     = IsTwoFactorEnabled;
+        this.LastBadAttempt         = LastBadAttempt;
+        this.LastLogin              = LastLogin;
+        this.LastName               = LastName;
+        this.LockDate               = LockDate;
+        this.LockoutEnd             = LockoutEnd;
+        this.PasswordHash           = PasswordHash;
+        this.PhoneNumber            = PhoneNumber;
+        this.PreferredLanguage      = PreferredLanguage;
+        this.RefreshToken           = RefreshToken;
+        this.RefreshTokenExpiryTime = RefreshTokenExpiryTime;
+        this.Rights                 = Rights;
+        this.SecurityStamp          = SecurityStamp;
+        this.SessionID              = SessionID;
+        this.SubscriptionExpires    = SubscriptionExpires;
+        this.SubscriptionID         = SubscriptionID;
+        this.Title                  = Title;
+        this.Website                = Website;
+    }
+
+
+    public override PostgresParameters ToDynamicParameters()
+    {
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(UserName),               UserName);
         parameters.Add(nameof(FirstName),              FirstName);
         parameters.Add(nameof(LastName),               LastName);
@@ -140,7 +223,7 @@ public sealed record UserRecord( string                        UserName,
         parameters.Add(nameof(IsDisabled),             IsDisabled);
         parameters.Add(nameof(SecurityStamp),          SecurityStamp);
         parameters.Add(nameof(ConcurrencyStamp),       ConcurrencyStamp);
-        parameters.Add(nameof(EscalateTo),             EscalateTo?.value);
+        parameters.Add(nameof(EscalateTo),             EscalateTo?.Value);
         parameters.Add(nameof(AuthenticatorKey),       AuthenticatorKey);
         parameters.Add(nameof(AdditionalData),         AdditionalData);
         return parameters;
@@ -149,48 +232,48 @@ public sealed record UserRecord( string                        UserName,
 
     public static UserRecord Create( DbDataReader reader )
     {
-        string                        userName               = reader.GetFieldValue<string>(nameof(UserName));
-        string                        firstName              = reader.GetFieldValue<string>(nameof(FirstName));
-        string                        lastName               = reader.GetFieldValue<string>(nameof(LastName));
-        string                        fullName               = reader.GetFieldValue<string>(nameof(FullName));
-        string                        rights                 = reader.GetFieldValue<string>(nameof(Rights));
-        string                        gender                 = reader.GetFieldValue<string>(nameof(Gender));
-        string                        company                = reader.GetFieldValue<string>(nameof(Company));
-        string                        description            = reader.GetFieldValue<string>(nameof(Description));
-        string                        department             = reader.GetFieldValue<string>(nameof(Department));
-        string                        title                  = reader.GetFieldValue<string>(nameof(Title));
-        string                        website                = reader.GetFieldValue<string>(nameof(Website));
-        SupportedLanguage             preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse(reader.GetValue(nameof(PreferredLanguage)));
-        string                        email                  = reader.GetFieldValue<string>(nameof(Email));
-        bool                          isEmailConfirmed       = reader.GetBoolean(nameof(IsEmailConfirmed));
-        string                        phoneNumber            = reader.GetFieldValue<string>(nameof(PhoneNumber));
-        string                        ext                    = reader.GetFieldValue<string>(nameof(Ext));
-        bool                          isPhoneNumberConfirmed = reader.GetBoolean(nameof(IsPhoneNumberConfirmed));
-        bool                          isTwoFactorEnabled     = reader.GetBoolean(nameof(IsTwoFactorEnabled));
-        Guid?                         subscriptionID         = reader.GetFieldValue<Guid?>(nameof(SubscriptionID));
-        DateTimeOffset?               subscriptionExpires    = reader.GetFieldValue<DateTimeOffset?>(nameof(SubscriptionExpires));
-        DateTimeOffset?               lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>(nameof(LastBadAttempt));
-        DateTimeOffset?               lastLogin              = reader.GetFieldValue<DateTimeOffset?>(nameof(LastLogin));
-        int                           badLogins              = reader.GetFieldValue<int>(nameof(BadLogins));
-        bool                          isLocked               = reader.GetBoolean(nameof(IsLocked));
-        DateTimeOffset?               lockDate               = reader.GetFieldValue<DateTimeOffset?>(nameof(LockDate));
-        DateTimeOffset?               lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>(nameof(LockoutEnd));
-        string                        passwordHash           = reader.GetFieldValue<string>(nameof(PasswordHash));
-        string                        authenticatorKey       = reader.GetFieldValue<string>(nameof(AuthenticatorKey));
-        string                        refreshToken           = reader.GetFieldValue<string>(nameof(RefreshToken));
-        DateTimeOffset?               refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>(nameof(RefreshTokenExpiryTime));
-        Guid?                         sessionID              = reader.GetFieldValue<Guid?>(nameof(SessionID));
-        bool                          isActive               = reader.GetBoolean(nameof(IsActive));
-        bool                          isDisabled             = reader.GetBoolean(nameof(IsDisabled));
-        string                        securityStamp          = reader.GetFieldValue<string>(nameof(SecurityStamp));
-        string                        concurrencyStamp       = reader.GetFieldValue<string>(nameof(ConcurrencyStamp));
-        RecordID<UserRecord>?         escalateTo             = RecordID<UserRecord>.TryCreate(reader, nameof(EscalateTo));
-        IDictionary<string, JToken?>? additionalData         = reader.GetAdditionalData();
-        RecordID<FileRecord>?         imageID                = RecordID<FileRecord>.TryCreate(reader, nameof(ImageID));
-        RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID(reader);
-        RecordID<UserRecord>?         createdBy              = RecordID<UserRecord>.CreatedBy(reader);
-        DateTimeOffset                dateCreated            = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
-        DateTimeOffset?               lastModified           = reader.GetFieldValue<DateTimeOffset?>(nameof(LastModified));
+        string                userName               = reader.GetFieldValue<string>(nameof(UserName));
+        string                firstName              = reader.GetFieldValue<string>(nameof(FirstName));
+        string                lastName               = reader.GetFieldValue<string>(nameof(LastName));
+        string                fullName               = reader.GetFieldValue<string>(nameof(FullName));
+        UserRights            rights                 = reader.GetFieldValue<string>(nameof(Rights));
+        string                gender                 = reader.GetFieldValue<string>(nameof(Gender));
+        string                company                = reader.GetFieldValue<string>(nameof(Company));
+        string                description            = reader.GetFieldValue<string>(nameof(Description));
+        string                department             = reader.GetFieldValue<string>(nameof(Department));
+        string                title                  = reader.GetFieldValue<string>(nameof(Title));
+        string                website                = reader.GetFieldValue<string>(nameof(Website));
+        SupportedLanguage     preferredLanguage      = EnumSqlHandler<SupportedLanguage>.Instance.Parse(reader.GetValue(nameof(PreferredLanguage)));
+        string                email                  = reader.GetFieldValue<string>(nameof(Email));
+        bool                  isEmailConfirmed       = reader.GetBoolean(nameof(IsEmailConfirmed));
+        string                phoneNumber            = reader.GetFieldValue<string>(nameof(PhoneNumber));
+        string                ext                    = reader.GetFieldValue<string>(nameof(Ext));
+        bool                  isPhoneNumberConfirmed = reader.GetBoolean(nameof(IsPhoneNumberConfirmed));
+        bool                  isTwoFactorEnabled     = reader.GetBoolean(nameof(IsTwoFactorEnabled));
+        Guid?                 subscriptionID         = reader.GetFieldValue<Guid?>(nameof(SubscriptionID));
+        DateTimeOffset?       subscriptionExpires    = reader.GetFieldValue<DateTimeOffset?>(nameof(SubscriptionExpires));
+        DateTimeOffset?       lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>(nameof(LastBadAttempt));
+        DateTimeOffset?       lastLogin              = reader.GetFieldValue<DateTimeOffset?>(nameof(LastLogin));
+        int                   badLogins              = reader.GetFieldValue<int>(nameof(BadLogins));
+        bool                  isLocked               = reader.GetBoolean(nameof(IsLocked));
+        DateTimeOffset?       lockDate               = reader.GetFieldValue<DateTimeOffset?>(nameof(LockDate));
+        DateTimeOffset?       lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>(nameof(LockoutEnd));
+        string                passwordHash           = reader.GetFieldValue<string>(nameof(PasswordHash));
+        string                authenticatorKey       = reader.GetFieldValue<string>(nameof(AuthenticatorKey));
+        string                refreshToken           = reader.GetFieldValue<string>(nameof(RefreshToken));
+        DateTimeOffset?       refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>(nameof(RefreshTokenExpiryTime));
+        Guid?                 sessionID              = reader.GetFieldValue<Guid?>(nameof(SessionID));
+        bool                  isActive               = reader.GetBoolean(nameof(IsActive));
+        bool                  isDisabled             = reader.GetBoolean(nameof(IsDisabled));
+        string                securityStamp          = reader.GetFieldValue<string>(nameof(SecurityStamp));
+        string                concurrencyStamp       = reader.GetFieldValue<string>(nameof(ConcurrencyStamp));
+        RecordID<UserRecord>? escalateTo             = RecordID<UserRecord>.TryCreate(reader, nameof(EscalateTo));
+        JsonObject?           additionalData         = reader.GetAdditionalData();
+        RecordID<FileRecord>? imageID                = RecordID<FileRecord>.TryCreate(reader, nameof(ImageID));
+        RecordID<UserRecord>  id                     = RecordID<UserRecord>.ID(reader);
+        RecordID<UserRecord>? createdBy              = RecordID<UserRecord>.CreatedBy(reader);
+        DateTimeOffset        dateCreated            = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
+        DateTimeOffset?       lastModified           = reader.GetFieldValue<DateTimeOffset?>(nameof(LastModified));
 
 
         UserRecord record = new(userName,
@@ -242,18 +325,21 @@ public sealed record UserRecord( string                        UserName,
 
     public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : struct, Enum => Create(request, UserRights<TEnum>.Create(request.Data), caller);
-    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(request, request.Data.Rights, caller);
+    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in Permissions<TEnum> rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : struct, Enum => Create(request, rights.ToString(), caller);
-    public static UserRecord Create<TUser>( ILoginRequest<TUser> request, string rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(request, rights.ToString(), caller);
+    public static UserRecord Create<TUser>( ILoginRequest<TUser> request, UserRights rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
     {
         ArgumentNullException.ThrowIfNull(request.Data);
-        return Create(request.UserName, rights, request.Data, caller).WithPassword(request.Password).Enable();
+
+        return Create(request.UserName, rights, request.Data, caller)
+              .WithPassword(request.Password)
+              .Enable();
     }
 
-    public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = null )
+    public static UserRecord Create<TUser>( string userName, UserRights rights, TUser data, UserRecord? caller = null )
         where TUser : class, IUserData<Guid> => new(userName,
                                                     data.FirstName,
                                                     data.LastName,
@@ -270,7 +356,7 @@ public sealed record UserRecord( string                        UserName,
                                                     data.PhoneNumber,
                                                     data.Ext,
                                                     false,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     true,
                                                     false,
                                                     false,
@@ -282,40 +368,40 @@ public sealed record UserRecord( string                        UserName,
                                                     false,
                                                     null,
                                                     null,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     null,
                                                     null,
-                                                    string.Empty,
-                                                    string.Empty,
+                                                    EMPTY,
+                                                    EMPTY,
                                                     rights,
                                                     RecordID<UserRecord>.TryCreate(data.EscalateTo),
                                                     data.AdditionalData,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     RecordID<FileRecord>.TryCreate(data.ImageID),
                                                     RecordID<UserRecord>.New(),
                                                     caller?.ID,
                                                     DateTimeOffset.UtcNow);
 
-    public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
-        where TEnum : struct, Enum => Create(userName, password, rights.ToString(), caller);
-    public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = null ) =>
+    public static UserRecord Create<TEnum>( string userName, string password, scoped in Permissions<TEnum> rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(userName, password, rights.ToString(), caller);
+    public static UserRecord Create( string userName, string password, UserRights rights, UserRecord? caller = null ) =>
         new UserRecord(userName,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
                        SupportedLanguage.English,
-                       string.Empty,
+                       EMPTY,
                        false,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
                        false,
-                       string.Empty,
+                       EMPTY,
                        true,
                        false,
                        false,
@@ -327,45 +413,45 @@ public sealed record UserRecord( string                        UserName,
                        false,
                        null,
                        null,
-                       string.Empty,
+                       EMPTY,
                        null,
                        null,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
                        rights,
                        RecordID<UserRecord>.Empty,
                        null,
-                       string.Empty,
+                       EMPTY,
                        RecordID<FileRecord>.Empty,
                        RecordID<UserRecord>.New(),
                        caller?.ID,
                        DateTimeOffset.UtcNow).WithPassword(password);
 
 
-    public static DynamicParameters GetDynamicParameters( IUserData data )
+    public static PostgresParameters GetDynamicParameters( IUserData data )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(Email),     data.Email);
         parameters.Add(nameof(FirstName), data.FirstName);
         parameters.Add(nameof(LastName),  data.LastName);
         parameters.Add(nameof(FullName),  data.FullName);
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( ILoginRequest request )
+    public static PostgresParameters GetDynamicParameters( ILoginRequest request )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(UserName), request.UserName);
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( string userName )
+    public static PostgresParameters GetDynamicParameters( string userName )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(UserName), userName);
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( RecordID<UserRecord> userID )
+    public static PostgresParameters GetDynamicParameters( RecordID<UserRecord> userID )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(ID), userID);
         return parameters;
     }
@@ -373,7 +459,7 @@ public sealed record UserRecord( string                        UserName,
 
     public UserRecord ClearRefreshToken( string securityStamp )
     {
-        RefreshToken           = string.Empty;
+        RefreshToken           = EMPTY;
         RefreshTokenExpiryTime = null;
         SecurityStamp          = securityStamp;
         return this;
@@ -399,18 +485,12 @@ public sealed record UserRecord( string                        UserName,
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-        IDictionary<string, JToken?>? data = value.AdditionalData;
-        if ( data is null ) { return this; }
-
-        AdditionalData ??= new Dictionary<string, JToken?>();
-        foreach ( ( string key, JToken? jToken ) in data ) { AdditionalData[key] = jToken; }
-
-        return this;
+        return WithAdditionalData(value);
     }
 
 
     public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall(RedeemCode, db, code, token);
-    public async ValueTask<bool> RedeemCode( NpgsqlConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
+    public async ValueTask<bool> RedeemCode( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, string code, CancellationToken token )
     {
         await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where(connection, transaction, db.UserRecoveryCodes, this, token) )
         {
@@ -430,7 +510,7 @@ public sealed record UserRecord( string                        UserName,
 
 
     public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall(ReplaceCodes, db, count, token);
-    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
+    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes(connection, transaction, db, token);
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create(this, count);
@@ -444,7 +524,7 @@ public sealed record UserRecord( string                        UserName,
 
 
     public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall(ReplaceCodes, db, recoveryCodes, token);
-    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
+    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord> old        = Codes(connection, transaction, db, token);
         RecoveryCodeRecord.Codes             dictionary = RecoveryCodeRecord.Create(this, recoveryCodes);
@@ -458,21 +538,21 @@ public sealed record UserRecord( string                        UserName,
 
 
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database         db,         CancellationToken token )                                             => db.TryCall(Codes, db, token);
-    public IAsyncEnumerable<RecoveryCodeRecord> Codes( NpgsqlConnection connection, DbTransaction     transaction, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where(connection, transaction, db.RecoveryCodes, this, token);
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where(connection, transaction, db.RecoveryCodes, this, token);
 
 
-    public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : struct, Enum
+    public UserRecord WithRights<TEnum>( scoped in UserRights rights )
+        where TEnum : unmanaged, Enum
     {
-        Rights = rights.ToString();
+        Rights.Value = rights.Value;
         return this;
     }
-    public async ValueTask<UserModel> GetRights( NpgsqlConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async ValueTask<UserModel> GetRights( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, CancellationToken token )
     {
         UserModel model = new(this);
-        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { model.Groups.Add(record.ToGroupModel()); }
+        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { await model.Groups.AddAsync(record.ToGroupModel(), token); }
 
-        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { model.Roles.Add(record.ToRoleModel()); }
+        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { await model.Roles.AddAsync(record.ToRoleModel(), token); }
 
         return model;
     }
@@ -531,6 +611,7 @@ public sealed record UserRecord( string                        UserName,
 
         return string.Compare(Company, other.Company, StringComparison.Ordinal);
     }
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), UserName, FullName, FirstName, LastName);
 
 
     public static bool operator >( UserRecord  left, UserRecord right ) => left.CompareTo(right) > 0;
@@ -540,25 +621,25 @@ public sealed record UserRecord( string                        UserName,
 
 
     public UserModel ToUserModel() => ToUserModel<UserModel>();
-    public TClass ToUserModel<TClass>()
-        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>();
-    public TClass ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>()
-        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+    public TSelf ToUserModel<TSelf>()
+        where TSelf : UserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TSelf>, new() => ToUserModel<TSelf, UserAddress, GroupModel, RoleModel>();
+    public TSelf ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>()
+        where TSelf : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
         where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
-        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TClass.Create(this);
+        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TSelf.Create(this);
 
 
-    public ValueTask<UserModel> ToUserModel( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>(connection, transaction, db, token);
-    public ValueTask<TClass> ToUserModel<TClass>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>(connection, transaction, db, token);
-    public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+    public ValueTask<UserModel> ToUserModel( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>(connection, transaction, db, token);
+    public ValueTask<TSelf> ToUserModel<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token )
+        where TSelf : UserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TSelf>, new() => ToUserModel<TSelf, UserAddress, GroupModel, RoleModel>(connection, transaction, db, token);
+    public async ValueTask<TSelf> ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token )
+        where TSelf : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
         where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
         where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress>
     {
-        TClass model = TClass.Create(this);
+        TSelf model = TSelf.Create(this);
 
         await foreach ( AddressRecord record in GetAddresses(connection, transaction, db, token) ) { model.Addresses.Add(record.ToAddressModel<TAddress>()); }
 
@@ -570,10 +651,157 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
+    public void Deconstruct( out string                userName,
+                             out string                firstName,
+                             out string                lastName,
+                             out string                fullName,
+                             out string                gender,
+                             out string                description,
+                             out string                company,
+                             out string                department,
+                             out string                title,
+                             out string                website,
+                             out SupportedLanguage     preferredLanguage,
+                             out string                email,
+                             out bool                  isEmailConfirmed,
+                             out string                phoneNumber,
+                             out string                ext,
+                             out bool                  isPhoneNumberConfirmed,
+                             out string                authenticatorKey,
+                             out bool                  isTwoFactorEnabled,
+                             out bool                  isActive,
+                             out bool                  isDisabled,
+                             out Guid?                 subscriptionID,
+                             out DateTimeOffset?       subscriptionExpires,
+                             out DateTimeOffset?       lastBadAttempt,
+                             out DateTimeOffset?       lastLogin,
+                             out int?                  badLogins,
+                             out bool                  isLocked,
+                             out DateTimeOffset?       lockDate,
+                             out DateTimeOffset?       lockoutEnd,
+                             out string                refreshToken,
+                             out DateTimeOffset?       refreshTokenExpiryTime,
+                             out Guid?                 sessionID,
+                             out string                securityStamp,
+                             out string                concurrencyStamp,
+                             out UserRights            rights,
+                             out RecordID<UserRecord>? escalateTo,
+                             out JsonObject?           additionalData,
+                             out string                passwordHash,
+                             out RecordID<FileRecord>? imageID,
+                             out RecordID<UserRecord>  id,
+                             out RecordID<UserRecord>? createdBy,
+                             out DateTimeOffset        dateCreated,
+                             out DateTimeOffset?       lastModified
+    )
+    {
+        userName               = UserName;
+        firstName              = FirstName;
+        lastName               = LastName;
+        fullName               = FullName;
+        gender                 = Gender;
+        description            = Description;
+        company                = Company;
+        department             = Department;
+        title                  = Title;
+        website                = Website;
+        preferredLanguage      = PreferredLanguage;
+        email                  = Email;
+        isEmailConfirmed       = IsEmailConfirmed;
+        phoneNumber            = PhoneNumber;
+        ext                    = Ext;
+        isPhoneNumberConfirmed = IsPhoneNumberConfirmed;
+        authenticatorKey       = AuthenticatorKey;
+        isTwoFactorEnabled     = IsTwoFactorEnabled;
+        isActive               = IsActive;
+        isDisabled             = IsDisabled;
+        subscriptionID         = SubscriptionID;
+        subscriptionExpires    = SubscriptionExpires;
+        lastBadAttempt         = LastBadAttempt;
+        lastLogin              = LastLogin;
+        badLogins              = BadLogins;
+        isLocked               = IsLocked;
+        lockDate               = LockDate;
+        lockoutEnd             = LockoutEnd;
+        refreshToken           = RefreshToken;
+        refreshTokenExpiryTime = RefreshTokenExpiryTime;
+        sessionID              = SessionID;
+        securityStamp          = SecurityStamp;
+        concurrencyStamp       = ConcurrencyStamp;
+        rights                 = Rights;
+        escalateTo             = EscalateTo;
+        additionalData         = AdditionalData;
+        passwordHash           = PasswordHash;
+        imageID                = ImageID;
+        id                     = ID;
+        createdBy              = CreatedBy;
+        dateCreated            = DateCreated;
+        lastModified           = LastModified;
+    }
+
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<UserRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            ( 
+                                            {nameof(UserName).SqlColumnName()}               VARCHAR(256)   NOT NULL UNIQUE,
+                                            {nameof(FirstName).SqlColumnName()}              VARCHAR(256)   NOT NULL,
+                                            {nameof(LastName).SqlColumnName()}               VARCHAR(256)   NOT NULL,
+                                            {nameof(FullName).SqlColumnName()}               VARCHAR(1024)  NOT NULL,
+                                            {nameof(Gender).SqlColumnName()}                 VARCHAR(1024)  NOT NULL,
+                                            {nameof(Description).SqlColumnName()}            VARCHAR(1024)  NOT NULL,
+                                            {nameof(Company).SqlColumnName()}                VARCHAR(1024)  NOT NULL,
+                                            {nameof(Department).SqlColumnName()}             VARCHAR(1024)  NOT NULL,
+                                            {nameof(Title).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
+                                            {nameof(PreferredLanguage).SqlColumnName()}      bigint         NOT NULL,
+                                            {nameof(Email).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
+                                            {nameof(IsEmailConfirmed).SqlColumnName()}       boolean        NOT NULL,
+                                            {nameof(PhoneNumber).SqlColumnName()}            VARCHAR(100)   NOT NULL,
+                                            {nameof(Ext).SqlColumnName()}                    VARCHAR(100)   NOT NULL,
+                                            {nameof(IsPhoneNumberConfirmed).SqlColumnName()} boolean        NOT NULL,
+                                            {nameof(AuthenticatorKey).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
+                                            {nameof(IsTwoFactorEnabled).SqlColumnName()}     boolean        NOT NULL,
+                                            {nameof(IsActive).SqlColumnName()}               boolean        NOT NULL,
+                                            {nameof(IsDisabled).SqlColumnName()}             boolean        NOT NULL,
+                                            {nameof(SubscriptionID).SqlColumnName()}         uuid           NULL,
+                                            {nameof(SubscriptionExpires).SqlColumnName()}    timestamptz    NULL,
+                                            {nameof(LastBadAttempt).SqlColumnName()}         timestamptz    NULL,
+                                            {nameof(LastLogin).SqlColumnName()}              timestamptz    NULL,
+                                            {nameof(BadLogins).SqlColumnName()}              int            NOT NULL,
+                                            {nameof(IsLocked).SqlColumnName()}               boolean        NOT NULL,
+                                            {nameof(LockDate).SqlColumnName()}               timestamptz    NULL,
+                                            {nameof(LockoutEnd).SqlColumnName()}             timestamptz    NULL,
+                                            {nameof(RefreshToken).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
+                                            {nameof(RefreshTokenExpiryTime).SqlColumnName()} timestamptz    NULL,
+                                            {nameof(SessionID).SqlColumnName()}              uuid           NULL,
+                                            {nameof(SecurityStamp).SqlColumnName()}          VARCHAR(1024)  NOT NULL,
+                                            {nameof(ConcurrencyStamp).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
+                                            {nameof(Rights).SqlColumnName()}                 VARCHAR(4000)  NOT NULL,
+                                            {nameof(EscalateTo).SqlColumnName()}             uuid           NULL,
+                                            {nameof(AdditionalData).SqlColumnName()}         json           NULL,
+                                            {nameof(PasswordHash).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
+                                            {nameof(ImageID).SqlColumnName()}                uuid           NOT NULL,
+                                            {nameof(ID).SqlColumnName()}                     uuid           PRIMARY KEY,
+                                            {nameof(CreatedBy).SqlColumnName()}              uuid           NULL,
+                                            {nameof(DateCreated).SqlColumnName()}            timestamptz    NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}           timestamptz    NULL,
+                                            FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
+                                            FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
+                                            FOREIGN KEY({nameof(ImageID).SqlColumnName()}) REFERENCES {FileRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
+                                            );
+
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
+
+
 
     #region Passwords
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool HasPassword() => !string.IsNullOrWhiteSpace(PasswordHash);
+    public bool HasPassword() => !string.IsNullOrWhiteSpace(PasswordHash);
 
 
     public UserRecord WithPassword( string password )
@@ -586,7 +814,7 @@ public sealed record UserRecord( string                        UserName,
     public UserRecord WithPassword( in string password, scoped in Requirements requirements ) => WithPassword(password, requirements, out _);
     public UserRecord WithPassword( in string password, scoped in Requirements requirements, out PasswordValidator.Results results )
     {
-        if ( requirements.maxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException($"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password)); }
+        if ( requirements.MaxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException($"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password)); }
 
         PasswordValidator validator = new(requirements);
         if ( !validator.Validate(password, out results) ) { return this; }
@@ -595,7 +823,7 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword(ref record, request.Password);
+    public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword(ref record, request.Password);
     public static bool VerifyPassword( scoped ref UserRecord record, in string password )
     {
         string value = Database.DataProtector.Decrypt(record.PasswordHash);
@@ -616,16 +844,16 @@ public sealed record UserRecord( string                        UserName,
 
     #region Owners
 
-    public async ValueTask<ErrorOrResult<UserRecord>> GetBoss( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+    public async ValueTask<ErrorOrResult<UserRecord>> GetBoss( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) =>
         EscalateTo.HasValue
             ? await db.Users.Get(connection, transaction, EscalateTo.Value, token)
-            : Error.Create(Status.Gone, StringValues.Empty);
+            : Error.Create(Status.Gone, StringTags.Empty);
 
 
-    public bool DoesNotOwn<TClass>( TClass record )
-        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => record.CreatedBy != ID;
-    public bool Owns<TClass>( TClass record )
-        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => record.CreatedBy == ID;
+    public bool DoesNotOwn<TSelf>( TSelf record )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => record.CreatedBy != ID;
+    public bool Owns<TSelf>( TSelf record )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => record.CreatedBy == ID;
 
     #endregion
 
@@ -729,15 +957,11 @@ public sealed record UserRecord( string                        UserName,
 
     #region Updaters
 
-    public UserRecord WithAdditionalData<TValue>( TValue? value )
-        where TValue : IDictionary<string, JToken?>
+    public override UserRecord WithAdditionalData( JsonObject? value )
     {
-        if ( value is null || value.Count <= 0 ) { return Modified(); }
+        if ( value is null || value.Count <= 0 ) { return this; }
 
-        IDictionary<string, JToken?> data = AdditionalData ?? new Dictionary<string, JToken?>();
-        foreach ( ( string? key, JToken? jToken ) in value ) { data[key] = jToken; }
-
-        AdditionalData = data;
+        base.WithAdditionalData(value);
         return Modified();
     }
 
@@ -768,9 +992,9 @@ public sealed record UserRecord( string                        UserName,
 
 
 
-    #region Tokens
+    #region SessionToken
 
-    public static bool CheckRefreshToken( ref UserRecord record, Tokens token, bool hashed = true ) => CheckRefreshToken(ref record, token.RefreshToken, hashed);
+    public static bool CheckRefreshToken( ref UserRecord record, SessionToken token, bool hashed = true ) => CheckRefreshToken(ref record, token.RefreshToken, hashed);
     public static bool CheckRefreshToken( ref UserRecord record, string? refreshToken, bool hashed = true )
     {
         // ReSharper disable once InvertIf
@@ -786,15 +1010,15 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public UserRecord WithNoRefreshToken()                                                                 => WithRefreshToken(string.Empty);
-    public UserRecord WithRefreshToken( Tokens token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken(token.RefreshToken, date, securityStamp);
+    public UserRecord WithNoRefreshToken()                                                                       => WithRefreshToken(EMPTY);
+    public UserRecord WithRefreshToken( SessionToken token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken(token.RefreshToken, date, securityStamp);
     public UserRecord WithRefreshToken( string? refreshToken, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
     {
         if ( string.IsNullOrEmpty(refreshToken) )
         {
-            RefreshToken           = string.Empty;
+            RefreshToken           = EMPTY;
             RefreshTokenExpiryTime = null;
-            SecurityStamp          = securityStamp ?? string.Empty;
+            SecurityStamp          = securityStamp ?? EMPTY;
             return Modified();
         }
 
@@ -816,10 +1040,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Roles
 
-    public async ValueTask<bool>                 TryAdd( NpgsqlConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd(connection, transaction, db.UserAddresses, this, value, token);
-    public       IAsyncEnumerable<AddressRecord> GetAddresses( NpgsqlConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where(connection, transaction, db.Addresses, this, token);
-    public async ValueTask<bool>                 HasAddress( NpgsqlConnection   connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists(connection, transaction, db.UserAddresses, this, value, token);
-    public async ValueTask                       Remove( NpgsqlConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete(connection, transaction, db.UserAddresses, this, value, token);
+    public async ValueTask<bool>                 TryAdd( NpgsqlConnection       connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd(connection, transaction, db.UserAddresses, this, value, token);
+    public       IAsyncEnumerable<AddressRecord> GetAddresses( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where(connection, transaction, db.Addresses, this, token);
+    public async ValueTask<bool>                 HasAddress( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists(connection, transaction, db.UserAddresses, this, value, token);
+    public async ValueTask                       Remove( NpgsqlConnection       connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete(connection, transaction, db.UserAddresses, this, value, token);
 
     #endregion
 
@@ -827,10 +1051,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Roles
 
-    public async ValueTask<bool>              TryAdd( NpgsqlConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd(connection, transaction, db.UserRoles, this, value, token);
-    public       IAsyncEnumerable<RoleRecord> GetRoles( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where(connection, transaction, db.Roles, this, token);
-    public async ValueTask<bool>              HasRole( NpgsqlConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists(connection, transaction, db.UserRoles, this, value, token);
-    public async ValueTask                    Remove( NpgsqlConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete(connection, transaction, db.UserRoles, this, value, token);
+    public async ValueTask<bool>              TryAdd( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd(connection, transaction, db.UserRoles, this, value, token);
+    public       IAsyncEnumerable<RoleRecord> GetRoles( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where(connection, transaction, db.Roles, this, token);
+    public async ValueTask<bool>              HasRole( NpgsqlConnection  connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists(connection, transaction, db.UserRoles, this, value, token);
+    public async ValueTask                    Remove( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete(connection, transaction, db.UserRoles, this, value, token);
 
     #endregion
 
@@ -838,10 +1062,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Groups
 
-    public async ValueTask<bool>               TryAdd( NpgsqlConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd(connection, transaction, db.UserGroups, this, value, token);
-    public       IAsyncEnumerable<GroupRecord> GetGroups( NpgsqlConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where(connection, transaction, db.Groups, this, token);
-    public async ValueTask<bool>               IsPartOfGroup( NpgsqlConnection connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists(connection, transaction, db.UserGroups, this, value, token);
-    public async ValueTask                     Remove( NpgsqlConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete(connection, transaction, db.UserGroups, this, value, token);
+    public async ValueTask<bool>               TryAdd( NpgsqlConnection        connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd(connection, transaction, db.UserGroups, this, value, token);
+    public       IAsyncEnumerable<GroupRecord> GetGroups( NpgsqlConnection     connection, NpgsqlTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where(connection, transaction, db.Groups, this, token);
+    public async ValueTask<bool>               IsPartOfGroup( NpgsqlConnection connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists(connection, transaction, db.UserGroups, this, value, token);
+    public async ValueTask                     Remove( NpgsqlConnection        connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete(connection, transaction, db.UserGroups, this, value, token);
 
     #endregion
 
@@ -849,32 +1073,70 @@ public sealed record UserRecord( string                        UserName,
 
     #region Claims
 
-    public async  ValueTask<Claim[]>                   GetUserClaims( NpgsqlConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => ( await ToUserModel(connection, transaction, db, token) ).GetClaims(types);
-    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims(connection, transaction, db, principal.Claims.ToArray(), types, token);
-    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
+    public async  ValueTask<Claim[]>                   GetUserClaims( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => ( await ToUserModel(connection, transaction, db, token) ).GetClaims(types);
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims(connection, transaction, db, principal.Claims.ToArray(), types, token);
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
-        DynamicParameters parameters = new();
-        parameters.Add(nameof(ID), Guid.Parse(claims.Single(static ( ref readonly Claim x ) => x.IsUserID()).Value));
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
 
-        if ( types.HasFlag(ClaimType.UserName) ) { parameters.Add(nameof(UserName), claims.Single(static ( ref readonly Claim x ) => x.IsUserName()).Value); }
+        parameters.Add(nameof(ID),
+                       Guid.Parse(claims.Single(static ( ref readonly Claim x ) => x.IsUserID())
+                                        .Value));
 
-        if ( types.HasFlag(ClaimType.FirstName) ) { parameters.Add(nameof(FirstName), claims.Single(static ( ref readonly Claim x ) => x.IsFirstName()).Value); }
+        if ( types.HasFlag(ClaimType.UserName) )
+        {
+            parameters.Add(nameof(UserName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsUserName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.LastName) ) { parameters.Add(nameof(LastName), claims.Single(static ( ref readonly Claim x ) => x.IsLastName()).Value); }
+        if ( types.HasFlag(ClaimType.FirstName) )
+        {
+            parameters.Add(nameof(FirstName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsFirstName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.FullName) ) { parameters.Add(nameof(FullName), claims.Single(static ( ref readonly Claim x ) => x.IsFullName()).Value); }
+        if ( types.HasFlag(ClaimType.LastName) )
+        {
+            parameters.Add(nameof(LastName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsLastName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.Email) ) { parameters.Add(nameof(Email), claims.Single(static ( ref readonly Claim x ) => x.IsEmail()).Value); }
+        if ( types.HasFlag(ClaimType.FullName) )
+        {
+            parameters.Add(nameof(FullName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsFullName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.MobilePhone) ) { parameters.Add(nameof(PhoneNumber), claims.Single(static ( ref readonly Claim x ) => x.IsMobilePhone()).Value); }
+        if ( types.HasFlag(ClaimType.Email) )
+        {
+            parameters.Add(nameof(Email),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsEmail())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.WebSite) ) { parameters.Add(nameof(Website), claims.Single(static ( ref readonly Claim x ) => x.IsWebSite()).Value); }
+        if ( types.HasFlag(ClaimType.MobilePhone) )
+        {
+            parameters.Add(nameof(PhoneNumber),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsMobilePhone())
+                                 .Value);
+        }
+
+        if ( types.HasFlag(ClaimType.WebSite) )
+        {
+            parameters.Add(nameof(Website),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsWebSite())
+                                 .Value);
+        }
 
         return db.Users.Get(connection, transaction, true, parameters, token);
     }
-    public static async IAsyncEnumerable<UserRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<UserRecord> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
 
         switch ( claim.Type )
         {

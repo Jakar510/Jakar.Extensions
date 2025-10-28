@@ -6,15 +6,15 @@
 ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
 ///     </para>
 /// </summary>
-[SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
+[SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public readonly ref struct LineSplitEntry<TValue>( scoped in ReadOnlySpan<TValue> line, scoped in ParamsArray<TValue> separator )
     where TValue : IEquatable<TValue>
 {
-    public ReadOnlySpan<TValue> Value      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = line;
-    public ParamsArray<TValue>  Separator  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = separator;
-    public int                  Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.Length; }
-    public bool                 IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.IsEmpty; }
-    public bool                 IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
+    public ReadOnlySpan<TValue> Value      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = line;
+    public ParamsArray<TValue>  Separator  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = separator;
+    public int                  Length     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Value.Length; }
+    public bool                 IsEmpty    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Value.IsEmpty; }
+    public bool                 IsNotEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !IsEmpty; }
 
 
     // This method allow to deconstruct the type, so you can write any of the following code

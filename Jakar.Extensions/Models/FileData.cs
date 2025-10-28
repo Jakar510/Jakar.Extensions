@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IFileMetaData : JsonModels.IJsonModel
+public interface IFileMetaData : IJsonModel
 {
     string?   FileDescription { get; }
     string?   FileName        { get; }
@@ -14,7 +14,7 @@ public interface IFileMetaData : JsonModels.IJsonModel
 
 
 
-public interface IFileMetaData<TFileMetaData> : IFileMetaData, IEqualComparable<TFileMetaData>
+public interface IFileMetaData<TFileMetaData> : IFileMetaData, IJsonModel<TFileMetaData>, IEqualComparable<TFileMetaData>
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public abstract static TFileMetaData  Create( IFileMetaData                                      data );
@@ -57,12 +57,12 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 
 
 [SuppressMessage("ReSharper", "TypeParameterCanBeVariant")]
-public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
+public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TSelf : class, IFileData<TSelf, TID, TFileMetaData>
 {
-    public abstract static TSelf         Create( IFileData<TID, TFileMetaData>                                      data );
+    public abstract static TSelf  Create( IFileData<TID, TFileMetaData>                                      data );
     public abstract static TSelf  Create( IFileData<TID>                                                     data, TFileMetaData metaData );
     public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID, TFileMetaData>? data );
     public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID>?                data, TFileMetaData metaData );
@@ -79,19 +79,20 @@ public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMeta
 
 
 
-[Serializable, SuppressMessage("ReSharper", "InconsistentNaming"), SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
-[method: SetsRequiredMembers]
-public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass, IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
+[Serializable]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
+public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass<TSelf>, IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
-    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>
+    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    public required                                  long          FileSize { get; init; } = fileSize;
-    [StringLength(UNICODE_CAPACITY)] public required string        Hash     { get; init; } = hash;
-    public required                                  TID           ID       { get; init; } = id;
-    public required                                  TFileMetaData MetaData { get; init; } = metaData;
-    protected internal                               MimeType      Mime     => MetaData.MimeType ?? MimeType.Text;
-    [StringLength(UNICODE_CAPACITY)] public required string        Payload  { get; init; } = payload;
+    public                          long          FileSize { get; init; } = fileSize;
+    [StringLength(HASH)] public     string        Hash     { get; init; } = hash;
+    public                          TID           ID       { get; init; } = id;
+    public                          TFileMetaData MetaData { get; init; } = metaData;
+    protected internal              MimeType      Mime     => MetaData.MimeType ?? MimeType.Text;
+    [StringLength(MAX_SIZE)] public string        Payload  { get; init; } = payload;
 
 
     public virtual LocalFile GetFile( LocalDirectory directory )
@@ -101,11 +102,14 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         string fileName  = $"{name}.{extension}";
         return directory.Join(fileName);
     }
-    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token).ConfigureAwait(false);
+    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token)
+                                                                                              .ConfigureAwait(false);
     public async Task WriteToAsync( LocalFile file, CancellationToken token )
     {
         await using FileStream stream = file.OpenWrite(FileMode.OpenOrCreate);
-        await WriteToAsync(stream, token).ConfigureAwait(false);
+
+        await WriteToAsync(stream, token)
+           .ConfigureAwait(false);
     }
     public async Task WriteToAsync( Stream stream, CancellationToken token )
     {
@@ -119,12 +123,17 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         if ( data.IsT1 )
         {
             await using StreamWriter writer = new(stream);
-            await writer.WriteAsync(data.AsT1).ConfigureAwait(false);
+
+            await writer.WriteAsync(data.AsT1)
+                        .ConfigureAwait(false);
+
             return;
         }
 
         ReadOnlyMemory<byte> payload = data.AsT0;
-        await stream.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
     public void WriteTo( Stream stream )
     {
@@ -155,24 +164,29 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
                                                   : Payload.TryGetData();
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID, TFileMetaData> data )                                                                           => Create(data, data.MetaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create(metaData, stream.AsReadOnlyMemory().Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
+    public static TSelf Create( IFileData<TID, TFileMetaData> data )                         => Create(data, data.MetaData);
+    public static TSelf Create( IFileData<TID>                data, TFileMetaData metaData ) => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
+    public static TSelf Create( TFileMetaData metaData, MemoryStream stream ) => Create(metaData,
+                                                                                        stream.AsReadOnlyMemory()
+                                                                                              .Span);
+    public static TSelf Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
+    public static TSelf Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
+    public static TSelf Create( TFileMetaData metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
 
 
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
-                                                                                                                               ? Create(content)
-                                                                                                                               : null;
+                                                                                                                        ? Create(content)
+                                                                                                                        : null;
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID>? content, TFileMetaData metaData ) => content is not null
-                                                                                                                                        ? Create(content, metaData)
-                                                                                                                                        : null;
+                                                                                                                                 ? Create(content, metaData)
+                                                                                                                                 : null;
     public static async ValueTask<TSelf> Create( LocalFile file, CancellationToken token = default )
     {
-        using TelemetrySpan  telemetrySpan = TelemetrySpan.Create();
-        ReadOnlyMemory<byte> content       = await file.ReadAsync().AsMemory(token);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        ReadOnlyMemory<byte> content = await file.ReadAsync()
+                                                 .AsMemory(token);
+
         return Create(TFileMetaData.Create(file), content.Span);
     }
     public static async ValueTask<TSelf> Create( TFileMetaData metaData, Stream stream, CancellationToken token = default )
@@ -184,7 +198,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     }
 
 
-    public virtual int CompareTo( TSelf? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -201,7 +215,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
         return Comparer<TFileMetaData>.Default.Compare(MetaData, other.MetaData);
     }
-    public virtual bool Equals( TSelf? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 
@@ -222,19 +236,23 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 
 
-[Serializable, SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
-public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
+[Serializable]
+[SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
+[method: JsonConstructor]
+public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
-    [JsonExtensionData]              public IDictionary<string, JToken?>? AdditionalData  { get; set; }
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileDescription { get; set; }  = fileDescription;
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileName        { get; init; } = fileName;
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileType        { get; init; } = fileType;
-    [StringLength(UNICODE_CAPACITY)] public MimeType?                     MimeType        { get; init; } = mimeType;
+    public static                      JsonTypeInfo<FileMetaData[]> JsonArrayInfo   => JakarExtensionsContext.Default.FileMetaDataArray;
+    public static                      JsonSerializerContext        JsonContext     => JakarExtensionsContext.Default;
+    public static                      JsonTypeInfo<FileMetaData>   JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
+    [StringLength(DESCRIPTION)] public string?                      FileDescription { get; set; }  = fileDescription;
+    [StringLength(NAME)]        public string?                      FileName        { get; init; } = fileName;
+    [StringLength(TYPE)]        public string?                      FileType        { get; init; } = fileType;
+    public                             MimeType?                    MimeType        { get; init; } = mimeType;
 
 
     public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)
     {
-        if ( value.AdditionalData is not null ) { AdditionalData = new Dictionary<string, JToken?>(value.AdditionalData); }
+        if ( value.AdditionalData is not null ) { AdditionalData = new JsonObject(value.AdditionalData); }
     }
     public FileMetaData( LocalFile value ) : this(value.Name, value.ContentType, value.Mime) { }
 
@@ -257,7 +275,7 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
 
         return ReferenceEquals(this, other) || ( other is FileMetaData data && Equals(data) );
     }
-    public bool Equals( FileMetaData? other )
+    public override bool Equals( FileMetaData? other )
     {
         if ( other is null ) { return false; }
 
@@ -265,7 +283,7 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
 
         return FileName == other.FileName && FileType == other.FileType && FileDescription == other.FileDescription;
     }
-    public int CompareTo( FileMetaData? other )
+    public override int CompareTo( FileMetaData? other )
     {
         if ( other is null ) { return 1; }
 
@@ -278,14 +296,6 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
         if ( fileTypeComparison != 0 ) { return fileTypeComparison; }
 
         return string.Compare(FileDescription, other.FileDescription, StringComparison.Ordinal);
-    }
-    public int CompareTo( object? obj )
-    {
-        if ( obj is null ) { return 1; }
-
-        return obj is FileMetaData other
-                   ? CompareTo(other)
-                   : throw new ArgumentException($"Object must be of type {nameof(FileMetaData)}");
     }
     public override int GetHashCode() => HashCode.Combine(FileName, FileType, MimeType);
 

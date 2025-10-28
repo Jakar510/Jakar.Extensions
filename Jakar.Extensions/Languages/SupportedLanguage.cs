@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public enum SupportedLanguage
+public enum SupportedLanguage : long
 {
     Unspecified = -1,
     English     = 0,

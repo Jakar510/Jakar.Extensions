@@ -11,13 +11,12 @@ public interface IUserSubscription : IUniqueID<Guid>
 
 
 
-public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExpires, RecordID<TClass> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TClass>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
-    where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass>
+public abstract record UserSubscription<TSelf>( DateTimeOffset? SubscriptionExpires, RecordID<TSelf> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TSelf>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
+    where TSelf : UserSubscription<TSelf>, ITableRecord<TSelf>
 {
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(SubscriptionExpires), SubscriptionExpires);
         return parameters;
     }

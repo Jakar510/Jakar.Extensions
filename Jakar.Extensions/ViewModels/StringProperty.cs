@@ -4,32 +4,30 @@
 namespace Jakar.Extensions;
 
 
-public class StringProperty<TCommand>( IEqualityComparer<string?> equalityComparer, OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : ViewModelProperty<TCommand, string>( equalityComparer, onSelected, value )
+public class StringProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : ViewModelProperty<TCommand, string>(onSelected, value)
     where TCommand : class, ICommand
 {
-    public StringProperty( IEqualityComparer<string?> equalityComparer, string value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
+    public StringProperty( string value ) : this(Properties.EmptyCommand, value) { }
 }
 
 
 
-public class EmailProperty<TCommand>( IEqualityComparer<string?> equalityComparer, OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>( equalityComparer, onSelected, value )
+public class EmailProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>(onSelected, value)
     where TCommand : class, ICommand
 {
-    public EmailProperty( IEqualityComparer<string?> equalityComparer, string value, MaskedTextProvider? mask ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
+    public EmailProperty( string value, MaskedTextProvider? mask ) : this(Properties.EmptyCommand, value) { }
 
 
-    protected override bool HasValue( [NotNullWhen( true )] string? value ) => base.HasValue( value ) && value.IsEmailAddress();
-    protected override string CoerceValue( string? value )
-    {
-        return string.IsNullOrWhiteSpace( value )
-                   ? string.Empty
-                   : value;
-    }
+    protected override bool HasValue( [NotNullWhen(true)] string? value ) => base.HasValue(value) && value.IsEmailAddress();
+    protected override string CoerceValue( string? value ) =>
+        string.IsNullOrWhiteSpace(value)
+            ? EMPTY
+            : value;
 }
 
 
 
-public class PhoneNumberProperty<TCommand>( IEqualityComparer<string?> equalityComparer, OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>( equalityComparer, onSelected, value )
+public class PhoneNumberProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>(onSelected, value)
     where TCommand : class, ICommand
 {
     public MaskedTextProvider Mask { get; init; } = new(@"(XXX) XXX-XXXX")
@@ -40,14 +38,14 @@ public class PhoneNumberProperty<TCommand>( IEqualityComparer<string?> equalityC
                                                         SkipLiterals    = false
                                                     };
 
-    public PhoneNumberProperty( IEqualityComparer<string?> equalityComparer, string value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
+    public PhoneNumberProperty( string value ) : this(Properties.EmptyCommand, value) { }
 
 
     protected override string CoerceValue( string? value )
     {
-        if ( string.IsNullOrWhiteSpace( value ) ) { return string.Empty; }
+        if ( string.IsNullOrWhiteSpace(value) ) { return EMPTY; }
 
-        string result = Mask.Set( value )
+        string result = Mask.Set(value)
                             ? Mask.ToString()
                             : value;
 
@@ -57,7 +55,7 @@ public class PhoneNumberProperty<TCommand>( IEqualityComparer<string?> equalityC
 
 
 
-public class PasswordProperty<TCommand>( IEqualityComparer<string?> equalityComparer, OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>( equalityComparer, onSelected, value )
+public class PasswordProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string>, None> onSelected, string value ) : StringProperty<TCommand>(onSelected, value)
     where TCommand : class, ICommand
 {
     public MaskedTextProvider Mask { get; init; } = new("*", CultureInfo.CurrentCulture, false, '_', '*', false)
@@ -68,14 +66,14 @@ public class PasswordProperty<TCommand>( IEqualityComparer<string?> equalityComp
                                                         SkipLiterals    = false
                                                     };
 
-    public PasswordProperty( IEqualityComparer<string?> equalityComparer, string value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
+    public PasswordProperty( string value ) : this(Properties.EmptyCommand, value) { }
 
 
     protected override string CoerceValue( string? value )
     {
-        if ( string.IsNullOrWhiteSpace( value ) ) { return string.Empty; }
+        if ( string.IsNullOrWhiteSpace(value) ) { return EMPTY; }
 
-        string result = Mask.Set( value )
+        string result = Mask.Set(value)
                             ? Mask.ToString()
                             : value;
 

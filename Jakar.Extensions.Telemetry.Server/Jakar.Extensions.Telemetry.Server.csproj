@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Database" />
     <PackageReference Include="Jakar.Extensions.Blazor" />
     <PackageReference Include="Jakar.Extensions.Blazor.Syncfusion" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
@@ -17,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Jakar.Database\Jakar.Database.csproj" />
     <ProjectReference Include="..\Jakar.Extensions.Telemetry\Jakar.Extensions.Telemetry.csproj" />
   </ItemGroup>
 

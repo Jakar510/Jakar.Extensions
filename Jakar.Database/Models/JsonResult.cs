@@ -3,7 +3,6 @@
 
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.WebUtilities;
-using Status = Jakar.Extensions.Status;
 
 
 
@@ -32,43 +31,30 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
                                                                                        [503] = ( "https://tools.ietf.org/html/rfc9110#section-15.6.4", "Service Unavailable" ),
                                                                                        [504] = ( "https://tools.ietf.org/html/rfc9110#section-15.6.5", "Gateway Timeout" )
                                                                                    };
-    public int                 StatusCode { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    int? IStatusCodeHttpResult.StatusCode => StatusCode;
-    public TValue?             Value      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
-    object? IValueHttpResult.  Value      => Value;
+    public int                           StatusCode { get; init; }
+    int? IStatusCodeHttpResult.          StatusCode => StatusCode;
+    public required JsonTypeInfo<TValue> TypeInfo   { get; init; }
+    public          TValue               Value      { get; }
+    object? IValueHttpResult.            Value      => Value;
 
 
-    public JsonResult( TValue? value, Status status ) : this(value, status.AsInt()) { }
-    public JsonResult( TValue? value, int status )
+    public JsonResult( TValue value, Status status ) : this(value, status.AsInt()) { }
+    public JsonResult( TValue value, int status )
     {
         Value      = value;
         StatusCode = status;
         if ( value is ProblemDetails details ) { Apply(details, StatusCode); }
     }
-    public static JsonResult<TValue> Create( TValue? value, Status status = Status.Ok ) => new(value, status);
-
-
-    public static implicit operator JsonResult<TValue>( Status                      status ) => new(default, status);
-    public static implicit operator JsonResult<TValue>( TValue?                     value )  => new(value, Status.Ok);
-    public static implicit operator JsonResult<TValue>( Ok<TValue>                  result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( Created<TValue>             result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( CreatedAtRoute<TValue>      result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( Accepted<TValue>            result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( AcceptedAtRoute<TValue>     result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( Conflict<TValue>            result ) => new(result.Value, result.StatusCode);
-    public static implicit operator JsonResult<TValue>( JsonHttpResult<TValue>      result ) => new(result.Value, result.StatusCode ?? 200);
-    public static implicit operator JsonResult<TValue>( UnprocessableEntity<TValue> result ) => new(result.Value, result.StatusCode);
+    public static JsonResult<TValue> Create( TValue value, Status               status              = Status.Ok ) => Create(value, Json.GetTypeInfo<TValue>(), status);
+    public static JsonResult<TValue> Create( TValue value, JsonTypeInfo<TValue> info, Status status = Status.Ok ) => new(value, status) { TypeInfo = info };
 
 
     public static void Apply( ProblemDetails details, int? statusCode )
     {
-        if ( !details.Status.HasValue )
-        {
-            details.Status = statusCode ??
-                             ( details is HttpValidationProblemDetails
-                                   ? 400
-                                   : 500 );
-        }
+        details.Status ??= statusCode ??
+                           ( details is HttpValidationProblemDetails
+                                 ? 400
+                                 : 500 );
 
         int valueOrDefault = details.Status.GetValueOrDefault();
 
@@ -99,7 +85,7 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         httpContext.Response.StatusCode = StatusCode;
-        string json = Value?.ToPrettyJson() ?? string.Empty;
+        string json = Value.ToJson(TypeInfo) ?? EMPTY;
         await httpContext.Response.WriteAsync(json, Encoding.Default, CancellationToken.None);
     }
     static void IEndpointMetadataProvider.PopulateMetadata( MethodInfo method, EndpointBuilder builder )

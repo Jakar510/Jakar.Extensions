@@ -1,51 +1,59 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
-public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRole,
-                                 [property: StringLength(1024)] string NormalizedName,
-                                 [property: StringLength(4096)] string ConcurrencyStamp,
-                                 string                                Rights,
-                                 RecordID<RoleRecord>                  ID,
-                                 RecordID<UserRecord>?                 CreatedBy,
-                                 DateTimeOffset                        DateCreated,
-                                 DateTimeOffset?                       LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
+[Serializable]
+[Table(TABLE_NAME)]
+public sealed record RoleRecord( [property: StringLength(NAME)]              string NameOfRole,
+                                 [property: StringLength(NORMALIZED_NAME)]   string NormalizedName,
+                                 [property: StringLength(CONCURRENCY_STAMP)] string ConcurrencyStamp,
+                                 UserRights                                         Rights,
+                                 RecordID<RoleRecord>                               ID,
+                                 RecordID<UserRecord>?                              CreatedBy,
+                                 DateTimeOffset                                     DateCreated,
+                                 DateTimeOffset?                                    LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
 {
-    public const                                string                        TABLE_NAME = "roles";
-    public static                               string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [JsonExtensionData]                  public IDictionary<string, JToken?>? AdditionalData { get; set; }
-    [StringLength(IUserRights.MAX_SIZE)] public string                        Rights         { get; set; } = Rights;
+    public const  string                     TABLE_NAME = "roles";
+    public static JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
+    public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
 
 
-    public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller) { }
-    public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller) { }
-    public RoleRecord( string       name, UserRecord? caller                                                                               = null ) : this(name, name, caller) { }
-    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = null ) : this(name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = null ) : this(name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = null ) : this(name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Default.WithColumn<string>(nameof(NameOfRole), length: NAME)
+                                                                                                           .WithColumn<string>(nameof(NormalizedName),   length: NORMALIZED_NAME)
+                                                                                                           .WithColumn<string>(nameof(ConcurrencyStamp), length: CONCURRENCY_STAMP)
+                                                                                                           .WithColumn<string>(nameof(Rights),           length: RIGHTS)
+                                                                                                           .With_CreatedBy()
+                                                                                                           .Build();
+
+    public static                 string     TableName => TABLE_NAME;
+    [StringLength(RIGHTS)] public UserRights Rights    { get; set; } = Rights;
+
+
+    public RoleRecord( IdentityRole role, RecordID<UserRecord>? caller                               = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, caller) { }
+    public RoleRecord( IdentityRole role, string                rights, RecordID<UserRecord>? caller = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, rights, caller) { }
+    public RoleRecord( string       name, RecordID<UserRecord>? caller                                                                                                             = null ) : this(name, name, caller) { }
+    public RoleRecord( string       name, string                normalizedName, RecordID<UserRecord>? caller                                                                       = null ) : this(name, normalizedName, name.GetHash(), EMPTY, RecordID<RoleRecord>.New(), caller, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string                normalizedName, string                concurrencyStamp, RecordID<UserRecord>? caller                               = null ) : this(name, normalizedName, concurrencyStamp, EMPTY, RecordID<RoleRecord>.New(), caller, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string                normalizedName, string                concurrencyStamp, string                rights, RecordID<UserRecord>? caller = null ) : this(name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller, DateTimeOffset.UtcNow) { }
     public RoleModel ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create(this);
 
-    public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : struct, Enum
-    {
-        Rights = rights.ToString();
-        return this;
-    }
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(NameOfRole),       NameOfRole);
         parameters.Add(nameof(NormalizedName),   NormalizedName);
         parameters.Add(nameof(ConcurrencyStamp), ConcurrencyStamp);
         parameters.Add(nameof(Rights),           Rights);
         return parameters;
     }
-    [Pure]
-    public static RoleRecord Create( DbDataReader reader )
+
+
+    [Pure] public static RoleRecord Create<TEnum>( string name, [HandlesResourceDisposal] scoped Permissions<TEnum> rights, string? normalizedName = null, RecordID<UserRecord>? caller = null, string? concurrencyStamp = null )
+        where TEnum : unmanaged, Enum => new(name, normalizedName ?? name, concurrencyStamp ?? name.GetHash(), rights.ToStringAndDispose(), caller);
+    [Pure] public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>(nameof(Rights));
         string                name             = reader.GetFieldValue<string>(nameof(NameOfRole));
@@ -59,16 +67,39 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
         return record.Validate();
     }
 
-    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
+
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
 
 
-    [Pure]
-    public IdentityRole ToIdentityRole() => new()
-                                            {
-                                                Name             = NameOfRole,
-                                                NormalizedName   = NormalizedName,
-                                                ConcurrencyStamp = ConcurrencyStamp
-                                            };
+    [Pure] public IdentityRole ToIdentityRole() => new()
+                                                   {
+                                                       Name             = NameOfRole,
+                                                       NormalizedName   = NormalizedName,
+                                                       ConcurrencyStamp = ConcurrencyStamp
+                                                   };
+
+
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<RoleRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (  
+                                            {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
+                                            {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
+                                            {nameof(ConcurrencyStamp).SqlColumnName()} varchar(1024) NOT NULL, 
+                                            {nameof(Rights).SqlColumnName()}           varchar(1024) NOT NULL, 
+                                            {nameof(ID).SqlColumnName()}               uuid          PRIMARY KEY,
+                                            {nameof(DateCreated).SqlColumnName()}      timestamptz   NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}     timestamptz   NULL,
+                                            {nameof(AdditionalData).SqlColumnName()}   json          NULL
+                                            );
+
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 
 
     public override bool Equals( RoleRecord? other )

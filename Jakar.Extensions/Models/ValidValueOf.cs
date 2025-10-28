@@ -6,19 +6,19 @@ namespace Jakar.Extensions;
 
 /// <summary> Inspired by <see cref="ValueOf{TValue,TThis}"/> </summary>
 /// <typeparam name="TValue"> </typeparam>
-/// <typeparam name="TClass"> </typeparam>
+/// <typeparam name="TSelf"> </typeparam>
 [SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]
-public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TClass, TValue>>, IEquatable<ValidValueOf<TClass, TValue>>, IComparable, IValidator
-    where TClass : ValidValueOf<TClass, TValue>, new()
+public abstract class ValidValueOf<TSelf, TValue> : IComparable<ValidValueOf<TSelf, TValue>>, IEquatable<ValidValueOf<TSelf, TValue>>, IComparable, IValidator
+    where TSelf : ValidValueOf<TSelf, TValue>, new()
     where TValue : IComparable<TValue>, IEquatable<TValue>
 {
     bool IValidator.IsValid => IsValid();
     public TValue   Value   { get; protected set; } = default!;
 
 
-    public static bool TryCreate( TValue value, [NotNullWhen(true)] out TClass? thisValue )
+    public static bool TryCreate( TValue value, [NotNullWhen(true)] out TSelf? thisValue )
     {
-        TClass self = new() { Value = value };
+        TSelf self = new() { Value = value };
 
         thisValue = self.IsValid()
                         ? self
@@ -28,9 +28,9 @@ public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TC
     }
 
 
-    public static TClass Create( TValue item )
+    public static TSelf Create( TValue item )
     {
-        TClass self = new() { Value = item };
+        TSelf self = new() { Value = item };
 
         self.Validate();
         return self;
@@ -65,11 +65,11 @@ public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TC
 
         if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return other is ValidValueOf<TClass, TValue> value
+        return other is ValidValueOf<TSelf, TValue> value
                    ? CompareTo(value)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(ValidValueOf<TClass, TValue>));
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(ValidValueOf<TSelf, TValue>));
     }
-    public int CompareTo( ValidValueOf<TClass, TValue>? other )
+    public int CompareTo( ValidValueOf<TSelf, TValue>? other )
     {
         if ( other is null ) { return 1; }
 
@@ -83,9 +83,9 @@ public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TC
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return other is ValidValueOf<TClass, TValue> value && Equals(value);
+        return other is ValidValueOf<TSelf, TValue> value && Equals(value);
     }
-    public virtual bool Equals( ValidValueOf<TClass, TValue>? other )
+    public virtual bool Equals( ValidValueOf<TSelf, TValue>? other )
     {
         if ( other is null ) { return false; }
 
@@ -120,10 +120,10 @@ public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TC
     }
 
 
-    public static bool operator ==( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => EqualityComparer<TValue>.Default.Equals(left.Value, right.Value);
-    public static bool operator !=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => !EqualityComparer<TValue>.Default.Equals(left.Value, right.Value);
-    public static bool operator >( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) > 0;
-    public static bool operator >=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) >= 0;
-    public static bool operator <( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) < 0;
-    public static bool operator <=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) <= 0;
+    public static bool operator ==( ValidValueOf<TSelf, TValue> left, ValidValueOf<TSelf, TValue> right ) => EqualityComparer<TValue>.Default.Equals(left.Value, right.Value);
+    public static bool operator !=( ValidValueOf<TSelf, TValue> left, ValidValueOf<TSelf, TValue> right ) => !EqualityComparer<TValue>.Default.Equals(left.Value, right.Value);
+    public static bool operator >( ValidValueOf<TSelf, TValue>  left, ValidValueOf<TSelf, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) > 0;
+    public static bool operator >=( ValidValueOf<TSelf, TValue> left, ValidValueOf<TSelf, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) >= 0;
+    public static bool operator <( ValidValueOf<TSelf, TValue>  left, ValidValueOf<TSelf, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) < 0;
+    public static bool operator <=( ValidValueOf<TSelf, TValue> left, ValidValueOf<TSelf, TValue> right ) => Comparer<TValue>.Default.Compare(left.Value, right.Value) <= 0;
 }

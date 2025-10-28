@@ -1,46 +1,18 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/23/2024  11:04
 
-using Microsoft.Extensions.Primitives;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
 namespace Jakar.Extensions;
 
 
-[Serializable, DefaultValue(nameof(Empty))]
-public readonly record struct Alert()
-{
-    public static readonly Alert Empty = new(null);
-    public                 bool  IsNotValid => !CheckIsValid(Title, Message);
-
-
-    public bool      IsValid => CheckIsValid(Title, Message);
-    public string?   Message { get; init; }
-    public string?   Title   { get; init; }
-    public TimeSpan? TTL     { get; init; }
-
-
-    public Alert( string? title, string? message, double ttlSeconds ) : this(title, message, TimeSpan.FromSeconds(ttlSeconds)) { }
-    public Alert( string? title, string? message = null, TimeSpan? ttl = null ) : this()
-    {
-        Title   = title;
-        Message = message;
-        TTL     = ttl;
-    }
-    public static bool CheckIsValid( string? title, string? message ) => !string.IsNullOrWhiteSpace(title) || !string.IsNullOrWhiteSpace(message);
-
-    public static implicit operator Alert( string? value ) => new(value);
-
-
-    [Pure] public Error ToError() => new(null, null, Title, Message, null, StringValues.Empty);
-}
-
-
-
-[Serializable, DefaultValue(nameof(Empty))]
+[Serializable]
+[DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass, IEqualComparable<Errors>
+public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
 {
     private static readonly Error[] __details = [];
     public static readonly Errors Empty = new()
@@ -48,12 +20,15 @@ public sealed class Errors() : BaseClass, IEqualComparable<Errors>
                                               Alert   = null,
                                               Details = __details
                                           };
+    public static JsonTypeInfo<Errors[]> JsonArrayInfo => JakarExtensionsContext.Default.ErrorsArray;
 
 
-    [JsonRequired] public required Alert?  Alert       { get; init; }
-    public                         string  Description => Details.GetMessage();
-    [JsonRequired] public required Error[] Details     { get; init; }
-    public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
+    public static                  JsonSerializerContext JsonContext  => JakarExtensionsContext.Default;
+    public static                  JsonTypeInfo<Errors>  JsonTypeInfo => JakarExtensionsContext.Default.Errors;
+    [JsonRequired] public required Alert?                Alert        { get; init; }
+    public                         string                Description  => Details.GetMessage();
+    [JsonRequired] public required Error[]               Details      { get; init; }
+    public                         bool                  IsValid      => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
 
 
     public static Errors Create( params Error[]? details ) => Create(null,                                     details);
@@ -66,8 +41,9 @@ public sealed class Errors() : BaseClass, IEqualComparable<Errors>
                                                                             };
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public        Status GetStatus()                 => Details.GetStatus(Status.Ok);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Status GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
+    public        ValueEnumerable<FromArray<Error>, Error> AsValueEnumerable()         => new(new FromArray<Error>(Details));
+    public        Status                                   GetStatus()                 => Details.GetStatus(Status.Ok);
+    public static Status                                   GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
 
 
     public static implicit operator ReadOnlySpan<Error>( Errors   result )  => result.Details;
@@ -80,24 +56,14 @@ public sealed class Errors() : BaseClass, IEqualComparable<Errors>
     public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create(details.ToArray());
 
 
-    public bool Equals( Errors? other )
+    public override bool Equals( Errors? other )
     {
         if ( other is null ) { return false; }
 
-        return ReferenceEquals(this, other) || ( Nullable.Equals(Alert, other.Alert) && Error.Equals(Details, other.Details) );
+        return ReferenceEquals(this, other) || ( Equals(Alert, other.Alert) && Error.Equals(Details, other.Details) );
     }
-    public int CompareTo( Errors? other ) => string.CompareOrdinal(Description, other?.Description);
-    public int CompareTo( object? other )
-    {
-        if ( other is null ) { return 1; }
-
-        if ( ReferenceEquals(this, other) ) { return 0; }
-
-        if ( other is Errors errors ) { return CompareTo(errors); }
-
-        throw new ExpectedValueTypeException(nameof(other), other, typeof(Errors));
-    }
-    public override bool Equals( object? obj )                      => ReferenceEquals(this, obj) || ( obj is Errors other && Equals(other) );
+    public override int  CompareTo( Errors? other )                 => string.CompareOrdinal(Description, other?.Description);
+    public override bool Equals( object?    obj )                   => ReferenceEquals(this, obj) || ( obj is Errors other && Equals(other) );
     public override int  GetHashCode()                              => HashCode.Combine(Alert, Details);
     public static   bool operator ==( Errors? left, Errors? right ) => EqualityComparer<Errors>.Default.Equals(left, right);
     public static   bool operator !=( Errors? left, Errors? right ) => !EqualityComparer<Errors>.Default.Equals(left, right);

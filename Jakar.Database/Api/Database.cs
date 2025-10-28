@@ -1,47 +1,52 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using ZiggyCreatures.Caching.Fusion;
 using IsolationLevel = System.Data.IsolationLevel;
-using Status = Jakar.Extensions.Status;
 
 
 
 namespace Jakar.Database;
 
 
-[SuppressMessage("ReSharper", "SuggestBaseTypeForParameter"), SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
-    protected readonly ConcurrentBag<IDbTable>          _tables             = [];
-    public readonly    DbOptions                        Settings;
-    public readonly    DbTable<AddressRecord>           Addresses;
-    public readonly    DbTable<FileRecord>              Files;
-    public readonly    DbTable<GroupRecord>             Groups;
-    public readonly    DbTable<RecoveryCodeRecord>      RecoveryCodes;
-    public readonly    DbTable<RoleRecord>              Roles;
-    public readonly    DbTable<UserAddressRecord>       UserAddresses;
-    public readonly    DbTable<UserGroupRecord>         UserGroups;
-    public readonly    DbTable<UserLoginProviderRecord> UserLogins;
-    public readonly    DbTable<UserRecord>              Users;
-    public readonly    DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
-    public readonly    DbTable<UserRoleRecord>          UserRoles;
-    protected readonly FusionCache                      _cache;
-    public readonly    IConfiguration                   Configuration;
-    protected          ActivitySource?                  _activitySource;
-    protected          Meter?                           _meter;
-    protected          string?                          _className;
+    public const                ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
+    protected readonly          ConcurrentBag<IDbTable>          _tables             = [];
+    public readonly             DbOptions                        Options;
+    public readonly             DbTable<AddressRecord>           Addresses;
+    public readonly             DbTable<FileRecord>              Files;
+    public readonly             DbTable<GroupRecord>             Groups;
+    protected internal readonly DbTable<MigrationRecord>         Migrations;
+    public readonly             DbTable<RecoveryCodeRecord>      RecoveryCodes;
+    public readonly             DbTable<RoleRecord>              Roles;
+    public readonly             DbTable<UserAddressRecord>       UserAddresses;
+    public readonly             DbTable<UserGroupRecord>         UserGroups;
+    public readonly             DbTable<UserLoginProviderRecord> UserLoginProviders;
+    public readonly             DbTable<UserRecord>              Users;
+    public readonly             DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
+    public readonly             DbTable<UserRoleRecord>          UserRoles;
+    protected readonly          FusionCache                      _cache;
+    public readonly             IConfiguration                   Configuration;
+    public readonly             ThreadLocal<UserRecord?>         LoggedInUser = new();
+    protected                   ActivitySource?                  _activitySource;
+    protected                   Meter?                           _meter;
+    protected                   string?                          _className;
 
 
-    public static      Database?         Current                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public static      DataProtector     DataProtector             { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             string            ClassName                 { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType().GetFullName(); }
-    public             int?              CommandTimeout            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.CommandTimeout; }
-    protected internal SecuredString?    ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public             PasswordValidator PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.PasswordRequirements.GetValidator(); }
-    public             IsolationLevel    TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion        Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.AppInformation.Version; }
+    public static Database?     Current       { get; set; }
+    public static DataProtector DataProtector { get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+
+    public string ClassName =>
+        _className ??= GetType()
+           .GetFullName();
+
+    protected internal SecuredString?               ConnectionString          { get; set; }
+    ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
+    public virtual     PasswordValidator            PasswordValidator         => DbOptions.PasswordRequirements.GetValidator();
+    public             IsolationLevel               TransactionIsolationLevel { get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion                   Version                   => Options.AppInformation.Version;
 
 
     static Database()
@@ -49,7 +54,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         EnumSqlHandler<SupportedLanguage>.Register();
         EnumSqlHandler<MimeType>.Register();
         EnumSqlHandler<Status>.Register();
-        EnumSqlHandler<AppVersion.Format>.Register();
+        EnumSqlHandler<AppVersionFormat>.Register();
         DateTimeOffsetHandler.Register();
         DateTimeHandler.Register();
         DateOnlyHandler.Register();
@@ -68,21 +73,22 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base()
     {
-        _cache            = cache;
-        Configuration     = configuration;
-        Settings          = options.Value;
-        Users             = Create<UserRecord>();
-        Roles             = Create<RoleRecord>();
-        UserRoles         = Create<UserRoleRecord>();
-        UserGroups        = Create<UserGroupRecord>();
-        Groups            = Create<GroupRecord>();
-        RecoveryCodes     = Create<RecoveryCodeRecord>();
-        UserLogins        = Create<UserLoginProviderRecord>();
-        UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
-        Addresses         = Create<AddressRecord>();
-        UserAddresses     = Create<UserAddressRecord>();
-        Files             = Create<FileRecord>();
-        Current           = this;
+        _cache             = cache;
+        Configuration      = configuration;
+        Options            = options.Value;
+        Users              = Create<UserRecord>();
+        Roles              = Create<RoleRecord>();
+        UserRoles          = Create<UserRoleRecord>();
+        UserGroups         = Create<UserGroupRecord>();
+        Groups             = Create<GroupRecord>();
+        RecoveryCodes      = Create<RecoveryCodeRecord>();
+        UserRecoveryCodes  = Create<UserRecoveryCodeRecord>();
+        UserLoginProviders = Create<UserLoginProviderRecord>();
+        Addresses          = Create<AddressRecord>();
+        UserAddresses      = Create<UserAddressRecord>();
+        Files              = Create<FileRecord>();
+        Migrations         = Create<MigrationRecord>();
+        Current            = this;
         Task.Run(InitDataProtector);
     }
     public virtual async ValueTask DisposeAsync()
@@ -101,11 +107,54 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     // Task IHostedService.StopAsync( CancellationToken  cancellationToken ) => _tableCache.StopAsync( cancellationToken );
 
 
+    public async ValueTask<bool> HasAccess<TRight>( CancellationToken token, params TRight[] rights )
+        where TRight : unmanaged, Enum
+    {
+        await using NpgsqlConnection connection   = await ConnectAsync(token);
+        UserRecord?                  loggedInUser = LoggedInUser.Value;
+        if ( loggedInUser is null ) { return false; }
+
+        bool result = await HasPermission(connection, null, loggedInUser, token, rights);
+        return result;
+    }
+    public async ValueTask<bool> HasPermission<TRight>( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, CancellationToken token, params TRight[] rights )
+        where TRight : unmanaged, Enum
+    {
+        HashSet<TRight> permissions = await CurrentPermissions<TRight>(connection, transaction, user, token);
+
+        foreach ( TRight right in rights.AsSpan() )
+        {
+            if ( permissions.Contains(right) ) { return false; }
+        }
+
+        return true;
+    }
+    public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, CancellationToken token )
+        where TRight : unmanaged, Enum
+    {
+        HashSet<IUserRights> models = new(DEFAULT_CAPACITY) { user };
+        HashSet<TRight>      rights = new(Permissions<TRight>.EnumValues.Length);
+
+        await foreach ( GroupRecord record in user.GetGroups(connection, transaction, this, token) ) { models.Add(record); }
+
+        await foreach ( RoleRecord record in user.GetRoles(connection, transaction, this, token) ) { models.Add(record); }
+
+        using Permissions<TRight> results = Permissions<TRight>.Create(models);
+
+        foreach ( ( TRight permission, bool value ) in results.Rights )
+        {
+            if ( value ) { rights.Add(permission); }
+        }
+
+        return rights;
+    }
+
+
     protected async Task InitDataProtector()
     {
-        if ( Settings.DataProtectorKey.HasValue )
+        if ( Options.DataProtectorKey.HasValue )
         {
-            ( LocalFile pem, SecuredStringResolverOptions password ) = Settings.DataProtectorKey.Value;
+            ( LocalFile pem, SecuredStringResolverOptions password ) = Options.DataProtectorKey.Value;
             await InitDataProtector(pem, password);
         }
     }
@@ -115,75 +164,26 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected virtual NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure.ToString());
     public async ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token )
     {
-        ConnectionString ??= await Settings.GetConnectionStringAsync(Configuration, token);
+        ConnectionString ??= await Options.GetConnectionStringAsync(Configuration, token);
         NpgsqlConnection connection = CreateConnection(ConnectionString);
         await connection.OpenAsync(token);
         return connection;
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected virtual DbTable<TClass> Create<TClass>()
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    protected virtual DbTable<TSelf> Create<TSelf>()
+        where TSelf : class, ITableRecord<TSelf>
     {
-        DbTable<TClass> table = new(this, _cache);
+        DbTable<TSelf> table = new(this, _cache);
         return AddDisposable(table);
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
     {
         _tables.Add(value);
         return value;
-    }
-
-
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where TValue : class, IDapperSqlCommand
-    {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token);
-    }
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
-    {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(transaction, token, CommandTimeout);
-    }
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
-    {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(connection, transaction, token, CommandTimeout);
-    }
-
-
-    public async ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( NpgsqlConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
-        where TValue : class, IDapperSqlCommand
-    {
-        try
-        {
-            CommandDefinition definition = GetCommand(command, transaction, token);
-            return await connection.ExecuteReaderAsync(definition);
-        }
-        catch ( Exception e ) { throw new SqlException(command.Sql, e); }
-    }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
-    {
-        try
-        {
-            CommandDefinition command = GetCommand(in sql, transaction, token);
-            return await connection.ExecuteReaderAsync(command);
-        }
-        catch ( Exception e ) { throw new SqlException(sql.sql, e); }
-    }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition )
-    {
-        try { return await definition.connection.ExecuteReaderAsync(definition); }
-        catch ( Exception e ) { throw new SqlException(definition.command.CommandText, definition.command.Parameters as DynamicParameters, e); }
     }
 
 
@@ -208,8 +208,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall(Register, request, rights, types, token);
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( NpgsqlConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
+        where TRequest : ILoginRequest<UserModel> => this.TryCall(Register, request, rights, types, token);
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( NpgsqlConnection connection, NpgsqlTransaction transaction, TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
+        where TRequest : ILoginRequest<UserModel>
     {
         UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
         if ( record is not null ) { return Error.NotFound(request.UserName); }
@@ -222,45 +224,21 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
+    public virtual async IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>, IDateCreated
     {
-        ArgumentNullException.ThrowIfNull(variableName);
-        DynamicParameters parameters = new(template);
-        parameters.Add(variableName, value);
-        return parameters;
+        SqlCommand<TSelf>            command = new(sql, parameters);
+        await using NpgsqlCommand    cmd     = command.ToCommand(connection, transaction);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-
-
-    public virtual async IAsyncEnumerable<TClass> Where<TClass>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TClass : class, IDbReaderMapping<TClass>, IRecordPair
-    {
-        DbDataReader reader;
-
-        try
-        {
-            SqlCommand        sqlCommand = new(sql, parameters);
-            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
-            reader = await connection.ExecuteReaderAsync(command);
-        }
-        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
-
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
-    }
-    public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TValue> Where<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
+        where TSelf : ITableRecord<TSelf>
     {
-        DbDataReader reader;
-
-        try
-        {
-            SqlCommand        sqlCommand = new(sql, parameters);
-            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
-            await connection.QueryAsync<TValue>(command);
-
-            reader = await connection.ExecuteReaderAsync(command);
-        }
-        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
-
+        SqlCommand<TSelf>            command = SqlCommand<TSelf>.Create(sql, parameters);
+        await using NpgsqlCommand    cmd     = command.ToCommand(connection, transaction);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
         while ( await reader.ReadAsync(token) ) { yield return reader.GetFieldValue<TValue>(0); }
     }
 }

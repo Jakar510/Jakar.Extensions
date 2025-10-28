@@ -6,17 +6,8 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
-    where TSelf : IRectangle<TSelf>
+    where TSelf : struct, IRectangle<TSelf>, IJsonModel<TSelf>
 {
-    public double        Bottom   { get; }
-    public double        Left     { get; }
-    public double        Right    { get; }
-    public double        Top      { get; }
-    public ReadOnlyPoint Center   { get; }
-    public ReadOnlyPoint Location { get; }
-    public ReadOnlySize  Size     { get; }
-
-
     public abstract static implicit operator Rectangle( TSelf  self );
     public abstract static implicit operator RectangleF( TSelf self );
     public abstract static implicit operator TSelf( int        value );
@@ -25,24 +16,21 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     public abstract static implicit operator TSelf( double     value );
 
 
-    public static bool CheckIfEmpty( in TSelf self ) => double.IsNaN(self.Bottom) || double.IsNaN(self.Top) || double.IsNegative(self.Left) || double.IsNaN(self.Left) || double.IsNaN(self.Right) || double.IsNegative(self.Right);
-
-
-    [Pure] public abstract static TSelf Create( params ReadOnlySpan<ReadOnlyPoint> points );
-    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               point,     in ReadOnlySize      size );
-    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               topLeft,   in ReadOnlyPoint     bottomRight );
-    [Pure] public abstract static TSelf Create( in     TSelf                       rectangle, in ReadOnlyThickness padding );
-    [Pure] public abstract static TSelf Create( double                             x,         double               y, in ReadOnlySize size );
-    [Pure] public abstract static TSelf Create( double                             x,         double               y, double          width, double height );
-    [Pure]
-    public abstract static TSelf Create<T>( ref readonly T rect )
-        where T : IRectangle<T>;
-
-
-    public void Deconstruct( out float          x,     out float         y, out float  width, out float  height );
-    public void Deconstruct( out double         x,     out double        y, out double width, out double height );
-    public void Deconstruct( out ReadOnlyPoint  point, out ReadOnlySize  size );
-    public void Deconstruct( out ReadOnlyPointF point, out ReadOnlySizeF size );
+    [Pure] public abstract static TSelf Create( float  x, float  y, float  width, float  height );
+    [Pure] public abstract static TSelf Create( double x, double y, double width, double height );
+    [Pure] public abstract static TSelf Create<TPoint>( params ReadOnlySpan<TPoint> points )
+        where TPoint : struct, IPoint<TPoint>;
+    [Pure] public abstract static TSelf Create<TPoint>( in TPoint topLeft, in TPoint bottomRight )
+        where TPoint : struct, IPoint<TPoint>;
+    [Pure] public abstract static TSelf Create<TPoint, TSize>( in TPoint point, in TSize size )
+        where TPoint : struct, IPoint<TPoint>
+        where TSize : struct, ISize<TSize>;
+    [Pure] public abstract static TSelf Create<TRectangle>( in TRectangle rectangle )
+        where TRectangle : struct, IRectangle<TRectangle>;
+    [Pure] public abstract static TSelf Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
+        where TRectangle : struct, IRectangle<TRectangle>;
+    [Pure] public abstract static TSelf Create<TSize>( double x, double y, in TSize size )
+        where TSize : struct, ISize<TSize>;
 
 
     public static string ToString( ref readonly TSelf self, string? format )
@@ -52,7 +40,7 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.X},{self.Y},{self.Width},{self.Height}";

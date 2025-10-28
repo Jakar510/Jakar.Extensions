@@ -13,9 +13,10 @@ namespace Jakar.Extensions;
 
 public sealed class OneTimePassword( string key, string issuer ) : Randoms
 {
+    private readonly byte[] __keyBytes = Base32Encoding.ToBytes(key);
+
     // ReSharper disable once StaticMemberInGenericType
     private readonly string __issuer     = issuer;
-    private readonly byte[] __keyBytes   = Base32Encoding.ToBytes(key);
     private readonly string __secret_Key = key;
 
 
@@ -27,7 +28,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
         where TApp : IAppName => Create(TApp.AppName);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool ValidateToken( string token, VerificationWindow? window = null ) => ValidateToken(token, out long _, window);
+    public bool ValidateToken( string token, VerificationWindow? window = null ) => ValidateToken(token, out long _, window);
     public bool ValidateToken( string token, out long timeStepMatched, VerificationWindow? window = null )
     {
         Totp totp = new(__keyBytes);
@@ -35,7 +36,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
     }
 
 
-    public string GetContent( IUserName record )   => GetContent(record.UserName);
+    public string GetContent( IUserName model )    => GetContent(model.UserName);
     public string GetContent( string    userName ) => $"otpauth://totp/{userName}?secret={__secret_Key}&issuer={__issuer}";
 
 
@@ -48,7 +49,9 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
                                       Options = GetOptions(width, height)
                                   };
 
-        string? result = writer.Write(GetContent(record)).ToString();
+        string? result = writer.Write(GetContent(record))
+                               .ToString();
+
         return result ?? throw new NullReferenceException(nameof(result));
     }
     public static QrCodeEncodingOptions GetOptions( int width, int height ) => new()
@@ -62,7 +65,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
                                                                                };
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public string GetQrCode( string userName, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode(userName, size, size, format);
+    public string GetQrCode( string userName, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode(userName, size, size, format);
     public string GetQrCode( string userName, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
         Guard.IsGreaterThanOrEqualTo(width,  0);
@@ -74,6 +77,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
                                       Options = GetOptions(width, height)
                                   };
 
-        return writer.Write(GetContent(userName)).ToString();
+        return writer.Write(GetContent(userName))
+                     .ToString();
     }
 }

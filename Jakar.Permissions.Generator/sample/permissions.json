@@ -1,0 +1,12 @@
+{
+  "System": {
+    "Manage": {
+      "Logs": ["View","Create","Delete","Import"],
+      "Emails": ["View","Create","Delete","Export"]
+    }
+  },
+  "User": {
+    "Files": ["Download","Upload","Modify","Delete","Edit","Share","View","Rename"],
+    "Groups": ["View","Edit","Remove","Assign"]
+  }
+}

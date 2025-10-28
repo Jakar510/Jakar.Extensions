@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -6,11 +6,12 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
+		<WarningsAsErrors>Nullable;CS0114</WarningsAsErrors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<Version>9.0.0.5-beta</Version>
+		<Version>9.0.0.8-beta</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -60,11 +61,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Remove="DbMigrations\CustomPostgresProcessor.cs" />
-		<Compile Remove="DbMigrations\CustomPostgresQuoter.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Dapper.Contrib" />
 		<PackageReference Include="dbup-postgresql" />
@@ -72,8 +68,7 @@
 		<PackageReference Include="FluentMigrator.Abstractions" />
 		<PackageReference Include="InterpolatedSql.Dapper" />
 		<PackageReference Include="Jakar.Extensions" />
-		<PackageReference Include="FluentMigrator" />
-		<PackageReference Include="FluentMigrator.Runner" />
+		<PackageReference Include="Jakar.Shapes" />
 		<PackageReference Include="MailKit" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
@@ -111,7 +106,7 @@
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.Memory" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" />
-		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" />
 		<PackageReference Include="ZXing.Net" />
 		<PackageReference Include="Hardware.Info" />
 		<PackageReference Include="System.Security.Cryptography.Xml" />
@@ -138,15 +133,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Reference Include="Dapper">
-	    <HintPath>C:\Users\jakar\.nuget\packages\dapper\2.1.66\lib\net8.0\Dapper.dll</HintPath>
-	  </Reference>
-	  <Reference Include="InterpolatedSql.Dapper">
-	    <HintPath>C:\Users\jakar\.nuget\packages\interpolatedsql.dapper\2.4.0\lib\net7.0\InterpolatedSql.Dapper.dll</HintPath>
-	  </Reference>
-	  <Reference Include="OneOf">
-	    <HintPath>C:\Users\jakar\.nuget\packages\oneof\3.0.271\lib\netstandard2.0\OneOf.dll</HintPath>
-	  </Reference>
+		<Reference Include="Dapper">
+			<HintPath>C:\Users\jakar\.nuget\packages\dapper\2.1.66\lib\net8.0\Dapper.dll</HintPath>
+		</Reference>
+		<Reference Include="InterpolatedSql.Dapper">
+			<HintPath>C:\Users\jakar\.nuget\packages\interpolatedsql.dapper\2.4.0\lib\net7.0\InterpolatedSql.Dapper.dll</HintPath>
+		</Reference>
+		<Reference Include="OneOf">
+			<HintPath>C:\Users\jakar\.nuget\packages\oneof\3.0.271\lib\netstandard2.0\OneOf.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!--

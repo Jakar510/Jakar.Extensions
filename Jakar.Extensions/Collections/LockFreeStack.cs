@@ -6,22 +6,22 @@ namespace Jakar.Extensions;
 
 public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 {
-    private Node? __head;
     private int   __count;
+    private Node? __head;
 
-    public int Count => Interlocked.CompareExchange( ref __count, 0, 0 );
+    public int Count => Interlocked.CompareExchange(ref __count, 0, 0);
 
 
     public void Push( TValue value )
     {
         Node node = new(value);
 
-        do { node.next = __head; }
-        while ( Interlocked.CompareExchange( ref __head, node, node.next ) != node.next );
+        do { node.Next = __head; }
+        while ( Interlocked.CompareExchange(ref __head, node, node.Next) != node.Next );
 
-        Interlocked.Increment( ref __count );
+        Interlocked.Increment(ref __count);
     }
-    public TValue? TryPop() => TryPop( out TValue? result )
+    public TValue? TryPop() => TryPop(out TValue? result)
                                    ? result
                                    : default;
     public bool TryPop( out TValue? result )
@@ -36,28 +36,12 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
             result = default;
             return false;
         }
-        while ( Interlocked.CompareExchange( ref __head, oldHead.next, oldHead ) != oldHead );
+        while ( Interlocked.CompareExchange(ref __head, oldHead.Next, oldHead) != oldHead );
 
-        Interlocked.Decrement( ref __count );
+        Interlocked.Decrement(ref __count);
         result = oldHead.Value;
         return true;
     }
-
-
-
-    protected sealed class Node( TValue value ) : IEqualityOperators<Node>
-    {
-        public readonly TValue Value = value;
-        public          Node?  next;
-
-
-        public          bool Equals( Node?   other )                => ReferenceEquals( this, other );
-        public override bool Equals( object? obj )                  => ReferenceEquals( this, obj ) || Equals( obj as Node );
-        public override int  GetHashCode()                          => HashCode.Combine( Value );
-        public static   bool operator ==( Node? left, Node? right ) => left?.Equals( right ) is true;
-        public static   bool operator !=( Node? left, Node? right ) => left?.Equals( right ) is not true;
-    }
-
 
 
     public IEnumerator<TValue> GetEnumerator()
@@ -67,8 +51,23 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
         while ( current is not null )
         {
             yield return current.Value;
-            current = current.next;
+            current = current.Next;
         }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+
+
+    protected sealed class Node( TValue value ) : IEqualityOperators<Node>
+    {
+        public readonly TValue Value = value;
+        public          Node?  Next;
+
+
+        public          bool Equals( Node?   other )                => ReferenceEquals(this, other);
+        public override bool Equals( object? obj )                  => ReferenceEquals(this, obj) || Equals(obj as Node);
+        public override int  GetHashCode()                          => HashCode.Combine(Value);
+        public static   bool operator ==( Node? left, Node? right ) => left?.Equals(right) is true;
+        public static   bool operator !=( Node? left, Node? right ) => left?.Equals(right) is not true;
+    }
 }

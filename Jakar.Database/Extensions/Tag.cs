@@ -11,7 +11,7 @@ public readonly record struct Tag( string Name, object? Value )
 
     public static KeyValuePair<string, object?>[] Convert( params ReadOnlySpan<Tag> tags )
     {
-        KeyValuePair<string, object?>[] array = AsyncLinq.GetArray<KeyValuePair<string, object?>>(tags.Length);
+        KeyValuePair<string, object?>[] array = tags.Length.GetArray<KeyValuePair<string, object?>>();
         for ( int i = 0; i < tags.Length; i++ ) { array[i] = tags[i]; }
 
         return array;

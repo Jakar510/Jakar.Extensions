@@ -1,21 +1,16 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 1/8/2024  21:46
 
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-
-
 namespace Jakar.Database;
 
 
 public sealed class ProtectedDataProvider : IDataProtectionProvider
 {
-    public static void Register( IServiceCollection builder ) => builder.TryAddSingleton<IDataProtectionProvider, ProtectedDataProvider>();
-    public IProtectedData CreateProtector( string purpose )
-    {
-        ProtectedData data = new(Database.DataProtector);
-        return data;
-    }
+    private readonly ConcurrentDictionary<string, ProtectedData> __data = new();
+
+
+    public static void           Register( IServiceCollection builder ) => builder.TryAddSingleton<IDataProtectionProvider, ProtectedDataProvider>();
+    public        IProtectedData CreateProtector( string      purpose ) => __data.GetOrAdd(purpose, static ( _, protector ) => new ProtectedData(protector), Database.DataProtector);
 }
 
 

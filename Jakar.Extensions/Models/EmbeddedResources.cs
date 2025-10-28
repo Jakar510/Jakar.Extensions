@@ -84,9 +84,11 @@ public class EmbeddedResources<TValue>
     }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public async ValueTask<T> GetResourceJsonAsync<T>( string fileName ) => await GetResourceJsonAsync<T>(fileName, Encoding.Default);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    public async ValueTask<T> GetResourceJsonAsync<T>( string fileName )
+        where T : IJsonModel<T> => await GetResourceJsonAsync<T>(fileName, Encoding.Default);
+
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
+        where T : IJsonModel<T>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         string              text          = await GetResourceTextAsync(fileName, encoding);

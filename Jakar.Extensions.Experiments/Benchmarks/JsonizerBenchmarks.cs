@@ -46,6 +46,8 @@
 // |   JsonNet_ToJson | 6.793 us | 0.0686 us | 0.0641 us |    2 | 0.6638 | 0.0076 |      5 KB |
 // | JsonNet_FromJson | 8.914 us | 0.0858 us | 0.0717 us |    3 | 0.5035 |      - |      4 KB |
 //  */
+//
+// [MarkdownExporterAttribute.GitHub]
 // [Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess )]
 // [Orderer( SummaryOrderPolicy.FastestToSlowest )]
 // [RankColumn]
@@ -88,7 +90,7 @@
 //         var test = new Test( "Root", children );
 //         return test;
 //     }
-//     public static Test GetObject() => new(string.Empty);
+//     public static Test GetObject() => new(EMPTY);
 //     public static Test GetObjects()
 //     {
 //         var first  = new Test( "First",  new Test( "1.1" ), new Test( "1.2" ) );

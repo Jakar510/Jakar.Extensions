@@ -23,13 +23,13 @@ public struct DataInsertBuilder( in InsertClauseBuilder insert, ref EasySqlBuild
         if ( !__cache.Any() ) { return __builder.NewLine(); }
 
         __builder.Begin();
-        __builder.AddRange( ',', __cache.Keys );
+        __builder.AddRange(',', __cache.Keys);
         __builder.End();
 
-        __builder.Add( VALUES );
+        __builder.Add(VALUES);
 
         __builder.Begin();
-        __builder.AddRange( ',', __cache.Values );
+        __builder.AddRange(',', __cache.Values);
         __builder.End();
 
 

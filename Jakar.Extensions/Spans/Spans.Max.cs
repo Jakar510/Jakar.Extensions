@@ -6,23 +6,21 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    [Pure]
-    public static TValue Max<TValue>( this scoped in ReadOnlySpan<TValue> value, TValue start )
+    [Pure] public static TValue Max<TValue>( this scoped in ReadOnlySpan<TValue> value, TValue start )
         where TValue : INumber<TValue>
     {
         TValue result = start;
-        foreach ( TValue x in value ) { result = TValue.Max( result, x ); }
+        foreach ( TValue x in value ) { result = TValue.Max(result, x); }
 
         return result;
     }
 
 
-    [Pure]
-    public static TNumber Max<TValue, TNumber>( this scoped in ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector, TNumber start )
+    [Pure] public static TNumber Max<TValue, TNumber>( this scoped in ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector, TNumber start )
         where TNumber : INumber<TNumber>
     {
         TNumber result = start;
-        foreach ( TValue x in value ) { result = TNumber.Max( result, selector( x ) ); }
+        foreach ( TValue x in value ) { result = TNumber.Max(result, selector(x)); }
 
         return result;
     }

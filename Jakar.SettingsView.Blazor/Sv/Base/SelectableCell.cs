@@ -15,20 +15,20 @@ public abstract class SelectableCell : CellBase
 
     public override async Task SetParametersAsync( ParameterView parameters )
     {
-        await base.SetParametersAsync( parameters );
-        await SetIsToggle( IsToggle );
+        await base.SetParametersAsync(parameters);
+        await SetIsToggle(IsToggle);
     }
     public async ValueTask SetIsToggle( bool value )
     {
         if ( _isToggle == value ) { return; }
 
         _isToggle = value;
-        await IsVisibleChanged.InvokeAsync( value );
+        await IsVisibleChanged.InvokeAsync(value);
     }
     protected async Task OnClickHandler( MouseEventArgs? args = null )
     {
-        Class = Class.ToggleClass( IsToggle );
-        await OnClick.Execute( args );
+        Class = Class.ToggleClass(IsToggle);
+        await OnClick.Execute(args);
     }
 }
 
@@ -47,21 +47,21 @@ public abstract class SelectableCell<TValue, TArgs> : ValueCellBase<TValue>
 
     public override async Task SetParametersAsync( ParameterView parameters )
     {
-        await base.SetParametersAsync( parameters );
-        await SetIsToggle( IsToggle );
+        await base.SetParametersAsync(parameters);
+        await SetIsToggle(IsToggle);
     }
     public async ValueTask SetIsToggle( bool? value )
     {
-        if ( Nullable.Equals( _isToggle, value ) ) { return; }
+        if ( Nullable.Equals(_isToggle, value) ) { return; }
 
         _isToggle = value;
-        if ( value.HasValue ) { await IsVisibleChanged.InvokeAsync( value.Value ); }
+        if ( value.HasValue ) { await IsVisibleChanged.InvokeAsync(value.Value); }
     }
     protected virtual async Task OnClickHandler( TArgs? args = null )
     {
-        if ( IsToggle.HasValue ) { Class = Class.ToggleClass( IsToggle.Value ); }
+        if ( IsToggle.HasValue ) { Class = Class.ToggleClass(IsToggle.Value); }
 
-        await OnClick.Execute( args );
+        await OnClick.Execute(args);
     }
 }
 

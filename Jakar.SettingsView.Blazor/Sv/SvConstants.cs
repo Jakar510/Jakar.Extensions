@@ -40,7 +40,7 @@ public static class SvConstants
     {
         if ( args is null ) { return; }
 
-        if ( callback.HasDelegate ) { await callback.InvokeAsync( args ); }
+        if ( callback.HasDelegate ) { await callback.InvokeAsync(args); }
     }
     public static string ToggleClass( this string classValue, bool isToggle )
     {
@@ -48,9 +48,9 @@ public static class SvConstants
 
         const string ACTIVE = $" {SV_ACTIVE}";
 
-        return !classValue.Contains( SV_ACTIVE, StringComparison.Ordinal )
+        return !classValue.Contains(SV_ACTIVE, StringComparison.Ordinal)
                    ? classValue + ACTIVE
-                   : classValue.Replace( ACTIVE, string.Empty, StringComparison.Ordinal );
+                   : classValue.Replace(ACTIVE, EMPTY, StringComparison.Ordinal);
     }
 
 

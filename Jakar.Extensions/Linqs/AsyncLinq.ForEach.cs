@@ -5,31 +5,31 @@ public static partial class AsyncLinq
 {
     public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> action )
     {
-        foreach ( TElement item in source ) { await action( item ); }
+        foreach ( TElement item in source ) { await action(item); }
     }
 
 
     public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, Task> action )
     {
-        foreach ( (TKey key, TElement value) in dict ) { await action( key, value ); }
+        foreach ( ( TKey key, TElement value ) in dict ) { await action(key, value); }
     }
 
 
     public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TElement, Task> action )
     {
-        foreach ( TElement value in dict.Values ) { await action( value ); }
+        foreach ( TElement value in dict.Values ) { await action(value); }
     }
 
 
     public static async Task ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, Task> action )
     {
-        foreach ( TKey key in dict.Keys ) { await action( key ); }
+        foreach ( TKey key in dict.Keys ) { await action(key); }
     }
 
 
     public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action )
     {
-        await foreach ( TElement item in source ) { await action( item ); }
+        await foreach ( TElement item in source ) { await action(item); }
     }
 
 
@@ -39,12 +39,15 @@ public static partial class AsyncLinq
         {
             using ( partition )
             {
-                while ( partition.MoveNext() ) { await body( partition.Current ); }
+                while ( partition.MoveNext() ) { await body(partition.Current); }
             }
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(awaitPartition));
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> body, int? maxDegreeOfParallelism = null )
     {
@@ -52,12 +55,15 @@ public static partial class AsyncLinq
         {
             using ( partition )
             {
-                while ( partition.MoveNext() ) { await body( partition.Current ); }
+                while ( partition.MoveNext() ) { await body(partition.Current); }
             }
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(awaitPartition));
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, Task> body, CancellationToken token, int? maxDegreeOfParallelism = null )
     {
@@ -65,12 +71,15 @@ public static partial class AsyncLinq
         {
             using ( partition )
             {
-                while ( partition.MoveNext() ) { await body( partition.Current, token ); }
+                while ( partition.MoveNext() ) { await body(partition.Current, token); }
             }
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(awaitPartition));
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask> body, CancellationToken token, int? maxDegreeOfParallelism = null )
     {
@@ -78,12 +87,15 @@ public static partial class AsyncLinq
         {
             using ( partition )
             {
-                while ( partition.MoveNext() ) { await body( partition.Current, token ); }
+                while ( partition.MoveNext() ) { await body(partition.Current, token); }
             }
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(awaitPartition));
     }
 
 
@@ -95,7 +107,7 @@ public static partial class AsyncLinq
 
         ActionBlock<TElement> block = new(action, options);
 
-        await foreach ( TElement item in source ) { block.Post( item ); }
+        await foreach ( TElement item in source ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -106,11 +118,11 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task awaitItem( TElement item ) => await action( item, token );
+        async Task awaitItem( TElement item ) => await action(item, token);
 
         ActionBlock<TElement> block = new(awaitItem, options);
 
-        await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -121,11 +133,11 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task awaitItem( TElement item ) => await action( item, token );
+        async Task awaitItem( TElement item ) => await action(item, token);
 
         ActionBlock<TElement> block = new(awaitItem, options);
 
-        await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -143,7 +155,10 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        await Task.WhenAll(Partitioner.Create(source)
+                                      .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                      .AsParallel()
+                                      .Select(awaitPartition));
     }
     public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, int? maxDegreeOfParallelism = null, TaskScheduler? scheduler = null )
     {
@@ -153,7 +168,7 @@ public static partial class AsyncLinq
 
 
         ActionBlock<Task> block = new(x => x, options);
-        await foreach ( Task item in source ) { block.Post( item ); }
+        await foreach ( Task item in source ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -171,13 +186,16 @@ public static partial class AsyncLinq
                 while ( partition.MoveNext() )
                 {
                     TElement item = await partition.Current;
-                    results.Add( item );
+                    results.Add(item);
                 }
             }
         }
 
 
-        Task tasks = Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
+        Task tasks = Task.WhenAll(Partitioner.Create(source)
+                                             .GetPartitions(maxDegreeOfParallelism ?? Environment.ProcessorCount)
+                                             .AsParallel()
+                                             .Select(awaitPartition));
 
         await tasks;
         return results;
@@ -188,8 +206,8 @@ public static partial class AsyncLinq
 
         async Task awaitTask( Task<TElement> task )
         {
-            Debug.Assert( results != null, nameof(results) + " != null" );
-            results.Add( await task );
+            Debug.Assert(results != null, nameof(results) + " != null");
+            results.Add(await task);
         }
 
         ExecutionDataflowBlockOptions options = new() { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
@@ -197,7 +215,7 @@ public static partial class AsyncLinq
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
         ActionBlock<Task<TElement>> block = new(awaitTask, options);
-        await foreach ( Task<TElement> item in source ) { block.Post( item ); }
+        await foreach ( Task<TElement> item in source ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -215,13 +233,13 @@ public static partial class AsyncLinq
 
         async Task awaitItem( TElement item )
         {
-            TElement result = await action( item, token );
-            results.Add( result );
+            TElement result = await action(item, token);
+            results.Add(result);
         }
 
         ActionBlock<TElement> block = new(awaitItem, options);
 
-        await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -236,7 +254,7 @@ public static partial class AsyncLinq
 
         ActionBlock<TElement> block = new(awaitItem, options);
 
-        await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
+        await foreach ( TElement item in source.WithCancellation(token) ) { block.Post(item); }
 
         block.Complete();
         await block.Completion;
@@ -244,29 +262,29 @@ public static partial class AsyncLinq
 
         async Task awaitItem( TElement item )
         {
-            TElement result = await action( item, token );
-            results.Add( result );
+            TElement result = await action(item, token);
+            results.Add(result);
         }
     }
     public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
     {
-        foreach ( TElement item in source ) { await action( item ); }
+        foreach ( TElement item in source ) { await action(item); }
     }
     public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, TElement, ValueTask> action )
     {
-        foreach ( (TKey key, TElement value) in dict ) { await action( key, value ); }
+        foreach ( ( TKey key, TElement value ) in dict ) { await action(key, value); }
     }
     public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TElement, ValueTask> action )
     {
-        foreach ( TElement value in dict.Values ) { await action( value ); }
+        foreach ( TElement value in dict.Values ) { await action(value); }
     }
     public static async ValueTask ForEachAsync<TKey, TElement>( this IDictionary<TKey, TElement> dict, Func<TKey, ValueTask> action )
     {
-        foreach ( TKey key in dict.Keys ) { await action( key ); }
+        foreach ( TKey key in dict.Keys ) { await action(key); }
     }
     public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action )
     {
-        await foreach ( TElement item in source ) { await action( item ); }
+        await foreach ( TElement item in source ) { await action(item); }
     }
     /// <summary> If <paramref name="source"/> is an <see cref="List{TElement}"/> , items should not be added or removed while the calling. </summary>
     /// <typeparam name="TElement"> </typeparam>
@@ -275,15 +293,15 @@ public static partial class AsyncLinq
         switch ( source )
         {
             case List<TElement> list:
-                ForEach( CollectionsMarshal.AsSpan( list ), action );
+                ForEach(CollectionsMarshal.AsSpan(list), action);
                 return;
 
             case TElement[] array:
-                ForEach( array.AsSpan(), action );
+                ForEach(array.AsSpan(), action);
                 return;
 
             default:
-                foreach ( TElement item in source ) { action( item ); }
+                foreach ( TElement item in source ) { action(item); }
 
                 return;
         }
@@ -291,21 +309,22 @@ public static partial class AsyncLinq
 
     public static void ForEach<TElement>( this ReadOnlySpan<TElement> source, Action<TElement> action )
     {
-        foreach ( ref readonly TElement item in source ) { action( item ); }
+        foreach ( ref readonly TElement item in source ) { action(item); }
     }
 
 
     public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TKey, TElement> action )
     {
-        foreach ( (TKey key, TElement value) in dict ) { action( key, value ); }
+        foreach ( ( TKey key, TElement value ) in dict ) { action(key, value); }
     }
     public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TKey> action )
     {
-        foreach ( TKey key in dict.Keys ) { action( key ); }
+        foreach ( TKey key in dict.Keys ) { action(key); }
     }
     public static void ForEach<TKey, TElement>( this IDictionary<TKey, TElement> dict, Action<TElement> action )
     {
-        foreach ( TElement value in dict.Values ) { action( value ); }
+        foreach ( TElement value in dict.Values ) { action(value); }
     }
-    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel().ForAll( action );
+    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
+                                                                                                                        .ForAll(action);
 }

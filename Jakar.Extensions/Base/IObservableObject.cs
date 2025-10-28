@@ -16,13 +16,13 @@ public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyCha
 
     bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value );
     bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue>;
+        where TComparer : EqualityComparer<TValue>;
     bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY );
     bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue>;
+        where TComparer : EqualityComparer<TValue>;
     bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
-        where TComparer : IEqualityComparer<TValue>;
+        where TComparer : EqualityComparer<TValue>;
 }
 
 

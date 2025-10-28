@@ -6,7 +6,7 @@ public sealed class ResxCollection : IResxCollection
     private readonly ConcurrentBag<ResxRowRecord> __rows = [];
 
 
-    public int Count { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __rows.Count; }
+    public int Count => __rows.Count;
 
 
     public ResxCollection() { }
@@ -15,7 +15,7 @@ public sealed class ResxCollection : IResxCollection
 
     public ResxSet GetSet( in SupportedLanguage language )
     {
-        ResxSet set = new(Count);
+        ResxSet set = new(DbOptions.ConcurrencyLevel, Count);
         foreach ( ResxRowRecord row in this ) { set[row.KeyID] = row.GetValue(language); }
 
         return set;
@@ -31,7 +31,7 @@ public sealed class ResxCollection : IResxCollection
 
     public ValueTask Init( IResxProvider  provider, CancellationToken      token                          = default ) => Init(provider, provider.Resx, token);
     public ValueTask Init( IConnectableDb db,       DbTable<ResxRowRecord> table, CancellationToken token = default ) => db.Call(Init, table, token);
-    public async ValueTask Init( NpgsqlConnection connection, DbTransaction? transaction, DbTable<ResxRowRecord> table, CancellationToken token = default )
+    public async ValueTask Init( NpgsqlConnection connection, NpgsqlTransaction? transaction, DbTable<ResxRowRecord> table, CancellationToken token = default )
     {
         __rows.Clear();
         await foreach ( ResxRowRecord record in table.All(connection, transaction, token) ) { __rows.Add(record); }

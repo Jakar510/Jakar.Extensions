@@ -1,4 +1,4 @@
 ﻿namespace Jakar.Extensions;
 
 
-[AttributeUsage( AttributeTargets.All )] public class NotSerializableAttribute : Attribute;
+[AttributeUsage(AttributeTargets.All)] public class NotSerializableAttribute : Attribute;

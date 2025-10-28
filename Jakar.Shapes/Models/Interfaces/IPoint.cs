@@ -5,19 +5,11 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
-    where TSelf : IPoint<TSelf>
+    where TSelf : struct, IPoint<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     [Pure] public abstract static TSelf Create( double x, double y );
 
-    [Pure] public TSelf  Reverse();
-    [Pure] public TSelf  Round();
-    [Pure] public TSelf  Floor();
-    [Pure] public double DistanceTo( in TSelf         other );
-    [Pure] public double Dot( in        ReadOnlyPoint other );
-    [Pure] public double Magnitude();
-    public        double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 );
 
-    
     public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )
@@ -25,7 +17,7 @@ public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.X},{self.Y}";

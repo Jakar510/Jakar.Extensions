@@ -4,23 +4,22 @@
 namespace Jakar.Extensions;
 
 
-[method: MethodImpl( MethodImplOptions.AggressiveInlining )]
+[method: MethodImpl(MethodImplOptions.AggressiveInlining)]
 public ref struct EnumerateEnumerator<TValue>( ReadOnlySpan<TValue> span )
 {
     private readonly ReadOnlySpan<TValue> __buffer = span;
     private          int                  __index  = 0;
 
-    public (int Index, TValue Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
+    public (int Index, TValue Value) Current { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; private set; } = default;
 
-    public EnumerateEnumerator( int startIndex, ReadOnlySpan<TValue> span ) : this( span ) => __index = startIndex;
+    public EnumerateEnumerator( int startIndex, ReadOnlySpan<TValue> span ) : this(span) => __index = startIndex;
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly EnumerateEnumerator<TValue> GetEnumerator() => this;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly EnumerateEnumerator<TValue> GetEnumerator() => this;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool MoveNext()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool MoveNext()
     {
-        int index = int.CreateChecked( __index );
+        int index = int.CreateChecked(__index);
 
         if ( index >= __buffer.Length )
         {
@@ -28,7 +27,7 @@ public ref struct EnumerateEnumerator<TValue>( ReadOnlySpan<TValue> span )
             return false;
         }
 
-        Current = (__index, __buffer[index]);
+        Current = ( __index, __buffer[index] );
         __index++;
         return true;
     }

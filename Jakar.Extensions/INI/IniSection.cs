@@ -4,24 +4,21 @@
 [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
 public partial class IniConfig
 {
-    internal const         string CLOSE   = " ]";
-    internal const         string EQUALS  = " = ";
-    internal const         string OPEN    = "[ ";
-    public static readonly int    Padding = CLOSE.Length + OPEN.Length + EQUALS.Length;
+    public static readonly int Padding = CLOSE.Length + OPEN.Length + EQUALS_SPACE.Length;
 
 
 
     public sealed class Section( string sectionName ) : IReadOnlyDictionary<string, string?>
     {
-        private readonly ConcurrentDictionary<string, string?>                                     __dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
-        public           int                                                                       Length  => GetLength(out _);
-        internal         int                                                                       Longest => __dictionary.Keys.Max(static item => item.Length);
-        public           ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
-        public           string                                                                    Name    { get; } = sectionName;
-        public           int                                                                       Count   => __dictionary.Count;
+        private readonly ConcurrentDictionary<string, string?> __dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
+        public           int                                   Count => __dictionary.Count;
         public string? this[ string key ] { get => __dictionary[key]; set => __dictionary[key] = value; }
-        public IEnumerable<string>  Keys   => __dictionary.Keys;
-        public IEnumerable<string?> Values => __dictionary.Values;
+        public   IEnumerable<string>                                                       Keys    => __dictionary.Keys;
+        public   int                                                                       Length  => GetLength(out _);
+        internal int                                                                       Longest => __dictionary.Keys.Max(static item => item.Length);
+        public   ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+        public   string                                                                    Name    { get; } = sectionName;
+        public   IEnumerable<string?>                                                      Values  => __dictionary.Values;
 
 
         public static implicit operator Section( string sectionName ) => new(sectionName);
@@ -34,7 +31,12 @@ public partial class IniConfig
         public string ToString( string? format, IFormatProvider? formatProvider )
         {
             Span<char> span = stackalloc char[Length + 1];
-            if ( TryFormat(span, out int charsWritten, format, formatProvider) ) { return span[..charsWritten].ToString(); }
+
+            if ( TryFormat(span, out int charsWritten, format, formatProvider) )
+            {
+                return span[..charsWritten]
+                   .ToString();
+            }
 
             throw new InvalidOperationException("Cannot convert to string");
         }
@@ -42,15 +44,14 @@ public partial class IniConfig
         {
             int count = __dictionary.Keys.Count;
             longest = Longest;
-            int keys   = ( longest + EQUALS.Length ) * count;
+            int keys   = ( longest + EQUALS_SPACE.Length ) * count;
             int values = __dictionary.Values.Sum(static x => x?.Length ?? 0);
             int result = Padding + keys + values + count;
             return result;
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
         {
             int length = GetLength(out int longest);
             Debug.Assert(destination.Length > length);
@@ -74,7 +75,7 @@ public partial class IniConfig
 
                 foreach ( char c in sKey.PadRight(longest) ) { destination[charsWritten++] = c; }
 
-                foreach ( char c in EQUALS ) { destination[charsWritten++] = c; }
+                foreach ( char c in EQUALS_SPACE ) { destination[charsWritten++] = c; }
 
                 foreach ( char c in sectionValue ) { destination[charsWritten++] = c; }
 
@@ -98,8 +99,8 @@ public partial class IniConfig
 
         #region Gets
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
         public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
+            where TValue : IJsonModel<TValue>
         {
             string? s = this[key];
 
@@ -109,10 +110,10 @@ public partial class IniConfig
 
             return value is not null;
         }
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue[]? value )
+        public bool ValueAs<TValue>( string key, JsonTypeInfo<TValue[]> info, [NotNullWhen(true)] out TValue[]? value )
         {
-            value = this[key]?.FromJson<TValue[]>();
+            value = this[key]
+              ?.FromJson(info);
 
             return value is not null;
         }
@@ -122,10 +123,10 @@ public partial class IniConfig
             where TNumber : INumber<TNumber> => TNumber.TryParse(this[key], null, out value);
 
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
-            value = this[key]?.FromJson<string[]>();
+            value = this[key]
+              ?.FromJson<string[]>(JakarExtensionsContext.Default.StringArray);
 
             return value is not null;
         }
@@ -173,25 +174,24 @@ public partial class IniConfig
 
         #region Adds
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
         public void AddJson<TValue>( string key, TValue value )
-            where TValue : class => this[key] = value.ToJson();
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
+            where TValue : class, IJsonModel<TValue> => this[key] = value.ToJson();
+        public void AddJson<TValue>( string key, TValue value, JsonTypeInfo<TValue> info ) => this[key] = value.ToJson(info);
+        public void Add<TValue>( string key, params ReadOnlySpan<TValue> values )
+            where TValue : IJsonModel<TValue> => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
-        public                                                                                                  void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
-        public                                                                                                  void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
-        public                                                                                                  void Add( string         key, TimeSpan            value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, DateTime            value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
-        public                                                                                                  void Add( string         key, DateTimeOffset      value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
-        public                                                                                                  void Add( string         key, IPAddress           value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, Guid                value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, bool                value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, AppVersion          value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, Version             value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, string?             value ) => this[key] = value;
+        public void Add( string key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
+        public void Add( string key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
+        public void Add( string key, TimeSpan            value ) => this[key] = value.ToString();
+        public void Add( string key, DateTime            value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
+        public void Add( string key, DateTimeOffset      value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
+        public void Add( string key, IPAddress           value ) => this[key] = value.ToString();
+        public void Add( string key, Guid                value ) => this[key] = value.ToString();
+        public void Add( string key, bool                value ) => this[key] = value.ToString();
+        public void Add( string key, AppVersion          value ) => this[key] = value.ToString();
+        public void Add( string key, Version             value ) => this[key] = value.ToString();
+        public void Add( string key, string?             value ) => this[key] = value;
 
 
         public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = null ) =>

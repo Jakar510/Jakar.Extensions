@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
-using ZiggyCreatures.Caching.Fusion;
-
-
-
 namespace Jakar.Database;
 
 
@@ -15,103 +11,140 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     public static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
 
 
-    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection(secure);
+    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure);
 
 
-    [Experimental("SqlTableBuilder"), Conditional("DEBUG")]
-    public static async void TestAsync()
+    public static async Task TestAsync( CancellationToken token = default )
     {
-        try
-        {
-            string sql = SqlTableBuilder<GroupRecord>.Create()
-                                                     .WithColumn(ColumnMetaData.Nullable(nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE))
-                                                     .WithColumn(ColumnMetaData.NotNullable(nameof(GroupRecord.NameOfGroup), DbType.String,            GroupRecord.MAX_SIZE,                     $"{nameof(GroupRecord.NameOfGroup)} > 0"))
-                                                     .WithColumn(ColumnMetaData.NotNullable(nameof(GroupRecord.Rights),      DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0"))
-                                                     .WithColumn<RecordID<GroupRecord>>(nameof(GroupRecord.ID))
-                                                     .WithColumn<RecordID<GroupRecord>?>(nameof(GroupRecord.CreatedBy))
-                                                     .WithColumn<Guid?>(nameof(GroupRecord.CreatedBy))
-                                                     .WithColumn<DateTimeOffset>(nameof(GroupRecord.DateCreated))
-                                                     .WithColumn<DateTimeOffset?>(nameof(GroupRecord.LastModified))
-                                                     .Build();
+        WebApplicationBuilder        builder          = WebApplication.CreateBuilder();
+        SecuredStringResolverOptions connectionString = $"User ID=dev;Password=dev;Host=localhost;Port=5432;Database={AppName}";
 
-            sql.WriteToConsole();
-            await InternalTestAsync();
+        DbOptions options = new()
+                            {
+                                ConnectionStringResolver = connectionString,
+                                CommandTimeout           = 30,
+                                TokenIssuer              = AppName,
+                                TokenAudience            = AppName
+                            };
 
-        #pragma warning disable RS1035
-            Console.ReadKey();
-        #pragma warning restore RS1035
-        }
-        catch ( Exception e )
-        {
-        #pragma warning disable RS1035
-            Console.Error.WriteLine(e);
-        #pragma warning restore RS1035
-        }
-    }
-    private static async Task InternalTestAsync()
-    {
-        WebApplicationBuilder builder          = WebApplication.CreateBuilder();
-        SecuredString         connectionString = $"User ID=dev;Password=dev;Host=192.168.2.50;Port=5432;Database={AppName}";
-
-        builder.AddDatabase<TestDatabase>(new DbOptions
-                                          {
-                                              ConnectionStringResolver = connectionString,
-                                              CommandTimeout           = 30,
-                                              TokenIssuer              = AppName,
-                                              TokenAudience            = AppName
-                                          });
-
+        builder.AddDatabase<TestDatabase>(options);
 
         await using WebApplication app = builder.Build();
 
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseHttpMetrics();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.UseTelemetry();
-        app.MapGet("Ping", static () => DateTimeOffset.UtcNow);
+        app.UseDefaults();
 
-        try
-        {
-            await app.MigrateUpAsync();
-            await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
-            await TestUsers(db);
-            await app.RunAsync();
-        }
-        finally { await app.MigrateDownAsync(); }
+        app.MapGet("/",     static () => DateTimeOffset.UtcNow);
+        app.MapGet("/Ping", static () => DateTimeOffset.UtcNow);
+
+        await app.ApplyMigrations(token);
+
+        await TestAll(app, token);
+
+        await app.StartAsync(token)
+                 .ConfigureAwait(false);
+
+        await app.WaitForShutdownAsync(token)
+                 .ConfigureAwait(false);
     }
-    private static async ValueTask TestUsers( Database db, CancellationToken token = default )
+
+
+    private static async ValueTask TestAll( WebApplication app, CancellationToken token = default )
     {
-        UserRecord       admin   = UserRecord.Create("Admin", "Admin", UserRights<TestRight>.SA);
-        UserRecord       user    = UserRecord.Create("User",  "User",  UserRights<TestRight>.Create(TestRight.Read));
-        UserRecord[]     users   = [admin, user];
-        List<UserRecord> results = new(users.Length);
+        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+        TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+        ( UserRecord admin, UserRecord user )             = await Add_Users(db, token);
+        ( RoleRecord adminRole, RoleRecord userRole )     = await Add_Roles(db, admin, token);
+        ( GroupRecord adminGroup, GroupRecord userGroup ) = await Add_Group(db, admin, token);
+        UserRoleRecord[]  userRoles  = await Add_Roles(db, user, [adminRole, userRole],   token);
+        UserGroupRecord[] userGroups = await Add_Roles(db, user, [adminGroup, userGroup], token);
+        ( AddressRecord address, UserAddressRecord userAddress ) = await Add_Address(db, user, token);
+        FileRecord              file          = await Add_File(db, user, token);
+        UserLoginProviderRecord loginProvider = await Add_UserLoginProvider(db, user, token);
+        ( RecoveryCodeRecord[] recoveryCodes, UserRecoveryCodeRecord[] userRecoveryCodes ) = await Add_RecoveryCodes(db, user, token);
+    }
+    private static async ValueTask<(RecoveryCodeRecord[] records, UserRecoveryCodeRecord[] results)> Add_RecoveryCodes( Database db, UserRecord user, CancellationToken token = default )
+    {
+        RecoveryCodeRecord.Codes codes = RecoveryCodeRecord.Create(user, 10);
 
-        using ( Activity? activity = Telemetry.DbSource.StartActivity("Users.Insert") )
-        {
-            await foreach ( UserRecord record in db.Users.Insert(users, token) ) { results.Add(record); }
+        RecoveryCodeRecord[] records = await db.RecoveryCodes.Insert(codes.Values, token)
+                                               .ToArray(codes.Count, token);
 
-            Debug.Assert(users.Length == results.Count);
-        }
+        UserRecoveryCodeRecord[] memory = UserRecoveryCodeRecord.Create(user, records.AsSpan());
 
-        using ( Activity? activity = Telemetry.DbSource.StartActivity("Users.All") )
-        {
-            results.Clear();
-            await foreach ( UserRecord record in db.Users.All(token) ) { results.Add(record); }
+        UserRecoveryCodeRecord[] results = await db.UserRecoveryCodes.Insert(memory.AsMemory(), token)
+                                                   .ToArray(records.Length, token);
 
-            Debug.Assert(users.Length == results.Count);
-        }
+        return ( records, results );
+    }
+    private static async ValueTask<UserLoginProviderRecord> Add_UserLoginProvider( Database db, UserRecord user, CancellationToken token = default )
+    {
+        UserLoginProviderRecord record = new("login provider", "provider display name", "provider key", "value", RecordID<UserLoginProviderRecord>.New(), user, DateTimeOffset.UtcNow);
+        record = await db.UserLoginProviders.Insert(record, token);
+        return record;
+    }
+    private static async ValueTask<FileRecord> Add_File( Database db, UserRecord user, CancellationToken token = default )
+    {
+        FileRecord record = new("file name", "file description", "file type", 0, "hash", MimeType.Unknown, "payload", "full file system path", RecordID<FileRecord>.New(), DateTimeOffset.UtcNow);
+        record       = await db.Files.Insert(record, token);
+        user.ImageID = record;
+        await db.Users.Update(user, token);
+        return record;
+    }
+    private static async ValueTask<(AddressRecord result, UserAddressRecord userAddress)> Add_Address( Database db, UserRecord user, CancellationToken token = default )
+    {
+        AddressRecord     record      = AddressRecord.Create("address line one", "", "city", "state or province", "postal code with optional extension", "country");
+        AddressRecord     result      = await db.Addresses.Insert(record, token);
+        UserAddressRecord userAddress = await db.UserAddresses.Insert(UserAddressRecord.Create(user, result), token);
+        return ( result, userAddress );
+    }
+    private static async ValueTask<UserGroupRecord[]> Add_Roles( Database db, UserRecord user, GroupRecord[] roles, CancellationToken token = default )
+    {
+        ReadOnlyMemory<UserGroupRecord> records = UserGroupRecord.Create(user, roles.AsSpan());
+
+        UserGroupRecord[] results = await db.UserGroups.Insert(records, token)
+                                            .ToArray(records.Length, token);
+
+        return results;
+    }
+    private static async ValueTask<UserRoleRecord[]> Add_Roles( Database db, UserRecord user, RoleRecord[] roles, CancellationToken token = default )
+    {
+        ReadOnlyMemory<UserRoleRecord> records = UserRoleRecord.Create(user, roles.AsSpan());
+
+        UserRoleRecord[] results = await db.UserRoles.Insert(records, token)
+                                           .ToArray(records.Length, token);
+
+        return results;
+    }
+    private static async ValueTask<(RoleRecord Admin, RoleRecord User)> Add_Roles( Database db, UserRecord adminUser, CancellationToken token = default )
+    {
+        RoleRecord admin = RoleRecord.Create("Admin", Permissions<TestRight>.SA(),                   "Admins", adminUser);
+        RoleRecord user  = RoleRecord.Create("User",  Permissions<TestRight>.Create(TestRight.Read), "Users",  adminUser);
+        return ( await db.Roles.Insert(admin, token), await db.Roles.Insert(user, token) );
+    }
+    private static async ValueTask<(GroupRecord Admin, GroupRecord User)> Add_Group( Database db, UserRecord adminUser, CancellationToken token = default )
+    {
+        GroupRecord admin = GroupRecord.Create("Admin", Permissions<TestRight>.SA(),                   "Admin", adminUser);
+        GroupRecord user  = GroupRecord.Create("User",  Permissions<TestRight>.Create(TestRight.Read), "User",  adminUser);
+        return ( await db.Groups.Insert(admin, token), await db.Groups.Insert(user, token) );
+    }
+    private static async ValueTask<(UserRecord Admin, UserRecord User)> Add_Users( Database db, CancellationToken token = default )
+    {
+        UserRecord admin = UserRecord.Create("Admin", "Admin", Permissions<TestRight>.SA());
+        UserRecord user  = UserRecord.Create("User",  "User",  Permissions<TestRight>.Create(TestRight.Read));
+
+        using ( Telemetry.DbSource.StartActivity("Users.Add.SU") ) { admin = await db.Users.Insert(admin, token); }
+
+        using ( Telemetry.DbSource.StartActivity("Users.Add.User") ) { user = await db.Users.Insert(user, token); }
+
+        return ( admin, user );
     }
 
 
 
     public enum TestRight
     {
+        Admin,
         Read,
-        Write,
-        Delete,
-        Admin
+        Write
     }
 }

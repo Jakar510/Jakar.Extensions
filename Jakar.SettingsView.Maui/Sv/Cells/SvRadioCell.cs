@@ -18,5 +18,5 @@ public abstract class SvRadioCell<TValue> : ValueCellBase<TValue>
 
 public class RadioCell : SvRadioCell<string>
 {
-    public override ErrorOrResult<string> Save() => Value ?? string.Empty;
+    public override ErrorOrResult<string> Save() => Value ?? EMPTY;
 }

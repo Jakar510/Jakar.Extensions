@@ -1,12 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/28/2022  1:14 PM
 
-using System;
-using System.Collections.Generic;
-using Jakar.Xml.Deserialization;
-
-
-
 namespace Jakar.Xml;
 
 
@@ -17,8 +11,8 @@ public static partial class Xmlizer
     {
         // Activator.CreateInstance<TValue>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
 
-        XDocument document = new( xml );
-        TValue?        result   = new();
+        XDocument document = new(xml);
+        TValue?   result   = new();
 
         object obj  = result;
         Type   type = typeof(TValue);

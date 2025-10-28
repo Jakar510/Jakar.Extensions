@@ -3,11 +3,6 @@
 
 public static class Buffers
 {
-    public const int DEFAULT_CAPACITY = 64;
-    public const int NOT_FOUND        = -1;
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void EnsureCapacity<TValue>( [MustDisposeResource] this ref Buffer<TValue> buffer, int additionalRequestedCapacity )
         where TValue : IEquatable<TValue>
     {

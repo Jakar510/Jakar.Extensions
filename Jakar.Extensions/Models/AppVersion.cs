@@ -1,28 +1,33 @@
 ﻿namespace Jakar.Extensions;
 
 
-/// <summary> See <see cref="Format"/> for formatting details. </summary>
-[Serializable, JsonConverter(typeof(AppVersionJsonNetConverter)), JsonObject]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISpanParsable<AppVersion>, IComparisonOperators<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>
+/// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
+[Serializable]
+[JsonConverter(typeof(AppVersionJsonConverter))]
+public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
-    private const          char                       SEPARATOR = '.';
-    public static readonly AppVersion                 Default   = new();
-    private                string?                    __string;
-    public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<AppVersion>.Default; }
-    public                 int?                       Build          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    int IReadOnlyCollection<int>.                     Count          => Scheme.AsInt();
-    public              AppVersionFlags               Flags          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              bool                          IsValid        => !ReferenceEquals(this, Default) && this != Default;
-    [JsonIgnore] public int                           Length         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Flags.Length + 65; }
-    public              int?                          Maintenance    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int                           Major          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          MajorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          Minor          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          MinorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              Format                        Scheme         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    private const          char       SEPARATOR = '.';
+    public static readonly AppVersion Default   = new(0);
+    private                string?    __string;
 
 
-    static AppVersion() => JsonNet.Serializer.Converters.Add(AppVersionJsonNetConverter.Instance);
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer => FuzzyEqualizer<AppVersion>.Default;
+    public static JsonTypeInfo<AppVersion[]> JsonArrayInfo  => JakarExtensionsContext.Default.AppVersionArray;
+    public static JsonSerializerContext      JsonContext    => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<AppVersion>   JsonTypeInfo   => JakarExtensionsContext.Default.AppVersion;
+    public        int?                       Build          { get; init; }
+    int IReadOnlyCollection<int>.            Count          => (int)Scheme;
+    public              AppVersionFlags      Flags          { get; init; }
+    public              bool                 IsValid        => !ReferenceEquals(this, Default) && this != Default;
+    [JsonIgnore] public int                  Length         => Flags.Length + 65;
+    public              int?                 Maintenance    { get; init; }
+    public              int                  Major          { get; init; }
+    public              int?                 MajorRevision  { get; init; }
+    public              int?                 Minor          { get; init; }
+    public              int?                 MinorRevision  { get; init; }
+    public              AppVersionFormat     Scheme         { get; init; }
+
+
     public AppVersion() : this(0, null, null, null, null, null, AppVersionFlags.Stable) { }
     public AppVersion( int major ) : this(major, null, null, null, null, null, AppVersionFlags.Stable) { }
     public AppVersion( int major, int  minor ) : this(major, minor, null, null, null, null, AppVersionFlags.Stable) { }
@@ -38,7 +43,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
         Build         = build;
         MajorRevision = majorRevision;
         MinorRevision = minorRevision;
-        Scheme        = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        Scheme        = GetAppVersionFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
         Flags         = flags;
     }
     public AppVersion( Version version )
@@ -49,39 +54,39 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
         Build         = version.Build;
         MinorRevision = version.MinorRevision;
         MajorRevision = version.MajorRevision;
-        Scheme        = GetFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
+        Scheme        = GetAppVersionFormat(Minor, Maintenance, MajorRevision, MinorRevision, Build);
         Flags         = AppVersionFlags.Stable;
     }
     public AppVersion( AppVersionFlags flags, params ReadOnlySpan<int> span )
     {
         Flags  = flags;
-        Scheme = (Format)span.Length;
+        Scheme = (AppVersionFormat)span.Length;
 
         switch ( Scheme )
         {
-            case Format.Singular:
+            case AppVersionFormat.Singular:
                 Major = span[0];
                 return;
 
-            case Format.Minimal:
+            case AppVersionFormat.Minimal:
                 Major = span[0];
                 Minor = span[1];
                 return;
 
-            case Format.Typical:
+            case AppVersionFormat.Typical:
                 Major = span[0];
                 Minor = span[1];
                 Build = span[2];
                 return;
 
-            case Format.Detailed:
+            case AppVersionFormat.Detailed:
                 Major       = span[0];
                 Minor       = span[1];
                 Maintenance = span[2];
                 Build       = span[3];
                 return;
 
-            case Format.DetailedRevisions:
+            case AppVersionFormat.DetailedRevisions:
                 Major         = span[0];
                 Minor         = span[1];
                 Maintenance   = span[2];
@@ -89,7 +94,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
                 Build         = span[4];
                 return;
 
-            case Format.Complete:
+            case AppVersionFormat.Complete:
                 Major         = span[0];
                 Minor         = span[1];
                 Maintenance   = span[2];
@@ -116,7 +121,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version ) => TryParse(value, CultureInfo.CurrentCulture, out version);
+    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version ) => TryParse(value, CultureInfo.InvariantCulture, out version);
     public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen(true)] out AppVersion? version )
     {
         if ( !value.IsEmpty )
@@ -147,7 +152,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
 
 
     public static AppVersion Parse( string                    s, IFormatProvider? provider ) => Parse(s.AsSpan(), provider);
-    public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse(value,     CultureInfo.CurrentUICulture);
+    public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse(value,     CultureInfo.InvariantCulture);
     public static AppVersion Parse( scoped ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse(ref value, in value, provider);
     private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
@@ -179,18 +184,18 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException(nameof(assembly.Version));
 
 
-    private static Format GetFormat( int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build ) =>
+    private static AppVersionFormat GetAppVersionFormat( int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build ) =>
         minor.HasValue && maintenance.HasValue && majorRevision.HasValue && minorRevision.HasValue && build.HasValue
-            ? Format.Complete
+            ? AppVersionFormat.Complete
             : minor.HasValue && maintenance.HasValue && majorRevision.HasValue && build.HasValue
-                ? Format.DetailedRevisions
+                ? AppVersionFormat.DetailedRevisions
                 : minor.HasValue && maintenance.HasValue && build.HasValue
-                    ? Format.Detailed
+                    ? AppVersionFormat.Detailed
                     : minor.HasValue && build.HasValue
-                        ? Format.Typical
+                        ? AppVersionFormat.Typical
                         : minor.HasValue
-                            ? Format.Minimal
-                            : Format.Singular;
+                            ? AppVersionFormat.Minimal
+                            : AppVersionFormat.Singular;
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -209,8 +214,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
         Debug.Assert(span.Length > Length);
         charsWritten = 0;
@@ -240,20 +244,22 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="AppVersionFormat.Singular"/> , <see cref="AppVersionFormat.DetailedRevisions"/> , <see cref="AppVersionFormat.Complete"/> ], will throw
+    ///     <see
+    ///         cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
     public Version ToVersion() =>
         Scheme switch
         {
-            Format.Singular          => new Version(Major, 0),
-            Format.Minimal           => new Version(Major, Minor ?? 0),
-            Format.Typical           => new Version(Major, Minor ?? 0, Build       ?? 0),
-            Format.Detailed          => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
-            Format.DetailedRevisions => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
-            Format.Complete          => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
-            _                        => throw new OutOfRangeException(Scheme)
+            AppVersionFormat.Singular          => new Version(Major, 0),
+            AppVersionFormat.Minimal           => new Version(Major, Minor ?? 0),
+            AppVersionFormat.Typical           => new Version(Major, Minor ?? 0, Build       ?? 0),
+            AppVersionFormat.Detailed          => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
+            AppVersionFormat.DetailedRevisions => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
+            AppVersionFormat.Complete          => new Version(Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0),
+            _                                  => throw new OutOfRangeException(Scheme, nameof(Scheme))
         };
 
 
@@ -282,7 +288,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public static bool operator <=( AppVersion  left, AppVersion  right ) => Comparer<AppVersion>.Default.Compare(left, right) <= 0;
 
 
-    private void AssertFormat( AppVersion other )
+    private void AssertAppVersionFormat( AppVersion other )
     {
         if ( Scheme == 0 || Scheme == other.Scheme ) { return; }
 
@@ -321,7 +327,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     {
         if ( other is null ) { return 1; }
 
-        AssertFormat(other);
+        AssertAppVersionFormat(other);
 
         int majorComparison = Major.CompareTo(other.Major);
         if ( majorComparison != 0 ) { return majorComparison; }
@@ -383,7 +389,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     {
         if ( other is null ) { return false; }
 
-        AssertFormat(other);
+        AssertAppVersionFormat(other);
 
         bool result = Major.Equals(other.Major) && Nullable.Compare(other.Minor, Minor) == 0 && Nullable.Compare(other.Maintenance, Maintenance) >= 0 && Nullable.Compare(other.MajorRevision, MajorRevision) >= 0 && Nullable.Compare(other.MinorRevision, MinorRevision) >= 0 && Nullable.Compare(other.Build, Build) >= 0;
 
@@ -395,7 +401,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     {
         if ( other is null ) { return false; }
 
-        AssertFormat(other);
+        AssertAppVersionFormat(other);
 
         return Major == other.Major && Nullable.Equals(Minor, other.Minor) && Nullable.Equals(Maintenance, other.Maintenance) && Nullable.Equals(MajorRevision, other.MajorRevision) && Nullable.Equals(MinorRevision, other.MinorRevision) && Nullable.Equals(Build, other.Build) && Flags.Equals(other.Flags);
     }
@@ -403,55 +409,53 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public override int  GetHashCode()         => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags);
 
 
-    // ---------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    public enum Format
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out AppVersion? result )
     {
-        /// <summary> Major </summary>
-        Singular = 1,
-
-        /// <summary> Major.Minor </summary>
-        Minimal = 2,
-
-        /// <summary> Major.Minor.Build </summary>
-        Typical = 3,
-
-        /// <summary> Major.Minor.Maintenance.Build </summary>
-        Detailed = 4,
-
-        /// <summary> Major.Minor.Maintenance.MajorRevision.Build </summary>
-        DetailedRevisions = 5,
-
-        /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
-        Complete = 6
-    }
-
-
-
-    public class AppVersionJsonNetConverter : JsonConverter<AppVersion>
-    {
-        public static   AppVersionJsonNetConverter Instance { get; } = new();
-        public override bool                       CanRead  => true;
-        public override bool                       CanWrite => true;
-
-
-        public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value is string version
-                                                                                                                                                                       ? Parse(version)
-                                                                                                                                                                       : existingValue;
-
-
-        public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
+        try
         {
-            if ( value is null )
+            if ( string.IsNullOrWhiteSpace(json) )
             {
-                writer.WriteNull();
-                return;
+                result = null;
+                return false;
             }
 
-            JToken token = value.ToString();
-            token.WriteTo(writer);
+            result = FromJson(json);
+            return true;
         }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
     }
+    public static AppVersion FromJson( string json ) => json.FromJson<AppVersion>();
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 }
+
+
+
+public enum AppVersionFormat
+{
+    /// <summary> Major </summary>
+    Singular = 1,
+
+    /// <summary> Major.Minor </summary>
+    Minimal = 2,
+
+    /// <summary> Major.Minor.Build </summary>
+    Typical = 3,
+
+    /// <summary> Major.Minor.Maintenance.Build </summary>
+    Detailed = 4,
+
+    /// <summary> Major.Minor.Maintenance.MajorRevision.Build </summary>
+    DetailedRevisions = 5,
+
+    /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
+    Complete = 6
+}
+
+
+
+public sealed class AppVersionJsonConverter : SerializeAsStringJsonConverter<AppVersionJsonConverter, AppVersion>;
