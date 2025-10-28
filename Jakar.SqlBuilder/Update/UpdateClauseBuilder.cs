@@ -8,18 +8,18 @@ public struct UpdateClauseBuilder( ref EasySqlBuilder builder )
 
     public UpdateChainBuilder To( string tableName )
     {
-        __builder.Add( UPDATE, tableName, SET );
-        return new UpdateChainBuilder( this, ref __builder );
+        __builder.Add(UPDATE, tableName, SET);
+        return new UpdateChainBuilder(this, ref __builder);
     }
     public UpdateChainBuilder To<TValue>( TValue _ )
     {
-        __builder.Add( UPDATE, typeof(TValue).GetName(), SET );
-        return new UpdateChainBuilder( this, ref __builder );
+        __builder.Add(UPDATE, typeof(TValue).GetName(), SET);
+        return new UpdateChainBuilder(this, ref __builder);
     }
     public UpdateChainBuilder To<TValue>()
     {
-        __builder.Add( UPDATE, typeof(TValue).GetName(), SET );
-        return new UpdateChainBuilder( this, ref __builder );
+        __builder.Add(UPDATE, typeof(TValue).GetName(), SET);
+        return new UpdateChainBuilder(this, ref __builder);
     }
 
 

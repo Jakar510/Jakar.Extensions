@@ -13,7 +13,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 {
     public const             string         TABLE_NAME = "migrations";
     internal static readonly PropertyInfo[] Properties = typeof(MigrationRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-    public static readonly   string         SelectSql  = $"SELECT * FROM {MigrationRecord.TABLE_NAME} ORDER BY {nameof(MigrationRecord.MigrationID).SqlColumnName()}";
+    public static readonly   string         SelectSql  = $"SELECT * FROM {TABLE_NAME} ORDER BY {nameof(MigrationID).SqlColumnName()}";
     public static readonly string ApplySql = $"""
                                               INSERT INTO {TABLE_NAME} 
                                               (
@@ -61,32 +61,30 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 
     [SetsRequiredMembers] public MigrationRecord( ulong migrationID, string description, string? TABLE_NAME = null ) : base()
     {
-        this.Description = description;
-        this.MigrationID = migrationID;
-        this.TableID     = TABLE_NAME;
+        Description = description;
+        MigrationID = migrationID;
+        TableID     = TABLE_NAME;
     }
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return Create<MigrationRecord>(migrationID,
-                                       $"create {TABLE_NAME} table",
-                                       $"""
-                                        CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                        (
-                                        {nameof(MigrationID).SqlColumnName()}    bigint        PRIMARY KEY,
-                                        {nameof(TableID).SqlColumnName()}        varchar(256)  NOT NULL,
-                                        {nameof(Description).SqlColumnName()}    varchar(4096) UNIQUE NOT NULL,
-                                        {nameof(AppliedOn).SqlColumnName()}      timestamptz   NOT NULL DEFAULT SYSUTCDATETIME(),
-                                        {nameof(AdditionalData).SqlColumnName()} json          NULL
-                                        );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        Create<MigrationRecord>(migrationID,
+                                $"create {TABLE_NAME} table",
+                                $"""
+                                 CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                 (
+                                 {nameof(MigrationID).SqlColumnName()}    bigint        PRIMARY KEY,
+                                 {nameof(TableID).SqlColumnName()}        varchar(256)  NOT NULL,
+                                 {nameof(Description).SqlColumnName()}    varchar(4096) UNIQUE NOT NULL,
+                                 {nameof(AppliedOn).SqlColumnName()}      timestamptz   NOT NULL DEFAULT SYSUTCDATETIME(),
+                                 {nameof(AdditionalData).SqlColumnName()} json          NULL
+                                 );
 
-                                        CREATE TRIGGER {nameof(SetLastModified).SqlColumnName()}
-                                        BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                        FOR EACH ROW
-                                        EXECUTE FUNCTION {nameof(SetLastModified).SqlColumnName()}();
-                                        """);
-    }
+                                 CREATE TRIGGER {nameof(SetLastModified).SqlColumnName()}
+                                 BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                 FOR EACH ROW
+                                 EXECUTE FUNCTION {nameof(SetLastModified).SqlColumnName()}();
+                                 """);
     public static MigrationRecord SetLastModified( ulong migrationID )
     {
         string name = nameof(SetLastModified)
@@ -124,10 +122,10 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
                                             );
 
 
-                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            CREATE TRIGGER {nameof(SetLastModified).SqlColumnName()}
                                             BEFORE INSERT OR UPDATE ON {tableName}
                                             FOR EACH ROW
-                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            EXECUTE FUNCTION {nameof(SetLastModified).SqlColumnName()}();
 
 
                                             -- Insert values if they do not exist with explicit ids (enum order)
@@ -148,7 +146,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     public static MigrationRecord Create<TSelf>( ulong migrationID, string description, string sql )
         where TSelf : ITableRecord<TSelf>
     {
-        MigrationRecord record = new MigrationRecord(migrationID, description)
+        MigrationRecord record = new(migrationID, description)
                                  {
                                      TableID = TSelf.TableName,
                                      SQL     = sql

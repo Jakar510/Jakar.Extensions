@@ -70,10 +70,10 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
 
         return Type == other.Type && Source == other.Source && Message == other.Message && MethodSignature == other.MethodSignature && HelpLink == other.HelpLink && HResult == other.HResult && Equals(Inner, other.Inner) && StackTrace.Equals(other.StackTrace) && Str == other.Str && Equals(TargetSite, other.TargetSite) && Equals(Data, other.Data);
     }
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is ExceptionDetails other && Equals(other);
+    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || ( obj is ExceptionDetails other && Equals(other) );
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(Type);
         hashCode.Add(Source);

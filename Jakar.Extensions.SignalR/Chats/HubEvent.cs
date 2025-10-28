@@ -25,14 +25,14 @@ public enum HubEventType
 
 public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
 {
+    public static                                 JsonTypeInfo<HubEvent[]> JsonArrayInfo => JakarSignalRContext.Default.HubEventArray;
     public static                                 JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
     public static                                 JsonTypeInfo<HubEvent>   JsonTypeInfo  => JakarSignalRContext.Default.HubEvent;
-    public static                                 JsonTypeInfo<HubEvent[]> JsonArrayInfo => JakarSignalRContext.Default.HubEventArray;
     [StringLength(CONNECTION_ID)] public required string                   ConnectionID  { get; init; }
     [StringLength(NAME)]          public required string                   Group         { get; init; }
+    public                                        InstantMessage?          Message       { get; init; }
     public required                               HubEventType             Type          { get; init; }
     public required                               ChatUser                 User          { get; init; }
-    public                                        InstantMessage?          Message       { get; init; }
 
 
     public HubEvent() { }
@@ -75,7 +75,7 @@ public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(Group, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(User);

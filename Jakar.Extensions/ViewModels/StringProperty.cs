@@ -19,12 +19,10 @@ public class EmailProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string
 
 
     protected override bool HasValue( [NotNullWhen(true)] string? value ) => base.HasValue(value) && value.IsEmailAddress();
-    protected override string CoerceValue( string? value )
-    {
-        return string.IsNullOrWhiteSpace(value)
-                   ? EMPTY
-                   : value;
-    }
+    protected override string CoerceValue( string? value ) =>
+        string.IsNullOrWhiteSpace(value)
+            ? EMPTY
+            : value;
 }
 
 

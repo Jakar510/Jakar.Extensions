@@ -11,15 +11,15 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     private                string?    __string;
 
 
-    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer { get => FuzzyEqualizer<AppVersion>.Default; }
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer => FuzzyEqualizer<AppVersion>.Default;
+    public static JsonTypeInfo<AppVersion[]> JsonArrayInfo  => JakarExtensionsContext.Default.AppVersionArray;
     public static JsonSerializerContext      JsonContext    => JakarExtensionsContext.Default;
     public static JsonTypeInfo<AppVersion>   JsonTypeInfo   => JakarExtensionsContext.Default.AppVersion;
-    public static JsonTypeInfo<AppVersion[]> JsonArrayInfo  => JakarExtensionsContext.Default.AppVersionArray;
     public        int?                       Build          { get; init; }
     int IReadOnlyCollection<int>.            Count          => (int)Scheme;
     public              AppVersionFlags      Flags          { get; init; }
     public              bool                 IsValid        => !ReferenceEquals(this, Default) && this != Default;
-    [JsonIgnore] public int                  Length         { get => Flags.Length + 65; }
+    [JsonIgnore] public int                  Length         => Flags.Length + 65;
     public              int?                 Maintenance    { get; init; }
     public              int                  Major          { get; init; }
     public              int?                 MajorRevision  { get; init; }

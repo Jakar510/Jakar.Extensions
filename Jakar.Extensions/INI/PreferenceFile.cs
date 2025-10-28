@@ -4,10 +4,10 @@
 public abstract class PreferenceFile<TSelf> : BaseClass<TSelf>, IAsyncDisposable
     where TSelf : PreferenceFile<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>, new()
 {
+    private readonly LocalFile         __file = $"{typeof(TSelf).Name}.ini";
     private readonly Lock              __lock = new();
     protected        DateTime          _lastWriteTimeUtc;
     protected        IniConfig?        _config;
-    private readonly LocalFile         __file = $"{typeof(TSelf).Name}.ini";
     protected        LocalFileWatcher? _watcher;
 
 

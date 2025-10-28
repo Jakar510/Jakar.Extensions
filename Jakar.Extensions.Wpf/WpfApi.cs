@@ -186,6 +186,7 @@ public static partial class WpfApi
         object old = control.Content;
         control.Content = value;
 
-        ContentControl.ContentProperty.GetMetadata(control).PropertyChangedCallback.Invoke(control, new DependencyPropertyChangedEventArgs(ContentControl.ContentProperty, old, value));
+        ContentControl.ContentProperty.GetMetadata(control)
+                      .PropertyChangedCallback.Invoke(control, new DependencyPropertyChangedEventArgs(ContentControl.ContentProperty, old, value));
     }
 }

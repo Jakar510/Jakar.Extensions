@@ -9,13 +9,18 @@ public readonly ref struct XAttributeBuilder
     internal readonly StringBuilder sb = new();
 
     public XAttributeBuilder() { }
-    public XAttributeBuilder( Type               type ) : this( type.AssemblyQualifiedName ?? type.FullName ?? type.Name ) { }
-    public XAttributeBuilder( ReadOnlySpan<char> xmls ) => With( nameof(xmls), xmls );
+    public XAttributeBuilder( Type               type ) : this(type.AssemblyQualifiedName ?? type.FullName ?? type.Name) { }
+    public XAttributeBuilder( ReadOnlySpan<char> xmls ) => With(nameof(xmls), xmls);
 
 
     public XAttributeBuilder With( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
-        sb.Append( ' ' ).Append( key ).Append( '=' ).Append( '"' ).Append( value ).Append( '"' );
+        sb.Append(' ')
+          .Append(key)
+          .Append('=')
+          .Append('"')
+          .Append(value)
+          .Append('"');
 
         return this;
     }

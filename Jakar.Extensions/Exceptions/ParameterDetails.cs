@@ -71,7 +71,7 @@ public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualCompar
 
         return Position == other.Position && string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase) && string.Equals(Type, other.Type, StringComparison.InvariantCultureIgnoreCase) && HasDefaultValue == other.HasDefaultValue && IsIn == other.IsIn && IsOptional == other.IsOptional && IsOut == other.IsOut;
     }
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is ParameterDetails other && Equals(other);
+    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || ( obj is ParameterDetails other && Equals(other) );
     public override int  GetHashCode()         => HashCode.Combine(base.GetHashCode(), Position, Name, Type, HasDefaultValue, IsIn, IsOptional, IsOut);
 
 

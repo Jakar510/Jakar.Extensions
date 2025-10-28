@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Newtonsoft.Json.Linq;
-using ValueOf;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [Serializable]
@@ -18,12 +12,10 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
                                  DateTimeOffset                                     DateCreated,
                                  DateTimeOffset?                                    LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
 {
-    public const                  string                     TABLE_NAME = "roles";
-    public static                 string                     TableName     { get => TABLE_NAME; }
-    public static                 JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
-    public static                 JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
-    public static                 JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
-    [StringLength(RIGHTS)] public UserRights                 Rights        { get; set; } = Rights;
+    public const  string                     TABLE_NAME = "roles";
+    public static JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
+    public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Default.WithColumn<string>(nameof(NameOfRole), length: NAME)
@@ -32,6 +24,9 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
                                                                                                            .WithColumn<string>(nameof(Rights),           length: RIGHTS)
                                                                                                            .With_CreatedBy()
                                                                                                            .Build();
+
+    public static                 string     TableName => TABLE_NAME;
+    [StringLength(RIGHTS)] public UserRights Rights    { get; set; } = Rights;
 
 
     public RoleRecord( IdentityRole role, RecordID<UserRecord>? caller                               = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, caller) { }
@@ -84,29 +79,27 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
                                                    };
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create {TABLE_NAME} table",
-                                                  $"""
-                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                   (  
-                                                   {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
-                                                   {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
-                                                   {nameof(ConcurrencyStamp).SqlColumnName()} varchar(1024) NOT NULL, 
-                                                   {nameof(Rights).SqlColumnName()}           varchar(1024) NOT NULL, 
-                                                   {nameof(ID).SqlColumnName()}               uuid          PRIMARY KEY,
-                                                   {nameof(DateCreated).SqlColumnName()}      timestamptz   NOT NULL,
-                                                   {nameof(LastModified).SqlColumnName()}     timestamptz   NULL,
-                                                   {nameof(AdditionalData).SqlColumnName()}   json          NULL
-                                                   );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<RoleRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (  
+                                            {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
+                                            {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
+                                            {nameof(ConcurrencyStamp).SqlColumnName()} varchar(1024) NOT NULL, 
+                                            {nameof(Rights).SqlColumnName()}           varchar(1024) NOT NULL, 
+                                            {nameof(ID).SqlColumnName()}               uuid          PRIMARY KEY,
+                                            {nameof(DateCreated).SqlColumnName()}      timestamptz   NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}     timestamptz   NULL,
+                                            {nameof(AdditionalData).SqlColumnName()}   json          NULL
+                                            );
 
-                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                   FOR EACH ROW
-                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                   """);
-    }
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 
 
     public override bool Equals( RoleRecord? other )

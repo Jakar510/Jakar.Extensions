@@ -26,6 +26,6 @@ public class RecordNotFoundException<TSelf> : RecordNotFoundException
     where TSelf : BaseRecord
 {
     public RecordNotFoundException() : base() { }
-    public RecordNotFoundException( TSelf record ) : base(record.ToString()) { }
+    public RecordNotFoundException( TSelf  record ) : base(record.ToString()) { }
     public RecordNotFoundException( string message, Exception inner ) : base(message, inner) { }
 }

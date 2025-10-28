@@ -1,5 +1,4 @@
-﻿using System.Formats.Asn1;
-using ZLinq;
+﻿using ZLinq;
 using ZLinq.Linq;
 using ZLinq.Traversables;
 
@@ -18,9 +17,9 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
     public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
+    public static       JsonTypeInfo<LocalDirectory[]> JsonArrayInfo     => JakarExtensionsContext.Default.LocalDirectoryArray;
     public static       JsonSerializerContext          JsonContext       => JakarExtensionsContext.Default;
     public static       JsonTypeInfo<LocalDirectory>   JsonTypeInfo      => JakarExtensionsContext.Default.LocalDirectory;
-    public static       JsonTypeInfo<LocalDirectory[]> JsonArrayInfo     => JakarExtensionsContext.Default.LocalDirectoryArray;
     public              DateTime                       CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
     public              bool                           DoesNotExist      => !Exists;
     public              bool                           Exists            => Info.Exists;
@@ -525,4 +524,21 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     public static bool operator >=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) >= 0;
     public static bool operator <( LocalDirectory   left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) < 0;
     public static bool operator <=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) <= 0;
+
+
+
+    public sealed class PathComparer : IComparer<LocalDirectory>
+    {
+        public static readonly PathComparer Default = new();
+        public int Compare( LocalDirectory? x, LocalDirectory? y )
+        {
+            if ( ReferenceEquals(x, y) ) { return 0; }
+
+            if ( y is null ) { return 1; }
+
+            if ( x is null ) { return -1; }
+
+            return string.Compare(x.FullPath, y.FullPath, StringComparison.InvariantCultureIgnoreCase);
+        }
+    }
 }

@@ -76,10 +76,10 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
             Directory.CreateDirectory(value);
         }
     }
-    public TakeScreenShotAsync                  TakeScreenShot        { get; set; } = ScreenShot.Empty;
-    public ConsoleTheme?                        Theme                 { get; set; }
-    AppLoggerOptions IOptions<AppLoggerOptions>.Value                 => this;
+    public         TakeScreenShotAsync          TakeScreenShot        { get; set; } = ScreenShot.Empty;
     public virtual bool                         TakeScreenshotOnError { get; set; }
+    public         ConsoleTheme?                Theme                 { get; set; }
+    AppLoggerOptions IOptions<AppLoggerOptions>.Value                 => this;
 
 
     public AppLoggerOptions() => Current = this;

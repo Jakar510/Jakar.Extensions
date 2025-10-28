@@ -193,7 +193,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek(0, SeekOrigin.Begin);
-        using MemoryStream memory = await Spans.ToMemoryStream(stream);
+        using MemoryStream memory = await stream.ToMemoryStream();
         return Create(metaData, memory);
     }
 
@@ -241,9 +241,9 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 [method: JsonConstructor]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
+    public static                      JsonTypeInfo<FileMetaData[]> JsonArrayInfo   => JakarExtensionsContext.Default.FileMetaDataArray;
     public static                      JsonSerializerContext        JsonContext     => JakarExtensionsContext.Default;
     public static                      JsonTypeInfo<FileMetaData>   JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
-    public static                      JsonTypeInfo<FileMetaData[]> JsonArrayInfo   => JakarExtensionsContext.Default.FileMetaDataArray;
     [StringLength(DESCRIPTION)] public string?                      FileDescription { get; set; }  = fileDescription;
     [StringLength(NAME)]        public string?                      FileName        { get; init; } = fileName;
     [StringLength(TYPE)]        public string?                      FileType        { get; init; } = fileType;

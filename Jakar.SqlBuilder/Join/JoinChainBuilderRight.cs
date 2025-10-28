@@ -8,19 +8,19 @@ public struct JoinChainBuilderRight( in JoinClauseBuilder join, ref EasySqlBuild
 
     public JoinClauseBuilder Right<TValue>( string columnName )
     {
-        __builder.Add( columnName.GetName<TValue>() );
+        __builder.Add(columnName.GetName<TValue>());
         __builder.VerifyParentheses();
         return __join;
     }
     public JoinClauseBuilder Right<TValue>( TValue _, string columnName )
     {
-        __builder.Add( columnName.GetName<TValue>() );
+        __builder.Add(columnName.GetName<TValue>());
         __builder.VerifyParentheses();
         return __join;
     }
     public JoinClauseBuilder Right( string columnName )
     {
-        __builder.Add( columnName );
+        __builder.Add(columnName);
         __builder.VerifyParentheses();
         return __join;
     }

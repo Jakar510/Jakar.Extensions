@@ -22,12 +22,12 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     where TChatRoom : ChatRooms<TChatRoom, TRoom>, ICollectionAlerts<TChatRoom, TRoom>
     where TRoom : IChatRoom<TRoom>
 {
-    protected readonly Disposables      _disposables      = [];
+    protected readonly Disposables      _disposables       = [];
     protected readonly WeakEventManager _onMessageReceived = new();
     protected          bool             _isDisposed;
     protected          ChatUser         _user = ChatUser.Empty;
     protected          HubConnection?   _connection; // SignalR.Client
-    protected          SessionToken?          _tokens;
+    protected          SessionToken?    _tokens;
 
 
     public abstract Uri       HostInfo { get; }
@@ -132,8 +132,11 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     }
 
 
-    protected virtual  void          ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;
-    protected virtual  HubConnection CreateConnection()                                       => new HubConnectionBuilder().AddJsonProtocol().WithAutomaticReconnect().WithUrl(TargetHost, ConfigureHttpConnection).Build();
+    protected virtual void ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;
+    protected virtual HubConnection CreateConnection() => new HubConnectionBuilder().AddJsonProtocol()
+                                                                                    .WithAutomaticReconnect()
+                                                                                    .WithUrl(TargetHost, ConfigureHttpConnection)
+                                                                                    .Build();
     protected abstract Task<string?> OptionsAccessTokenProvider();
 
 

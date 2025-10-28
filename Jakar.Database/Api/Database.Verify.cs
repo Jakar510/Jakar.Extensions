@@ -23,8 +23,7 @@ public abstract partial class Database
 
     /// <summary> </summary>
     /// <returns> <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/> </returns>
-    [SuppressMessage("ReSharper", "UnusedParameter.Global")]
-    public virtual ValueTask<ErrorOrResult<SubscriptionStatus>> ValidateSubscription( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(SubscriptionStatus.Ok);
+    [SuppressMessage("ReSharper", "UnusedParameter.Global")] public virtual ValueTask<ErrorOrResult<SubscriptionStatus>> ValidateSubscription( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(SubscriptionStatus.Ok);
 
 
     protected virtual async ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( NpgsqlConnection connection, NpgsqlTransaction transaction, ILoginRequest request, CancellationToken token = default )

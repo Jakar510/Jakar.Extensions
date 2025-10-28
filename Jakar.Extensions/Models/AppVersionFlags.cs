@@ -12,9 +12,9 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     public readonly        uint            Iteration = iteration;
 
 
-    public bool IsEmpty    { get => string.IsNullOrWhiteSpace(Flag); }
-    public bool IsNotEmpty { get => !IsEmpty; }
-    public int  Length     { get => Flag.Length + 15; }
+    public bool IsEmpty    => string.IsNullOrWhiteSpace(Flag);
+    public bool IsNotEmpty => !IsEmpty;
+    public int  Length     => Flag.Length + 15;
 
 
     public override string ToString() => AsSpan()

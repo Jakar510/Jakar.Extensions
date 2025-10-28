@@ -10,7 +10,10 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// <returns>
     ///     <see cref="EasySqlBuilder"/>
     /// </returns>
-    public EasySqlBuilder By( string separator, params string[] columnNames ) => __builder.Begin().Add( ORDER, BY ).AddRange( separator, columnNames ).End();
+    public EasySqlBuilder By( string separator, params string[] columnNames ) => __builder.Begin()
+                                                                                          .Add(ORDER, BY)
+                                                                                          .AddRange(separator, columnNames)
+                                                                                          .End();
 
 
     /// <summary> Starts an ORDER BY chain </summary>
@@ -19,9 +22,10 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseChainBuilder Chain()
     {
-        __builder.Add( ORDER, BY ).Begin();
+        __builder.Add(ORDER, BY)
+                 .Begin();
 
-        return new OrderByClauseChainBuilder( this, ref __builder );
+        return new OrderByClauseChainBuilder(this, ref __builder);
     }
     /// <summary> Starts an ORDER BY chain starting with <paramref name="columnName"/> </summary>
     /// <returns>
@@ -29,21 +33,26 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseChainBuilder Chain( string columnName )
     {
-        __builder.Add( ORDER, BY ).Begin().Add( columnName );
+        __builder.Add(ORDER, BY)
+                 .Begin()
+                 .Add(columnName);
 
-        return new OrderByClauseChainBuilder( this, ref __builder );
+        return new OrderByClauseChainBuilder(this, ref __builder);
     }
 
 
     public EasySqlBuilder Done()
     {
-        __builder.VerifyParentheses().NewLine();
+        __builder.VerifyParentheses()
+                 .NewLine();
 
         return __builder;
     }
     public OrderByClauseBuilder Next()
     {
-        __builder.VerifyParentheses().Add( ORDER, BY ).Begin();
+        __builder.VerifyParentheses()
+                 .Add(ORDER, BY)
+                 .Begin();
 
         return this;
     }
@@ -59,7 +68,10 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseBuilder By( string columnName )
     {
-        __builder.Begin().Add( ORDER, BY ).Space().Add( columnName );
+        __builder.Begin()
+                 .Add(ORDER, BY)
+                 .Space()
+                 .Add(columnName);
 
         return this;
     }

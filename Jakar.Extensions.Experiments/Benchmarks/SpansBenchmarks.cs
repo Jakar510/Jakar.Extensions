@@ -82,80 +82,70 @@ public class SpansBenchmarks
     private const string TEST            = $"{ALPHANUMERIC}_{EMPTY_WITH_TABS}_{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
-    [Params( "", ALPHANUMERIC, TEST )] public string Value { get; set; } = EMPTY;
+    [Params("", ALPHANUMERIC, TEST)] public string Value { get; set; } = EMPTY;
 
-    [Benchmark] public bool Contains_span()  => Value.Contains( '2' );
-    [Benchmark] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );
+    [Benchmark] public bool Contains_span()  => Value.Contains('2');
+    [Benchmark] public bool Contains_value() => Spans.Contains(Value, NEW_VALUE);
 
-    [Benchmark]
-    public bool ContainsAny()
+    [Benchmark] public bool ContainsAny()
     {
         ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
-        return Spans.ContainsAny( Value, buffer );
+        return Spans.ContainsAny(Value, buffer);
     }
 
-    [Benchmark]
-    public bool ContainsNone()
+    [Benchmark] public bool ContainsNone()
     {
         ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
-        return Spans.ContainsNone( Value, buffer );
+        return Spans.ContainsNone(Value, buffer);
     }
 
-    [Benchmark]
-    public bool EndsWith()
+    [Benchmark] public bool EndsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return Spans.EndsWith( in span, '1' );
+        return Spans.EndsWith(in span, '1');
     }
-    [Benchmark]
-    public bool IsNullOrWhiteSpace()
+    [Benchmark] public bool IsNullOrWhiteSpace()
     {
         ReadOnlySpan<char> span = Value;
         return span.IsNullOrWhiteSpace();
     }
-    [Benchmark]
-    public bool StartsWith()
+    [Benchmark] public bool StartsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return Spans.StartsWith( in span, '1' );
+        return Spans.StartsWith(in span, '1');
     }
 
 
     [Benchmark] public ReadOnlySpan<char> AsBuffer() => Value;
 
-    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>(Value, NEW_VALUE);
 
-    [Benchmark]
-    [MustDisposeResource]
-    public Buffer<char> RemoveAll_Params()
+    [Benchmark] [MustDisposeResource] public Buffer<char> RemoveAll_Params()
     {
         Span<char> span = stackalloc char[Value.Length];
-        Value.CopyTo( span );
+        Value.CopyTo(span);
 
-        Span<char> result = span.RemoveAll( '1', '3', 'F', 'A' );
-        return new Buffer<char>( result );
+        Span<char> result = span.RemoveAll('1', '3', 'F', 'A');
+        return new Buffer<char>(result);
     }
 
 
-    [Benchmark]
-    public void RemoveAll_Single()
+    [Benchmark] public void RemoveAll_Single()
     {
         ReadOnlySpan<char> value = Value;
-        Spans.RemoveAll( in value, '1' );
+        Spans.RemoveAll(in value, '1');
     }
-    [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>( Value, OLD, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>(Value, OLD, NEW_VALUE);
 
 
-    [Benchmark]
-    public ReadOnlySpan<char> Slice_False()
+    [Benchmark] public ReadOnlySpan<char> Slice_False()
     {
         ReadOnlySpan<char> value = Value;
-        return value.Slice( 'z', '4', false );
+        return value.Slice('z', '4', false);
     }
-    [Benchmark]
-    public ReadOnlySpan<char> Slice_True()
+    [Benchmark] public ReadOnlySpan<char> Slice_True()
     {
         ReadOnlySpan<char> value = Value;
-        return value.Slice( 'z', '4', true );
+        return value.Slice('z', '4', true);
     }
 }

@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 public interface IJsonModel<TSelf>
     where TSelf : IJsonModel<TSelf>
 {
+    public abstract static JsonTypeInfo<TSelf[]> JsonArrayInfo { get; }
     public abstract static JsonSerializerContext JsonContext   { get; }
     public abstract static JsonTypeInfo<TSelf>   JsonTypeInfo  { get; }
-    public abstract static JsonTypeInfo<TSelf[]> JsonArrayInfo { get; }
 
 
     // public                 void   Serialize( ref    Utf8JsonWriter writer );

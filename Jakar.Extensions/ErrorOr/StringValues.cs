@@ -46,7 +46,7 @@ public readonly struct StringTags( Pair[] tags, string[] values ) : IValueEnumer
 
     public          bool Equals( StringTags other ) => Tags.Equals(other.Tags) && Values.Equals(other.Values);
     public override bool Equals( object?    obj )   => obj is StringTags other && Equals(other);
-    public override int  GetHashCode()              { return HashCode.Combine(Tags, Values); }
+    public override int  GetHashCode()              => HashCode.Combine(Tags, Values);
 
 
     public static bool operator ==( StringTags left, StringTags right ) => Equals(left, right);

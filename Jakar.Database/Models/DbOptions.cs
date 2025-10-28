@@ -1,10 +1,8 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
-using Microsoft.IdentityModel.Tokens;
 using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
-using ZiggyCreatures.Caching.Fusion.Events;
 
 
 
@@ -21,11 +19,10 @@ public sealed class DbOptions : IOptions<DbOptions>
     public const           string USER_EXISTS         = "User Exists";
     public static readonly Uri    Local_433           = new("https://localhost:443");
     public static readonly Uri    Local_80            = new("http://localhost:80");
+    public static          int    ConcurrencyLevel { get; set; }
 
 
     public static PasswordRequirements                                    PasswordRequirements            { get => PasswordRequirements.Current; set => PasswordRequirements.Current = value; }
-    public static int                                                     ConcurrencyLevel                { get;                                 set; }
-    public        TelemetrySource?                                        TelemetrySource                 { get => TelemetrySource.Current;      set => TelemetrySource.Current = value; }
     public        AppInformation                                          AppInformation                  { get;                                 set; } = AppInformation.Invalid;
     public        string                                                  AuthenticationScheme            { get;                                 set; } = DbServices.AUTHENTICATION_SCHEME;
     public        string                                                  AuthenticationSchemeDisplayName { get;                                 set; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
@@ -56,6 +53,7 @@ public sealed class DbOptions : IOptions<DbOptions>
     public        AppLoggerOptions                                        LoggerOptions                   { get;                                 set; } = new();
     public        SeqConfig?                                              SeqConfig                       { get;                                 set; }
     public        Logger?                                                 Serilogger                      { get;                                 set; }
+    public        TelemetrySource?                                        TelemetrySource                 { get => TelemetrySource.Current;      set => TelemetrySource.Current = value; }
     public        string                                                  TokenAudience                   { get;                                 set; } = EMPTY;
     public        string                                                  TokenIssuer                     { get;                                 set; } = EMPTY;
     public        string                                                  UserExists                      { get;                                 set; } = USER_EXISTS;

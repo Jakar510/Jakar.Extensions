@@ -24,7 +24,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
 
 
     public IniConfig() : this(DEFAULT_CAPACITY) { }
-    public IniConfig( int                                                capacity ) { __dictionary = new ConcurrentDictionary<string, Section>(Environment.ProcessorCount, capacity, StringComparer.OrdinalIgnoreCase); }
+    public IniConfig( int                                                capacity ) => __dictionary = new ConcurrentDictionary<string, Section>(Environment.ProcessorCount, capacity, StringComparer.OrdinalIgnoreCase);
     public IniConfig( IDictionary<string, Section>                       sections ) : this(sections.Count) { Add(sections); }
     public IniConfig( IEnumerable<Section>                               sections ) : this(DEFAULT_CAPACITY) { Add(sections); }
     public IniConfig( IEnumerable<KeyValuePair<string, Section>>         sections ) : this(DEFAULT_CAPACITY) { Add(sections); }
@@ -143,7 +143,9 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
 
     /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
     /// <param name="sectionName"> Section Name </param>
-    /// <returns> <see cref="Section"/> </returns>
+    /// <returns>
+    ///     <see cref="Section"/>
+    /// </returns>
     public Section GetOrAdd( string sectionName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);

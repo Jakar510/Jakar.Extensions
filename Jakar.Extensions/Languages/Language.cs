@@ -160,9 +160,9 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 [Serializable]
 public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
 {
+    public static JsonTypeInfo<LanguageCollection[]> JsonArrayInfo => JakarExtensionsContext.Default.LanguageCollectionArray;
     public static JsonSerializerContext              JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LanguageCollection>   JsonTypeInfo  => JakarExtensionsContext.Default.LanguageCollection;
-    public static JsonTypeInfo<LanguageCollection[]> JsonArrayInfo => JakarExtensionsContext.Default.LanguageCollectionArray;
 
 
     public LanguageCollection() : base(DEFAULT_CAPACITY) { }
@@ -186,7 +186,7 @@ public class LanguageCollection : ObservableCollection<LanguageCollection, Langu
 
 
     public override int  GetHashCode()                                                      => RuntimeHelpers.GetHashCode(this);
-    public override bool Equals( object?                  other )                           => ReferenceEquals(this, other) || other is LanguageCollection x && Equals(x);
+    public override bool Equals( object?                  other )                           => ReferenceEquals(this, other) || ( other is LanguageCollection x && Equals(x) );
     public static   bool operator ==( LanguageCollection? left, LanguageCollection? right ) => EqualityComparer<LanguageCollection>.Default.Equals(left, right);
     public static   bool operator !=( LanguageCollection? left, LanguageCollection? right ) => !EqualityComparer<LanguageCollection>.Default.Equals(left, right);
     public static   bool operator >( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) > 0;

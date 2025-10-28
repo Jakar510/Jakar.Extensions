@@ -28,8 +28,8 @@ public class Observer<TValue> : IObservable<TValue>
 
     protected class ObserverWrapper( IObserver<TValue> observer, Observer<TValue> parent ) : IObserver<TValue>, IDisposable
     {
-        protected readonly Observer<TValue>  _parent   = parent;
         protected readonly IObserver<TValue> _observer = observer;
+        protected readonly Observer<TValue>  _parent   = parent;
 
 
         public virtual void Dispose()                  => _parent.Remove(this);

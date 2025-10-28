@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Empty))]
 public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 {
-    public static readonly Error       Empty                                = new(null, null, null, null, null, null);
+    public static readonly Error       Empty = new(null, null, null, null, null, null);
     internal readonly      Status?     statusCode;
     internal readonly      StringTags? errors;
 
@@ -49,13 +49,13 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
         where TValue : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
     public static Error Create( Status     status, in StringTags? errors = null, [CallerMemberName] string      type = EMPTY )                                                                   => new(status, type, null, null, null, in errors);
     public static Error Create( Status     status, string         type,          in                 StringTags? errors )                                                                         => new(status, type, null, null, null, in errors);
-    public static Error Create( Status     status, string         type,          params             string[]    errors )                                                                         => Create(status, type, null, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          params             Pair[]      errors )                                                                         => Create(status, type, null, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          params             string[]    errors )                                                                         => Create(status, type, null, null, null);
+    public static Error Create( Status     status, string         type,          params             Pair[]      errors )                                                                         => Create(status, type, null, null, null);
     public static Error Create( Status     status, string         type,          string?                        title,  in     StringTags? errors )                                              => new(status, type, title, null, null, in errors);
-    public static Error Create( Status     status, string         type,          string?                        title,  params string[]    errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          string?                        title,  params Pair[]      errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          string?                        title,  params string[]    errors )                                              => Create(status, type, title, null, null);
+    public static Error Create( Status     status, string         type,          string?                        title,  params Pair[]      errors )                                              => Create(status, type, title, null, null);
     public static Error Create( Status     status, string         type,          string?                        title,  string?            detail, string? instance, in     StringTags? errors ) => new(status, type, title, detail, instance, in errors);
-    public static Error Create( Status     status, string         type,          string?                        title,  string?            detail, string? instance, params Pair[]      errors ) => Create(status, type, title, detail, instance, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          string?                        title,  string?            detail, string? instance, params Pair[]      errors ) => Create(status, type, title, detail, instance);
     public static Error Create( Exception? e,      string?        detail,        in StringTags?                 errors, Status             status = Status.InternalServerError ) => Create(e, detail, e?.Source, in errors, status);
     public static Error Create( Exception? e, string? detail, string? instance, in StringTags? errors = null, Status status = Status.InternalServerError ) => new(status,
                                                                                                                                                                   e?.GetType()

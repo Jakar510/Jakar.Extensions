@@ -6,8 +6,8 @@ namespace Jakar.Extensions;
 
 public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 {
-    private Node? __head;
     private int   __count;
+    private Node? __head;
 
     public int Count => Interlocked.CompareExchange(ref __count, 0, 0);
 
@@ -44,6 +44,19 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
     }
 
 
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        Node? current = __head;
+
+        while ( current is not null )
+        {
+            yield return current.Value;
+            current = current.Next;
+        }
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+
 
     protected sealed class Node( TValue value ) : IEqualityOperators<Node>
     {
@@ -57,18 +70,4 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
         public static   bool operator ==( Node? left, Node? right ) => left?.Equals(right) is true;
         public static   bool operator !=( Node? left, Node? right ) => left?.Equals(right) is not true;
     }
-
-
-
-    public IEnumerator<TValue> GetEnumerator()
-    {
-        Node? current = __head;
-
-        while ( current is not null )
-        {
-            yield return current.Value;
-            current = current.Next;
-        }
-    }
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

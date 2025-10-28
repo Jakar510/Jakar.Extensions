@@ -12,29 +12,26 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    private      string            __company          = EMPTY;
-    private      string            __department       = EMPTY;
-    private      string            __email            = EMPTY;
-    private      string            __ext              = EMPTY;
-    private      string            __firstName        = EMPTY;
-    private      string            __gender           = EMPTY;
-    private      string            __lastName         = EMPTY;
-    private      string            __phoneNumber      = EMPTY;
-    private      UserRights        __rights           = new();
-    private      string            __title            = EMPTY;
-    private      string            __userName         = EMPTY;
-    private      string            __website          = EMPTY;
-    protected    string?           _description;
-    protected    string?           _fullName;
-    private      SupportedLanguage __preferredLanguage = SupportedLanguage.English;
-    private      TID?              __createdBy;
-    private      TID?              __escalateTo;
-    private      TID?              __imageID;
-    protected    TID               _id;
-
-
-    public TID                            ID        { get => _id; init => _id = value; }
-    public ObservableCollection<TAddress> Addresses { get;        init; } = [];
+    private   string                         __company     = EMPTY;
+    private   string                         __department  = EMPTY;
+    private   string                         __email       = EMPTY;
+    private   string                         __ext         = EMPTY;
+    private   string                         __firstName   = EMPTY;
+    private   string                         __gender      = EMPTY;
+    private   string                         __lastName    = EMPTY;
+    private   string                         __phoneNumber = EMPTY;
+    private   string                         __title       = EMPTY;
+    private   string                         __userName    = EMPTY;
+    private   string                         __website     = EMPTY;
+    protected string?                        _description;
+    protected string?                        _fullName;
+    private   SupportedLanguage              __preferredLanguage = SupportedLanguage.English;
+    protected TID                            _id;
+    private   TID?                           __createdBy;
+    private   TID?                           __escalateTo;
+    private   TID?                           __imageID;
+    private   UserRights                     __rights = new();
+    public    ObservableCollection<TAddress> Addresses { get; init; } = [];
 
     [StringLength(COMPANY)] public string Company
     {
@@ -79,16 +76,19 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [StringLength(FULL_NAME)] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public string                            Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
-    public                           ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
-    public                           TID?                              ImageID            { get => __imageID;                   set => SetProperty(ref __imageID, value); }
-    [JsonIgnore] public virtual      bool                              IsValid            { get => IsValidEmail                      && IsValidName && IsValidUserName; }
-    [JsonIgnore] public virtual      bool                              IsValidEmail       { get => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress(); }
-    [JsonIgnore] public virtual      bool                              IsValidName        { get => !string.IsNullOrWhiteSpace(FullName); }
-    [JsonIgnore] public virtual      bool                              IsValidPhoneNumber { get => !string.IsNullOrWhiteSpace(PhoneNumber); }
-    [JsonIgnore] public virtual      bool                              IsValidUserName    { get => !string.IsNullOrWhiteSpace(UserName); }
-    [JsonIgnore] public virtual      bool                              IsValidWebsite     { get => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _); }
+    [StringLength(FULL_NAME)] public string                            FullName { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
+    [StringLength(GENDER)]    public string                            Gender   { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    public                           ObservableCollection<TGroupModel> Groups   { get;                                init; } = [];
+
+
+    public                      TID  ID                 { get => _id;       init => _id = value; }
+    public                      TID? ImageID            { get => __imageID; set => SetProperty(ref __imageID, value); }
+    [JsonIgnore] public virtual bool IsValid            => IsValidEmail                      && IsValidName && IsValidUserName;
+    [JsonIgnore] public virtual bool IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
+    [JsonIgnore] public virtual bool IsValidName        => !string.IsNullOrWhiteSpace(FullName);
+    [JsonIgnore] public virtual bool IsValidPhoneNumber => !string.IsNullOrWhiteSpace(PhoneNumber);
+    [JsonIgnore] public virtual bool IsValidUserName    => !string.IsNullOrWhiteSpace(UserName);
+    [JsonIgnore] public virtual bool IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
 
     [Required] [StringLength(2000)] public string LastName
     {

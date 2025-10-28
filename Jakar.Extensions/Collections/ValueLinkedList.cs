@@ -22,8 +22,8 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             lock ( __lock ) { return __count; }
         }
     }
-    public bool            IsReadOnly => false;
     public Node?           First      { get; private set; }
+    public bool            IsReadOnly => false;
     public ValueEnumerator Values     => new(this);
 
 
@@ -238,10 +238,10 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
     public sealed class Enumerator( ValueLinkedList<T> list ) : IEnumerator<T>
     {
-        private readonly ValueLinkedList<T> __list     = list;
-        private          Node?              __nextNode = list.First;
-        private          Node?              __currentNode;
+        private readonly ValueLinkedList<T> __list = list;
         private          bool               __isDisposed;
+        private          Node?              __currentNode;
+        private          Node?              __nextNode = list.First;
 
 
         public ref T Current => ref __currentNode is null
@@ -287,8 +287,8 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
     public sealed class Node( T value )
     {
-        public Node? Next;
         public T     Value = value;
+        public Node? Next;
     }
 
 

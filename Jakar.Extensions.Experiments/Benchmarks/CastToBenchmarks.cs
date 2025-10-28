@@ -56,34 +56,34 @@ public class CastToBenchmarks
     public static SupportedLanguage Value => SupportedLanguage.English;
 
 
-    [BenchmarkCategory("Convert")] [Benchmark] public byte    Convert_Cast_Byte()    => Convert.ToByte( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public sbyte   Convert_Cast_SByte()   => Convert.ToSByte( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public short   Convert_Cast_Short()   => Convert.ToInt16( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public ushort  Convert_Cast_UShort()  => Convert.ToUInt16( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public int     Convert_Cast_Int()     => Convert.ToInt32( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public uint    Convert_Cast_UInt()    => Convert.ToUInt32( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public long    Convert_Cast_Long()    => Convert.ToInt32( Value );
-    [BenchmarkCategory("Convert")] [Benchmark] public ulong   Convert_Cast_ULong()   => Convert.ToUInt64( Value );
+    [BenchmarkCategory("Convert")] [Benchmark] public byte   Convert_Cast_Byte()   => Convert.ToByte(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public sbyte  Convert_Cast_SByte()  => Convert.ToSByte(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public short  Convert_Cast_Short()  => Convert.ToInt16(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public ushort Convert_Cast_UShort() => Convert.ToUInt16(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public int    Convert_Cast_Int()    => Convert.ToInt32(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public uint   Convert_Cast_UInt()   => Convert.ToUInt32(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public long   Convert_Cast_Long()   => Convert.ToInt32(Value);
+    [BenchmarkCategory("Convert")] [Benchmark] public ulong  Convert_Cast_ULong()  => Convert.ToUInt64(Value);
 
 
-    [BenchmarkCategory("Cast")] [Benchmark] public byte    Cast_Byte()    => Value.AsByte();
-    [BenchmarkCategory("Cast")] [Benchmark] public sbyte   Cast_SByte()   => Value.AsSByte();
-    [BenchmarkCategory("Cast")] [Benchmark] public short   Cast_Short()   => Value.AsShort();
-    [BenchmarkCategory("Cast")] [Benchmark] public ushort  Cast_UShort()  => Value.AsUShort();
-    [BenchmarkCategory("Cast")] [Benchmark] public int     Cast_Int()     => Value.AsInt();
-    [BenchmarkCategory("Cast")] [Benchmark] public uint    Cast_UInt()    => Value.AsUInt();
-    [BenchmarkCategory("Cast")] [Benchmark] public long    Cast_Long()    => Value.AsLong();
-    [BenchmarkCategory("Cast")] [Benchmark] public ulong   Cast_ULong()   => Value.AsULong();
+    [BenchmarkCategory("Cast")] [Benchmark] public byte   Cast_Byte()   => Value.AsByte();
+    [BenchmarkCategory("Cast")] [Benchmark] public sbyte  Cast_SByte()  => Value.AsSByte();
+    [BenchmarkCategory("Cast")] [Benchmark] public short  Cast_Short()  => Value.AsShort();
+    [BenchmarkCategory("Cast")] [Benchmark] public ushort Cast_UShort() => Value.AsUShort();
+    [BenchmarkCategory("Cast")] [Benchmark] public int    Cast_Int()    => Value.AsInt();
+    [BenchmarkCategory("Cast")] [Benchmark] public uint   Cast_UInt()   => Value.AsUInt();
+    [BenchmarkCategory("Cast")] [Benchmark] public long   Cast_Long()   => Value.AsLong();
+    [BenchmarkCategory("Cast")] [Benchmark] public ulong  Cast_ULong()  => Value.AsULong();
 
 
-    [BenchmarkCategory("DirectCast")] [Benchmark] public byte    Direct_Cast_Byte()    => (byte)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public sbyte   Direct_Cast_SByte()   => (sbyte)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public short   Direct_Cast_Short()   => (short)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public ushort  Direct_Cast_UShort()  => (ushort)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public int     Direct_Cast_Int()     => (int)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public uint    Direct_Cast_UInt()    => (uint)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public long    Direct_Cast_Long()    => (long)Value;
-    [BenchmarkCategory("DirectCast")] [Benchmark] public ulong   Direct_Cast_ULong()   => (ulong)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public byte   Direct_Cast_Byte()   => (byte)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public sbyte  Direct_Cast_SByte()  => (sbyte)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public short  Direct_Cast_Short()  => (short)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public ushort Direct_Cast_UShort() => (ushort)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public int    Direct_Cast_Int()    => (int)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public uint   Direct_Cast_UInt()   => (uint)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public long   Direct_Cast_Long()   => (long)Value;
+    [BenchmarkCategory("DirectCast")] [Benchmark] public ulong  Direct_Cast_ULong()  => (ulong)Value;
 }
 
 

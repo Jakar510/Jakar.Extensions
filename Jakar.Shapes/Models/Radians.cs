@@ -26,7 +26,8 @@ public readonly record struct Radians( double Value ) : IFormattable, IMathOpera
     {
         Radians[] array = GC.AllocateUninitializedArray<Radians>(360);
 
-        for ( int i = 0; i < array.Length; i++ ) array[i] = new Radians(i * INCREMENT);
+        for ( int i = 0; i < array.Length; i++ ) { array[i] = new Radians(i * INCREMENT); }
+
         return array;
     }
     public static Radians Normalize( double value )

@@ -56,7 +56,10 @@ public static class JsonXmlConverter
             case JsonValue value:
             {
                 XmlElement element = doc.CreateElement(name ?? Constants.VALUE);
-                element.InnerText = value.ToJsonString().Trim('"'); // strips quotes for strings
+
+                element.InnerText = value.ToJsonString()
+                                         .Trim('"'); // strips quotes for strings
+
                 parent.AppendChild(element);
                 break;
             }
@@ -72,7 +75,7 @@ public static class JsonXmlConverter
     }
 
 
-    public static JsonNode    ToJson( this XmlDocument           value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY ) { return null; }
-    public static XmlDocument ToXml( this  JsonNode              value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY ) { return null; }
-    public static XmlDocument ToXml( this  IEnumerable<JsonNode> values, [CallerArgumentExpression(nameof(values))] string rootName = EMPTY ) { return null; }
+    public static JsonNode    ToJson( this XmlDocument           value,  [CallerArgumentExpression(nameof(value))]  string rootName = EMPTY ) => null;
+    public static XmlDocument ToXml( this  JsonNode              value,  [CallerArgumentExpression(nameof(value))]  string rootName = EMPTY ) => null;
+    public static XmlDocument ToXml( this  IEnumerable<JsonNode> values, [CallerArgumentExpression(nameof(values))] string rootName = EMPTY ) => null;
 }

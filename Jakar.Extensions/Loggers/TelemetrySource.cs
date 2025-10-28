@@ -44,7 +44,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public readonly        AppInformation                  Info;
     public readonly        Meter                           Meter;
     public static          TelemetrySource?                Current        { get; set; }
-    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { get => FuzzyEqualizer<TelemetrySource>.Default; }
+    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer => FuzzyEqualizer<TelemetrySource>.Default;
 
 
     ref readonly AppInformation ITelemetrySource.Info   => ref Info;

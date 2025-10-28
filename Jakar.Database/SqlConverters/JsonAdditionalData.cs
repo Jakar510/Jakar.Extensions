@@ -9,5 +9,5 @@ public sealed class JsonAdditionalData : JsonSqlHandler<JsonAdditionalData, Json
     public override JsonTypeInfo<JsonObject?> TypeInfo                                                  => JakarExtensionsContext.Default.JsonObject;
     public override void                      SetValue( IDbDataParameter parameter, JsonObject? value ) => parameter.Value = value?.ToJson();
     public override JsonObject?               Parse( object?             value ) => Parse(value as string);
-    public static   JsonObject?               Parse( string?             value ) => (value ?? EMPTY).GetAdditionalData();
+    public static   JsonObject?               Parse( string?             value ) => ( value ?? EMPTY ).GetAdditionalData();
 }

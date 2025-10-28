@@ -107,7 +107,7 @@ public sealed class WebResponse<TValue>
     {
         if ( IsSuccessStatusCode ) { return; }
 
-        throw new HttpRequestException(this.ToString(), Exception);
+        throw new HttpRequestException(ToString(), Exception);
     }
 
 

@@ -33,6 +33,6 @@ public static partial class Enums
 
     [RequiresDynamicCode(nameof(GetEnumValue))] public static TValue GetEnumValue<TValue, TEnum>( this TEnum value )
         where TEnum : unmanaged, Enum => GetEnumNamedValues<TEnum, TValue>()
-                                     .First(pair => pair.Key == value.ToString())
-                                     .Value;
+                                        .First(pair => pair.Key == value.ToString())
+                                        .Value;
 }

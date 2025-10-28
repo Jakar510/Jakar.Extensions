@@ -32,9 +32,9 @@ public sealed partial class ExperimentContext : JsonSerializerContext;
 public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 {
     private static readonly Node[]                __empty = [];
+    public static           JsonTypeInfo<Node[]>  JsonArrayInfo => ExperimentContext.Default.NodeArray;
     public static           JsonSerializerContext JsonContext   => ExperimentContext.Default;
     public static           JsonTypeInfo<Node>    JsonTypeInfo  => ExperimentContext.Default.Node;
-    public static           JsonTypeInfo<Node[]>  JsonArrayInfo => ExperimentContext.Default.NodeArray;
     public                  Node[]                Children      { get; init; } = __empty;
     public                  DateTimeOffset        Date          { get; init; }
     public                  string                Description   { get; init; } = EMPTY;
@@ -66,8 +66,8 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 
     public sealed class NodeFaker : Faker<Node>
     {
-        public static readonly NodeFaker Instance = new();
         private static         uint      __depth  = (uint)Random.Shared.Next(5, 10);
+        public static readonly NodeFaker Instance = new();
 
 
         public NodeFaker()
@@ -84,7 +84,9 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 
             uint depth = __depth;
             __depth = depth / 2;
-            return Generate((int)depth).ToArray();
+
+            return Generate((int)depth)
+               .ToArray();
         }
     }
 }
@@ -94,14 +96,10 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
 public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
 {
-    public Email Email         = new("bite@me.com");
-    public Error MutableError  = Error.InternalServerError();
-    public Error ReadOnlyError = Error.InternalServerError();
-    public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
-
     internal static readonly TestJson Debug = new()
                                               {
-                                                  Nodes  = Node.NodeFaker.Instance.Generate(5).ToArray(),
+                                                  Nodes = Node.NodeFaker.Instance.Generate(5)
+                                                              .ToArray(),
                                                   Errors = Errors.Create(Error.Accepted(), Error.BadRequest()),
                                                   Files  = [new FileData(0, "Hash", "payload", new FileMetaData("file.dat", MimeTypeNames.Application.BINARY, MimeType.Binary))],
                                                   Location = new CurrentLocation
@@ -115,7 +113,7 @@ public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
                                                                  Course           = Random.Shared.NextDouble() * 360,
                                                                  InstanceID       = Guid.NewGuid(),
                                                                  ID               = Guid.NewGuid(),
-                                                                 Timestamp        = DateTimeOffset.UtcNow,
+                                                                 Timestamp        = DateTimeOffset.UtcNow
                                                              },
                                                   CreateUser = new CreateUserModel
                                                                {
@@ -124,7 +122,7 @@ public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
                                                                    UserName  = "Jonny",
                                                                    FirstName = "John",
                                                                    LastName  = "Doe",
-                                                                   Email     = "john.doe@mail.com",
+                                                                   Email     = "john.doe@mail.com"
                                                                },
                                                   User = new UserModel
                                                          {
@@ -133,19 +131,23 @@ public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
                                                              UserName  = "Jonny",
                                                              FirstName = "John",
                                                              LastName  = "Doe",
-                                                             Email     = "john.doe@mail.com",
+                                                             Email     = "john.doe@mail.com"
                                                          }
                                               };
+    public        Email                    Email         = new("bite@me.com");
+    public        Error                    MutableError  = Error.InternalServerError();
+    public        Error                    ReadOnlyError = Error.InternalServerError();
+    public        Pair                     Pair          = new("date", DateTime.Now.ToLongDateString());
+    public static JsonTypeInfo<TestJson[]> JsonArrayInfo => ExperimentContext.Default.TestJsonArray;
 
-    public static JsonSerializerContext          JsonContext   => ExperimentContext.Default;
-    public static JsonTypeInfo<TestJson>         JsonTypeInfo  => ExperimentContext.Default.TestJson;
-    public static JsonTypeInfo<TestJson[]>       JsonArrayInfo => ExperimentContext.Default.TestJsonArray;
-    public        Node[]                         Nodes         { get; set; } = [];
-    public        CreateUserModel                CreateUser    { get; set; } = new();
-    public        Errors                         Errors        { get; set; } = Errors.Empty;
-    public        ObservableCollection<FileData> Files         { get; set; } = [];
-    public        CurrentLocation                Location      { get; set; } = new();
-    public        UserModel                      User          { get; set; } = new();
+    public static JsonSerializerContext          JsonContext  => ExperimentContext.Default;
+    public static JsonTypeInfo<TestJson>         JsonTypeInfo => ExperimentContext.Default.TestJson;
+    public        CreateUserModel                CreateUser   { get; set; } = new();
+    public        Errors                         Errors       { get; set; } = Errors.Empty;
+    public        ObservableCollection<FileData> Files        { get; set; } = [];
+    public        CurrentLocation                Location     { get; set; } = new();
+    public        Node[]                         Nodes        { get; set; } = [];
+    public        UserModel                      User         { get; set; } = new();
 
 
     public static void Print()

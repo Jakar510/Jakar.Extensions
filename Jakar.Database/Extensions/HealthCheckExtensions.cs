@@ -46,8 +46,9 @@ public static class HealthChecks
     }
 
 
-    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder )                                       => builder.Services.AddHealthChecks();
-    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, HealthCheckRegistration registration ) => builder.AddHealthChecks().Add(registration);
+    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder ) => builder.Services.AddHealthChecks();
+    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, HealthCheckRegistration registration ) => builder.AddHealthChecks()
+                                                                                                                                             .Add(registration);
     public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, params HealthCheckRegistration[] registrations )
     {
         IHealthChecksBuilder checks = builder.AddHealthChecks();

@@ -97,10 +97,10 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     [Pure] public static ReadOnlyRectangleF Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
         where TRectangle : struct, IRectangle<TRectangle>
     {
-        double x      = ( rectangle.X      + padding.Left );
-        double y      = ( rectangle.Y      + padding.Top );
-        double width  = ( rectangle.Width  - padding.HorizontalThickness );
-        double height = ( rectangle.Height - padding.VerticalThickness );
+        double x      = rectangle.X      + padding.Left;
+        double y      = rectangle.Y      + padding.Top;
+        double width  = rectangle.Width  - padding.HorizontalThickness;
+        double height = rectangle.Height - padding.VerticalThickness;
         return Create(x, y, width, height);
     }
 

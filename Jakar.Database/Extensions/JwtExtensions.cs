@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  5:01 PM
 
-using Microsoft.IdentityModel.Tokens;
-
-
-
 namespace Jakar.Database;
 
 
@@ -13,10 +9,10 @@ public static class JwtExtensions
     [Pure] public static DateTimeOffset TokenExpiration( this IConfiguration configuration ) => configuration.TokenExpiration(TimeSpan.FromMinutes(30));
 
 
-    [Pure]
-    public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
+    [Pure] public static DateTimeOffset TokenExpiration( this IConfiguration configuration, TimeSpan defaultValue )
     {
-        TimeSpan offset = configuration.TokenValidation().GetValue(nameof(TokenExpiration), defaultValue);
+        TimeSpan offset = configuration.TokenValidation()
+                                       .GetValue(nameof(TokenExpiration), defaultValue);
 
         return DateTimeOffset.UtcNow + offset;
     }

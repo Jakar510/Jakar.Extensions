@@ -86,7 +86,9 @@
     {
         if ( _isExpanded == value ) { return; }
 
-        IsExpandedExpression?.Compile().Invoke();
+        IsExpandedExpression?.Compile()
+                             .Invoke();
+
         _isExpanded = value;
         await IsExpandedChanged.InvokeAsync(value);
     }

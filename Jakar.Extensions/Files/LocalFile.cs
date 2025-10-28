@@ -1,8 +1,5 @@
 ﻿// unset
 
-using ValueOf;
-
-
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1584
 
@@ -14,25 +11,25 @@ namespace Jakar.Extensions;
 [Serializable]
 public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
 {
-    public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
-    public readonly              string   FullPath     = info.FullName;
-    private                      bool     __isTemporary;
-    [JsonIgnore] public readonly FileInfo Info = info;
+    public readonly              Encoding                  FileEncoding = encoding ?? Encoding.Default;
+    [JsonIgnore] public readonly FileInfo                  Info         = info;
+    public readonly              string                    FullPath     = info.FullName;
+    private                      bool                      __isTemporary;
+    public static                JsonTypeInfo<LocalFile[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileArray;
 
 
-    public static JsonSerializerContext     JsonContext     => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LocalFile>   JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
-    public static JsonTypeInfo<LocalFile[]> JsonArrayInfo   => JakarExtensionsContext.Default.LocalFileArray;
-    public        string                    ContentType     { get => Mime.ToContentType(); }
-    public        DateTimeOffset            CreationTimeUtc { get => Info.CreationTimeUtc; }
-    public        string?                   DirectoryName   { get => Info.DirectoryName; }
-    public        bool                      DoesNotExist    { get => !Exists; }
-    public        bool                      Exists          { get => Info.Exists; }
-    public        string                    Extension       { get => Info.Extension; }
-    bool TempFile.ITempFile.                IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
-    public DateTimeOffset                   LastAccess      { get => Info.LastAccessTime; }
-    public MimeType                         Mime            { get => Extension.FromExtension(); }
-    public string                           Name            { get => Info.Name; }
+    public static JsonSerializerContext   JsonContext     => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LocalFile> JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
+    public        string                  ContentType     => Mime.ToContentType();
+    public        DateTimeOffset          CreationTimeUtc => Info.CreationTimeUtc;
+    public        string?                 DirectoryName   => Info.DirectoryName;
+    public        bool                    DoesNotExist    => !Exists;
+    public        bool                    Exists          => Info.Exists;
+    public        string                  Extension       => Info.Extension;
+    bool TempFile.ITempFile.              IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset                 LastAccess      => Info.LastAccessTime;
+    public MimeType                       Mime            => Extension.FromExtension();
+    public string                         Name            => Info.Name;
 
     [JsonIgnore] public LocalDirectory? Parent
     {
@@ -45,7 +42,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
                        : new LocalDirectory(parent);
         }
     }
-    public string Root { get => Directory.GetDirectoryRoot(FullPath); }
+    public string Root => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
@@ -1087,5 +1084,22 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// </returns>
         TValue AsJson<TValue>( in TelemetrySpan parent = default )
             where TValue : IJsonModel<TValue>;
+    }
+
+
+
+    public sealed class PathComparer : IComparer<LocalFile>
+    {
+        public static readonly PathComparer Default = new();
+        public int Compare( LocalFile? x, LocalFile? y )
+        {
+            if ( ReferenceEquals(x, y) ) { return 0; }
+
+            if ( y is null ) { return 1; }
+
+            if ( x is null ) { return -1; }
+
+            return string.Compare(x.FullPath, y.FullPath, StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }

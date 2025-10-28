@@ -311,8 +311,8 @@ internal static class PermissionGenUtilities
 
     private sealed class Node
     {
-        public Dictionary<string, Node>                  Children { get; init; } = [];
-        public List<(string Field, int Id, string Path)> Fields   { get; init; } = [];
+        public Dictionary<string, Node>                  Children { get; } = [];
+        public List<(string Field, int Id, string Path)> Fields   { get; } = [];
         public string                                    Name     { get; }
         public Node( string name ) => Name = name;
     }

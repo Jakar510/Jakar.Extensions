@@ -4,10 +4,6 @@
 
 // ReSharper disable CheckNamespace
 
-using Jakar.Extensions.UserGuid;
-
-
-
 namespace Jakar.Extensions.UserLong;
 // ReSharper restore CheckNamespace
 
@@ -124,9 +120,9 @@ public sealed partial class JakarModelsLongContext : JsonSerializerContext
 [Serializable]
 public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IAddress, IEqualComparable<UserAddress>
 {
+    public static JsonTypeInfo<UserAddress[]> JsonArrayInfo => JakarModelsLongContext.Default.UserAddressArray;
     public static JsonSerializerContext       JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsLongContext.Default.UserAddress;
-    public static JsonTypeInfo<UserAddress[]> JsonArrayInfo => JakarModelsLongContext.Default.UserAddressArray;
 
 
     public UserAddress() : base() { }
@@ -174,9 +170,9 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 [Serializable]
 public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IGroupModel, IEqualComparable<GroupModel>
 {
+    public static JsonTypeInfo<GroupModel[]> JsonArrayInfo => JakarModelsLongContext.Default.GroupModelArray;
     public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
-    public static JsonTypeInfo<GroupModel[]> JsonArrayInfo => JakarModelsLongContext.Default.GroupModelArray;
 
 
     public GroupModel( string                            nameOfGroup, long? ownerID, long? createdBy, long id, string rights ) : base(nameOfGroup, ownerID, createdBy, id, rights) { }
@@ -197,9 +193,9 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
 [Serializable]
 public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IRoleModel, IEqualComparable<RoleModel>
 {
+    public static JsonTypeInfo<RoleModel[]> JsonArrayInfo => JakarModelsLongContext.Default.RoleModelArray;
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsLongContext.Default.RoleModel;
-    public static JsonTypeInfo<RoleModel[]> JsonArrayInfo => JakarModelsLongContext.Default.RoleModelArray;
 
 
     public RoleModel( string                           nameOfRole, string rights, long id ) : base(nameOfRole, rights, id) { }
@@ -221,9 +217,9 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
 [method: SetsRequiredMembers]
 public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IFileData, IEqualComparable<FileData>
 {
+    public static JsonTypeInfo<FileData[]> JsonArrayInfo => JakarModelsLongContext.Default.FileDataArray;
     public static JsonSerializerContext    JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsLongContext.Default.FileData;
-    public static JsonTypeInfo<FileData[]> JsonArrayInfo => JakarModelsLongContext.Default.FileDataArray;
 
 
     [SetsRequiredMembers] public FileData( IFileData<long, FileMetaData> file ) : this(file, file.MetaData) { }
@@ -247,9 +243,9 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 [Serializable]
 public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation, IJsonModel<CurrentLocation>
 {
+    public static JsonTypeInfo<CurrentLocation[]> JsonArrayInfo           => JakarModelsLongContext.Default.CurrentLocationArray;
     public static JsonSerializerContext           JsonContext             => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsLongContext.Default.CurrentLocation;
-    public static JsonTypeInfo<CurrentLocation[]> JsonArrayInfo           => JakarModelsLongContext.Default.CurrentLocationArray;
     public        double?                         Accuracy                { get; init; }
     public        double?                         Altitude                { get; init; }
     public        AltitudeReference               AltitudeReferenceSystem { get; init; }
@@ -406,9 +402,9 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 [Serializable]
 public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel
 {
+    public static JsonTypeInfo<UserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.UserModelArray;
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.UserModel;
-    public static JsonTypeInfo<UserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.UserModelArray;
 
 
     public UserModel() : base() { }
@@ -448,9 +444,9 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 [Serializable]
 public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel, IEqualComparable<CreateUserModel>
 {
+    public static JsonTypeInfo<CreateUserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.CreateUserModelArray;
     public static JsonSerializerContext           JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.CreateUserModel;
-    public static JsonTypeInfo<CreateUserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.CreateUserModelArray;
 
 
     public CreateUserModel() : base() { }
@@ -517,23 +513,23 @@ public class UserDevice : DeviceInformation, IUserDevice
 [Serializable]
 public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISessionID, IJsonModel<SessionToken>
 {
+    public static JsonTypeInfo<SessionToken[]> JsonArrayInfo => JakarModelsLongContext.Default.SessionTokenArray;
     public static JsonSerializerContext        JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<SessionToken>   JsonTypeInfo  => JakarModelsLongContext.Default.SessionToken;
-    public static JsonTypeInfo<SessionToken[]> JsonArrayInfo => JakarModelsLongContext.Default.SessionTokenArray;
-    public        Guid                         UserID        { get; set; }
-    public        string?                      FullName      { get; set; }
-    public        AppVersion                   Version       { get; set; } = AppVersion.Default;
     public        string                       AccessToken   { get; set; } = EMPTY;
+    public        string                       DeviceID      { get; set; } = EMPTY;
+    public        string                       DeviceName    { get; set; } = EMPTY;
+    public        string?                      FullName      { get; set; }
+    public        bool                         IsValid       => SessionID > 0;
     public        string?                      RefreshToken  { get; set; }
     public        long                         SessionID     { get; set; }
-    public        string                       DeviceName    { get; set; } = EMPTY;
-    public        bool                         IsValid       => SessionID > 0;
-    public        string                       DeviceID      { get; set; } = EMPTY;
+    public        Guid                         UserID        { get; set; }
+    public        AppVersion                   Version       { get; set; } = AppVersion.Default;
 
 
-    public override bool Equals( SessionToken?    other )                       => ReferenceEquals(this, other) || other is not null && UserID == other.UserID && DeviceID == other.DeviceID;
+    public override bool Equals( SessionToken?    other )                       => ReferenceEquals(this, other) || ( other is not null && UserID == other.UserID && DeviceID == other.DeviceID );
     public override int  CompareTo( SessionToken? other )                       => Nullable.Compare(SessionID, other?.SessionID);
-    public override bool Equals( object?          other )                       => ReferenceEquals(this, other) || other is SessionToken x && Equals(x);
+    public override bool Equals( object?          other )                       => ReferenceEquals(this, other) || ( other is SessionToken x && Equals(x) );
     public override int  GetHashCode()                                          => HashCode.Combine(UserID, DeviceID, SessionID, FullName, DeviceName);
     public static   bool operator ==( SessionToken? left, SessionToken? right ) => EqualityComparer<SessionToken>.Default.Equals(left, right);
     public static   bool operator !=( SessionToken? left, SessionToken? right ) => !EqualityComparer<SessionToken>.Default.Equals(left, right);
@@ -549,17 +545,17 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
 [method: JsonConstructor]
 public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>, IEqualComparable<UserLoginRequest>
 {
+    public static                JsonTypeInfo<UserLoginRequest[]> JsonArrayInfo => JakarModelsLongContext.Default.UserLoginRequestArray;
     public static                JsonSerializerContext            JsonContext   => JakarModelsLongContext.Default;
     public static                JsonTypeInfo<UserLoginRequest>   JsonTypeInfo  => JakarModelsLongContext.Default.UserLoginRequest;
-    public static                JsonTypeInfo<UserLoginRequest[]> JsonArrayInfo => JakarModelsLongContext.Default.UserLoginRequestArray;
     [JsonIgnore] public override bool                             IsValid       => this.IsValid();
 
 
     public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserName, request.Password, data) { }
     public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserName, request.Password, request.Data) { }
-    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture);
+    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) );
     public override int  CompareTo( UserLoginRequest? other )                           => string.Compare(UserName, other?.Password, StringComparison.CurrentCultureIgnoreCase);
-    public override bool Equals( object?              other )                           => ReferenceEquals(this, other) || other is UserLoginRequest x && Equals(x);
+    public override bool Equals( object?              other )                           => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
     public override int  GetHashCode()                                                  => HashCode.Combine(UserName, Password);
     public static   bool operator ==( UserLoginRequest? left, UserLoginRequest? right ) => EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator !=( UserLoginRequest? left, UserLoginRequest? right ) => !EqualityComparer<UserLoginRequest>.Default.Equals(left, right);

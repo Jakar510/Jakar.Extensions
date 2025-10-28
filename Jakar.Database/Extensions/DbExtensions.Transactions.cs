@@ -7,7 +7,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -27,7 +27,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -47,7 +47,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -67,7 +67,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -87,7 +87,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -107,7 +107,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -127,7 +127,7 @@ public static partial class DbExtensions
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -143,21 +143,21 @@ public static partial class DbExtensions
 
         await foreach ( TResult item in result.WithCancellation(token) ) { yield return item; }
     }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( this IConnectableDb                                                                                                              db,
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TResult>( this IConnectableDb                                                                                                                      db,
                                                                                                                      Func<NpgsqlConnection, NpgsqlTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                                                     TArg1                                                                                                                            arg1,
-                                                                                                                     TArg2                                                                                                                            arg2,
-                                                                                                                     TArg3                                                                                                                            arg3,
-                                                                                                                     TArg4                                                                                                                            arg4,
-                                                                                                                     TArg5                                                                                                                            arg5,
-                                                                                                                     TArg6                                                                                                                            arg6,
-                                                                                                                     TArg7                                                                                                                            arg7,
-                                                                                                                     [EnumeratorCancellation] CancellationToken                                                                                       token
+                                                                                                                     TArg1                                                                                                                                    arg1,
+                                                                                                                     TArg2                                                                                                                                    arg2,
+                                                                                                                     TArg3                                                                                                                                    arg3,
+                                                                                                                     TArg4                                                                                                                                    arg4,
+                                                                                                                     TArg5                                                                                                                                    arg5,
+                                                                                                                     TArg6                                                                                                                                    arg6,
+                                                                                                                     TArg7                                                                                                                                    arg7,
+                                                                                                                     [EnumeratorCancellation] CancellationToken                                                                                               token
     )
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -173,22 +173,22 @@ public static partial class DbExtensions
 
         await foreach ( TResult item in result.WithCancellation(token) ) { yield return item; }
     }
-    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb                                                                                                                     db,
+    public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb                                                                                                                             db,
                                                                                                                             Func<NpgsqlConnection, NpgsqlTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken, IAsyncEnumerable<TResult>> func,
-                                                                                                                            TArg1                                                                                                                                   arg1,
-                                                                                                                            TArg2                                                                                                                                   arg2,
-                                                                                                                            TArg3                                                                                                                                   arg3,
-                                                                                                                            TArg4                                                                                                                                   arg4,
-                                                                                                                            TArg5                                                                                                                                   arg5,
-                                                                                                                            TArg6                                                                                                                                   arg6,
-                                                                                                                            TArg7                                                                                                                                   arg7,
-                                                                                                                            TArg8                                                                                                                                   arg8,
-                                                                                                                            [EnumeratorCancellation] CancellationToken                                                                                              token
+                                                                                                                            TArg1                                                                                                                                           arg1,
+                                                                                                                            TArg2                                                                                                                                           arg2,
+                                                                                                                            TArg3                                                                                                                                           arg3,
+                                                                                                                            TArg4                                                                                                                                           arg4,
+                                                                                                                            TArg5                                                                                                                                           arg5,
+                                                                                                                            TArg6                                                                                                                                           arg6,
+                                                                                                                            TArg7                                                                                                                                           arg7,
+                                                                                                                            TArg8                                                                                                                                           arg8,
+                                                                                                                            [EnumeratorCancellation] CancellationToken                                                                                                      token
     )
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync(db.TransactionIsolationLevel, token);
-        IAsyncEnumerable<TResult> result;
+        IAsyncEnumerable<TResult>     result;
 
         try
         {
@@ -345,17 +345,17 @@ public static partial class DbExtensions
             throw;
         }
     }
-    public static async ValueTask TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>( this IConnectableDb                                                                                                     db,
+    public static async ValueTask TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>( this IConnectableDb                                                                                                             db,
                                                                                                    Func<NpgsqlConnection, NpgsqlTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken, ValueTask> func,
-                                                                                                   TArg1                                                                                                                   arg1,
-                                                                                                   TArg2                                                                                                                   arg2,
-                                                                                                   TArg3                                                                                                                   arg3,
-                                                                                                   TArg4                                                                                                                   arg4,
-                                                                                                   TArg5                                                                                                                   arg5,
-                                                                                                   TArg6                                                                                                                   arg6,
-                                                                                                   TArg7                                                                                                                   arg7,
-                                                                                                   TArg8                                                                                                                   arg8,
-                                                                                                   CancellationToken                                                                                                       token
+                                                                                                   TArg1                                                                                                                           arg1,
+                                                                                                   TArg2                                                                                                                           arg2,
+                                                                                                   TArg3                                                                                                                           arg3,
+                                                                                                   TArg4                                                                                                                           arg4,
+                                                                                                   TArg5                                                                                                                           arg5,
+                                                                                                   TArg6                                                                                                                           arg6,
+                                                                                                   TArg7                                                                                                                           arg7,
+                                                                                                   TArg8                                                                                                                           arg8,
+                                                                                                   CancellationToken                                                                                                               token
     )
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);
@@ -522,17 +522,17 @@ public static partial class DbExtensions
             throw;
         }
     }
-    public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb                                                                                                              db,
+    public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TResult>( this IConnectableDb                                                                                                                      db,
                                                                                                                      Func<NpgsqlConnection, NpgsqlTransaction, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, CancellationToken, ValueTask<TResult>> func,
-                                                                                                                     TArg1                                                                                                                            arg1,
-                                                                                                                     TArg2                                                                                                                            arg2,
-                                                                                                                     TArg3                                                                                                                            arg3,
-                                                                                                                     TArg4                                                                                                                            arg4,
-                                                                                                                     TArg5                                                                                                                            arg5,
-                                                                                                                     TArg6                                                                                                                            arg6,
-                                                                                                                     TArg7                                                                                                                            arg7,
-                                                                                                                     TArg8                                                                                                                            arg8,
-                                                                                                                     CancellationToken                                                                                                                token
+                                                                                                                     TArg1                                                                                                                                    arg1,
+                                                                                                                     TArg2                                                                                                                                    arg2,
+                                                                                                                     TArg3                                                                                                                                    arg3,
+                                                                                                                     TArg4                                                                                                                                    arg4,
+                                                                                                                     TArg5                                                                                                                                    arg5,
+                                                                                                                     TArg6                                                                                                                                    arg6,
+                                                                                                                     TArg7                                                                                                                                    arg7,
+                                                                                                                     TArg8                                                                                                                                    arg8,
+                                                                                                                     CancellationToken                                                                                                                        token
     )
     {
         await using NpgsqlConnection  conn        = await db.ConnectAsync(token);

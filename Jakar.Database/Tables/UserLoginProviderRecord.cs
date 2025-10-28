@@ -2,10 +2,6 @@
 // 01/30/2023  2:41 PM
 
 
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-
-
-
 namespace Jakar.Database;
 
 
@@ -21,18 +17,19 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                               DateTimeOffset?                                                               LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
     public const  string                                  TABLE_NAME = "user_login_providers";
-    public static string                                  TableName     { get => TABLE_NAME; }
+    public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
     public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
-    public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<UserLoginProviderRecord>.Default.WithColumn<string>(nameof(LoginProvider), length: MAX_FIXED)
-                                                                                                                        .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: MAX_FIXED)
+                                                                                                                        .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, MAX_FIXED)
                                                                                                                         .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)
                                                                                                                         .WithColumn<string>(nameof(Value),               length: MAX_FIXED)
                                                                                                                         .With_CreatedBy()
                                                                                                                         .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
@@ -50,28 +47,26 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     }
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
-                                                               $"create {TABLE_NAME} table",
-                                                               $"""
-                                                                CREATE TABLE {TABLE_NAME}
-                                                                (
-                                                                {nameof(LoginProvider).SqlColumnName()}       char({MAX_FIXED}) NOT NULL,
-                                                                {nameof(ProviderDisplayName).SqlColumnName()} char({MAX_FIXED}) NOT NULL,
-                                                                {nameof(ProviderKey).SqlColumnName()}         char({MAX_FIXED}) NOT NULL,
-                                                                {nameof(Value).SqlColumnName()}               char({MAX_FIXED}) NOT NULL,
-                                                                {nameof(ID).SqlColumnName()}                  uuid              PRIMARY KEY,
-                                                                {nameof(DateCreated).SqlColumnName()}         timestamptz       NOT NULL DEFAULT SYSUTCDATETIME(),
-                                                                {nameof(LastModified).SqlColumnName()}        timestamptz                 
-                                                                );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
+                                                        $"create {TABLE_NAME} table",
+                                                        $"""
+                                                         CREATE TABLE {TABLE_NAME}
+                                                         (
+                                                         {nameof(LoginProvider).SqlColumnName()}       char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ProviderDisplayName).SqlColumnName()} char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ProviderKey).SqlColumnName()}         char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(Value).SqlColumnName()}               char({MAX_FIXED}) NOT NULL,
+                                                         {nameof(ID).SqlColumnName()}                  uuid              PRIMARY KEY,
+                                                         {nameof(DateCreated).SqlColumnName()}         timestamptz       NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                         {nameof(LastModified).SqlColumnName()}        timestamptz                 
+                                                         );
 
-                                                                CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                                BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                                FOR EACH ROW
-                                                                EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                                """);
-    }
+                                                         CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                         BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                                         FOR EACH ROW
+                                                         EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                         """);
     [Pure] public static UserLoginProviderRecord Create( DbDataReader reader )
     {
         string                            loginProvider       = reader.GetFieldValue<string>(nameof(LoginProvider));

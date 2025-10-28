@@ -21,7 +21,7 @@ public static class PostgresParams
                                                                                          [nameof(DeviceTypes)]         = "device_types",
                                                                                          [nameof(DistanceUnit)]        = "distance_units",
                                                                                          [nameof(Status)]              = "statuses",
-                                                                                         [nameof(NpgsqlDbType)]        = "db_types",
+                                                                                         [nameof(NpgsqlDbType)]        = "db_types"
                                                                                      };
     public static  string SqlColumnName( this string name ) => NameSnakeCaseCache.GetOrAdd(name, ToSnakeCase);
     private static string ToSnakeCase( string        x )    => x.ToSnakeCase();
@@ -160,7 +160,7 @@ public readonly struct PostgresParameters( FrozenDictionary<string, ColumnMetaDa
                                         IsNullable    = meta.IsNullable,
                                         SourceVersion = sourceVersion,
                                         Direction     = direction,
-                                        Value         = value,
+                                        Value         = value
                                     };
 
         return Add(parameter);
@@ -234,7 +234,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        NpgsqlCommand command = new NpgsqlCommand
+        NpgsqlCommand command = new()
                                 {
                                     Connection     = connection,
                                     CommandText    = SQL,
@@ -252,7 +252,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
     public override bool Equals( object?           obj )   => obj is SqlCommand<TSelf> other                                             && Equals(other);
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(SQL, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(Parameters);
         hashCode.Add(CommandType);

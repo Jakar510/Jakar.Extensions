@@ -50,8 +50,12 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
 
     public static implicit operator Spline( ReadOnlyPoint[]?               points ) => Create(points);
     [Pure] public static            Spline Create( params ReadOnlyPoint[]? points ) => new(points);
-    [Pure] public                   Spline Round()                                  => new(AsValueEnumerable().Select(static x => x.Round()).ToArray());
-    [Pure] public                   Spline Floor()                                  => new(AsValueEnumerable().Select(static x => x.Floor()).ToArray());
+    [Pure] public Spline Round() => new(AsValueEnumerable()
+                                       .Select(static x => x.Round())
+                                       .ToArray());
+    [Pure] public Spline Floor() => new(AsValueEnumerable()
+                                       .Select(static x => x.Floor())
+                                       .ToArray());
 
 
     [Pure] public ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable() => new(new FromArray<ReadOnlyPoint>(Points));
@@ -89,7 +93,9 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
 
         for ( int i = 0; i < Length; i++ )
         {
-            int pointComparison = Points[i].CompareTo(other.Points[i]);
+            int pointComparison = Points[i]
+               .CompareTo(other.Points[i]);
+
             if ( pointComparison != 0 ) { return pointComparison; }
         }
 
@@ -109,7 +115,8 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
 
         for ( int i = 0; i < Length; i++ )
         {
-            if ( !Points[i].Equals(other.Points[i]) ) { return false; }
+            if ( !Points[i]
+                    .Equals(other.Points[i]) ) { return false; }
         }
 
         return true;

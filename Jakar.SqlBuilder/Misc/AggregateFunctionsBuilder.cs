@@ -41,7 +41,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Distinct()
     {
-        __builder.AggregateFunction( DISTINCT );
+        __builder.AggregateFunction(DISTINCT);
         return __next;
     }
 
@@ -52,7 +52,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Average()
     {
-        __builder.AggregateFunction( AVERAGE );
+        __builder.AggregateFunction(AVERAGE);
         return __next;
     }
     /// <summary> Return the average value of values in <paramref name="columnName"/> </summary>
@@ -61,7 +61,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Average( string columnName )
     {
-        __builder.AggregateFunction( AVERAGE, columnName );
+        __builder.AggregateFunction(AVERAGE, columnName);
         return __next;
     }
     /// <summary>
@@ -73,7 +73,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Average<TValue>( string columnName )
     {
-        __builder.AggregateFunction( AVERAGE, columnName.GetName<TValue>() );
+        __builder.AggregateFunction(AVERAGE, columnName.GetName<TValue>());
         return __next;
     }
     /// <summary>
@@ -85,7 +85,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Average<TValue>( TValue obj, string columnName )
     {
-        __builder.AggregateFunction( AVERAGE, columnName.GetName( obj ) );
+        __builder.AggregateFunction(AVERAGE, columnName.GetName(obj));
         return __next;
     }
 
@@ -96,7 +96,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Sum()
     {
-        __builder.AggregateFunction( SUM );
+        __builder.AggregateFunction(SUM);
         return __next;
     }
     /// <summary> Return the total value of values in <paramref name="columnName"/> </summary>
@@ -105,7 +105,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Sum( string columnName )
     {
-        __builder.AggregateFunction( SUM, columnName );
+        __builder.AggregateFunction(SUM, columnName);
         return __next;
     }
     /// <summary>
@@ -117,7 +117,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Sum<TValue>( string columnName )
     {
-        __builder.AggregateFunction( SUM, columnName.GetName<TValue>() );
+        __builder.AggregateFunction(SUM, columnName.GetName<TValue>());
         return __next;
     }
     /// <summary>
@@ -129,7 +129,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Sum<TValue>( TValue obj, string columnName )
     {
-        __builder.AggregateFunction( SUM, columnName.GetName( obj ) );
+        __builder.AggregateFunction(SUM, columnName.GetName(obj));
         return __next;
     }
 
@@ -140,7 +140,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Count()
     {
-        __builder.AggregateFunction( COUNT );
+        __builder.AggregateFunction(COUNT);
         return __next;
     }
     /// <summary> Return count of values in <paramref name="columnName"/> </summary>
@@ -149,7 +149,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Count( string columnName )
     {
-        __builder.AggregateFunction( COUNT, columnName );
+        __builder.AggregateFunction(COUNT, columnName);
         return __next;
     }
     /// <summary>
@@ -161,7 +161,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Count<TValue>( string columnName )
     {
-        __builder.AggregateFunction( COUNT, columnName.GetName<TValue>() );
+        __builder.AggregateFunction(COUNT, columnName.GetName<TValue>());
         return __next;
     }
     /// <summary>
@@ -173,7 +173,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Count<TValue>( TValue obj, string columnName )
     {
-        __builder.AggregateFunction( COUNT, columnName.GetName( obj ) );
+        __builder.AggregateFunction(COUNT, columnName.GetName(obj));
         return __next;
     }
 
@@ -184,7 +184,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Min()
     {
-        __builder.AggregateFunction( MIN );
+        __builder.AggregateFunction(MIN);
         return __next;
     }
     /// <summary> Return the minimum value of values in <paramref name="columnName"/> </summary>
@@ -193,7 +193,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Min( string columnName )
     {
-        __builder.AggregateFunction( MIN, columnName );
+        __builder.AggregateFunction(MIN, columnName);
         return __next;
     }
     /// <summary>
@@ -205,7 +205,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Min<TValue>( string columnName )
     {
-        __builder.AggregateFunction( MIN, columnName.GetName<TValue>() );
+        __builder.AggregateFunction(MIN, columnName.GetName<TValue>());
         return __next;
     }
     /// <summary>
@@ -217,7 +217,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Min<TValue>( TValue obj, string columnName )
     {
-        __builder.AggregateFunction( MIN, columnName.GetName( obj ) );
+        __builder.AggregateFunction(MIN, columnName.GetName(obj));
         return __next;
     }
 
@@ -228,7 +228,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Max()
     {
-        __builder.AggregateFunction( MAX );
+        __builder.AggregateFunction(MAX);
         return __next;
     }
     /// <summary> Return the maximum value of values in <paramref name="columnName"/> </summary>
@@ -237,7 +237,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Max( string columnName )
     {
-        __builder.AggregateFunction( MAX, columnName );
+        __builder.AggregateFunction(MAX, columnName);
         return __next;
     }
     /// <summary>
@@ -249,7 +249,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Max<TValue>( string columnName )
     {
-        __builder.AggregateFunction( MAX, columnName.GetName<TValue>() );
+        __builder.AggregateFunction(MAX, columnName.GetName<TValue>());
         return __next;
     }
     /// <summary>
@@ -261,7 +261,7 @@ public struct AggregateFunctionsBuilder<TNext>
     /// </returns>
     public TNext Max<TValue>( TValue obj, string columnName )
     {
-        __builder.AggregateFunction( MAX, columnName.GetName( obj ) );
+        __builder.AggregateFunction(MAX, columnName.GetName(obj));
         return __next;
     }
 }

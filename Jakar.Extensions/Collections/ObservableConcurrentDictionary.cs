@@ -14,9 +14,9 @@ public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableCon
     private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                                        __jsonContext;
     private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>?   __jsonTypeInfo;
+    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
     public static  JsonSerializerContext                                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ObservableConcurrentDictionary() : this(DEFAULT_CAPACITY) { }
@@ -38,7 +38,7 @@ public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableCon
 
 
     public override int  GetHashCode()                                                                                                          => RuntimeHelpers.GetHashCode(this);
-    public override bool Equals( object?                                            other )                                                     => ReferenceEquals(this, other) || other is ObservableConcurrentDictionary<TKey, TValue> x && Equals(x);
+    public override bool Equals( object?                                            other )                                                     => ReferenceEquals(this, other) || ( other is ObservableConcurrentDictionary<TKey, TValue> x && Equals(x) );
     public static   bool operator ==( ObservableConcurrentDictionary<TKey, TValue>? left, ObservableConcurrentDictionary<TKey, TValue>? right ) => EqualityComparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Equals(left, right);
     public static   bool operator !=( ObservableConcurrentDictionary<TKey, TValue>? left, ObservableConcurrentDictionary<TKey, TValue>? right ) => !EqualityComparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Equals(left, right);
     public static   bool operator >( ObservableConcurrentDictionary<TKey, TValue>   left, ObservableConcurrentDictionary<TKey, TValue>  right ) => Comparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Compare(left, right) > 0;
@@ -56,8 +56,8 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     protected internal readonly ConcurrentDictionary<TKey, TValue> buffer = dictionary;
 
 
-    public sealed override int  Count      { get => buffer.Count; }
-    public                 bool IsReadOnly { get => ( (IDictionary)buffer ).IsReadOnly; }
+    public sealed override int  Count      => buffer.Count;
+    public                 bool IsReadOnly => ( (IDictionary)buffer ).IsReadOnly;
 
     public TValue this[ TKey key ]
     {
@@ -77,10 +77,10 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
         }
     }
 
-    public ICollection<TKey>                              Keys   { get => buffer.Keys; }
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { get => buffer.Keys; }
-    public ICollection<TValue>                            Values { get => buffer.Values; }
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { get => buffer.Values; }
+    public ICollection<TKey>                              Keys   => buffer.Keys;
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   => buffer.Keys;
+    public ICollection<TValue>                            Values => buffer.Values;
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => buffer.Values;
 
 
     protected ObservableConcurrentDictionary() : this(DEFAULT_CAPACITY) { }

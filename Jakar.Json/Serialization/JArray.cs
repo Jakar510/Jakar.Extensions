@@ -22,18 +22,21 @@ public ref struct JsonArray
     }
     public readonly JsonArray Empty()
     {
-        __writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
+        __writer.Append(START)
+                .Append(JWriter.SPACE)
+                .Append(END)
+                .FinishBlock();
 
         return this;
     }
     public JsonArray Begin()
     {
-        __writer.StartBlock( START );
+        __writer.StartBlock(START);
         return this;
     }
     public JsonArray Complete()
     {
-        __writer.FinishBlock( END );
+        __writer.FinishBlock(END);
         return this;
     }
 
@@ -152,69 +155,77 @@ public ref struct JsonArray
     //                                                     : Add();
 
 
-    public readonly JsonArray Add( string value ) => Add( value.AsSpan() );
-    public readonly JsonArray Add()               => Add( JWriter.NULL );
+    public readonly JsonArray Add( string value ) => Add(value.AsSpan());
+    public readonly JsonArray Add()               => Add(JWriter.NULL);
     public readonly JsonArray Add( ReadOnlySpan<char> value )
     {
-        __writer.Append( JWriter.QUOTE ).Append( value ).Append( JWriter.QUOTE ).Next();
+        __writer.Append(JWriter.QUOTE)
+                .Append(value)
+                .Append(JWriter.QUOTE)
+                .Next();
 
         return this;
     }
 
 
     public readonly JsonArray Add<TValue>( TValue? value )
-        where TValue : ISpanFormattable => Add( value, CultureInfo.CurrentCulture );
+        where TValue : ISpanFormattable => Add(value, CultureInfo.CurrentCulture);
     public readonly JsonArray Add<TValue>( TValue? value, IFormatProvider? culture )
-        where TValue : ISpanFormattable => Add( value, default, culture );
+        where TValue : ISpanFormattable => Add(value, default, culture);
     public readonly JsonArray Add<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        __writer.Append( value, format, provider );
+        __writer.Append(value, format, provider);
         return this;
     }
     public readonly JsonArray Add<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        if ( value is not null ) { __writer.Append( value, format, bufferSize, provider ).Next(); }
+        if ( value is not null )
+        {
+            __writer.Append(value, format, bufferSize, provider)
+                    .Next();
+        }
 
         return this;
     }
 
 
     public readonly JsonArray AddNumber<TValue>( TValue? value )
-        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber(value, CultureInfo.CurrentCulture);
     public readonly JsonArray AddNumber<TValue>( TValue? value, IFormatProvider? culture )
-        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, default, culture );
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber(value, default, culture);
     public readonly JsonArray AddNumber<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         if ( value is null ) { return this; }
 
-        return AddNumber( value.Value, format, provider );
+        return AddNumber(value.Value, format, provider);
     }
     public readonly JsonArray AddNumber<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         if ( value is null ) { return this; }
 
-        return AddNumber( value.Value, bufferSize, format, provider );
+        return AddNumber(value.Value, bufferSize, format, provider);
     }
 
 
     public readonly JsonArray AddNumber<TValue>( TValue value )
-        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber(value, CultureInfo.CurrentCulture);
     public readonly JsonArray AddNumber<TValue>( TValue value, IFormatProvider? culture )
-        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, default, culture );
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber(value, default, culture);
     public readonly JsonArray AddNumber<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
-        __writer.Append( value, format, provider );
+        __writer.Append(value, format, provider);
         return this;
     }
     public readonly JsonArray AddNumber<TValue>( TValue value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
-        __writer.AppendValue( value, format, bufferSize, provider ).Next();
+        __writer.AppendValue(value, format, bufferSize, provider)
+                .Next();
 
         return this;
     }
@@ -230,10 +241,10 @@ public ref struct JsonArray
 
         Begin();
 
-        foreach ( (int index, IJsonizer item) in collection.Enumerate( 0 ) )
+        foreach ( ( int index, IJsonizer item ) in collection.Enumerate(0) )
         {
             JsonObject node = AddObject();
-            item.Serialize( ref node );
+            item.Serialize(ref node);
 
             if ( index < collection.Count ) { __writer.Next(); }
         }

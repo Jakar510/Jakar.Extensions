@@ -27,8 +27,8 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    [JsonIgnore]                                                                      public override bool IsValid         { get => base.IsValid                         && IsValidPassword; }
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
+    [JsonIgnore]                                                                      public override bool IsValid         => base.IsValid                         && IsValidPassword;
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password);
 
 
     [Required] [StringLength(PASSWORD)] public virtual string Password

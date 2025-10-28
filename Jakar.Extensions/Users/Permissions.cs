@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/14/2025  22:34
 
-using System;
-using Org.BouncyCastle.Utilities.Encoders;
 using ZLinq;
 
 
@@ -285,8 +283,8 @@ public readonly ref struct Permissions : IDisposable
 
 public readonly record struct Right( int Index, bool Value )
 {
-    public readonly int  Index = Index;
     public readonly bool Value = Value;
+    public readonly int  Index = Index;
 }
 
 
@@ -302,7 +300,7 @@ public readonly ref struct Permissions<TEnum> : IDisposable
     public static    char                InvalidChar { get; set; } = '.';
     public static    Permissions<TEnum>  Default     { [MustDisposeResource] get => new(); }
     public static    int                 Count       => EnumValues.Length;
-    public static    ReadOnlySpan<TEnum> EnumValues  => __enumValues ??= Enum.GetValues<TEnum>();
+    public static    ReadOnlySpan<TEnum> EnumValues  => new(__enumValues ??= Enum.GetValues<TEnum>());
     public           Enumerable          Rights      => new(this);
 
 
@@ -552,7 +550,7 @@ public readonly ref struct Permissions<TEnum> : IDisposable
             foreach ( ref readonly TEnum e in EnumValues ) { permissions[i++] = new Right<TEnum>(e, __rights.Has(e)); }
 
             span = permissions;
-            ref readonly var x = ref span[1];
+            ref readonly Right<TEnum> x = ref span[1];
             return true;
         }
         public bool TryCopyTo( scoped Span<Right<TEnum>> destination, Index offset )
@@ -570,6 +568,6 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 public readonly record struct Right<TEnum>( TEnum Index, bool Value )
     where TEnum : unmanaged, Enum
 {
-    public readonly TEnum Index = Index;
     public readonly bool  Value = Value;
+    public readonly TEnum Index = Index;
 }

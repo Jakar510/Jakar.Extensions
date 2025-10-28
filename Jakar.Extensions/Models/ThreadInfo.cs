@@ -28,7 +28,7 @@ public readonly struct ThreadInformation( string name, int managedThreadID, Lang
     public static ThreadInformation Create() => new();
 
 
-    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Name, nameof(ThreadInformation.Name)), Enricher.GetProperty(ManagedThreadID, nameof(ThreadInformation.ManagedThreadID)), Enricher.GetProperty(CurrentCulture.DisplayName, nameof(ThreadInformation.CurrentCulture)), Enricher.GetProperty(CurrentUICulture.DisplayName, nameof(ThreadInformation.CurrentUICulture))]);
+    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Name, nameof(Name)), Enricher.GetProperty(ManagedThreadID, nameof(ManagedThreadID)), Enricher.GetProperty(CurrentCulture.DisplayName, nameof(CurrentCulture)), Enricher.GetProperty(CurrentUICulture.DisplayName, nameof(CurrentUICulture))]);
     public LogEventProperty GetProperty()       => new(nameof(ThreadInformation), GetStructureValue());
 
 
@@ -73,7 +73,7 @@ public readonly struct ThreadInformation( string name, int managedThreadID, Lang
     public override bool Equals( object?           obj )   => obj is ThreadInformation other                                               && Equals(other);
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(Name, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(ManagedThreadID);
         hashCode.Add(CurrentCulture);

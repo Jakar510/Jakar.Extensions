@@ -27,13 +27,13 @@ public static class Constants
     public static class Characters
     {
         public const string ALPHANUMERIC   = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        public const char   MINUS          = '-';
         public const char   EQUALS         = '=';
         public const char   FLAG_SEPARATOR = '-';
         public const string GUID_FORMAT    = "D";
         public const string HEX_CHARS      = "0123456789ABCDEF";
         public const char   HYPHEN         = '-';
         public const string LOWER_CASE     = @"abcdefghijklmnopqrstuvwxyz";
+        public const char   MINUS          = '-';
         public const string NUMERIC        = @"0123456789";
         public const char   PLUS           = '+';
         public const byte   PLUS_BYTE      = (byte)'+';

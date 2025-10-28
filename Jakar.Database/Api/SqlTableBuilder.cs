@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 3/1/2024  23:20
 
-using System.Formats.Asn1;
-using System.Xml;
-
-
-
 namespace Jakar.Database.DbMigrations;
 
 

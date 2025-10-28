@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
-using StackExchange.Redis;
-
-
-
 namespace Jakar.Database;
 
 
@@ -18,7 +14,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure);
 
 
-    public static async Task TestAsync()
+    public static async Task TestAsync( CancellationToken token = default )
     {
         WebApplicationBuilder        builder          = WebApplication.CreateBuilder();
         SecuredStringResolverOptions connectionString = $"User ID=dev;Password=dev;Host=localhost;Port=5432;Database={AppName}";
@@ -40,11 +36,15 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
         app.MapGet("/",     static () => DateTimeOffset.UtcNow);
         app.MapGet("/Ping", static () => DateTimeOffset.UtcNow);
 
-        await app.ApplyMigrations();
+        await app.ApplyMigrations(token);
 
-        await TestAll(app);
+        await TestAll(app, token);
 
-        await app.RunAsync();
+        await app.StartAsync(token)
+                 .ConfigureAwait(false);
+
+        await app.WaitForShutdownAsync(token)
+                 .ConfigureAwait(false);
     }
 
 
@@ -53,10 +53,10 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
         await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
         TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
         ( UserRecord admin, UserRecord user )             = await Add_Users(db, token);
-        ( RoleRecord AdminRole, RoleRecord UserRole )     = await Add_Roles(db, admin, token);
-        ( GroupRecord AdminGroup, GroupRecord UserGroup ) = await Add_Group(db, admin, token);
-        UserRoleRecord[]  userRoles  = await Add_Roles(db, user, [AdminRole, UserRole],   token);
-        UserGroupRecord[] userGroups = await Add_Roles(db, user, [AdminGroup, UserGroup], token);
+        ( RoleRecord adminRole, RoleRecord userRole )     = await Add_Roles(db, admin, token);
+        ( GroupRecord adminGroup, GroupRecord userGroup ) = await Add_Group(db, admin, token);
+        UserRoleRecord[]  userRoles  = await Add_Roles(db, user, [adminRole, userRole],   token);
+        UserGroupRecord[] userGroups = await Add_Roles(db, user, [adminGroup, userGroup], token);
         ( AddressRecord address, UserAddressRecord userAddress ) = await Add_Address(db, user, token);
         FileRecord              file          = await Add_File(db, user, token);
         UserLoginProviderRecord loginProvider = await Add_UserLoginProvider(db, user, token);
@@ -145,6 +145,6 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     {
         Admin,
         Read,
-        Write,
+        Write
     }
 }

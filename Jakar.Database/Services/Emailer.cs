@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using MailKit.Net.Smtp;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -35,11 +34,11 @@ public interface IEmailer : IEmailTokenService
 public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configuration, ILogger<Emailer> logger, Database dataBase, IOptions<EmailerOptions> options ) : IEmailer
 {
     protected readonly Database                _dataBase      = dataBase;
+    protected readonly EmailerOptions          _options       = options.Value;
     protected readonly EmailTokenProvider      _tokenProvider = tokenProvider;
     protected readonly IConfiguration          _configuration = configuration;
     protected readonly ILogger                 _logger        = logger;
     protected readonly JwtSecurityTokenHandler _handler       = new();
-    protected readonly EmailerOptions          _options       = options.Value;
     protected          EmailSettings?          _settings;
 
 

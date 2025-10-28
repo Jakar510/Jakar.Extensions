@@ -19,8 +19,6 @@ public interface ILine<TSelf, TPoint> : IShape<TSelf>
 
     public abstract static TSelf operator &( TSelf self, TPoint other );
     public abstract static TSelf operator ^( TSelf self, TPoint other );
-
-
 }
 
 

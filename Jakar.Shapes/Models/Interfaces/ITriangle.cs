@@ -7,9 +7,9 @@ namespace Jakar.Shapes.Interfaces;
 public interface ITriangle<TSelf> : IShape<TSelf>, IShapeLocation
     where TSelf : struct, ITriangle<TSelf>
 {
-   ReadOnlyPoint A { get; }
-   ReadOnlyPoint B { get; }
-   ReadOnlyPoint C { get; }
+    ReadOnlyPoint A { get; }
+    ReadOnlyPoint B { get; }
+    ReadOnlyPoint C { get; }
 
 
     public abstract static TSelf Create( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint c );

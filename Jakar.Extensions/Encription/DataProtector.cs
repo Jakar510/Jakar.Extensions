@@ -276,7 +276,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    public string Decrypt( string value ) { return Decrypt(value, Encoding.Default); }
+    public string Decrypt( string value ) => Decrypt(value, Encoding.Default);
     public string Decrypt( string value, Encoding encoding )
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
@@ -392,7 +392,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    public string Encrypt( string value ) { return Encrypt(value, Encoding.Default); }
+    public string Encrypt( string value ) => Encrypt(value, Encoding.Default);
     public string Encrypt( string value, Encoding encoding )
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();

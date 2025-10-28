@@ -37,12 +37,12 @@ public sealed class ChatUser( string fullName, string userName, Guid userID ) : 
     {
         if ( other is null ) { return false; }
 
-        return ReferenceEquals(this, other) || string.Equals(FullName, other.FullName, StringComparison.InvariantCultureIgnoreCase) && UserID.Equals(other.UserID) && string.Equals(UserName, other.UserName, StringComparison.InvariantCultureIgnoreCase);
+        return ReferenceEquals(this, other) || ( string.Equals(FullName, other.FullName, StringComparison.InvariantCultureIgnoreCase) && UserID.Equals(other.UserID) && string.Equals(UserName, other.UserName, StringComparison.InvariantCultureIgnoreCase) );
     }
-    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || obj is ChatUser other && Equals(other);
+    public override bool Equals( object? obj ) => ReferenceEquals(this, obj) || ( obj is ChatUser other && Equals(other) );
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(FullName, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(UserID);

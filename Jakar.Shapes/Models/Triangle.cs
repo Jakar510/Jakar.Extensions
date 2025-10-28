@@ -34,8 +34,12 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     ReadOnlyPoint ITriangle<Triangle>.            A             => A;
     ReadOnlyPoint ITriangle<Triangle>.            B             => B;
     ReadOnlyPoint ITriangle<Triangle>.            C             => C;
-    double IShapeLocation.                        X             => this.Centroid().X;
-    double IShapeLocation.                        Y             => this.Centroid().Y;
+
+    double IShapeLocation.X => this.Centroid()
+                                   .X;
+
+    double IShapeLocation.Y => this.Centroid()
+                                   .Y;
 
 
     public static bool TryFromJson( string? json, out Triangle result )

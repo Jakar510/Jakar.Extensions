@@ -4,21 +4,26 @@
 namespace Jakar.Xml.Deserialization;
 
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public readonly ref struct XNode
 {
     private readonly ReadOnlyMemory<char> _xml;
 
 
-    public bool                 HasAttributes => !Attributes.IsEmpty;
-    public ReadOnlyMemory<char> Name          => _xml[1.._xml.Span.IndexOf( '>' )].Trim();
-    public ReadOnlyMemory<char> Attributes    => _xml[(Name.Length                + 1).._xml.Span.IndexOf( '>' )].Trim();
-    public ReadOnlyMemory<char> StartTag      => _xml[..(_xml.Span.IndexOf( '>' ) + 1)].Trim();
+    public bool HasAttributes => !Attributes.IsEmpty;
+
+    public ReadOnlyMemory<char> Name => _xml[1.._xml.Span.IndexOf('>')]
+       .Trim();
+
+    public ReadOnlyMemory<char> Attributes => _xml[( Name.Length + 1 ).._xml.Span.IndexOf('>')]
+       .Trim();
+
+    public ReadOnlyMemory<char> StartTag => _xml[..( _xml.Span.IndexOf('>') + 1 )]
+       .Trim();
 
     public Buffer<char> EndTag
     {
-        [Pure][MustDisposeResource]
-        get
+        [Pure] [MustDisposeResource] get
         {
             ReadOnlySpan<char> name = Name.Span;
 
@@ -39,29 +44,29 @@ public readonly ref struct XNode
         get
         {
             ReadOnlySpan<char> attributes = Attributes.Span;
-            if ( !attributes.Contains( Constants.XMLS_TAG ) ) { return default; }
+            if ( !attributes.Contains(Constants.XMLS_TAG) ) { return default; }
 
-            int                typeStart = attributes.IndexOf( Constants.XMLS_TAG ) + Constants.XMLS_TAG.Length;
+            int                typeStart = attributes.IndexOf(Constants.XMLS_TAG) + Constants.XMLS_TAG.Length;
             ReadOnlySpan<char> temp      = attributes[typeStart..];
-            return Attributes[..temp.IndexOf( '"' )];
+            return Attributes[..temp.IndexOf('"')];
         }
     }
 
-    public ReadOnlyMemory<char> Content => _xml.Slice( StartTag.Length, _xml.Length - EndTag.Length );
+    public ReadOnlyMemory<char> Content => _xml.Slice(StartTag.Length, _xml.Length - EndTag.Length);
 
 
     public XNode( ReadOnlyMemory<char> xml )
     {
         ReadOnlySpan<char> span = xml.Span;
-        if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
+        if ( xml.IsEmpty ) { throw new ArgumentNullException(nameof(xml)); }
 
-        if ( !span.StartsWith( '<' ) ) { throw new FormatException( "Must start with '<'" ); }
+        if ( !span.StartsWith('<') ) { throw new FormatException("Must start with '<'"); }
 
-        if ( !span.Contains( '>' ) ) { throw new FormatException( "Must contain '<'" ); }
+        if ( !span.Contains('>') ) { throw new FormatException("Must contain '<'"); }
 
-        if ( !span.Contains( "</" ) ) { throw new FormatException( "Must contain '</'" ); }
+        if ( !span.Contains("</") ) { throw new FormatException("Must contain '</'"); }
 
-        if ( !span.EndsWith( '>' ) ) { throw new FormatException( "Must End with '>'" ); }
+        if ( !span.EndsWith('>') ) { throw new FormatException("Must End with '>'"); }
 
 
         _xml = xml;
@@ -79,7 +84,7 @@ public readonly ref struct XNode
         foreach ( JAttribute attribute in GetAttributes() )
         {
             KeyValuePair<string, string> pair = attribute.ToPair();
-            attributes.Add( pair.Key, pair.Value );
+            attributes.Add(pair.Key, pair.Value);
         }
 
         return attributes;
@@ -97,15 +102,15 @@ public readonly ref struct XNode
         public AttributeEnumerator( ReadOnlyMemory<char> memory )
         {
             ReadOnlySpan<char> span = memory.Span;
-            if ( span.IsEmpty ) { throw new ArgumentNullException( nameof(span) ); }
+            if ( span.IsEmpty ) { throw new ArgumentNullException(nameof(span)); }
 
-            if ( span.Contains( '<' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( span.Contains('<') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( span.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains( "</" ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( span.Contains("</") ) { throw new FormatException($"Cannot start with {'<'}"); }
 
-            if ( span.Contains( '>' ) ) { throw new FormatException( $"Cannot start with {'<'}" ); }
+            if ( span.Contains('>') ) { throw new FormatException($"Cannot start with {'<'}"); }
 
             _xml = _span = memory;
         }
@@ -123,11 +128,11 @@ public readonly ref struct XNode
             }
 
 
-            int                  start = _span.Span.IndexOf( ' ' );
+            int                  start = _span.Span.IndexOf(' ');
             ReadOnlyMemory<char> temp  = _span[start..];
-            temp = temp[..temp.Span.IndexOf( ' ' )];
+            temp = temp[..temp.Span.IndexOf(' ')];
 
-            Current = new JAttribute( temp );
+            Current = new JAttribute(temp);
             return true;
         }
         public void Dispose() { }

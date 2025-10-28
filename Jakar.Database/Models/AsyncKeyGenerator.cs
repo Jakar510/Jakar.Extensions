@@ -11,7 +11,7 @@ public sealed class AsyncKeyGenerator<TSelf>( DbTable<TSelf> table, Cancellation
     where TSelf : class, ITableRecord<TSelf>
 {
     private readonly DbTable<TSelf>      __table = table;
-    private          CancellationToken    __token = token;
+    private          CancellationToken   __token = token;
     private          KeyGenerator<TSelf> __generator;
     public           RecordID<TSelf>     Current { get; private set; }
 

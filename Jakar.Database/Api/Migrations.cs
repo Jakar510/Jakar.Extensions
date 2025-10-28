@@ -53,7 +53,7 @@ public static class Migrations
     {
         await using AsyncServiceScope scope       = app.Services.CreateAsyncScope();
         Database                      db          = scope.ServiceProvider.GetRequiredService<Database>();
-        MigrationRecord[]             applied     = await Migrations.All(db, token);
+        MigrationRecord[]             applied     = await All(db, token);
         await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
         HashSet<MigrationRecord>      pending     = [..Records.Values];
@@ -103,7 +103,7 @@ public static class Migrations
     public static void UseMigrationsEndPoint( this WebApplication app, string endpoint = MIGRATIONS ) => app.MapGet(endpoint, GetMigrationsAndRenderHtml);
     private static async Task<ContentHttpResult> GetMigrationsAndRenderHtml( [FromServices] Database db, CancellationToken token )
     {
-        ReadOnlySpan<MigrationRecord> records = await Migrations.All(db, token);
+        ReadOnlySpan<MigrationRecord> records = await All(db, token);
         string                        html    = records.CreateHtml();
         return TypedResults.Content(html, "text/html", Encoding.UTF8);
     }
@@ -166,7 +166,7 @@ public static class Migrations
     }
     private static void HtmlEncode( this TextWriter writer, string? value )
     {
-        if ( string.IsNullOrEmpty(value) ) return;
+        if ( string.IsNullOrEmpty(value) ) { return; }
 
         ReadOnlySpan<char> span  = value.AsSpan();
         int                start = 0;
@@ -185,13 +185,14 @@ public static class Migrations
 
             if ( entity is not null )
             {
-                if ( i > start ) writer.Write(span.Slice(start, i - start));
+                if ( i > start ) { writer.Write(span.Slice(start, i - start)); }
+
                 writer.Write(entity);
                 start = i + 1;
             }
         }
 
-        if ( start < span.Length ) writer.Write(span.Slice(start));
+        if ( start < span.Length ) { writer.Write(span.Slice(start)); }
     }
 
 
@@ -296,7 +297,7 @@ public static class Migrations
         public IEnumerable<MigrationRecord> Values => __records.Values;
         public RecordValues()
         {
-            foreach ( MigrationRecord record in Migrations.BuiltIns(Ids) ) { Add(record); }
+            foreach ( MigrationRecord record in BuiltIns(Ids) ) { Add(record); }
         }
 
 

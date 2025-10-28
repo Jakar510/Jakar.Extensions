@@ -108,7 +108,7 @@ public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue
         TValue[] values;
         lock ( _lock ) { values = _values.ToArray(); }
 
-        foreach ( var value in values ) { yield return value; }
+        foreach ( TValue value in values ) { yield return value; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

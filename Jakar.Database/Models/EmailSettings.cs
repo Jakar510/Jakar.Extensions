@@ -11,16 +11,16 @@ namespace Jakar.Database;
 [Serializable]
 public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IJsonModel<EmailSettings>
 {
+    public static JsonTypeInfo<EmailSettings[]> JsonArrayInfo => JakarDatabaseContext.Default.EmailSettingsArray;
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<EmailSettings>   JsonTypeInfo  => JakarDatabaseContext.Default.EmailSettings;
-    public static JsonTypeInfo<EmailSettings[]> JsonArrayInfo => JakarDatabaseContext.Default.EmailSettingsArray;
+    public        bool                          IsValid       => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(Site) && Port.IsValidPort();
     public        SecureSocketOptions           Options       { get; init; } = SecureSocketOptions.Auto;
     public        string                        Password      { get; init; } = EMPTY;
     public        int                           Port          { get; init; }
     public        string                        Site          { get; init; } = EMPTY;
     public        string                        UserName      { get; init; } = EMPTY;
     public        AppVersion                    Version       { get; init; } = AppVersion.Default;
-    public        bool                          IsValid       => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(Site) && Port.IsValidPort();
     public EmailSettings() { }
     public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection(nameof(EmailSettings))
                                                                                        .Get<EmailSettings>() ??
@@ -29,7 +29,7 @@ public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IJs
     public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password, Site);
 
 
-    public override bool Equals( EmailSettings? other ) => ReferenceEquals(this, other) || other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) && string.Equals(Site, other.Site, StringComparison.InvariantCulture) && Port == other.Port;
+    public override bool Equals( EmailSettings? other ) => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) && string.Equals(Site, other.Site, StringComparison.InvariantCulture) && Port == other.Port );
     public override int CompareTo( EmailSettings? other )
     {
         if ( ReferenceEquals(this, other) ) { return 0; }

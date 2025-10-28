@@ -34,11 +34,11 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 [MemoryDiagnoser]
 public class HashBenchmarks
 {
-    private const    string  HASH    = "xOEDj6A8g15z";
-    private const    long    VALUE   = 69;
+    private const    string  HASH     = "xOEDj6A8g15z";
+    private const    long    VALUE    = 69;
     private readonly Hashids __hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
 
 
-    [Benchmark] public long   GetLong() => __hasher.DecodeSingleLong( HASH );
-    [Benchmark] public string GetHash() => __hasher.EncodeLong( VALUE );
+    [Benchmark] public long   GetLong() => __hasher.DecodeSingleLong(HASH);
+    [Benchmark] public string GetHash() => __hasher.EncodeLong(VALUE);
 }

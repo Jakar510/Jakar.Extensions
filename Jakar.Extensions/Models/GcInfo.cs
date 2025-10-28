@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/29/2025  14:44
 
-using System;
 using Serilog.Events;
 using ZLinq;
 
@@ -74,7 +73,7 @@ public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long 
 
         return AllocatedBytesForCurrentThread.CompareTo(other.AllocatedBytesForCurrentThread);
     }
-    public override bool Equals( object? obj )   { return obj is GcInfo other && Equals(other); }
+    public override bool Equals( object? obj )   => obj is GcInfo other              && Equals(other);
     public          bool Equals( GcInfo  other ) => TotalMemory == other.TotalMemory && TotalPauseDuration.Equals(other.TotalPauseDuration) && TotalAllocatedBytes == other.TotalAllocatedBytes && AllocatedBytesForCurrentThread == other.AllocatedBytesForCurrentThread && MemoryInfo.Equals(other.MemoryInfo);
     public override int  GetHashCode()           => HashCode.Combine(TotalMemory, TotalPauseDuration, TotalAllocatedBytes, AllocatedBytesForCurrentThread, MemoryInfo);
 
@@ -91,15 +90,8 @@ public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long 
 
 
 
-/// <summary>Provides a set of APIs that can be used to retrieve garbage collection information.</summary>
-/// <remarks>
-/// A GC is identified by its Index. which starts from 1 and increases with each GC (see more explanation
-/// of it in the Index prooperty).
-/// If you are asking for a GC that does not exist, eg, you called the GC.GetGCMemoryInfo API
-/// before a GC happened, or you are asking for a GC of GCKind.FullBlocking and no full blocking
-/// GCs have happened, you will get all 0's in the info, including the Index. So you can use Index 0
-/// to detect that no GCs, or no GCs of the kind you specified have happened.
-/// </remarks>
+/// <summary> Provides a set of APIs that can be used to retrieve garbage collection information. </summary>
+/// <remarks> A GC is identified by its Index. which starts from 1 and increases with each GC (see more explanation of it in the Index prooperty). If you are asking for a GC that does not exist, eg, you called the GC.GetGCMemoryInfo API before a GC happened, or you are asking for a GC of GCKind.FullBlocking and no full blocking GCs have happened, you will get all 0's in the info, including the Index. So you can use Index 0 to detect that no GCs, or no GCs of the kind you specified have happened. </remarks>
 [Serializable]
 [method: JsonConstructor]
 public readonly struct GcMemoryInformation( bool                      compacted,
@@ -119,101 +111,52 @@ public readonly struct GcMemoryInformation( bool                      compacted,
                                             TimeSpan[]                pauseDurations,
                                             GcGenerationInformation[] generationInfo ) : IEquatable<GcMemoryInformation>
 {
-    /// <summary>
-    /// High memory load threshold when this GC occurred
-    /// </summary>
+    /// <summary> High memory load threshold when this GC occurred </summary>
     public readonly long HighMemoryLoadThresholdBytes = highMemoryLoadThresholdBytes;
 
-    /// <summary>
-    /// Memory load when this GC occurred
-    /// </summary>
+    /// <summary> Memory load when this GC occurred </summary>
     public readonly long MemoryLoadBytes = memoryLoadBytes;
 
-    /// <summary>
-    /// Total available memory for the GC to use when this GC occurred.
-    ///
-    /// If the environment variable DOTNET_GCHeapHardLimit is set,
-    /// or "Server.GC.HeapHardLimit" is in runtimeconfig.json, this will come from that.
-    /// If the program is run in a container, this will be an implementation-defined fraction of the container's size.
-    /// Else, this is the physical memory on the machine that was available for the GC to use when this GC occurred.
-    /// </summary>
+    /// <summary> Total available memory for the GC to use when this GC occurred. If the environment variable DOTNET_GCHeapHardLimit is set, or "Server.GC.HeapHardLimit" is in runtimeconfig.json, this will come from that. If the program is run in a container, this will be an implementation-defined fraction of the container's size. Else, this is the physical memory on the machine that was available for the GC to use when this GC occurred. </summary>
     public readonly long TotalAvailableMemoryBytes = totalAvailableMemoryBytes;
 
-    /// <summary>
-    /// The total heap size when this GC occurred
-    /// </summary>
+    /// <summary> The total heap size when this GC occurred </summary>
     public readonly long HeapSizeBytes = heapSizeBytes;
 
-    /// <summary>
-    /// The total fragmentation when this GC occurred
-    ///
-    /// Let's take the example below:
-    ///  | OBJ_A |     OBJ_B     | OBJ_C |   OBJ_D   | OBJ_E |
-    ///
-    /// Let's say OBJ_B, OBJ_C and and OBJ_E are garbage and get collected, but the heap does not get compacted, the resulting heap will look like the following:
-    ///  | OBJ_A |           F           |   OBJ_D   |
-    ///
-    /// The memory between OBJ_A and OBJ_D marked `F` is considered part of the FragmentedBytes, and will be used to allocate new objects. The memory after OBJ_D will not be
-    /// considered part of the FragmentedBytes, and will also be used to allocate new objects
-    /// </summary>
+    /// <summary> The total fragmentation when this GC occurred Let's take the example below: | OBJ_A |     OBJ_B     | OBJ_C |   OBJ_D   | OBJ_E | Let's say OBJ_B, OBJ_C and and OBJ_E are garbage and get collected, but the heap does not get compacted, the resulting heap will look like the following: | OBJ_A |           F           |   OBJ_D   | The memory between OBJ_A and OBJ_D marked `F` is considered part of the FragmentedBytes, and will be used to allocate new objects. The memory after OBJ_D will not be considered part of the FragmentedBytes, and will also be used to allocate new objects </summary>
     public readonly long FragmentedBytes = fragmentedBytes;
 
-    /// <summary>
-    /// The index of this GC. GC indices start with 1 and get increased at the beginning of a GC.
-    /// Since the info is updated at the end of a GC, this means you can get the info for a BGC
-    /// with a smaller index than a foreground GC finished earlier.
-    /// </summary>
+    /// <summary> The index of this GC. GC indices start with 1 and get increased at the beginning of a GC. Since the info is updated at the end of a GC, this means you can get the info for a BGC with a smaller index than a foreground GC finished earlier. </summary>
     public readonly long Index = index;
 
-    /// <summary>
-    /// The generation this GC collected. Collecting a generation means all its younger generation(s)
-    /// are also collected.
-    /// </summary>
+    /// <summary> The generation this GC collected. Collecting a generation means all its younger generation(s) are also collected. </summary>
     public readonly int Generation = generation;
 
-    /// <summary>
-    /// Is this a compacting GC or not.
-    /// </summary>
+    /// <summary> Is this a compacting GC or not. </summary>
     public readonly bool Compacted = compacted;
 
-    /// <summary>
-    /// Is this a concurrent GC (BGC) or not.
-    /// </summary>
+    /// <summary> Is this a concurrent GC (BGC) or not. </summary>
     public readonly bool Concurrent = concurrent;
 
-    /// <summary>
-    /// Total committed bytes of the managed heap.
-    /// </summary>
+    /// <summary> Total committed bytes of the managed heap. </summary>
     public readonly long TotalCommittedBytes = totalCommittedBytes;
 
-    /// <summary>
-    /// Promoted bytes for this GC.
-    /// </summary>
+    /// <summary> Promoted bytes for this GC. </summary>
     public readonly long PromotedBytes = promotedBytes;
 
-    /// <summary>
-    /// Number of pinned objects this GC observed.
-    /// </summary>
+    /// <summary> Number of pinned objects this GC observed. </summary>
     public readonly long PinnedObjectsCount = pinnedObjectsCount;
 
-    /// <summary>
-    /// Number of objects ready for finalization this GC observed.
-    /// </summary>
+    /// <summary> Number of objects ready for finalization this GC observed. </summary>
     public readonly long FinalizationPendingCount = finalizationPendingCount;
 
-    /// <summary>
-    /// Pause durations. For blocking GCs there's only 1 pause; for BGC there are 2.
-    /// </summary>
+    /// <summary> Pause durations. For blocking GCs there's only 1 pause; for BGC there are 2. </summary>
     public readonly TimeSpan[] PauseDurations = pauseDurations;
 
-    /// <summary>
-    /// This is the % pause time in GC so far. If it's 1.2%, this number is 1.2.
-    /// </summary>
+    /// <summary> This is the % pause time in GC so far. If it's 1.2%, this number is 1.2. </summary>
     public readonly double PauseTimePercentage = pauseTimePercentage;
 
-    /// <summary>
-    /// Generation info for all generations.
-    /// </summary>
+    /// <summary> Generation info for all generations. </summary>
     public readonly GcGenerationInformation[] GenerationInfo = generationInfo;
 
 
@@ -242,23 +185,23 @@ public readonly struct GcMemoryInformation( bool                      compacted,
 
 
     public StructureValue GetProperty() =>
-        new StructureValue([
-                               Enricher.GetProperty(Compacted,                    nameof(Compacted)),
-                               Enricher.GetProperty(HighMemoryLoadThresholdBytes, nameof(HighMemoryLoadThresholdBytes)),
-                               Enricher.GetProperty(MemoryLoadBytes,              nameof(MemoryLoadBytes)),
-                               Enricher.GetProperty(TotalAvailableMemoryBytes,    nameof(TotalAvailableMemoryBytes)),
-                               Enricher.GetProperty(HeapSizeBytes,                nameof(HeapSizeBytes)),
-                               Enricher.GetProperty(FragmentedBytes,              nameof(FragmentedBytes)),
-                               Enricher.GetProperty(Generation,                   nameof(Generation)),
-                               Enricher.GetProperty(Concurrent,                   nameof(Concurrent)),
-                               Enricher.GetProperty(TotalCommittedBytes,          nameof(TotalCommittedBytes)),
-                               Enricher.GetProperty(PromotedBytes,                nameof(PromotedBytes)),
-                               Enricher.GetProperty(PinnedObjectsCount,           nameof(PinnedObjectsCount)),
-                               Enricher.GetProperty(FinalizationPendingCount,     nameof(FinalizationPendingCount)),
-                               Enricher.GetProperty(PauseTimePercentage,          nameof(PauseTimePercentage)),
-                               Enricher.GetProperty(GenerationInfo,               nameof(GenerationInfo)),
-                               Enricher.GetProperty(PauseDurations,               nameof(PauseDurations)),
-                           ]);
+        new([
+                Enricher.GetProperty(Compacted,                    nameof(Compacted)),
+                Enricher.GetProperty(HighMemoryLoadThresholdBytes, nameof(HighMemoryLoadThresholdBytes)),
+                Enricher.GetProperty(MemoryLoadBytes,              nameof(MemoryLoadBytes)),
+                Enricher.GetProperty(TotalAvailableMemoryBytes,    nameof(TotalAvailableMemoryBytes)),
+                Enricher.GetProperty(HeapSizeBytes,                nameof(HeapSizeBytes)),
+                Enricher.GetProperty(FragmentedBytes,              nameof(FragmentedBytes)),
+                Enricher.GetProperty(Generation,                   nameof(Generation)),
+                Enricher.GetProperty(Concurrent,                   nameof(Concurrent)),
+                Enricher.GetProperty(TotalCommittedBytes,          nameof(TotalCommittedBytes)),
+                Enricher.GetProperty(PromotedBytes,                nameof(PromotedBytes)),
+                Enricher.GetProperty(PinnedObjectsCount,           nameof(PinnedObjectsCount)),
+                Enricher.GetProperty(FinalizationPendingCount,     nameof(FinalizationPendingCount)),
+                Enricher.GetProperty(PauseTimePercentage,          nameof(PauseTimePercentage)),
+                Enricher.GetProperty(GenerationInfo,               nameof(GenerationInfo)),
+                Enricher.GetProperty(PauseDurations,               nameof(PauseDurations))
+            ]);
     public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
 
@@ -281,7 +224,7 @@ public readonly struct GcMemoryInformation( bool                      compacted,
     public override bool Equals( object? obj ) => obj is GcMemoryInformation other && Equals(other);
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(HighMemoryLoadThresholdBytes);
         hashCode.Add(MemoryLoadBytes);
         hashCode.Add(TotalAvailableMemoryBytes);
@@ -310,16 +253,16 @@ public readonly struct GcMemoryInformation( bool                      compacted,
 [method: JsonConstructor]
 public readonly struct GcGenerationInformation( long fragmentationAfterBytes, long fragmentationBeforeBytes, long sizeAfterBytes, long sizeBeforeBytes ) : IEquatable<GcGenerationInformation>
 {
-    /// <summary>Size in bytes on entry to the reported collection.</summary>
+    /// <summary> Size in bytes on entry to the reported collection. </summary>
     public readonly long SizeBeforeBytes = sizeBeforeBytes;
 
-    /// <summary>Fragmentation in bytes on entry to the reported collection.</summary>
+    /// <summary> Fragmentation in bytes on entry to the reported collection. </summary>
     public readonly long FragmentationBeforeBytes = fragmentationBeforeBytes;
 
-    /// <summary>Size in bytes on exit from the reported collection.</summary>
+    /// <summary> Size in bytes on exit from the reported collection. </summary>
     public readonly long SizeAfterBytes = sizeAfterBytes;
 
-    /// <summary>Fragmentation in bytes on exit from the reported collection.</summary>
+    /// <summary> Fragmentation in bytes on exit from the reported collection. </summary>
     public readonly long FragmentationAfterBytes = fragmentationAfterBytes;
 
 
@@ -327,7 +270,7 @@ public readonly struct GcGenerationInformation( long fragmentationAfterBytes, lo
     public static implicit operator GcGenerationInformation( GCGenerationInfo info ) => new(in info);
 
 
-    public StructureValue   GetProperty()              => new([Enricher.GetProperty(SizeBeforeBytes, nameof(SizeBeforeBytes)), Enricher.GetProperty(FragmentationBeforeBytes, nameof(FragmentationBeforeBytes)), Enricher.GetProperty(SizeAfterBytes, nameof(SizeAfterBytes)), Enricher.GetProperty(FragmentationAfterBytes, nameof(FragmentationAfterBytes)),]);
+    public StructureValue   GetProperty()              => new([Enricher.GetProperty(SizeBeforeBytes, nameof(SizeBeforeBytes)), Enricher.GetProperty(FragmentationBeforeBytes, nameof(FragmentationBeforeBytes)), Enricher.GetProperty(SizeAfterBytes, nameof(SizeAfterBytes)), Enricher.GetProperty(FragmentationAfterBytes, nameof(FragmentationAfterBytes))]);
     public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
     public          bool Equals( GcGenerationInformation other )                                    => SizeBeforeBytes == other.SizeBeforeBytes && FragmentationBeforeBytes == other.FragmentationBeforeBytes && SizeAfterBytes == other.SizeAfterBytes && FragmentationAfterBytes == other.FragmentationAfterBytes;

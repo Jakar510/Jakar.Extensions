@@ -20,10 +20,13 @@ public static class JwtParser
     }
     public static List<Claim> ParseClaimsFromJwt( string jwt )
     {
-        List<Claim> claims        = [];
-        string      payload       = jwt.Split('.')[1];
-        string      json          = ParseBase64WithoutPadding(payload).ConvertToString(Encoding.Default);
-        JsonObject  keyValuePairs = json.GetAdditionalData() ?? new JsonObject();
+        List<Claim> claims  = [];
+        string      payload = jwt.Split('.')[1];
+
+        string json = ParseBase64WithoutPadding(payload)
+           .ConvertToString(Encoding.Default);
+
+        JsonObject keyValuePairs = json.GetAdditionalData() ?? new JsonObject();
 
         ExtractRolesFromJwt(claims, keyValuePairs);
         claims.AddRange(keyValuePairs.Select(static kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? EMPTY)));
@@ -35,7 +38,11 @@ public static class JwtParser
         JsonNode? roles = keyValuePairs[ClaimTypes.Role];
         if ( roles is null ) { return; }
 
-        ReadOnlySpan<string> parsedRoles = roles.ToString().Trim().TrimStart('[').TrimEnd(']').Split(',');
+        ReadOnlySpan<string> parsedRoles = roles.ToString()
+                                                .Trim()
+                                                .TrimStart('[')
+                                                .TrimEnd(']')
+                                                .Split(',');
 
         if ( !parsedRoles.IsEmpty )
         {

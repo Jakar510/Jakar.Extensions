@@ -1,7 +1,4 @@
-﻿
-
-
-namespace Jakar.Extensions.Maui;
+﻿namespace Jakar.Extensions.Maui;
 
 
 internal class OrientationPage { }

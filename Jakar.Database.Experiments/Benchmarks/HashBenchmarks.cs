@@ -24,7 +24,12 @@ namespace Jakar.Database.Experiments.Benchmarks;
 
 
 
-[Config( typeof(BenchmarkConfig) )][GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory )][SimpleJob( RuntimeMoniker.HostProcess )][Orderer( SummaryOrderPolicy.FastestToSlowest )][RankColumn][MemoryDiagnoser]
+[Config(typeof(BenchmarkConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class HashBenchmarks
 {
     private const    string  HASH     = "xOEDj6A8g15z";
@@ -32,6 +37,6 @@ public class HashBenchmarks
     private readonly Hashids __hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
 
 
-    [Benchmark] public long   GetLong() => __hasher.DecodeSingleLong( HASH );
-    [Benchmark] public string GetHash() => __hasher.EncodeLong( VALUE );
+    [Benchmark] public long   GetLong() => __hasher.DecodeSingleLong(HASH);
+    [Benchmark] public string GetHash() => __hasher.EncodeLong(VALUE);
 }

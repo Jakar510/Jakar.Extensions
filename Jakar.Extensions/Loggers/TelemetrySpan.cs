@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Empty))]
 public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 {
-    public static readonly TelemetrySpan Empty         = new(EMPTY, null);
+    public static readonly TelemetrySpan Empty = new(EMPTY, null);
     private readonly       Activity?     __parent;
     private readonly       Activity?     __activity;
     private readonly       long          __start;

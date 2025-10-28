@@ -9,9 +9,9 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
     private static JsonTypeInfo<ObservableHashSet<TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                     __jsonContext;
     private static JsonTypeInfo<ObservableHashSet<TValue>>?   __jsonTypeInfo;
+    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
     public static  JsonSerializerContext                      JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableHashSet<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
@@ -31,7 +31,7 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
 
 
     public override int  GetHashCode()                                                                    => buffer.GetHashCode();
-    public override bool Equals( object?                         other )                                  => ReferenceEquals(this, other) || other is ObservableHashSet<TValue> x && Equals(x);
+    public override bool Equals( object?                         other )                                  => ReferenceEquals(this, other) || ( other is ObservableHashSet<TValue> x && Equals(x) );
     public static   bool operator ==( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
     public static   bool operator !=( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => !EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
     public static   bool operator >( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) > 0;
@@ -46,8 +46,8 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     where TSelf : ObservableHashSet<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly HashSet<TValue> buffer = values;
-    public sealed override      int             Count      { get => buffer.Count; }
-    bool ICollection<TValue>.                   IsReadOnly { get => ( (ICollection<TValue>)buffer ).IsReadOnly; }
+    public sealed override      int             Count      => buffer.Count;
+    bool ICollection<TValue>.                   IsReadOnly => ( (ICollection<TValue>)buffer ).IsReadOnly;
 
 
     protected ObservableHashSet() : this(DEFAULT_CAPACITY) { }

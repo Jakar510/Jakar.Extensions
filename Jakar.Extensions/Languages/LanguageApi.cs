@@ -9,12 +9,12 @@ namespace Jakar.Extensions;
 public class LanguageApi : BaseClass
 {
     protected readonly WeakEventManager<Language> _weakEventManager  = new();
-    private            LanguageCollection         __languages        = new(Language.Supported);
     private            CultureInfo                __currentCulture   = CultureInfo.CurrentCulture;
     private            CultureInfo                __currentUiCulture = CultureInfo.CurrentUICulture;
     private            CultureInfo?               __defaultThreadCurrentCulture;
     private            CultureInfo?               __defaultThreadCurrentUiCulture;
     private            Language?                  __selectedLanguage;
+    private            LanguageCollection         __languages = new(Language.Supported);
 
 
     public virtual CultureInfo CurrentCulture

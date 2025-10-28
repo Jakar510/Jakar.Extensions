@@ -2,10 +2,6 @@
 // 03/06/2023  12:59 AM
 
 
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.Database;
 
 
@@ -25,8 +21,8 @@ public static class ErrorOrResults
     public static JsonResult<Errors> ToJsonResult( this         Errors value ) => JsonResult<Errors>.Create(value,                  Errors.JsonTypeInfo, value.GetStatus());
 
 
-     public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
-     public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
+    public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
+    public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.Value);
 
 
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;

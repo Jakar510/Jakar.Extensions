@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -61,21 +60,15 @@ public sealed class PermissionGenerator : IIncrementalGenerator
         PermissionGenUtilities.GenerateRegistry(context, permissions);
         PermissionGenUtilities.GenerateConstants(context, permissions, opts.IncludeDocs, opts.IncludeDebuggerDisplay, opts.Namespace, opts.RootClass);
     }
-    private static (string Path, string Text) HandleText( AdditionalText file, CancellationToken token )
-    {
-        return ( file.Path, Text: file.GetText(token)
-                                     ?.ToString() ??
-                                  string.Empty );
-    }
-    private static ImmutableArray<AdditionalText> ConsolidateText( ImmutableArray<AdditionalText> files, CancellationToken token )
-    {
-        return files.Length > 0
-                   ? files
-                   : PermissionGenUtilities.AutoDiscoverFiles(token);
-    }
-    private static bool CheckText( AdditionalText file )
-    {
-        return Path.GetFileName(file.Path)
-                   .Equals(Constants.FILE_NAME, StringComparison.OrdinalIgnoreCase);
-    }
+    private static (string Path, string Text) HandleText( AdditionalText file, CancellationToken token ) =>
+        ( file.Path, Text: file.GetText(token)
+                              ?.ToString() ??
+                           string.Empty );
+    private static ImmutableArray<AdditionalText> ConsolidateText( ImmutableArray<AdditionalText> files, CancellationToken token ) =>
+        files.Length > 0
+            ? files
+            : PermissionGenUtilities.AutoDiscoverFiles(token);
+    private static bool CheckText( AdditionalText file ) =>
+        Path.GetFileName(file.Path)
+            .Equals(Constants.FILE_NAME, StringComparison.OrdinalIgnoreCase);
 }

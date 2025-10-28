@@ -25,21 +25,21 @@ public interface IInstantMessage
 [Serializable]
 public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage, IJsonModel<InstantMessage>
 {
-    public static readonly InstantMessage[] Empty = [];
-    private                bool             __hasBeenRead;
-    private                FileData[]?      __data;
-    private                string           __groupName = EMPTY;
-    private                string           __message   = EMPTY;
+    public static readonly InstantMessage[]               Empty = [];
+    private                bool                           __hasBeenRead;
+    private                FileData[]?                    __data;
+    private                string                         __groupName = EMPTY;
+    private                string                         __message   = EMPTY;
+    public static          JsonTypeInfo<InstantMessage[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageArray;
 
 
-    public static                             JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;
-    public static                             JsonTypeInfo<InstantMessage>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessage;
-    public static                             JsonTypeInfo<InstantMessage[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageArray;
-    public                                    FileData[]?                    Data          { get => __data;        set => SetProperty(ref __data,        value); }
-    [StringLength(NAME)] public required      string                         GroupName     { get => __groupName;   set => SetProperty(ref __groupName,   value); }
-    public                                    bool                           HasBeenRead   { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
-    [StringLength(MAX_FIXED)] public required string                         Message       { get => __message;     set => SetProperty(ref __message,     value); }
-    public                                    DateTimeOffset                 TimeStamp     { get;                  init; }
+    public static                             JsonSerializerContext        JsonContext  => JakarSignalRContext.Default;
+    public static                             JsonTypeInfo<InstantMessage> JsonTypeInfo => JakarSignalRContext.Default.InstantMessage;
+    public                                    FileData[]?                  Data         { get => __data;        set => SetProperty(ref __data,        value); }
+    [StringLength(NAME)] public required      string                       GroupName    { get => __groupName;   set => SetProperty(ref __groupName,   value); }
+    public                                    bool                         HasBeenRead  { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
+    [StringLength(MAX_FIXED)] public required string                       Message      { get => __message;     set => SetProperty(ref __message,     value); }
+    public                                    DateTimeOffset               TimeStamp    { get;                  init; }
 
 
     public InstantMessage() { }
@@ -105,9 +105,9 @@ public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage,
 
 public sealed class InstantMessageCollection : ConcurrentObservableCollection<InstantMessageCollection, InstantMessage>, ICollectionAlerts<InstantMessageCollection, InstantMessage>
 {
+    public static JsonTypeInfo<InstantMessageCollection[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageCollectionArray;
     public static JsonSerializerContext                    JsonContext   => JakarSignalRContext.Default;
     public static JsonTypeInfo<InstantMessageCollection>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessageCollection;
-    public static JsonTypeInfo<InstantMessageCollection[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageCollectionArray;
 
 
     public InstantMessageCollection() : this(DEFAULT_CAPACITY) { }

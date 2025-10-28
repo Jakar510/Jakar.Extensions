@@ -29,66 +29,66 @@ public static partial class Xmlizer
     /// </summary>
     internal static readonly ConcurrentDictionary<Type, Func<string, object>> Parsers = new();
     /// <summary> register System built-ins </summary>
-    static Xmlizer() => Register( typeof(bool?),
-                                  typeof(byte?),
-                                  typeof(sbyte?),
-                                  typeof(Guid?),
-                                  typeof(char?),
-                                  typeof(DateTime?),
-                                  typeof(int?),
-                                  typeof(uint?),
-                                  typeof(short?),
-                                  typeof(ushort?),
-                                  typeof(long?),
-                                  typeof(ulong?),
-                                  typeof(float?),
-                                  typeof(double?),
-                                  typeof(decimal?),
-                                  typeof(TimeSpan?),
-                                  typeof(bool),
-                                  typeof(byte),
-                                  typeof(sbyte),
-                                  typeof(Guid),
-                                  typeof(char),
-                                  typeof(string),
-                                  typeof(DateTime),
-                                  typeof(int),
-                                  typeof(uint),
-                                  typeof(short),
-                                  typeof(ushort),
-                                  typeof(long),
-                                  typeof(ulong),
-                                  typeof(float),
-                                  typeof(double),
-                                  typeof(decimal),
-                                  typeof(TimeSpan) );
-    public static string ToXml<TValue>( this TValue obj, in IDictionary<string, string>? attributes = null ) => Serialize( obj, attributes );
+    static Xmlizer() => Register(typeof(bool?),
+                                 typeof(byte?),
+                                 typeof(sbyte?),
+                                 typeof(Guid?),
+                                 typeof(char?),
+                                 typeof(DateTime?),
+                                 typeof(int?),
+                                 typeof(uint?),
+                                 typeof(short?),
+                                 typeof(ushort?),
+                                 typeof(long?),
+                                 typeof(ulong?),
+                                 typeof(float?),
+                                 typeof(double?),
+                                 typeof(decimal?),
+                                 typeof(TimeSpan?),
+                                 typeof(bool),
+                                 typeof(byte),
+                                 typeof(sbyte),
+                                 typeof(Guid),
+                                 typeof(char),
+                                 typeof(string),
+                                 typeof(DateTime),
+                                 typeof(int),
+                                 typeof(uint),
+                                 typeof(short),
+                                 typeof(ushort),
+                                 typeof(long),
+                                 typeof(ulong),
+                                 typeof(float),
+                                 typeof(double),
+                                 typeof(decimal),
+                                 typeof(TimeSpan));
+    public static string ToXml<TValue>( this TValue obj, in IDictionary<string, string>? attributes = null ) => Serialize(obj, attributes);
 
 
     public static TValue FromXml<TValue>( this string xml, out IDictionary<string, string>? attributes )
-        where TValue : new() => Deserialize<TValue>( xml, out attributes );
+        where TValue : new() => Deserialize<TValue>(xml, out attributes);
 
 
     // Register(typeof(IPAddress),
     // typeof(DnsEndPoint),
     // typeof(SocketAddress));
-    public static void Register( Assembly assembly ) => Register( assembly.GetTypes() );
+    public static void Register( Assembly assembly ) => Register(assembly.GetTypes());
 
-    public static void Register<TValue>() => Register( typeof(TValue) );
+    public static void Register<TValue>() => Register(typeof(TValue));
 
     public static void Register( params Type[] types )
     {
-        foreach ( Type type in types ) { Register( type ); }
+        foreach ( Type type in types ) { Register(type); }
     }
 
     public static void Register( Type type, string? nodeName = null )
     {
-        if ( NameToType.Values.Contains( type ) ) { return; }
+        if ( NameToType.Values.Contains(type) ) { return; }
 
-        NameToType[type.GetTypeName( true )] = type;
+        NameToType[type.GetTypeName(true)] = type;
 
-        if ( type.HasInterface<IConvertible>() ) { Parsers[type] = value => value.ConvertTo( type ); }
+        if ( type.HasInterface<IConvertible>() ) { Parsers[type] = value => value.ConvertTo(type); }
 
-        NodeNames.RegisterNodeName( type, nodeName );
+        NodeNames.RegisterNodeName(type, nodeName);
     }
 }

@@ -13,9 +13,10 @@ namespace Jakar.Extensions;
 
 public sealed class OneTimePassword( string key, string issuer ) : Randoms
 {
+    private readonly byte[] __keyBytes = Base32Encoding.ToBytes(key);
+
     // ReSharper disable once StaticMemberInGenericType
     private readonly string __issuer     = issuer;
-    private readonly byte[] __keyBytes   = Base32Encoding.ToBytes(key);
     private readonly string __secret_Key = key;
 
 

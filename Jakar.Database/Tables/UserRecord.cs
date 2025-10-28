@@ -1,8 +1,4 @@
-﻿using System.Reflection.Metadata;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [Serializable]
@@ -59,7 +55,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                                                                            .With_CreatedBy()
                                                                                                            .Build();
 
-    public static                                                             string             TableName              { get => TABLE_NAME; }
+    public static                                                             string             TableName              => TABLE_NAME;
     [ProtectedPersonalData] [StringLength(MAX_SIZE)]          public override JsonObject?        AdditionalData         { get => _additionalData; set => _additionalData = value; }
     [StringLength(                        AUTHENTICATOR_KEY)] public          string             AuthenticatorKey       { get;                    set; }
     public                                                                    int?               BadLogins              { get;                    set; }
@@ -83,7 +79,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public   bool                                                                                IsLocked               { get; set; }
     public   bool                                                                                IsPhoneNumberConfirmed { get; set; }
     public   bool                                                                                IsTwoFactorEnabled     { get; set; }
-    internal bool                                                                                IsValid                { get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
+    internal bool                                                                                IsValid                => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid();
     bool IValidator.                                                                             IsValid                => IsValid;
     public DateTimeOffset?                                                                       LastBadAttempt         { get;                  set; }
     public DateTimeOffset?                                                                       LastLogin              { get;                  set; }
@@ -102,9 +98,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public                                                                     DateTimeOffset?   SubscriptionExpires    { get;                  set; }
     public                                                                     Guid?             SubscriptionID         { get;                  set; }
     [ProtectedPersonalData] [StringLength(TITLE)] public                       string            Title                  { get;                  set; }
-    public                                                                     string            UserName               { get;                  init; }
-    [ProtectedPersonalData] [StringLength(WEBSITE)] public                     string            Website                { get;                  set; }
     public                                                                     Guid              UserID                 => ID.Value;
+    public                                                                     string            UserName               { get; init; }
+    [ProtectedPersonalData] [StringLength(WEBSITE)] public                     string            Website                { get; set; }
 
 
     [JsonConstructor] public UserRecord( string                UserName,
@@ -743,65 +739,63 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         lastModified           = LastModified;
     }
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<UserRecord>(migrationID,
-                                                  $"create {TABLE_NAME} table",
-                                                  $"""
-                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                   ( 
-                                                   {nameof(UserName).SqlColumnName()}               VARCHAR(256)   NOT NULL UNIQUE,
-                                                   {nameof(FirstName).SqlColumnName()}              VARCHAR(256)   NOT NULL,
-                                                   {nameof(LastName).SqlColumnName()}               VARCHAR(256)   NOT NULL,
-                                                   {nameof(FullName).SqlColumnName()}               VARCHAR(1024)  NOT NULL,
-                                                   {nameof(Gender).SqlColumnName()}                 VARCHAR(1024)  NOT NULL,
-                                                   {nameof(Description).SqlColumnName()}            VARCHAR(1024)  NOT NULL,
-                                                   {nameof(Company).SqlColumnName()}                VARCHAR(1024)  NOT NULL,
-                                                   {nameof(Department).SqlColumnName()}             VARCHAR(1024)  NOT NULL,
-                                                   {nameof(Title).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
-                                                   {nameof(PreferredLanguage).SqlColumnName()}      bigint         NOT NULL,
-                                                   {nameof(Email).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
-                                                   {nameof(IsEmailConfirmed).SqlColumnName()}       boolean        NOT NULL,
-                                                   {nameof(PhoneNumber).SqlColumnName()}            VARCHAR(100)   NOT NULL,
-                                                   {nameof(Ext).SqlColumnName()}                    VARCHAR(100)   NOT NULL,
-                                                   {nameof(IsPhoneNumberConfirmed).SqlColumnName()} boolean        NOT NULL,
-                                                   {nameof(AuthenticatorKey).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
-                                                   {nameof(IsTwoFactorEnabled).SqlColumnName()}     boolean        NOT NULL,
-                                                   {nameof(IsActive).SqlColumnName()}               boolean        NOT NULL,
-                                                   {nameof(IsDisabled).SqlColumnName()}             boolean        NOT NULL,
-                                                   {nameof(SubscriptionID).SqlColumnName()}         uuid           NULL,
-                                                   {nameof(SubscriptionExpires).SqlColumnName()}    timestamptz    NULL,
-                                                   {nameof(LastBadAttempt).SqlColumnName()}         timestamptz    NULL,
-                                                   {nameof(LastLogin).SqlColumnName()}              timestamptz    NULL,
-                                                   {nameof(BadLogins).SqlColumnName()}              int            NOT NULL,
-                                                   {nameof(IsLocked).SqlColumnName()}               boolean        NOT NULL,
-                                                   {nameof(LockDate).SqlColumnName()}               timestamptz    NULL,
-                                                   {nameof(LockoutEnd).SqlColumnName()}             timestamptz    NULL,
-                                                   {nameof(RefreshToken).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
-                                                   {nameof(RefreshTokenExpiryTime).SqlColumnName()} timestamptz    NULL,
-                                                   {nameof(SessionID).SqlColumnName()}              uuid           NULL,
-                                                   {nameof(SecurityStamp).SqlColumnName()}          VARCHAR(1024)  NOT NULL,
-                                                   {nameof(ConcurrencyStamp).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
-                                                   {nameof(Rights).SqlColumnName()}                 VARCHAR(4000)  NOT NULL,
-                                                   {nameof(EscalateTo).SqlColumnName()}             uuid           NULL,
-                                                   {nameof(AdditionalData).SqlColumnName()}         json           NULL,
-                                                   {nameof(PasswordHash).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
-                                                   {nameof(ImageID).SqlColumnName()}                uuid           NOT NULL,
-                                                   {nameof(ID).SqlColumnName()}                     uuid           PRIMARY KEY,
-                                                   {nameof(CreatedBy).SqlColumnName()}              uuid           NULL,
-                                                   {nameof(DateCreated).SqlColumnName()}            timestamptz    NOT NULL,
-                                                   {nameof(LastModified).SqlColumnName()}           timestamptz    NULL,
-                                                   FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
-                                                   FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
-                                                   FOREIGN KEY({nameof(ImageID).SqlColumnName()}) REFERENCES {FileRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
-                                                   );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<UserRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            ( 
+                                            {nameof(UserName).SqlColumnName()}               VARCHAR(256)   NOT NULL UNIQUE,
+                                            {nameof(FirstName).SqlColumnName()}              VARCHAR(256)   NOT NULL,
+                                            {nameof(LastName).SqlColumnName()}               VARCHAR(256)   NOT NULL,
+                                            {nameof(FullName).SqlColumnName()}               VARCHAR(1024)  NOT NULL,
+                                            {nameof(Gender).SqlColumnName()}                 VARCHAR(1024)  NOT NULL,
+                                            {nameof(Description).SqlColumnName()}            VARCHAR(1024)  NOT NULL,
+                                            {nameof(Company).SqlColumnName()}                VARCHAR(1024)  NOT NULL,
+                                            {nameof(Department).SqlColumnName()}             VARCHAR(1024)  NOT NULL,
+                                            {nameof(Title).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
+                                            {nameof(PreferredLanguage).SqlColumnName()}      bigint         NOT NULL,
+                                            {nameof(Email).SqlColumnName()}                  VARCHAR(1024)  NOT NULL,
+                                            {nameof(IsEmailConfirmed).SqlColumnName()}       boolean        NOT NULL,
+                                            {nameof(PhoneNumber).SqlColumnName()}            VARCHAR(100)   NOT NULL,
+                                            {nameof(Ext).SqlColumnName()}                    VARCHAR(100)   NOT NULL,
+                                            {nameof(IsPhoneNumberConfirmed).SqlColumnName()} boolean        NOT NULL,
+                                            {nameof(AuthenticatorKey).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
+                                            {nameof(IsTwoFactorEnabled).SqlColumnName()}     boolean        NOT NULL,
+                                            {nameof(IsActive).SqlColumnName()}               boolean        NOT NULL,
+                                            {nameof(IsDisabled).SqlColumnName()}             boolean        NOT NULL,
+                                            {nameof(SubscriptionID).SqlColumnName()}         uuid           NULL,
+                                            {nameof(SubscriptionExpires).SqlColumnName()}    timestamptz    NULL,
+                                            {nameof(LastBadAttempt).SqlColumnName()}         timestamptz    NULL,
+                                            {nameof(LastLogin).SqlColumnName()}              timestamptz    NULL,
+                                            {nameof(BadLogins).SqlColumnName()}              int            NOT NULL,
+                                            {nameof(IsLocked).SqlColumnName()}               boolean        NOT NULL,
+                                            {nameof(LockDate).SqlColumnName()}               timestamptz    NULL,
+                                            {nameof(LockoutEnd).SqlColumnName()}             timestamptz    NULL,
+                                            {nameof(RefreshToken).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
+                                            {nameof(RefreshTokenExpiryTime).SqlColumnName()} timestamptz    NULL,
+                                            {nameof(SessionID).SqlColumnName()}              uuid           NULL,
+                                            {nameof(SecurityStamp).SqlColumnName()}          VARCHAR(1024)  NOT NULL,
+                                            {nameof(ConcurrencyStamp).SqlColumnName()}       VARCHAR(4000)  NOT NULL,
+                                            {nameof(Rights).SqlColumnName()}                 VARCHAR(4000)  NOT NULL,
+                                            {nameof(EscalateTo).SqlColumnName()}             uuid           NULL,
+                                            {nameof(AdditionalData).SqlColumnName()}         json           NULL,
+                                            {nameof(PasswordHash).SqlColumnName()}           VARCHAR(1024)  NOT NULL,
+                                            {nameof(ImageID).SqlColumnName()}                uuid           NOT NULL,
+                                            {nameof(ID).SqlColumnName()}                     uuid           PRIMARY KEY,
+                                            {nameof(CreatedBy).SqlColumnName()}              uuid           NULL,
+                                            {nameof(DateCreated).SqlColumnName()}            timestamptz    NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}           timestamptz    NULL,
+                                            FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
+                                            FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES {TABLE_NAME}(id) ON DELETE SET NULL
+                                            FOREIGN KEY({nameof(ImageID).SqlColumnName()}) REFERENCES {FileRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
+                                            );
 
-                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                   FOR EACH ROW
-                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                   """);
-    }
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 
 
 

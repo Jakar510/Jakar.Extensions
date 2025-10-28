@@ -111,11 +111,11 @@ public sealed class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<M
 
         return string.Compare(Signature, other.Signature, StringComparison.InvariantCultureIgnoreCase);
     }
-    public override bool Equals( object?        obj )   => ReferenceEquals(this, obj)   || obj is MethodDetails other && Equals(other);
-    public override bool Equals( MethodDetails? other ) => ReferenceEquals(this, other) || other is not null          && string.Equals(Name, other.Name) && string.Equals(DeclaringType, other.DeclaringType);
+    public override bool Equals( object?        obj )   => ReferenceEquals(this, obj)   || ( obj is MethodDetails other && Equals(other) );
+    public override bool Equals( MethodDetails? other ) => ReferenceEquals(this, other) || ( other is not null          && string.Equals(Name, other.Name) && string.Equals(DeclaringType, other.DeclaringType) );
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add((int)Attributes);
         hashCode.Add(DeclaringType, StringComparer.InvariantCultureIgnoreCase);

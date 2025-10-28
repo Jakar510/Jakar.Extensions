@@ -26,7 +26,7 @@ public readonly struct AppInformation( AppVersion version, Guid appID, string ap
     public static JsonTypeInfo<AppInformation[]> JsonArrayInfo => JakarExtensionsContext.Default.AppInformationArray;
 
 
-    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Version, nameof(AppInformation.Version)), Enricher.GetProperty(AppID, nameof(AppInformation.AppID)), Enricher.GetProperty(AppName, nameof(AppInformation.AppName)), Enricher.GetProperty(PackageName, nameof(AppInformation.PackageName))]);
+    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Version, nameof(Version)), Enricher.GetProperty(AppID, nameof(AppID)), Enricher.GetProperty(AppName, nameof(AppName)), Enricher.GetProperty(PackageName, nameof(PackageName))]);
     public LogEventProperty GetProperty()       => new(nameof(AppInformation), GetStructureValue());
 
 
@@ -71,7 +71,7 @@ public readonly struct AppInformation( AppVersion version, Guid appID, string ap
     public override bool Equals( object?        obj )   => obj is AppInformation other   && Equals(other);
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(Version);
         hashCode.Add(AppID);
         hashCode.Add(AppName,     StringComparer.InvariantCultureIgnoreCase);

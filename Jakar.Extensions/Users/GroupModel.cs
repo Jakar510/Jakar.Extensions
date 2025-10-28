@@ -29,14 +29,14 @@ public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? crea
     where TSelf : GroupModel<TSelf, TID>, IGroupModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
     private   string     __nameOfGroup = nameOfGroup;
-    private   UserRights __rights      = rights;
+    protected TID        _id           = id;
     private   TID?       __createdBy   = createdBy;
     private   TID?       __ownerID     = ownerID;
-    protected TID        _id           = id;
+    private   UserRights __rights      = rights;
+    public    TID?       CreatedBy { get => __createdBy; set => SetProperty(ref __createdBy, value); }
 
 
     public                        TID        ID          { get => _id;           init => _id = value; }
-    public                        TID?       CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
     [StringLength(NAME)] public   string     NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
     public                        TID?       OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
     [StringLength(RIGHTS)] public UserRights Rights      { get => __rights;      set => SetProperty(ref __rights,      value); }

@@ -18,7 +18,8 @@ namespace Jakar.Json.Generator;
 ///         <see href="https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs"/>
 ///     </para>
 /// </summary>
-[Generator][SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[Generator]
+[SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
 public class JsonizerGenerator : ISourceGenerator
 {
     public const            string FROM_JSON   = "FromJson";
@@ -28,16 +29,17 @@ public class JsonizerGenerator : ISourceGenerator
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
     {
-        if ( !overridenNameOpt.IsNull ) { return overridenNameOpt.Value?.ToString() ?? throw new NullReferenceException( nameof(TypedConstant.Value) ); }
+        if ( !overridenNameOpt.IsNull ) { return overridenNameOpt.Value?.ToString() ?? throw new NullReferenceException(nameof(TypedConstant.Value)); }
 
-        fieldName = fieldName.TrimStart( '_' );
+        fieldName = fieldName.TrimStart('_');
 
         if ( fieldName.Length == 0 ) { return string.Empty; }
 
         Span<char> span = stackalloc char[fieldName.Length];
-        span[0] = char.ToUpper( fieldName[0] );
+        span[0] = char.ToUpper(fieldName[0]);
 
-        fieldName[1..].CopyTo( span[1..] );
+        fieldName[1..]
+           .CopyTo(span[1..]);
 
         return span.ToString();
     }
@@ -45,9 +47,9 @@ public class JsonizerGenerator : ISourceGenerator
 
     private static string? ProcessClass( INamedTypeSymbol classSymbol, IEnumerable<IFieldSymbol> fields, in ISymbol? attributeSymbol, GeneratorExecutionContext context )
     {
-        if ( attributeSymbol is null ) { throw new ArgumentNullException( nameof(attributeSymbol) ); }
+        if ( attributeSymbol is null ) { throw new ArgumentNullException(nameof(attributeSymbol)); }
 
-        if ( !classSymbol.ContainingSymbol.Equals( classSymbol.ContainingNamespace, SymbolEqualityComparer.Default ) )
+        if ( !classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default) )
         {
             return null; //TODO: issue a diagnostic that it must be top level
         }
@@ -55,37 +57,37 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        StringBuilder sb = new( $$"""
+        StringBuilder sb = new($$"""
 
-                                  #nullable enable
-                                  namespace {{namespaceName}};
+                                 #nullable enable
+                                 namespace {{namespaceName}};
 
 
-                                  public partial class {{classSymbol.Name}} 
-                                  {
+                                 public partial class {{classSymbol.Name}} 
+                                 {
 
-                                  """ );
+                                 """);
 
         // if the class doesn't implement INotifyPropertyChanged already, add it
         // if ( !classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default) ) { source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;"); }
 
         // create properties for each field 
-        foreach ( IFieldSymbol fieldSymbol in fields ) { ProcessField( sb, fieldSymbol, attributeSymbol ); }
+        foreach ( IFieldSymbol fieldSymbol in fields ) { ProcessField(sb, fieldSymbol, attributeSymbol); }
 
-        sb.Append( '}' );
+        sb.Append('}');
         return sb.ToString();
     }
     private static void Execute( in GeneratorExecutionContext context, in SyntaxReceiver receiver, in CancellationToken token )
     {
         // get the added attribute, and INotifyPropertyChanged
-        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName( __attribute ) ?? throw new InvalidOperationException();
+        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName(__attribute) ?? throw new InvalidOperationException();
 
 
         // group the fields by class, and generate the source
-        foreach ( IGrouping<INamedTypeSymbol, IFieldSymbol> group in receiver.Fields.GroupBy<IFieldSymbol, INamedTypeSymbol>( f => f.ContainingType, SymbolEqualityComparer.Default ) )
+        foreach ( IGrouping<INamedTypeSymbol, IFieldSymbol> group in receiver.Fields.GroupBy<IFieldSymbol, INamedTypeSymbol>(f => f.ContainingType, SymbolEqualityComparer.Default) )
         {
-            string classSource = ProcessClass( group.Key, group, attributeSymbol, context ) ?? throw new InvalidOperationException();
-            context.AddSource( $"{group.Key.Name}_autoNotify.cs", SourceText.From( classSource, Encoding.UTF8 ) );
+            string classSource = ProcessClass(group.Key, group, attributeSymbol, context) ?? throw new InvalidOperationException();
+            context.AddSource($"{group.Key.Name}_autoNotify.cs", SourceText.From(classSource, Encoding.UTF8));
         }
     }
 
@@ -96,11 +98,13 @@ public class JsonizerGenerator : ISourceGenerator
         ITypeSymbol fieldType = fieldSymbol.Type;
 
         // get the AutoNotify attribute from the field, and any associated data
-        AttributeData attributeData = fieldSymbol.GetAttributes().Single( ad => ad.AttributeClass?.Equals( attributeSymbol, SymbolEqualityComparer.Default ) ?? false );
+        AttributeData attributeData = fieldSymbol.GetAttributes()
+                                                 .Single(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) ?? false);
 
-        TypedConstant overridenNameOpt = attributeData.NamedArguments.SingleOrDefault( kvp => kvp.Key == nameof(JsonizerAttribute) ).Value;
+        TypedConstant overridenNameOpt = attributeData.NamedArguments.SingleOrDefault(kvp => kvp.Key == nameof(JsonizerAttribute))
+                                                      .Value;
 
-        string propertyName = ChooseName( fieldName, overridenNameOpt );
+        string propertyName = ChooseName(fieldName, overridenNameOpt);
 
         if ( propertyName.Length == 0 || propertyName == fieldName )
         {
@@ -108,22 +112,22 @@ public class JsonizerGenerator : ISourceGenerator
             return;
         }
 
-        sb.Append( $$"""
+        sb.Append($$"""
 
-                         public {{fieldType}} {{propertyName}} 
-                         {
-                             get 
-                             {
-                                 return this.{{fieldName}};
-                             }
-                             set
-                             {
-                                 this.{{fieldName}} = value;
-                                 this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({{propertyName}})));
-                             }
-                         }
+                        public {{fieldType}} {{propertyName}} 
+                        {
+                            get 
+                            {
+                                return this.{{fieldName}};
+                            }
+                            set
+                            {
+                                this.{{fieldName}} = value;
+                                this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({{propertyName}})));
+                            }
+                        }
 
-                     """ );
+                    """);
     }
 
 
@@ -135,7 +139,7 @@ public class JsonizerGenerator : ISourceGenerator
         if ( context.CancellationToken.IsCancellationRequested ) { return; }
 
         // Register a syntax receiver that will be created for each generation pass
-        context.RegisterForSyntaxNotifications( () => new SyntaxReceiver() );
+        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
     }
 
 
@@ -143,7 +147,7 @@ public class JsonizerGenerator : ISourceGenerator
     {
         if ( context.SyntaxContextReceiver is not SyntaxReceiver receiver ) { return; }
 
-        Execute( context, receiver, context.CancellationToken );
+        Execute(context, receiver, context.CancellationToken);
     }
 
 
@@ -164,9 +168,10 @@ public class JsonizerGenerator : ISourceGenerator
             foreach ( VariableDeclaratorSyntax variable in syntax.Declaration.Variables )
             {
                 // Get the symbol being declared by the field, and keep it if its annotated
-                if ( context.SemanticModel.GetDeclaredSymbol( variable ) is not IFieldSymbol fieldSymbol ) { continue; }
+                if ( context.SemanticModel.GetDeclaredSymbol(variable) is not IFieldSymbol fieldSymbol ) { continue; }
 
-                if ( fieldSymbol.GetAttributes().Any( data => data.AttributeClass?.ToDisplayString() == "AutoNotify.AutoNotifyAttribute" ) ) { Fields.Add( fieldSymbol ); }
+                if ( fieldSymbol.GetAttributes()
+                                .Any(data => data.AttributeClass?.ToDisplayString() == "AutoNotify.AutoNotifyAttribute") ) { Fields.Add(fieldSymbol); }
             }
         }
     }
@@ -176,7 +181,7 @@ public class JsonizerGenerator : ISourceGenerator
 
 public class JsonSerializationGenerator : ISourceGenerator
 {
-    public void Initialize( GeneratorInitializationContext context ) => context.RegisterForSyntaxNotifications( () => new JsonSerializationSyntaxReceiver() );
+    public void Initialize( GeneratorInitializationContext context ) => context.RegisterForSyntaxNotifications(() => new JsonSerializationSyntaxReceiver());
 
     public void Execute( GeneratorExecutionContext context )
     {
@@ -189,43 +194,45 @@ public class JsonSerializationGenerator : ISourceGenerator
                                        : string.Empty;
 
             string className = classDeclaration.Identifier.ToString();
-            string source    = GenerateSerializationSource( namespaceName, className, classDeclaration.Members );
-            context.AddSource( $"{className}_JsonSerialization", SourceText.From( source, Encoding.UTF8 ) );
+            string source    = GenerateSerializationSource(namespaceName, className, classDeclaration.Members);
+            context.AddSource($"{className}_JsonSerialization", SourceText.From(source, Encoding.UTF8));
         }
     }
 
     private string GenerateSerializationSource( string namespaceName, string className, SyntaxList<MemberDeclarationSyntax> members )
     {
-        List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
+        List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>()
+                                                            .Where(p => p.Modifiers.Any(m => m.ValueText == "public"))
+                                                            .ToList();
 
         StringBuilder builder = new();
-        builder.AppendLine( $"namespace {namespaceName}" );
-        builder.AppendLine( "{" );
-        builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );
-        builder.AppendLine( "    {" );
-        builder.AppendLine( $"        public static string ToJson(this {className} obj)" );
-        builder.AppendLine( "        {" );
-        builder.AppendLine( "            var sb = new System.Text.StringBuilder();" );
-        builder.AppendLine( "            sb.Append(\"{\");" );
+        builder.AppendLine($"namespace {namespaceName}");
+        builder.AppendLine("{");
+        builder.AppendLine($"    public static partial class {className}JsonSerializationExtensions");
+        builder.AppendLine("    {");
+        builder.AppendLine($"        public static string ToJson(this {className} obj)");
+        builder.AppendLine("        {");
+        builder.AppendLine("            var sb = new System.Text.StringBuilder();");
+        builder.AppendLine("            sb.Append(\"{\");");
 
         for ( int i = 0; i < properties.Count; i++ )
         {
             PropertyDeclarationSyntax property     = properties[i];
             string                    propertyName = property.Identifier.ToString();
             string                    propertyType = property.Type.ToString();
-            builder.AppendLine( $"            sb.Append(\"\\\"{propertyName}\\\": \");" );
+            builder.AppendLine($"            sb.Append(\"\\\"{propertyName}\\\": \");");
 
-            if ( propertyType      == "string" ) { builder.AppendLine( $"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");" ); }
-            else if ( propertyType == "int" ) { builder.AppendLine( $"            sb.Append(obj.{propertyName}.ToString());" ); }
+            if ( propertyType      == "string" ) { builder.AppendLine($"            sb.Append($\"\\\"{{obj.{propertyName}}}.Replace(\"\\\"\", \"\\\\\\\"\")}}\\\"\");"); }
+            else if ( propertyType == "int" ) { builder.AppendLine($"            sb.Append(obj.{propertyName}.ToString());"); }
 
-            if ( i < properties.Count - 1 ) { builder.AppendLine( "            sb.Append(\",\");" ); }
+            if ( i < properties.Count - 1 ) { builder.AppendLine("            sb.Append(\",\");"); }
         }
 
-        builder.AppendLine( "            sb.Append(\"}\");" );
-        builder.AppendLine( "            return sb.ToString();" );
-        builder.AppendLine( "        }" );
-        builder.AppendLine( "    }" );
-        builder.AppendLine( "}" );
+        builder.AppendLine("            sb.Append(\"}\");");
+        builder.AppendLine("            return sb.ToString();");
+        builder.AppendLine("        }");
+        builder.AppendLine("    }");
+        builder.AppendLine("}");
 
         return builder.ToString();
     }
@@ -240,9 +247,10 @@ public class JsonSerializationGenerator : ISourceGenerator
         {
             if ( syntaxNode is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclaration )
             {
-                AttributeSyntax? generateJsonAttribute = classDeclaration.AttributeLists.SelectMany( attrList => attrList.Attributes ).FirstOrDefault( attr => attr.Name.ToString() == "GenerateJsonSerializer" );
+                AttributeSyntax? generateJsonAttribute = classDeclaration.AttributeLists.SelectMany(attrList => attrList.Attributes)
+                                                                         .FirstOrDefault(attr => attr.Name.ToString() == "GenerateJsonSerializer");
 
-                if ( generateJsonAttribute != null ) { CandidateClasses.Add( classDeclaration ); }
+                if ( generateJsonAttribute != null ) { CandidateClasses.Add(classDeclaration); }
             }
         }
     }

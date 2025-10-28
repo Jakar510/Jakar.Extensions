@@ -75,5 +75,5 @@ public interface IInsertInto
 public interface IDataInsert : IChainEnd<ISqlBuilderRoot>
 {
     public IDataInsert With<TValue>( string columnName, TValue data );
-    public IDataInsert With<TValue>( TValue      data );
+    public IDataInsert With<TValue>( TValue data );
 }

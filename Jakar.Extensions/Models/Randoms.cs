@@ -15,11 +15,11 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "RedundantVerbatimStringPrefix")]
 public class Randoms : BaseClass
 {
-    public static readonly char[] AlphaNumeric  = [.. ALPHANUMERIC];
-    public static readonly char[] LowerCase     = [.. LOWER_CASE];
-    public static readonly char[] Numeric       = [.. NUMERIC];
-    public static readonly char[] SpecialChars  = [.. SPECIAL_CHARS];
-    public static readonly char[] UpperCase     = [.. UPPER_CASE];
+    public static readonly char[] AlphaNumeric = [.. ALPHANUMERIC];
+    public static readonly char[] LowerCase    = [.. LOWER_CASE];
+    public static readonly char[] Numeric      = [.. NUMERIC];
+    public static readonly char[] SpecialChars = [.. SPECIAL_CHARS];
+    public static readonly char[] UpperCase    = [.. UPPER_CASE];
 
 
     public static Random                Random { get; set; } = new(69420);

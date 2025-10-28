@@ -6,7 +6,7 @@ public sealed class ResxCollection : IResxCollection
     private readonly ConcurrentBag<ResxRowRecord> __rows = [];
 
 
-    public int Count {  get => __rows.Count; }
+    public int Count => __rows.Count;
 
 
     public ResxCollection() { }

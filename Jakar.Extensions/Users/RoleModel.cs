@@ -28,8 +28,8 @@ public class RoleModel<TSelf, TID>( string nameOfRole, UserRights rights, TID id
     where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
     private   string     __name   = nameOfRole;
-    private   UserRights __rights = rights;
     protected TID        _id      = id;
+    private   UserRights __rights = rights;
 
 
     public                        TID        ID         { get => _id;      init => _id = value; }

@@ -2,7 +2,6 @@
 // 02/27/2025  11:02
 
 
-using Serilog.Core;
 using Serilog.Events;
 using ZLinq;
 
@@ -16,11 +15,9 @@ public static class Enricher
     private static readonly ConcurrentDictionary<string, LogEventProperty> __sourceContexts = new();
 
 
-    /// <summary>
-    /// Gets the span unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span unique identifier.</returns>
+    /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span unique identifier. </returns>
     public static string GetSpanID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -30,17 +27,15 @@ public static class Enricher
                              ActivityIdFormat.Hierarchical => activity.Id,
                              ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
                              ActivityIdFormat.Unknown      => null,
-                             _                             => null,
+                             _                             => null
                          };
 
         return spanId ?? EMPTY;
     }
 
-    /// <summary>
-    /// Gets the span trace unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span trace unique identifier.</returns>
+    /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span trace unique identifier. </returns>
     public static string GetTraceID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -50,17 +45,15 @@ public static class Enricher
                               ActivityIdFormat.Hierarchical => activity.RootId,
                               ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
                               ActivityIdFormat.Unknown      => null,
-                              _                             => null,
+                              _                             => null
                           };
 
         return traceId ?? EMPTY;
     }
 
-    /// <summary>
-    /// Gets the span parent unique identifier regardless of the activity identifier format.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>The span parent unique identifier.</returns>
+    /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
+    /// <param name="activity"> The activity. </param>
+    /// <returns> The span parent unique identifier. </returns>
     public static string GetParentID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
@@ -70,7 +63,7 @@ public static class Enricher
                                ActivityIdFormat.Hierarchical => activity.ParentId,
                                ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
                                ActivityIdFormat.Unknown      => null,
-                               _                             => null,
+                               _                             => null
                            };
 
         return parentId ?? EMPTY;

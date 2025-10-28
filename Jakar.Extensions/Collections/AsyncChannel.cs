@@ -16,8 +16,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
     private readonly TaskCompletionSource<bool> __completion = new();
 
 
-    public int  Count   { get => Reader.Count; }
-    public bool IsEmpty { get => Reader.Count == 0; }
+    public int  Count   => Reader.Count;
+    public bool IsEmpty => Reader.Count == 0;
 
 
     public AsyncChannel()
@@ -44,9 +44,9 @@ public sealed class AsyncChannel<TValue> : IDisposable
         private readonly AsyncChannel<TValue> __parent = parent;
         public override  bool                 CanCount   => true;
         public override  bool                 CanPeek    => true;
-        public override  Task                 Completion { get => __parent.__completion.Task; }
-        public override  int                  Count      { get => __parent.__values.Count; }
-        public           bool                 IsEmpty    { get => __parent.__values.IsEmpty; }
+        public override  Task                 Completion => __parent.__completion.Task;
+        public override  int                  Count      => __parent.__values.Count;
+        public           bool                 IsEmpty    => __parent.__values.IsEmpty;
 
 
         public TValue? Read() => __parent.__values.TryDequeue(out TValue? first)

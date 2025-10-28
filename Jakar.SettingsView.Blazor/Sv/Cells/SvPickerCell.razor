@@ -31,21 +31,21 @@
     // ReSharper disable once CSharpWarnings::CS8618 
     private OptionsPopup<TValue> __selector;
 
-    public override                             WidgetType           Type       => WidgetType.Picker;
-    [Parameter]                 public          IList<TValue>        Values     { get; set; } = new ObservableCollection<TValue>();
-    [Parameter]                 public          Func<TValue, string> Formatter  { get; set; } = OptionsPopup<TValue>.DefaultFormatter;
-    [Parameter][EditorRequired] public required string               PopupTitle { get; set; }
+    public override                              WidgetType           Type       => WidgetType.Picker;
+    [Parameter]                  public          IList<TValue>        Values     { get; set; } = new ObservableCollection<TValue>();
+    [Parameter]                  public          Func<TValue, string> Formatter  { get; set; } = OptionsPopup<TValue>.DefaultFormatter;
+    [Parameter] [EditorRequired] public required string               PopupTitle { get; set; }
 
 
     protected override void OnParametersSet()
     {
         __selector = new OptionsPopup<TValue>
-                    {
-                        ID        = ID,
-                        Close     = new EventCallback<TValue>(this, SetValue),
-                        Title     = PopupTitle,
-                        Formatter = Formatter
-                    };
+                     {
+                         ID        = ID,
+                         Close     = new EventCallback<TValue>(this, SetValue),
+                         Title     = PopupTitle,
+                         Formatter = Formatter
+                     };
     }
     protected override async Task OnClickHandler( MouseEventArgs? args = null )
     {

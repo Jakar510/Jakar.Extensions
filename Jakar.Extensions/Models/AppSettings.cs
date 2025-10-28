@@ -30,8 +30,8 @@ public interface IAppSettings<TViewPage> : IAppSettings, IScreenshot
 [Serializable]
 public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel(hostInfo, defaultHostInfo), IAppSettings, IScreenshot
 {
-    private string     __deviceID = EMPTY;
     private LocalFile? __screenshot;
+    private string     __deviceID = EMPTY;
 
 
     public string     AppName    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = appName;

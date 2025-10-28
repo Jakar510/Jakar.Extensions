@@ -118,7 +118,7 @@ public static partial class Validate
 
     [Pure] public static string? AssertLength( [NotNullIfNotNull(nameof(value))] string? value, int maxLength, [CallerArgumentExpression(nameof(value))] string? name = null, [CallerMemberName] string? caller = null )
     {
-        if ( IsValidLength(value, null, maxLength) ){ throw new ArgumentOutOfRangeException(name, $"{caller}.{name}: length '{value?.Length}' exceeds maximum length of '{maxLength}'"); }
+        if ( IsValidLength(value, null, maxLength) ) { throw new ArgumentOutOfRangeException(name, $"{caller}.{name}: length '{value?.Length}' exceeds maximum length of '{maxLength}'"); }
 
         return value;
     }

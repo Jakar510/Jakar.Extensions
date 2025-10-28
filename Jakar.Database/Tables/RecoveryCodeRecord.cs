@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:26 PM
 
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
-
-
-
 namespace Jakar.Database;
 
 
@@ -15,15 +10,16 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
-    public static           string                             TableName     { get => TABLE_NAME; }
+    public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
     public static           JsonSerializerContext              JsonContext   => JakarDatabaseContext.Default;
     public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
-    public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Default.WithColumn<string>(nameof(Code), length: 1024)
                                                                                                                    .With_CreatedBy()
                                                                                                                    .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this(code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
@@ -47,28 +43,26 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     }
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<UserRecord>(migrationID,
-                                                  $"create {TABLE_NAME} table",
-                                                  $"""
-                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                   (  
-                                                   {nameof(Code).SqlColumnName()}           VARCHAR(1024)  NOT NULL, 
-                                                   {nameof(AdditionalData).SqlColumnName()} json           NULL,
-                                                   {nameof(ID).SqlColumnName()}             uuid           PRIMARY KEY,
-                                                   {nameof(CreatedBy).SqlColumnName()}      uuid           NULL,
-                                                   {nameof(DateCreated).SqlColumnName()}    timestamptz    NOT NULL,
-                                                   {nameof(LastModified).SqlColumnName()}   timestamptz    NULL,
-                                                   FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL 
-                                                   );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<UserRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (  
+                                            {nameof(Code).SqlColumnName()}           VARCHAR(1024)  NOT NULL, 
+                                            {nameof(AdditionalData).SqlColumnName()} json           NULL,
+                                            {nameof(ID).SqlColumnName()}             uuid           PRIMARY KEY,
+                                            {nameof(CreatedBy).SqlColumnName()}      uuid           NULL,
+                                            {nameof(DateCreated).SqlColumnName()}    timestamptz    NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}   timestamptz    NULL,
+                                            FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL 
+                                            );
 
-                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                   FOR EACH ROW
-                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                   """);
-    }
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 
 
     [Pure] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
@@ -157,10 +151,10 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     public sealed class Codes( int count ) : IReadOnlyDictionary<string, RecoveryCodeRecord>
     {
         private readonly Dictionary<string, RecoveryCodeRecord> __codes = new(count, StringComparer.Ordinal);
-        public           int                                    Count  => __codes.Count;
-        public           IEnumerable<string>                    Keys   => __codes.Keys;
-        public           IEnumerable<RecoveryCodeRecord>        Values => __codes.Values;
+        public           int                                    Count => __codes.Count;
         public RecoveryCodeRecord this[ string key ] { get => __codes[key]; internal set => __codes[key] = value; }
+        public IEnumerable<string>                                   Keys                                                                           => __codes.Keys;
+        public IEnumerable<RecoveryCodeRecord>                       Values                                                                         => __codes.Values;
         public IEnumerator<KeyValuePair<string, RecoveryCodeRecord>> GetEnumerator()                                                                => __codes.GetEnumerator();
         IEnumerator IEnumerable.                                     GetEnumerator()                                                                => ( (IEnumerable)__codes ).GetEnumerator();
         public bool                                                  ContainsKey( string key )                                                      => __codes.ContainsKey(key);

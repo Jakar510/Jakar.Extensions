@@ -3,7 +3,6 @@
 
 
 using ZLinq;
-using ZLinq.Internal;
 using ZLinq.Linq;
 
 
@@ -43,7 +42,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         Span     = _array;
         _length  = 0;
     }
-    public void Dispose() => ArrayPool<TValue>.Shared.Return(_array, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<TValue>());
+    public void Dispose() => ArrayPool<TValue>.Shared.Return(_array, RuntimeHelpers.IsReferenceOrContainsReferences<TValue>());
 
 
     public void Advance( int count )

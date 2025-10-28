@@ -4,21 +4,21 @@
 [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
 public partial class IniConfig
 {
-    public static readonly int    Padding = CLOSE.Length + OPEN.Length + EQUALS_SPACE.Length;
+    public static readonly int Padding = CLOSE.Length + OPEN.Length + EQUALS_SPACE.Length;
 
 
 
     public sealed class Section( string sectionName ) : IReadOnlyDictionary<string, string?>
     {
-        private readonly ConcurrentDictionary<string, string?>                                     __dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
-        public           int                                                                       Length  => GetLength(out _);
-        internal         int                                                                       Longest => __dictionary.Keys.Max(static item => item.Length);
-        public           ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
-        public           string                                                                    Name    { get; } = sectionName;
-        public           int                                                                       Count   => __dictionary.Count;
+        private readonly ConcurrentDictionary<string, string?> __dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
+        public           int                                   Count => __dictionary.Count;
         public string? this[ string key ] { get => __dictionary[key]; set => __dictionary[key] = value; }
-        public IEnumerable<string>  Keys   => __dictionary.Keys;
-        public IEnumerable<string?> Values => __dictionary.Values;
+        public   IEnumerable<string>                                                       Keys    => __dictionary.Keys;
+        public   int                                                                       Length  => GetLength(out _);
+        internal int                                                                       Longest => __dictionary.Keys.Max(static item => item.Length);
+        public   ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+        public   string                                                                    Name    { get; } = sectionName;
+        public   IEnumerable<string?>                                                      Values  => __dictionary.Values;
 
 
         public static implicit operator Section( string sectionName ) => new(sectionName);

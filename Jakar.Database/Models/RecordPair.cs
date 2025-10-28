@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/11/2023  11:20 PM
 
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-
-
-
 namespace Jakar.Database;
 
 
@@ -21,7 +17,7 @@ public readonly struct RecordPair<TSelf>( RecordID<TSelf> id, DateTimeOffset dat
     public static ReadOnlyMemory<PropertyInfo>             ClassProperties  { get; } = typeof(RecordPair<TSelf>).GetProperties();
     public static int                                      PropertyCount    { get; } = 2;
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = TSelf.PropertyMetaData;
-    public static string                                   TableName        { get => TSelf.TableName; }
+    public static string                                   TableName        => TSelf.TableName;
     Guid IUniqueID<Guid>.                                  ID               => ID.Value;
     RecordID<TSelf> IRecordPair<TSelf>.                    ID               => ID;
     DateTimeOffset IDateCreated.                           DateCreated      => DateCreated;

@@ -48,7 +48,7 @@ public static class Sizes
                                                                           [typeof(Int128?)] = Int128.MaxValue.ToString()
                                                                                                     .Length,
                                                                           [typeof(UInt128?)] = UInt128.MaxValue.ToString()
-                                                                                                      .Length,
+                                                                                                      .Length
                                                                       };
 
 

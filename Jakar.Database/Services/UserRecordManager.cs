@@ -18,6 +18,6 @@ public class UserManager( Database                                    database,
     protected readonly Database _database = database;
 
 
-    public override async Task<IList<Claim>>      GetClaimsAsync( UserRecord       user )                                                                            => await _database.TryCall(GetClaimsAsync, user, CancellationToken.None);
+    public override async Task<IList<Claim>>      GetClaimsAsync( UserRecord       user )                                                                                => await _database.TryCall(GetClaimsAsync, user, CancellationToken.None);
     public async          ValueTask<IList<Claim>> GetClaimsAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, CancellationToken token ) => await user.GetUserClaims(connection, transaction, _database, Claims.DEFAULTS, token);
 }

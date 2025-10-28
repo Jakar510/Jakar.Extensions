@@ -9,10 +9,10 @@ namespace Jakar.Database;
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>
 {
     public const  string                         TABLE_NAME = "user_roles";
-    public static string                         TableName     { get => TABLE_NAME; }
     public static JsonTypeInfo<UserRoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRoleRecordArray;
     public static JsonSerializerContext          JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserRoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRoleRecord;
+    public static string                         TableName     => TABLE_NAME;
 
 
     public UserRoleRecord( RecordID<UserRecord>  key, RecordID<RoleRecord> value ) : base(key, value) { }

@@ -13,9 +13,9 @@ namespace Jakar.Extensions;
 /// <summary> A log event enricher which adds span information from the current <see cref="Activity"/>. </summary>
 public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher options, TelemetrySource source ) : ILogEventEnricher
 {
-    private readonly LogEventProperty               __appInfo     = source.Info.GetProperty();
-    private readonly IOpenTelemetryActivityEnricher __options     = options;
-    private readonly TelemetrySource                __source      = source;
+    private readonly IOpenTelemetryActivityEnricher __options = options;
+    private readonly LogEventProperty               __appInfo = source.Info.GetProperty();
+    private readonly TelemetrySource                __source  = source;
 
 
     public static void Create( LoggerEnrichmentConfiguration enrichment, AppLoggerOptions options, TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));

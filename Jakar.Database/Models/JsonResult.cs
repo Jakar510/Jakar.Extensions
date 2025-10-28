@@ -31,10 +31,10 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
                                                                                        [503] = ( "https://tools.ietf.org/html/rfc9110#section-15.6.4", "Service Unavailable" ),
                                                                                        [504] = ( "https://tools.ietf.org/html/rfc9110#section-15.6.5", "Gateway Timeout" )
                                                                                    };
-    public int                           StatusCode {  get; init; }
+    public int                           StatusCode { get; init; }
     int? IStatusCodeHttpResult.          StatusCode => StatusCode;
-    public required JsonTypeInfo<TValue> TypeInfo   {  get; init; }
-    public          TValue               Value      {  get; }
+    public required JsonTypeInfo<TValue> TypeInfo   { get; init; }
+    public          TValue               Value      { get; }
     object? IValueHttpResult.            Value      => Value;
 
 

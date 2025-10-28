@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using Jakar.Extensions.UserGuid;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -24,9 +20,9 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
     private static JsonTypeInfo<ObservableCollection<TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                        __jsonContext;
     private static JsonTypeInfo<ObservableCollection<TValue>>?   __jsonTypeInfo;
+    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
     public static  JsonSerializerContext                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ObservableCollection() : this(Comparer<TValue>.Default) { }
@@ -57,7 +53,7 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
 
 
     public override int  GetHashCode()                                                                          => RuntimeHelpers.GetHashCode(this);
-    public override bool Equals( object?                            other )                                     => ReferenceEquals(this, other) || other is ObservableCollection<TValue> x && Equals(x);
+    public override bool Equals( object?                            other )                                     => ReferenceEquals(this, other) || ( other is ObservableCollection<TValue> x && Equals(x) );
     public static   bool operator ==( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
     public static   bool operator !=( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => !EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
     public static   bool operator >( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) > 0;
@@ -86,7 +82,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
     object? IList.this[ int                index ] { get => Get(index); set => Set(index, (TValue)value!); }
     public TValue this[ int                index ] { get => Get(index); set => Set(index, value); }
-    TValue IReadOnlyList<TValue>.this[ int index ] { get => Get(index); }
+    TValue IReadOnlyList<TValue>.this[ int index ] => Get(index);
     object ICollection.SyncRoot { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer; }
 
 
@@ -507,7 +503,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    public virtual ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default ) { return ValueTask.FromResult(InternalTryAdd(in value)); }
+    public virtual ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default ) => ValueTask.FromResult(InternalTryAdd(in value));
     public virtual ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
         foreach ( TValue value in values ) { InternalTryAdd(in value); }
@@ -586,15 +582,15 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual void RemoveRange( int startIndex, int                         count )  => InternalRemove(startIndex, count);
 
 
-    public virtual ValueTask<bool> RemoveAsync( TValue              value,  CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(in value)); }
-    public virtual ValueTask<int>  RemoveAsync( RefCheck<TValue>    match,  CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(match)); }
-    public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values)); }
+    public virtual ValueTask<bool> RemoveAsync( TValue              value,  CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(in value));
+    public virtual ValueTask<int>  RemoveAsync( RefCheck<TValue>    match,  CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(match));
+    public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values));
     public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         await foreach ( TValue value in values.WithCancellation(token) ) { InternalRemove(in value); }
     }
-    public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values.Span)); }
-    public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values.AsSpan())); }
+    public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.Span));
+    public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.AsSpan()));
 
     public virtual int  Remove( RefCheck<TValue>                    match )                                        => InternalRemove(match);
     public virtual bool Remove( TValue                              value )                                        => InternalRemove(in value);
@@ -661,7 +657,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         ReadOnlySpan<TValue> span = AsSpan();
         return span.ContainsAny(values);
     }
-    public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) { return ValueTask.FromResult(InternalContains(in value)); }
+    public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) => ValueTask.FromResult(InternalContains(in value));
 
 
     public virtual void Clear() => InternalClear();
@@ -676,7 +672,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ReadOnlySpan<TValue>   span   = AsSpan();
         FilterBuffer<TValue>   values = new(span.Length);
-        FilterDelegate<TValue> filter = GetFilter(); 
+        FilterDelegate<TValue> filter = GetFilter();
 
         for ( int i = 0; i < span.Length; i++ )
         {

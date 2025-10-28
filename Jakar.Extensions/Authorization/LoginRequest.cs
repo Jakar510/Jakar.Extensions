@@ -72,10 +72,10 @@ public static class LoginRequestExtensions
 public abstract class LoginRequest<TSelf>( string userName, string password ) : BaseClass<TSelf>, ILoginRequest
     where TSelf : LoginRequest<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    [Required] public           string     Password { get; init; } = password;
-    [Required] public           string     UserName { get; init; } = userName;
-    public                      AppVersion Version  { get; init; } = AppVersion.Default;
     [JsonIgnore] public virtual bool       IsValid  => this.IsValid();
+    [Required]   public         string     Password { get; init; } = password;
+    [Required]   public         string     UserName { get; init; } = userName;
+    public                      AppVersion Version  { get; init; } = AppVersion.Default;
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => this.GetNetworkCredentials();
@@ -87,7 +87,7 @@ public abstract class LoginRequest<TSelf>( string userName, string password ) : 
 
         return string.Compare(UserName, other.UserName, StringComparison.InvariantCulture);
     }
-    public override bool Equals( TSelf? other ) => ReferenceEquals(this, other) || other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture);
+    public override bool Equals( TSelf? other ) => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) );
     public override int  GetHashCode()          => HashCode.Combine(UserName, Password);
 }
 
@@ -140,15 +140,15 @@ public abstract class LoginRequest<TSelf, TValue>( string userName, string passw
 [method: JsonConstructor]
 public sealed class LoginRequestVersion( string userName, string password, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userName, password, data), IJsonModel<LoginRequestVersion>, IEqualComparable<LoginRequestVersion>
 {
+    public static JsonTypeInfo<LoginRequestVersion[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestVersionArray;
     public static JsonSerializerContext               JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LoginRequestVersion>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequestVersion;
-    public static JsonTypeInfo<LoginRequestVersion[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestVersionArray;
     public LoginRequestVersion( ILoginRequest             request, AppVersion data ) : this(request.UserName, request.Password, data) { }
     public LoginRequestVersion( ILoginRequest<AppVersion> request ) : this(request.UserName, request.UserName, request.Data) { }
 
 
     public override int  GetHashCode()                                                        => HashCode.Combine(UserName, Password, Data);
-    public override bool Equals( object?                   other )                            => ReferenceEquals(this, other) || other is LoginRequestValue x && Equals(x);
+    public override bool Equals( object?                   other )                            => ReferenceEquals(this, other) || ( other is LoginRequestValue x && Equals(x) );
     public static   bool operator ==( LoginRequestVersion? left, LoginRequestVersion? right ) => EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
     public static   bool operator !=( LoginRequestVersion? left, LoginRequestVersion? right ) => !EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
     public static   bool operator >( LoginRequestVersion   left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) > 0;
@@ -163,9 +163,9 @@ public sealed class LoginRequestVersion( string userName, string password, AppVe
 [method: JsonConstructor]
 public sealed class LoginRequestValue( string userName, string password, JsonValue data ) : LoginRequest<LoginRequestValue, JsonValue>(userName, password, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
 {
+    public static JsonTypeInfo<LoginRequestValue[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestValueArray;
     public static JsonSerializerContext             JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LoginRequestValue>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequestValue;
-    public static JsonTypeInfo<LoginRequestValue[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestValueArray;
     public LoginRequestValue( ILoginRequest            request, JsonValue data ) : this(request.UserName, request.Password, data) { }
     public LoginRequestValue( ILoginRequest<JsonValue> request ) : this(request.UserName, request.UserName, request.Data) { }
 
@@ -174,7 +174,7 @@ public sealed class LoginRequestValue( string userName, string password, JsonVal
 
 
     public override int  GetHashCode()                                                    => HashCode.Combine(UserName, Password, Data);
-    public override bool Equals( object?                 other )                          => ReferenceEquals(this, other) || other is LoginRequestValue x && Equals(x);
+    public override bool Equals( object?                 other )                          => ReferenceEquals(this, other) || ( other is LoginRequestValue x && Equals(x) );
     public static   bool operator ==( LoginRequestValue? left, LoginRequestValue? right ) => EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
     public static   bool operator !=( LoginRequestValue? left, LoginRequestValue? right ) => !EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
     public static   bool operator >( LoginRequestValue   left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) > 0;
@@ -189,16 +189,16 @@ public sealed class LoginRequestValue( string userName, string password, JsonVal
 [method: JsonConstructor]
 public sealed class LoginRequest( string userName, string password ) : LoginRequest<LoginRequest>(userName, password), IJsonModel<LoginRequest>, IEqualComparable<LoginRequest>
 {
+    public static JsonTypeInfo<LoginRequest[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestArray;
     public static JsonSerializerContext        JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LoginRequest>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequest;
-    public static JsonTypeInfo<LoginRequest[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestArray;
 
 
     public LoginRequest( ILoginRequest request ) : this(request.UserName, request.Password) { }
 
 
     public override int  GetHashCode()                                          => HashCode.Combine(UserName, Password);
-    public override bool Equals( object?            other )                     => ReferenceEquals(this, other) || other is LoginRequest x && Equals(x);
+    public override bool Equals( object?            other )                     => ReferenceEquals(this, other) || ( other is LoginRequest x && Equals(x) );
     public static   bool operator ==( LoginRequest? left, LoginRequest? right ) => EqualityComparer<LoginRequest>.Default.Equals(left, right);
     public static   bool operator !=( LoginRequest? left, LoginRequest? right ) => !EqualityComparer<LoginRequest>.Default.Equals(left, right);
     public static   bool operator >( LoginRequest   left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) > 0;

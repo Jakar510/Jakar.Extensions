@@ -24,7 +24,7 @@ ReadOnlySpan<ReadOnlyPoint> span =
     line.Get(3.5),
     line.Get(5.5),
     line.Get(7.5),
-    line.Get(9.5),
+    line.Get(9.5)
 ];
 
 Console.WriteLine();

@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 02/19/2023  7:25 PM
 
-using System;
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -83,7 +78,7 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
 
         return string.Equals(_rights, other._rights, StringComparison.Ordinal);
     }
-    public override bool Equals( object? obj )                              => ReferenceEquals(this, obj) || obj is UserRights other && Equals(other);
+    public override bool Equals( object? obj )                              => ReferenceEquals(this, obj) || ( obj is UserRights other && Equals(other) );
     public override int  GetHashCode()                                      => _rights.GetHashCode();
     public static   bool operator <( UserRights?  left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) < 0;
     public static   bool operator >( UserRights?  left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) > 0;

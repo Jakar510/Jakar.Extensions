@@ -634,19 +634,19 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static string Hash_MD5( this ref readonly ReadOnlySpan<byte> data )
     {
-        using var hasher = MD5.Create();
+        using MD5 hasher = MD5.Create();
         return hasher.Hash(data);
     }
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static string Hash_MD5( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {
-        using var hasher = MD5.Create();
+        using MD5 hasher = MD5.Create();
         return hasher.Hash(encoding, data);
     }
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static string Hash_MD5( this string data, Encoding? encoding = null )
     {
-        using var hasher = MD5.Create();
+        using MD5 hasher = MD5.Create();
         return hasher.Hash(encoding, data);
     }
 
@@ -654,19 +654,19 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static string Hash_SHA1( this ref readonly ReadOnlySpan<byte> data )
     {
-        using var hasher = SHA1.Create();
+        using SHA1 hasher = SHA1.Create();
         return hasher.Hash(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static string Hash_SHA1( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {
-        using var hasher = SHA1.Create();
+        using SHA1 hasher = SHA1.Create();
         return hasher.Hash(encoding, data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static string Hash_SHA1( this string data, Encoding? encoding = null )
     {
-        using var hasher = SHA1.Create();
+        using SHA1 hasher = SHA1.Create();
         return hasher.Hash(encoding, data);
     }
 
@@ -674,19 +674,19 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static string Hash_SHA256( this ref readonly ReadOnlySpan<byte> data )
     {
-        using var hasher = SHA256.Create();
+        using SHA256 hasher = SHA256.Create();
         return hasher.Hash(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static string Hash_SHA256( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {
-        using var hasher = SHA256.Create();
+        using SHA256 hasher = SHA256.Create();
         return hasher.Hash(encoding, data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static string Hash_SHA256( this string data, Encoding? encoding = null )
     {
-        using var hasher = SHA256.Create();
+        using SHA256 hasher = SHA256.Create();
         return hasher.Hash(encoding, data);
     }
 
@@ -694,19 +694,19 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static string Hash_SHA384( this ref readonly ReadOnlySpan<byte> data )
     {
-        using var hasher = SHA384.Create();
+        using SHA384 hasher = SHA384.Create();
         return hasher.Hash(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static string Hash_SHA384( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {
-        using var hasher = SHA384.Create();
+        using SHA384 hasher = SHA384.Create();
         return hasher.Hash(encoding, data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static string Hash_SHA384( this string data, Encoding? encoding = null )
     {
-        using var hasher = SHA384.Create();
+        using SHA384 hasher = SHA384.Create();
         return hasher.Hash(encoding, data);
     }
 
@@ -714,19 +714,19 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static string Hash_SHA512( this ref readonly ReadOnlySpan<byte> data )
     {
-        using var hasher = SHA512.Create();
+        using SHA512 hasher = SHA512.Create();
         return hasher.Hash(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static string Hash_SHA512( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {
-        using var hasher = SHA512.Create();
+        using SHA512 hasher = SHA512.Create();
         return hasher.Hash(encoding, data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static string Hash_SHA512( this string data, Encoding? encoding = null )
     {
-        using var hasher = SHA512.Create();
+        using SHA512 hasher = SHA512.Create();
         return hasher.Hash(encoding, data);
     }
 
@@ -743,31 +743,31 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static async ValueTask<string> HashAsync_MD5( this ReadOnlyMemory<byte> data )
     {
-        using var hasher = MD5.Create();
+        using MD5 hasher = MD5.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static async ValueTask<string> HashAsync_SHA1( this ReadOnlyMemory<byte> data )
     {
-        using var hasher = SHA1.Create();
+        using SHA1 hasher = SHA1.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static async ValueTask<string> HashAsync_SHA256( this ReadOnlyMemory<byte> data )
     {
-        using var hasher = SHA256.Create();
+        using SHA256 hasher = SHA256.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static async ValueTask<string> HashAsync_SHA384( this ReadOnlyMemory<byte> data )
     {
-        using var hasher = SHA384.Create();
+        using SHA384 hasher = SHA384.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static async ValueTask<string> HashAsync_SHA512( this ReadOnlyMemory<byte> data )
     {
-        using var hasher = SHA512.Create();
+        using SHA512 hasher = SHA512.Create();
         return await hasher.HashAsync(data);
     }
 
@@ -775,31 +775,31 @@ public static class Hashes
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static async ValueTask<string> HashAsync_MD5( this byte[] data )
     {
-        using var hasher = MD5.Create();
+        using MD5 hasher = MD5.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static async ValueTask<string> HashAsync_SHA1( this byte[] data )
     {
-        using var hasher = SHA1.Create();
+        using SHA1 hasher = SHA1.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static async ValueTask<string> HashAsync_SHA256( this byte[] data )
     {
-        using var hasher = SHA256.Create();
+        using SHA256 hasher = SHA256.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static async ValueTask<string> HashAsync_SHA384( this byte[] data )
     {
-        using var hasher = SHA384.Create();
+        using SHA384 hasher = SHA384.Create();
         return await hasher.HashAsync(data);
     }
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static async ValueTask<string> HashAsync_SHA512( this byte[] data )
     {
-        using var hasher = SHA512.Create();
+        using SHA512 hasher = SHA512.Create();
         return await hasher.HashAsync(data);
     }
     public static async ValueTask<string> HashAsync( this byte[] data, HashAlgorithm hasher )

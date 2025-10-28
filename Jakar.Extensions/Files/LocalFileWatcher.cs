@@ -13,36 +13,16 @@ namespace Jakar.Extensions;
 [NotSerializable]
 public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>, IEqualComparable<LocalFileWatcher>
 {
-    private          FileSystemWatcher?                    __watcher;
     private readonly WeakEventManager<ErrorEventArgs>      __errorEventManager  = new();
     private readonly WeakEventManager<FileSystemEventArgs> __eventManager       = new();
     private readonly WeakEventManager<RenamedEventArgs>    __renameEventManager = new();
+    private          FileSystemWatcher?                    __watcher;
     private          LocalDirectory?                       __directory;
+    public static    JsonTypeInfo<LocalFileWatcher[]>      JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
 
 
-    public event ErrorEventHandler?      Error   { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this,  x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this,  x)); }
-    public event FileSystemEventHandler? Changed { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
-    public event FileSystemEventHandler? Created { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
-    public event FileSystemEventHandler? Deleted { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
-    public event RenamedEventHandler?    Renamed { add => __renameEventManager.AddEventHandler(x => value?.Invoke(this, x)); remove => __renameEventManager.RemoveEventHandler(x => value?.Invoke(this, x)); }
-
-
-    public static JsonSerializerContext            JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LocalFileWatcher>   JsonTypeInfo  => JakarExtensionsContext.Default.LocalFileWatcher;
-    public static JsonTypeInfo<LocalFileWatcher[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
-    public        NotifyFilters                    Filters       { get; set; } = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
-    public        string                           SearchFilter  { get; set; } = "*";
-
-    public bool EnableRaisingEvents
-    {
-        get => __watcher?.EnableRaisingEvents is true;
-        set
-        {
-            if ( __watcher is not null ) { __watcher.EnableRaisingEvents = value; }
-
-            OnPropertyChanged();
-        }
-    }
+    public static JsonSerializerContext          JsonContext  => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LocalFileWatcher> JsonTypeInfo => JakarExtensionsContext.Default.LocalFileWatcher;
     public LocalDirectory? Directory
     {
         get => __directory;
@@ -75,6 +55,26 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
                      .AsSpan());
         }
     }
+
+    public bool EnableRaisingEvents
+    {
+        get => __watcher?.EnableRaisingEvents is true;
+        set
+        {
+            if ( __watcher is not null ) { __watcher.EnableRaisingEvents = value; }
+
+            OnPropertyChanged();
+        }
+    }
+    public NotifyFilters Filters      { get; set; } = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+    public string        SearchFilter { get; set; } = "*";
+
+
+    public event ErrorEventHandler?      Error   { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this,  x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this,  x)); }
+    public event FileSystemEventHandler? Changed { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
+    public event FileSystemEventHandler? Created { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
+    public event FileSystemEventHandler? Deleted { add => __eventManager.AddEventHandler(x => value?.Invoke(this,       x)); remove => __eventManager.RemoveEventHandler(x => value?.Invoke(this,       x)); }
+    public event RenamedEventHandler?    Renamed { add => __renameEventManager.AddEventHandler(x => value?.Invoke(this, x)); remove => __renameEventManager.RemoveEventHandler(x => value?.Invoke(this, x)); }
 
 
     public LocalFileWatcher() { }
@@ -128,7 +128,7 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
 
 
     public override int  GetHashCode()                                                  => RuntimeHelpers.GetHashCode(this);
-    public override bool Equals( object?                other )                         => ReferenceEquals(this, other) || other is LocalFileWatcher x && Equals(x);
+    public override bool Equals( object?                other )                         => ReferenceEquals(this, other) || ( other is LocalFileWatcher x && Equals(x) );
     public static   bool operator ==( LocalFileWatcher? left, LocalFileWatcher? right ) => EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
     public static   bool operator !=( LocalFileWatcher? left, LocalFileWatcher? right ) => !EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
     public static   bool operator >( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) > 0;

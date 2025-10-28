@@ -19,13 +19,13 @@ public abstract class DescriptionCellBase : CellBase, ISvCellDescription
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        await SetDescription( Description );
+        await SetDescription(Description);
     }
     public async ValueTask SetDescription( string? value )
     {
-        if ( string.Equals( Description, value, StringComparison.Ordinal ) ) { return; }
+        if ( string.Equals(Description, value, StringComparison.Ordinal) ) { return; }
 
         Description = value;
-        await DescriptionChanged.InvokeAsync( value );
+        await DescriptionChanged.InvokeAsync(value);
     }
 }

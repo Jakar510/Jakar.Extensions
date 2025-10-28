@@ -12,11 +12,11 @@ public sealed class RecordGenerator<TSelf>( DbTable<TSelf> table ) : IAsyncEnume
 {
     private readonly AsyncKeyGenerator<TSelf> __generator = new(table);
     private readonly DbTable<TSelf>           __table     = table;
-    private          CancellationToken         __token;
+    private          CancellationToken        __token;
     private          TSelf?                   __current;
 
 
-    public TSelf Current {  get => __current ?? throw new NullReferenceException(nameof(__current)); }
+    public TSelf Current => __current ?? throw new NullReferenceException(nameof(__current));
 
 
     public RecordGenerator( DbTable<TSelf> table, CancellationToken token ) : this(table) => __token = token;

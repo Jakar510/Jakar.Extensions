@@ -9,17 +9,17 @@ public struct JoinChainBuilderLeft( in JoinClauseBuilder join, ref EasySqlBuilde
 
     public JoinChainBuilderMiddle Left<TValue>( string columnName )
     {
-        __builder.Add( columnName.GetName<TValue>() );
-        return new JoinChainBuilderMiddle( __join, ref __builder );
+        __builder.Add(columnName.GetName<TValue>());
+        return new JoinChainBuilderMiddle(__join, ref __builder);
     }
     public JoinChainBuilderMiddle Left<TValue>( TValue obj, string columnName )
     {
-        __builder.Add( columnName.GetName<TValue>() );
-        return new JoinChainBuilderMiddle( __join, ref __builder );
+        __builder.Add(columnName.GetName<TValue>());
+        return new JoinChainBuilderMiddle(__join, ref __builder);
     }
     public JoinChainBuilderMiddle Left( string columnName )
     {
-        __builder.Add( columnName );
-        return new JoinChainBuilderMiddle( __join, ref __builder );
+        __builder.Add(columnName);
+        return new JoinChainBuilderMiddle(__join, ref __builder);
     }
 }

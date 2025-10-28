@@ -44,5 +44,5 @@ public abstract class ChatRooms<TSelf, TRoom> : ConcurrentObservableCollection<T
     protected ChatRooms( params ReadOnlySpan<TRoom> enumerable ) : base(enumerable) { }
 
 
-    protected override bool Filter( int index, ref readonly TRoom? value ) => ShowAll || value is not null && value.Active;
+    protected override bool Filter( int index, ref readonly TRoom? value ) => ShowAll || ( value is not null && value.Active );
 }

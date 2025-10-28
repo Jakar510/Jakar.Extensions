@@ -8,7 +8,7 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 public class BenchmarkConfig : ManualConfig
 {
     // private readonly FileStream _stream = new("Benchmark.log", FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-    public BenchmarkConfig() => SummaryStyle = SummaryStyle.Default.WithRatioStyle( RatioStyle.Percentage );
+    public BenchmarkConfig() => SummaryStyle = SummaryStyle.Default.WithRatioStyle(RatioStyle.Percentage);
 
     // AddLogger( new ConsoleLogger(), new StreamLogger( new StreamWriter( _stream ) ) );
     // AddExporter( new JsonExporter() );

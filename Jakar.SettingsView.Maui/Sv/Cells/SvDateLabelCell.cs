@@ -7,7 +7,7 @@ namespace Jakar.SettingsView.Maui.Sv;
 
 public class SvDateLabelCell : ValueCellBase<DateTime>
 {
-    public sealed override WidgetType              Type   => WidgetType.DateLabel;
     public                 string?                 Format { get; set; }
+    public sealed override WidgetType              Type   => WidgetType.DateLabel;
     public override        ErrorOrResult<DateTime> Save() => Value;
 }

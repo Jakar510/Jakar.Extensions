@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/18/2025  23:29
 
-using Org.BouncyCastle.Asn1.Tsp;
-
-
-
 namespace Jakar.Database.DbMigrations;
 
 
@@ -19,32 +15,28 @@ public enum ColumnOptions : ulong
     Fixed           = 1 << 4,
     AlwaysIdentity  = 1 << 5,
     DefaultIdentity = 1 << 6,
-    All             = ~0UL,
+    All             = ~0UL
 }
 
 
 
 /// <summary>
-/// <para>
-/// <see cref="Scope"/>:  Order of magnitude of representable range (the exponent range).
-/// </para>
-/// <para>
-/// <see cref="Precision"/>: Reliable decimal digits of accuracy.
-/// </para>
+///     <para> <see cref="Scope"/>:  Order of magnitude of representable range (the exponent range). </para>
+///     <para> <see cref="Precision"/>: Reliable decimal digits of accuracy. </para>
 /// </summary>
 /// <param name="Scope"> Order of magnitude of representable range (the exponent range). </param>
 /// <param name="Precision"> Reliable decimal digits of accuracy. </param>
 [DefaultValue(nameof(Default))]
 public readonly record struct PrecisionInfo( int Scope, int Precision )
 {
-    public static readonly          PrecisionInfo Default   = new(-1, -1);
-    public static readonly          PrecisionInfo Float     = new(38, 7);
-    public static readonly          PrecisionInfo Double    = new(308, 15);
     public static readonly          PrecisionInfo Decimal   = new(28, 28);
+    public static readonly          PrecisionInfo Default   = new(-1, -1);
+    public static readonly          PrecisionInfo Double    = new(308, 15);
+    public static readonly          PrecisionInfo Float     = new(38, 7);
     public static readonly          PrecisionInfo Int128    = new(128, 0);
-    public readonly                 int           Scope     = Scope;
-    public readonly                 int           Precision = Precision;
     public readonly                 bool          IsValid   = Scope >= 0 && Precision >= 0;
+    public readonly                 int           Precision = Precision;
+    public readonly                 int           Scope     = Scope;
     public static implicit operator PrecisionInfo( (int Precision, int Scope) value ) => Create(value.Precision, value.Scope);
 
     public override string ToString() => $"{Scope}, {Precision}";
@@ -64,8 +56,8 @@ public readonly record struct PrecisionInfo( int Scope, int Precision )
 public readonly record struct LengthInfo( int Value )
 {
     public static readonly          LengthInfo Default = new(-1);
-    public readonly                 int        Value   = Value;
     public readonly                 bool       IsValid = Value >= 0;
+    public readonly                 int        Value   = Value;
     public static implicit operator LengthInfo( int value ) => new(value);
 }
 
@@ -75,9 +67,9 @@ public readonly record struct LengthInfo( int Value )
 public readonly record struct SizeInfo( LengthInfo Length, PrecisionInfo Precision )
 {
     public static readonly SizeInfo      Default   = new(LengthInfo.Default, PrecisionInfo.Default);
+    public readonly        bool          IsValid   = Length.IsValid || Precision.IsValid;
     public readonly        LengthInfo    Length    = Length;
     public readonly        PrecisionInfo Precision = Precision;
-    public readonly        bool          IsValid   = Length.IsValid || Precision.IsValid;
 
 
     public static implicit operator SizeInfo( int                        value ) => new(value, PrecisionInfo.Default);
@@ -102,15 +94,15 @@ public sealed record ColumnCheckMetaData( bool And, params string[] Checks )
 public sealed class ColumnMetaDataAttribute : Attribute
 {
     internal static readonly ColumnMetaDataAttribute Empty = new();
-    public                   ColumnOptions?          Options         { get; set; }
-    public                   PostgresType?           DbType          { get; set; }
-    public                   SizeInfo?               Length          { get; set; }
     public                   string?                 ColumnName      { get; set; }
-    public                   string?                 IndexColumnName { get; set; }
-    public                   string?                 VariableName    { get; set; }
-    public                   string?                 Name            { get; set; }
-    public                   string?                 KeyValuePair    { get; set; }
+    public                   PostgresType?           DbType          { get; set; }
     public                   string?                 ForeignKey      { get; set; }
+    public                   string?                 IndexColumnName { get; set; }
+    public                   string?                 KeyValuePair    { get; set; }
+    public                   SizeInfo?               Length          { get; set; }
+    public                   string?                 Name            { get; set; }
+    public                   ColumnOptions?          Options         { get; set; }
+    public                   string?                 VariableName    { get; set; }
 
 
     public void Deconstruct( out string? columnName, out ColumnOptions options, out SizeInfo length, out PostgresType? dbType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name )
@@ -152,15 +144,15 @@ public sealed class ColumnMetaData( string               propertyName,
     public readonly bool                 IsPrimaryKey    = options.HasFlagValue(ColumnOptions.PrimaryKey);
     public readonly ColumnCheckMetaData? Checks          = checks;
     public readonly ColumnOptions        Options         = options;
-    public readonly SizeInfo             Length          = length;
     public readonly PostgresType         DbType          = dbType;
-    public readonly string               PropertyName    = Validate.ThrowIfNull(propertyName);
+    public readonly SizeInfo             Length          = length;
     public readonly string               ColumnName      = Validate.ThrowIfNull(columnName);
+    public readonly string               KeyValuePair    = keyValuePair ?? $" {columnName} = @{columnName} ";
+    public readonly string               Name            = name         ?? $" {columnName} ";
+    public readonly string               PropertyName    = Validate.ThrowIfNull(propertyName);
+    public readonly string               VariableName    = variableName ?? $" @{columnName} ";
     public readonly string?              ForeignKeyName  = foreignKeyName?.SqlColumnName();
     public readonly string?              IndexColumnName = indexColumnName?.SqlColumnName();
-    public readonly string               Name            = name         ?? $" {columnName} ";
-    public readonly string               VariableName    = variableName ?? $" @{columnName} ";
-    public readonly string               KeyValuePair    = keyValuePair ?? $" {columnName} = @{columnName} ";
     public          string               DataType        = dbType.GetPostgresDataType(in length, in options);
 
 
@@ -295,7 +287,7 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
         bool         isEnum = false;
         PostgresType dbType;
 
-        if ( ( typeof(TValue) ) == typeof(RecordID<TSelf>) || ( typeof(TValue) ) == typeof(RecordID<TSelf>?) )
+        if ( typeof(TValue) == typeof(RecordID<TSelf>) || typeof(TValue) == typeof(RecordID<TSelf>?) )
         {
             dbType  =  PostgresType.Guid;
             options |= ColumnOptions.PrimaryKey;

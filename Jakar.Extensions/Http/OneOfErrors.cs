@@ -7,10 +7,10 @@ namespace Jakar.Extensions;
 [method: JsonConstructor]
 public readonly struct OneOfErrors( JsonNode? json, string? text, Errors? errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
 {
-    public static readonly OneOfErrors Empty         = new(null, null, null);
-    public readonly        Errors?     Errors        = errors;
-    public readonly        JsonNode?   Json          = json;
-    public readonly        string?     Text          = text;
+    public static readonly OneOfErrors Empty  = new(null, null, null);
+    public readonly        Errors?     Errors = errors;
+    public readonly        JsonNode?   Json   = json;
+    public readonly        string?     Text   = text;
 
     public bool IsErrors { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
     public bool IsJson   { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }

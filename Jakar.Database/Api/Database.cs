@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using Microsoft.Data.SqlClient;
-using ZXing.Aztec.Internal;
 using IsolationLevel = System.Data.IsolationLevel;
 
 
@@ -20,17 +18,18 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly             DbTable<AddressRecord>           Addresses;
     public readonly             DbTable<FileRecord>              Files;
     public readonly             DbTable<GroupRecord>             Groups;
+    protected internal readonly DbTable<MigrationRecord>         Migrations;
     public readonly             DbTable<RecoveryCodeRecord>      RecoveryCodes;
     public readonly             DbTable<RoleRecord>              Roles;
     public readonly             DbTable<UserAddressRecord>       UserAddresses;
     public readonly             DbTable<UserGroupRecord>         UserGroups;
+    public readonly             DbTable<UserLoginProviderRecord> UserLoginProviders;
     public readonly             DbTable<UserRecord>              Users;
     public readonly             DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
     public readonly             DbTable<UserRoleRecord>          UserRoles;
-    public readonly             DbTable<UserLoginProviderRecord> UserLoginProviders;
-    protected internal readonly DbTable<MigrationRecord>         Migrations;
     protected readonly          FusionCache                      _cache;
     public readonly             IConfiguration                   Configuration;
+    public readonly             ThreadLocal<UserRecord?>         LoggedInUser = new();
     protected                   ActivitySource?                  _activitySource;
     protected                   Meter?                           _meter;
     protected                   string?                          _className;
@@ -38,17 +37,16 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     public static Database?     Current       { get; set; }
     public static DataProtector DataProtector { get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public string ClassName
-    {
-        get => _className ??= GetType()
-                  .GetFullName();
-    }
+
+    public string ClassName =>
+        _className ??= GetType()
+           .GetFullName();
+
     protected internal SecuredString?               ConnectionString          { get; set; }
     ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
-    public virtual     PasswordValidator            PasswordValidator         { get => DbOptions.PasswordRequirements.GetValidator(); }
+    public virtual     PasswordValidator            PasswordValidator         => DbOptions.PasswordRequirements.GetValidator();
     public             IsolationLevel               TransactionIsolationLevel { get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion                   Version                   { get => Options.AppInformation.Version; }
-    public readonly    ThreadLocal<UserRecord?>     LoggedInUser = new();
+    public             AppVersion                   Version                   => Options.AppInformation.Version;
 
 
     static Database()

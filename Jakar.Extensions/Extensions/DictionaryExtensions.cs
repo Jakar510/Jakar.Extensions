@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/11/2024  11:04
 
-using Microsoft.Extensions.Primitives;
-
-
-
 namespace Jakar.Extensions;
 
 

@@ -13,12 +13,12 @@ public partial class DbTable<TSelf> : IConnectableDb
     protected readonly IConnectableDbRoot _database;
 
 
-    public static TSelf[]                  Empty                     { get => []; }
-    public static ImmutableArray<TSelf>    EmptyArray                { get => []; }
-    public static FrozenSet<TSelf>         Set                       { get => FrozenSet<TSelf>.Empty; }
+    public static TSelf[]                  Empty                     => [];
+    public static ImmutableArray<TSelf>    EmptyArray                => [];
+    public static FrozenSet<TSelf>         Set                       => FrozenSet<TSelf>.Empty;
     public        FusionCacheEntryOptions? Options                   { get; set; }
-    public        RecordGenerator<TSelf>   Records                   { get => new(this); }
-    public        IsolationLevel           TransactionIsolationLevel { get => _database.TransactionIsolationLevel; }
+    public        RecordGenerator<TSelf>   Records                   => new(this);
+    public        IsolationLevel           TransactionIsolationLevel => _database.TransactionIsolationLevel;
 
 
     public DbTable( IConnectableDbRoot database, FusionCache cache )
@@ -175,5 +175,5 @@ public enum PostgresCollectionType
     PRIMARY_KEY,
     UNIQUE_KEYS,
     FOREIGN_KEYS,
-    CONSTRAINT_COLUMNS,
+    CONSTRAINT_COLUMNS
 }

@@ -24,20 +24,21 @@ public sealed record FileRecord( string?              FileName,
                                  DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
 {
     public const  string                     TABLE_NAME = "files";
-    public static string                     TableName     { get => TABLE_NAME; }
+    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
     public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<FileRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;
-    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Default.WithColumn<string?>(nameof(FileName), ColumnOptions.Nullable, length: 256)
-                                                                                                           .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
-                                                                                                           .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Default.WithColumn<string?>(nameof(FileName), ColumnOptions.Nullable, 256)
+                                                                                                           .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, 1024)
+                                                                                                           .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, 256)
                                                                                                            .WithColumn<long>(nameof(FileSize))
                                                                                                            .WithColumn<string>(nameof(Hash),        length: MAX_FIXED)
                                                                                                            .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
                                                                                                            .WithColumn<string>(nameof(FullPath),    length: MAX_FIXED)
                                                                                                            .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }
@@ -220,31 +221,29 @@ public sealed record FileRecord( string?              FileName,
     public static bool operator >=( FileRecord left, FileRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( FileRecord  left, FileRecord right ) => left.CompareTo(right) < 0;
     public static bool operator <=( FileRecord left, FileRecord right ) => left.CompareTo(right) <= 0;
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<FileRecord>(5,
-                                                  $"create {TABLE_NAME} table",
-                                                  $"""
-                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                   (
-                                                   {nameof(FileName).SqlColumnName()}        varchar({FILE_NAME})  NULL UNIQUE,
-                                                   {nameof(FileDescription).SqlColumnName()} varchar({MAX_FIXED})  NULL,
-                                                   {nameof(FileType).SqlColumnName()}        varchar(TYPE)         NULL,
-                                                   {nameof(FullPath).SqlColumnName()}        varchar({MAX_FIXED})  NULL UNIQUE,
-                                                   {nameof(FileSize).SqlColumnName()}        bigint                NOT NULL,
-                                                   {nameof(Hash).SqlColumnName()}             varchar({MAX_FIXED}) NOT NULL,
-                                                   {nameof(MimeType).SqlColumnName()}        varchar(TYPE)         NULL,
-                                                   {nameof(Payload).SqlColumnName()}          text                 NOT NULL,
-                                                   {nameof(ID).SqlColumnName()}               uuid                 NOT NULL PRIMARY KEY,
-                                                   {nameof(DateCreated).SqlColumnName()}     timestamptz           NOT NULL DEFAULT SYSUTCDATETIME(),
-                                                   {nameof(LastModified).SqlColumnName()}    timestamptz           NULL,
-                                                   FOREIGN KEY({nameof(MimeType).SqlColumnName()}) REFERENCES {nameof(MimeType).SqlColumnName()}(id) ON DELETE SET NULL
-                                                   );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<FileRecord>(5,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (
+                                            {nameof(FileName).SqlColumnName()}        varchar({FILE_NAME})  NULL UNIQUE,
+                                            {nameof(FileDescription).SqlColumnName()} varchar({MAX_FIXED})  NULL,
+                                            {nameof(FileType).SqlColumnName()}        varchar(TYPE)         NULL,
+                                            {nameof(FullPath).SqlColumnName()}        varchar({MAX_FIXED})  NULL UNIQUE,
+                                            {nameof(FileSize).SqlColumnName()}        bigint                NOT NULL,
+                                            {nameof(Hash).SqlColumnName()}             varchar({MAX_FIXED}) NOT NULL,
+                                            {nameof(MimeType).SqlColumnName()}        varchar(TYPE)         NULL,
+                                            {nameof(Payload).SqlColumnName()}          text                 NOT NULL,
+                                            {nameof(ID).SqlColumnName()}               uuid                 NOT NULL PRIMARY KEY,
+                                            {nameof(DateCreated).SqlColumnName()}     timestamptz           NOT NULL DEFAULT SYSUTCDATETIME(),
+                                            {nameof(LastModified).SqlColumnName()}    timestamptz           NULL,
+                                            FOREIGN KEY({nameof(MimeType).SqlColumnName()}) REFERENCES {nameof(MimeType).SqlColumnName()}(id) ON DELETE SET NULL
+                                            );
 
-                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                   FOR EACH ROW
-                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                   """);
-    }
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 }

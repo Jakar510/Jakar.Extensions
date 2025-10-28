@@ -4,7 +4,6 @@
 using System.Security.Cryptography.X509Certificates;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
-using Seq.Apps;
 
 
 
@@ -25,6 +24,7 @@ public static class Telemetry
     public static readonly KeyValuePair<string, object?>[] Pairs                            = [];
     public static readonly Meter                           DbMeter                          = CreateMeter(METER_NAME);
     public static readonly ActivitySource                  DbSource                         = CreateSource(METER_NAME);
+
 
     public static readonly ConcurrentDictionary<string, Instrument> Instruments = [];
     public static readonly ConcurrentDictionary<string, Meter>      Meters      = [];

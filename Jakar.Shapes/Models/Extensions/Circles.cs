@@ -42,10 +42,8 @@ public static class Circles
 
 
     [Pure] public static ReadOnlyLine RadiusLine<TCircle>( this TCircle self, in Radians radians )
-        where TCircle : struct, ICircle<TCircle>
-    {
-        return new ReadOnlyLine(self.Center, new ReadOnlyPoint(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value)));
-    }
+        where TCircle : struct, ICircle<TCircle> =>
+        new(self.Center, new ReadOnlyPoint(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value)));
 
 
     [Pure] public static CalculatedLine RadiusCalculatedLine<TCircle>( this TCircle self, in Radians radians )
@@ -150,16 +148,12 @@ public static class Circles
 
 
     public static double DistanceTo<TCircle>( this TCircle self, TCircle other )
-        where TCircle : struct, ICircle<TCircle>
-    {
-        return self.DistanceTo(other.Center);
-    }
+        where TCircle : struct, ICircle<TCircle> =>
+        self.DistanceTo(other.Center);
     public static double DistanceTo<TCircle, TPoint>( this TCircle self, TPoint other )
         where TCircle : struct, ICircle<TCircle>
-        where TPoint : struct, IPoint<TPoint>
-    {
-        return self.Center.DistanceTo(other);
-    }
+        where TPoint : struct, IPoint<TPoint> =>
+        self.Center.DistanceTo(other);
 
 
     public static bool IsTangent<TCircle>( this TCircle self, ReadOnlyLine line )

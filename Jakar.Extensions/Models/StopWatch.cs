@@ -11,7 +11,7 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     private readonly long        __start  = Stopwatch.GetTimestamp();
 
 
-    public TimeSpan Elapsed { get => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp()); }
+    public TimeSpan Elapsed => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp());
 
 
     public void Dispose()
@@ -41,12 +41,10 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
         FormattableString result = $"{format} {Value} {Unit}";
         return result.ToString(formatProvider);
     }
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-    {
-        return format.IsNullOrWhiteSpace()
-                   ? destination.TryWrite(provider, $"{Value} {Unit}",          out charsWritten)
-                   : destination.TryWrite(provider, $"{format} {Value} {Unit}", out charsWritten);
-    }
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider = null ) =>
+        format.IsNullOrWhiteSpace()
+            ? destination.TryWrite(provider, $"{Value} {Unit}",          out charsWritten)
+            : destination.TryWrite(provider, $"{format} {Value} {Unit}", out charsWritten);
     public override                 string ToString()                                    => $"{Value} {Unit}";
     public static implicit operator SpanDuration( (double value, Range unit)  tuple )    => new(tuple.value, tuple.unit);
     public static implicit operator SpanDuration( KeyValuePair<double, Range> tuple )    => new(tuple.Key, tuple.Value);
@@ -95,6 +93,6 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
         Minutes,
         Seconds,
         Milliseconds,
-        Microseconds,
+        Microseconds
     }
 }

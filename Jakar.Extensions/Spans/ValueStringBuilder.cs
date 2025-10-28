@@ -17,9 +17,9 @@ public ref struct ValueStringBuilder : IDisposable
     public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Capacity; }
     public readonly Span<char> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Next; }
     public readonly Span<char> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
-    public readonly Span<char> this[ Range range ] { get => __chars[range]; }
-    public ref char this[ Index            index ] { get => ref __chars[index]; }
-    public ref char this[ int              index ] { get => ref __chars[index]; }
+    public readonly Span<char> this[ Range range ] => __chars[range];
+    public ref char this[ Index            index ] => ref __chars[index];
+    public ref char this[ int              index ] => ref __chars[index];
     public readonly ReadOnlySpan<char> Result { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
     public          int                Length { [MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get => __chars.Length; set => __chars.Length = value; }
     public readonly ReadOnlySpan<char> Values => __chars.Values;
@@ -77,7 +77,6 @@ public ref struct ValueStringBuilder : IDisposable
     [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => __chars.Span;
     [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => __chars[start..];
     [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => __chars.Span.Slice(start, length);
-    
 
 
     public bool TryCopyTo( scoped ref Span<char> destination, out int charsWritten )
@@ -376,9 +375,9 @@ public ref struct ValueStringBuilder : IDisposable
         if ( formatSpan.IsEmpty ) { throw new ArgumentNullException(nameof(formatSpan)); }
 
         EnsureCapacity<TValue>(in formatSpan);
-        int  pos             = 0;
-        char ch              = '\0';
-        var  customFormatter = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
+        int               pos             = 0;
+        char              ch              = '\0';
+        ICustomFormatter? customFormatter = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
 
         while ( true )
         {

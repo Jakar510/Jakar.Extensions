@@ -20,10 +20,9 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified, AdditionalData), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "addresses";
-    public static string                        TableName     { get => TABLE_NAME; }
+    public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
-    public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Default.WithColumn<string>(nameof(Line1), length: 256)
@@ -32,11 +31,13 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                               .WithColumn<string>(nameof(StateOrProvince), length: 256)
                                                                                                               .WithColumn<string>(nameof(Country),         length: 256)
                                                                                                               .WithColumn<string>(nameof(PostalCode),      length: 256)
-                                                                                                              .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
+                                                                                                              .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, 256)
                                                                                                               .WithColumn<bool>(nameof(IsPrimary),         length: 256)
                                                                                                               .With_AdditionalData()
                                                                                                               .With_CreatedBy()
                                                                                                               .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
@@ -80,10 +81,10 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
-    public static AddressRecord Parse( string s, IFormatProvider? provider ) => Create(Extensions.Validate.Re.Address.Match(s));
+    public static AddressRecord Parse( string s, IFormatProvider? provider ) => Create(Validate.Re.Address.Match(s));
     public static bool TryParse( [NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AddressRecord result )
     {
-        Match match = Extensions.Validate.Re.Address.Match(s ?? EMPTY);
+        Match match = Validate.Re.Address.Match(s ?? EMPTY);
 
         if ( !match.Success )
         {
@@ -94,7 +95,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         result = Create(match);
         return true;
     }
- 
+
 
     [Pure] public static AddressRecord Create( Match          match )   => new(match);
     [Pure] public static AddressRecord Create( IAddress<Guid> address ) => new(address);
@@ -268,33 +269,31 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static bool operator <=( AddressRecord left, AddressRecord right ) => left.CompareTo(right) <= 0;
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<AddressRecord>(migrationID,
-                                                     $"create {TABLE_NAME} table",
-                                                     $"""
-                                                      CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                      (
-                                                      {nameof(Line1).SqlColumnName()}           varchar(512)   NOT NULL,
-                                                      {nameof(Line2).SqlColumnName()}           varchar(512)   NOT NULL,
-                                                      {nameof(City).SqlColumnName()}            varchar(512)   NOT NULL,
-                                                      {nameof(StateOrProvince).SqlColumnName()} varchar(512)   NOT NULL,
-                                                      {nameof(Country).SqlColumnName()}         varchar(512)   NOT NULL,
-                                                      {nameof(PostalCode).SqlColumnName()}      varchar(64)    NOT NULL,
-                                                      {nameof(Address).SqlColumnName()}         varchar(3000)  NULL,
-                                                      {nameof(IsPrimary).SqlColumnName()}       boolean        NOT NULL DEFAULT FALSE,
-                                                      {nameof(CreatedBy).SqlColumnName()}       uuid           NULL,
-                                                      {nameof(ID).SqlColumnName()}              uuid           NOT NULL PRIMARY KEY,
-                                                      {nameof(DateCreated).SqlColumnName()}     timestamptz    NOT NULL DEFAULT SYSUTCDATETIME(),
-                                                      {nameof(LastModified).SqlColumnName()}    timestamptz    NULL,
-                                                      {nameof(AdditionalData).SqlColumnName()}  json           NULL,
-                                                      FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
-                                                      );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<AddressRecord>(migrationID,
+                                              $"create {TABLE_NAME} table",
+                                              $"""
+                                               CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                               (
+                                               {nameof(Line1).SqlColumnName()}           varchar(512)   NOT NULL,
+                                               {nameof(Line2).SqlColumnName()}           varchar(512)   NOT NULL,
+                                               {nameof(City).SqlColumnName()}            varchar(512)   NOT NULL,
+                                               {nameof(StateOrProvince).SqlColumnName()} varchar(512)   NOT NULL,
+                                               {nameof(Country).SqlColumnName()}         varchar(512)   NOT NULL,
+                                               {nameof(PostalCode).SqlColumnName()}      varchar(64)    NOT NULL,
+                                               {nameof(Address).SqlColumnName()}         varchar(3000)  NULL,
+                                               {nameof(IsPrimary).SqlColumnName()}       boolean        NOT NULL DEFAULT FALSE,
+                                               {nameof(CreatedBy).SqlColumnName()}       uuid           NULL,
+                                               {nameof(ID).SqlColumnName()}              uuid           NOT NULL PRIMARY KEY,
+                                               {nameof(DateCreated).SqlColumnName()}     timestamptz    NOT NULL DEFAULT SYSUTCDATETIME(),
+                                               {nameof(LastModified).SqlColumnName()}    timestamptz    NULL,
+                                               {nameof(AdditionalData).SqlColumnName()}  json           NULL,
+                                               FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
+                                               );
 
-                                                      CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                      FOR EACH ROW
-                                                      EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                      """);
-    }
+                                               CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                               BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                               FOR EACH ROW
+                                               EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                               """);
 }

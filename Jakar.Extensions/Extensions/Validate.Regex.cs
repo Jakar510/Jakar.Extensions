@@ -32,19 +32,25 @@ public static partial class Validate
         public static partial Regex Email { get; }
 
 
-        /// <summary> <see href="https://www.regextester.com/22"/> </summary>
+        /// <summary>
+        ///     <see href="https://www.regextester.com/22"/>
+        /// </summary>
         [GeneratedRegex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
         public static partial Regex Ip { get; }
 
 
-        /// <summary> <see href="https://www.regextester.com/25"/> </summary>
+        /// <summary>
+        ///     <see href="https://www.regextester.com/25"/>
+        /// </summary>
         [GeneratedRegex(@"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))",
                         OPTIONS,
                         MATCH_TIMEOUT_MILLISECONDS)]
         public static partial Regex IpV6 { get; }
 
 
-        /// <summary> <see href="https://urlregex.com/"/> </summary>
+        /// <summary>
+        ///     <see href="https://urlregex.com/"/>
+        /// </summary>
         [GeneratedRegex(@"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
         public static partial Regex Url { get; }
 
@@ -54,59 +60,83 @@ public static partial class Validate
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public static partial class PhoneNumbers
         {
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"(^|\()?\s*(\d{2})\s*(\s|\))*(9?\d{4})(\s|-)?(\d{4})($|\n)", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex Brazil { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"^(13[0-9]|14[57]|15[012356789]|17[0678]|18[0-9])[0-9]{8}$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex China1 { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"1[34578][012356789]\d{8}|134[012345678]\d{7}", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex China2 { get; }
 
-            /// <summary> <see href="https://www.regextester.com/1978"/> </summary>
+            /// <summary>
+            ///     <see href="https://www.regextester.com/1978"/>
+            /// </summary>
             [GeneratedRegex(@"((?:\+|00)[17](?: |\-)?|(?:\+|00)[1-9]\d{0,2}(?: |\-)?|(?:\+|00)1\-\d{3}(?: |\-)?)?(0\d|\([0-9]{3}\)|[1-9]{0,3})(?:((?: |\-)[0-9]{2}){4}|((?:[0-9]{2}){4})|((?: |\-)[0-9]{3}(?: |\-)[0-9]{4})|([0-9]{7}))", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex Generic { get; }
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"/^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{1,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex Germany { get; }
 
 
-            /// <summary> <see href="https://www.regextester.com/93470"/> </summary>
+            /// <summary>
+            ///     <see href="https://www.regextester.com/93470"/>
+            /// </summary>
             [GeneratedRegex(@"^(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex India { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"\(?(?:\+62|62|0)(?:\d{2,3})?\)?[ .-]?\d{2,4}[ .-]?\d{2,4}[ .-]?\d{2,4}", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex Indonesia { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"^(?:\d{10}|\d{3}-\d{3}-\d{4}|\d{2}-\d{4}-\d{4}|\d{3}-\d{4}-\d{4})$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex Japan { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"^((\+7|7|8)+([0-9]){10})$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)] public static partial Regex Russia { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"^(?:(?:\(?(?:0(?:0|11)\)?[\s-]?\(?|\+)44\)?[\s-]?(?:\(?0\)?[\s-]?)?)|(?:\(?0))(?:(?:\d{5}\)?[\s-]?\d{4,5})|(?:\d{4}\)?[\s-]?(?:\d{5}|\d{3}[\s-]?\d{3}))|(?:\d{3}\)?[\s-]?\d{3}[\s-]?\d{3,4})|(?:\d{2}\)?[\s-]?\d{4}[\s-]?\d{4}))(?:[\s-]?(?:x|ext\.?|\#)\d{3,4})?$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex UnitedKingdom { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex UnitedSatesOrCanada1 { get; }
 
 
-            /// <summary> <see href="https://phoneregex.com/"/> </summary>
+            /// <summary>
+            ///     <see href="https://phoneregex.com/"/>
+            /// </summary>
             [GeneratedRegex(@"^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$", OPTIONS, MATCH_TIMEOUT_MILLISECONDS)]
             public static partial Regex UnitedSatesOrCanada2 { get; }
         }

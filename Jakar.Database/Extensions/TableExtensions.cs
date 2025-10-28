@@ -21,7 +21,7 @@ public static class TableExtensions
         HashSet<string> missing =
         [
             .. TSelf.ClassProperties.AsValueEnumerable()
-                     .Select(static x => x.Name)
+                    .Select(static x => x.Name)
         ];
 
         missing.ExceptWith(parameterNames);

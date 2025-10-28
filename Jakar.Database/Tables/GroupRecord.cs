@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using ValueOf;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 [Serializable]
@@ -25,11 +20,11 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
                                                                                                             .Build();
 
 
-    public static string                                   TableName      { get => TABLE_NAME; }
-    Guid? ICreatedByUser<Guid>.                            CreatedBy      => CreatedBy?.Value;
-    Guid? IGroupModel<Guid>.                               OwnerID        => CreatedBy?.Value;
-    [StringLength(RIGHTS)]               public UserRights Rights         { get; set; } = Rights;
-    [StringLength(GroupRecord.MAX_SIZE)] public string?    NormalizedName { get; set; } = NormalizedName;
+    public static string                     TableName      => TABLE_NAME;
+    Guid? ICreatedByUser<Guid>.              CreatedBy      => CreatedBy?.Value;
+    [StringLength(MAX_SIZE)] public string?  NormalizedName { get; set; } = NormalizedName;
+    Guid? IGroupModel<Guid>.                 OwnerID        => CreatedBy?.Value;
+    [StringLength(RIGHTS)] public UserRights Rights         { get; set; } = Rights;
 
 
     public GroupRecord( string nameOfGroup, UserRights rights, RecordID<UserRecord>? owner = null, string? normalizedName = null ) : this(nameOfGroup, normalizedName, EMPTY, RecordID<GroupRecord>.New(), owner, DateTimeOffset.UtcNow) { }
@@ -44,28 +39,26 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
         where TGroupModel : class, IGroupModel<TGroupModel, Guid> => TGroupModel.Create(this);
 
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create {TABLE_NAME} table",
-                                                  $"""
-                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
-                                                   (  
-                                                   {nameof(NameOfGroup).SqlColumnName()}    varchar(1024) NOT NULL, 
-                                                   {nameof(NormalizedName).SqlColumnName()}     varchar(1024) NOT NULL,  
-                                                   {nameof(Rights).SqlColumnName()}         varchar(1024) NOT NULL, 
-                                                   {nameof(ID).SqlColumnName()}             uuid          PRIMARY KEY,
-                                                   {nameof(DateCreated).SqlColumnName()}    timestamptz   NOT NULL,
-                                                   {nameof(LastModified).SqlColumnName()}   timestamptz   NULL,
-                                                   {nameof(AdditionalData).SqlColumnName()} json          NULL
-                                                   );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<RoleRecord>(migrationID,
+                                           $"create {TABLE_NAME} table",
+                                           $"""
+                                            CREATE TABLE IF NOT EXISTS {TABLE_NAME}
+                                            (  
+                                            {nameof(NameOfGroup).SqlColumnName()}    varchar(1024) NOT NULL, 
+                                            {nameof(NormalizedName).SqlColumnName()}     varchar(1024) NOT NULL,  
+                                            {nameof(Rights).SqlColumnName()}         varchar(1024) NOT NULL, 
+                                            {nameof(ID).SqlColumnName()}             uuid          PRIMARY KEY,
+                                            {nameof(DateCreated).SqlColumnName()}    timestamptz   NOT NULL,
+                                            {nameof(LastModified).SqlColumnName()}   timestamptz   NULL,
+                                            {nameof(AdditionalData).SqlColumnName()} json          NULL
+                                            );
 
-                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                   FOR EACH ROW
-                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                   """);
-    }
+                                            CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                            BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                            FOR EACH ROW
+                                            EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                            """);
 
 
     public override int CompareTo( GroupRecord? other )

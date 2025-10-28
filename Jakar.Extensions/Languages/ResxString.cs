@@ -35,12 +35,12 @@ public sealed class ResxString( string neutral,
     public readonly string German     = german;
     public readonly string Japanese   = japanese;
     public readonly string Korean     = korean;
+    public readonly string Neutral    = neutral;
     public readonly string Polish     = polish;
     public readonly string Portuguese = portuguese;
     public readonly string Spanish    = spanish;
     public readonly string Swedish    = swedish;
     public readonly string Thai       = thai;
-    public readonly string Neutral    = neutral;
 
 
 #pragma warning disable RS1035

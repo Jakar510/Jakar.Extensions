@@ -34,10 +34,7 @@ namespace Jakar.Database;
 /// <param name="QueueSizeLimit"> The maximum number of events that will be held in-memory while waiting to ship them to Seq. Beyond this limit, events will be dropped. The default is 100,000. Has no effect on durable log shipping. </param>
 /// <param name="PayloadFormatter"> An <see cref="ITextFormatter"/> that will be used to format (newline-delimited CLEF/JSON) payloads. Experimental. </param>
 /// <param name="FormatProvider">
-///     An <see cref="IFormatProvider"/> that will be used to render log event tokens. Does not apply if <paramref name="PayloadFormatter"/> is provided. If
-///     <paramref
-///         name="FormatProvider"/>
-///     is provided then event messages will be rendered and included in the payload.
+///     An <see cref="IFormatProvider"/> that will be used to render log event tokens. Does not apply if <paramref name="PayloadFormatter"/> is provided. If <paramref name="FormatProvider"/> is provided then event messages will be rendered and included in the payload.
 /// </param>
 /// <returns> Logger configuration, allowing configuration to continue. </returns>
 /// <exception cref="ArgumentNullException"> A required parameter is null. </exception>

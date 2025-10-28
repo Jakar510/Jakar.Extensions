@@ -73,7 +73,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     internal readonly ILogger?   Logger   = logger;
 
 
-    public HttpRequestHeaders DefaultRequestHeaders { get => Client.DefaultRequestHeaders; }
+    public HttpRequestHeaders DefaultRequestHeaders => Client.DefaultRequestHeaders;
     public RetryPolicy?       Retries               { get;                   set; }
     public TimeSpan           Timeout               { get => Client.Timeout; set => Client.Timeout = value; }
 

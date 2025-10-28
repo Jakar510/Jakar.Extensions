@@ -9,7 +9,7 @@ public struct WhereClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder build
 
     public TNext Exists()
     {
-        __builder.Add( EXISTS );
+        __builder.Add(EXISTS);
         return __next;
     }
 
@@ -29,52 +29,53 @@ public struct WhereClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder build
 
     public WhereClauseBuilder<TNext> Between( string columnName )
     {
-        __builder.Add( BETWEEN, columnName );
+        __builder.Add(BETWEEN, columnName);
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> And()
     {
-        __builder.Add( AND );
+        __builder.Add(AND);
         return this;
     }
     public WhereClauseBuilder<TNext> Or()
     {
-        __builder.Add( OR );
+        __builder.Add(OR);
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> IsNull( string columnName )
     {
-        __builder.Add( IS, NULL, columnName );
+        __builder.Add(IS, NULL, columnName);
         return this;
     }
     public WhereClauseBuilder<TNext> IsNotNull( string columnName )
     {
-        __builder.Add( IS, NOT, NULL, columnName );
+        __builder.Add(IS, NOT, NULL, columnName);
         return this;
     }
 
 
     public WhereClauseBuilder<TNext> Like( string pattern )
     {
-        __builder.Add( LIKE, pattern );
+        __builder.Add(LIKE, pattern);
         return this;
     }
 
 
     public WhereInChainBuilder<TNext> In( string columnName )
     {
-        __builder.Add( columnName, IN );
-        return new WhereInChainBuilder<TNext>( this, ref __builder );
+        __builder.Add(columnName, IN);
+        return new WhereInChainBuilder<TNext>(this, ref __builder);
     }
     public WhereInChainBuilder<TNext> NotIn( string columnName )
     {
-        __builder.Add( columnName, NOT, IN ).Begin();
+        __builder.Add(columnName, NOT, IN)
+                 .Begin();
 
-        return new WhereInChainBuilder<TNext>( this, ref __builder );
+        return new WhereInChainBuilder<TNext>(this, ref __builder);
     }
 
 

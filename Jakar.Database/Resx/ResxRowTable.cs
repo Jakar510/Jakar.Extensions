@@ -26,10 +26,9 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>(in ID, in DateCreated, in LastModified), ITableRecord<ResxRowRecord>
 {
     public const  string                        TABLE_NAME = "resx";
-    public static string                        TableName     => TABLE_NAME;
+    public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<ResxRowRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.ResxRowRecord;
-    public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<ResxRowRecord>.Default.WithColumn<string>(nameof(KeyID), length: NAME)
@@ -50,6 +49,8 @@ public sealed record ResxRowRecord( long                    KeyID,
                                                                                                               .WithColumn<string>(nameof(Swedish),    length: MAX_SIZE)
                                                                                                               .WithColumn<string>(nameof(Thai),       length: MAX_SIZE)
                                                                                                               .Build();
+
+    public static string TableName => TABLE_NAME;
 
 
     public ResxRowRecord( string key, long keyID ) : this(key, keyID, EMPTY) { }
@@ -107,41 +108,39 @@ public sealed record ResxRowRecord( long                    KeyID,
              RecordID<ResxRowRecord>.New(),
              DateTimeOffset.UtcNow) { }
 
-    public static MigrationRecord CreateTable( ulong migrationID )
-    {
-        return MigrationRecord.Create<ResxRowRecord>(migrationID,
-                                                     $"create {TABLE_NAME} table",
-                                                     $"""
-                                                      CREATE TABLE {TABLE_NAME}
-                                                      (
-                                                      {nameof(ID).SqlColumnName()}           uuid            PRIMARY KEY,
-                                                      {nameof(KeyID).SqlColumnName()}        bigint          NOT NULL,
-                                                      {nameof(Key).SqlColumnName()}          varchar({NAME}) NOT NULL,
-                                                      {nameof(Neutral).SqlColumnName()}      text            NOT NULL,
-                                                      {nameof(English).SqlColumnName()}      text            NOT NULL,
-                                                      {nameof(Spanish).SqlColumnName()}      text            NOT NULL,
-                                                      {nameof(French).SqlColumnName()}       text            NOT NULL,
-                                                      {nameof(Swedish).SqlColumnName()}      text            NOT NULL,
-                                                      {nameof(German).SqlColumnName()}       text            NOT NULL,
-                                                      {nameof(Chinese).SqlColumnName()}      text            NOT NULL,
-                                                      {nameof(Polish).SqlColumnName()}       text            NOT NULL,
-                                                      {nameof(Thai).SqlColumnName()}         text            NOT NULL,
-                                                      {nameof(Japanese).SqlColumnName()}     text            NOT NULL,
-                                                      {nameof(Czech).SqlColumnName()}        text            NOT NULL,
-                                                      {nameof(Portuguese).SqlColumnName()}   text            NOT NULL,
-                                                      {nameof(Dutch).SqlColumnName()}        text            NOT NULL,
-                                                      {nameof(Korean).SqlColumnName()}       text            NOT NULL,
-                                                      {nameof(Arabic).SqlColumnName()}       text            NOT NULL,
-                                                      {nameof(DateCreated).SqlColumnName()}  timestamptz     NOT NULL DEFAULT SYSUTCDATETIME(),
-                                                      {nameof(LastModified).SqlColumnName()} timestamptz                 
-                                                      );
+    public static MigrationRecord CreateTable( ulong migrationID ) =>
+        MigrationRecord.Create<ResxRowRecord>(migrationID,
+                                              $"create {TABLE_NAME} table",
+                                              $"""
+                                               CREATE TABLE {TABLE_NAME}
+                                               (
+                                               {nameof(ID).SqlColumnName()}           uuid            PRIMARY KEY,
+                                               {nameof(KeyID).SqlColumnName()}        bigint          NOT NULL,
+                                               {nameof(Key).SqlColumnName()}          varchar({NAME}) NOT NULL,
+                                               {nameof(Neutral).SqlColumnName()}      text            NOT NULL,
+                                               {nameof(English).SqlColumnName()}      text            NOT NULL,
+                                               {nameof(Spanish).SqlColumnName()}      text            NOT NULL,
+                                               {nameof(French).SqlColumnName()}       text            NOT NULL,
+                                               {nameof(Swedish).SqlColumnName()}      text            NOT NULL,
+                                               {nameof(German).SqlColumnName()}       text            NOT NULL,
+                                               {nameof(Chinese).SqlColumnName()}      text            NOT NULL,
+                                               {nameof(Polish).SqlColumnName()}       text            NOT NULL,
+                                               {nameof(Thai).SqlColumnName()}         text            NOT NULL,
+                                               {nameof(Japanese).SqlColumnName()}     text            NOT NULL,
+                                               {nameof(Czech).SqlColumnName()}        text            NOT NULL,
+                                               {nameof(Portuguese).SqlColumnName()}   text            NOT NULL,
+                                               {nameof(Dutch).SqlColumnName()}        text            NOT NULL,
+                                               {nameof(Korean).SqlColumnName()}       text            NOT NULL,
+                                               {nameof(Arabic).SqlColumnName()}       text            NOT NULL,
+                                               {nameof(DateCreated).SqlColumnName()}  timestamptz     NOT NULL DEFAULT SYSUTCDATETIME(),
+                                               {nameof(LastModified).SqlColumnName()} timestamptz                 
+                                               );
 
-                                                      CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON {TABLE_NAME}
-                                                      FOR EACH ROW
-                                                      EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
-                                                      """);
-    }
+                                               CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                               BEFORE INSERT OR UPDATE ON {TABLE_NAME}
+                                               FOR EACH ROW
+                                               EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                               """);
     [Pure] public static ResxRowRecord Create( DbDataReader reader )
     {
         long                    keyID        = reader.GetFieldValue<long>(nameof(KeyID));

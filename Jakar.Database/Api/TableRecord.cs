@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
-using Jakar.Database.Resx;
-
-
-
 namespace Jakar.Database;
 
 
@@ -82,10 +78,10 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
 
     protected TableRecord( ref readonly RecordID<TSelf> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
     {
-        this.DateCreated    = dateCreated;
-        _lastModified       = lastModified;
-        __id                = id;
-        this.AdditionalData = additionalData;
+        DateCreated    = dateCreated;
+        _lastModified  = lastModified;
+        __id           = id;
+        AdditionalData = additionalData;
     }
 
 
@@ -135,10 +131,10 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
 
     public void Deconstruct( out RecordID<TSelf> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
     {
-        additionalData = this.AdditionalData;
-        id             = this.ID;
-        dateCreated    = this.DateCreated;
-        lastModified   = this.LastModified;
+        additionalData = AdditionalData;
+        id             = ID;
+        dateCreated    = DateCreated;
+        lastModified   = LastModified;
     }
 
 
@@ -160,7 +156,7 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
     public RecordID<UserRecord>? CreatedBy { get; set; }
 
 
-    protected OwnedTableRecord( ref readonly RecordID<UserRecord>? createdBy, ref readonly RecordID<TSelf> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null ) : base(in id, in dateCreated, in lastModified, additionalData) { this.CreatedBy = createdBy; }
+    protected OwnedTableRecord( ref readonly RecordID<UserRecord>? createdBy, ref readonly RecordID<TSelf> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null ) : base(in id, in dateCreated, in lastModified, additionalData) => CreatedBy = createdBy;
 
 
     public static PostgresParameters GetDynamicParameters( UserRecord user )
@@ -204,10 +200,10 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
     }
     public void Deconstruct( out RecordID<UserRecord>? createdBy, out RecordID<TSelf> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
     {
-        createdBy      = this.CreatedBy;
-        id             = this.ID;
-        dateCreated    = this.DateCreated;
-        lastModified   = this.LastModified;
-        additionalData = this.AdditionalData;
+        createdBy      = CreatedBy;
+        id             = ID;
+        dateCreated    = DateCreated;
+        lastModified   = LastModified;
+        additionalData = AdditionalData;
     }
 }

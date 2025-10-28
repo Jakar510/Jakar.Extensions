@@ -32,9 +32,9 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
     public readonly        Errors?       Error = error;
 
 
-    [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors { get => Error?.IsValid is true; }
-    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  { get => Value is not null; }
-    [MemberNotNullWhen(true, nameof(Value))] public bool Passed    { get => Value is true; }
+    [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true;
+    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Value is not null;
+    [MemberNotNullWhen(true, nameof(Value))] public bool Passed    => Value is true;
 
 
     public static ErrorOrResult Create( bool   value )  => new(value, Errors.Empty);

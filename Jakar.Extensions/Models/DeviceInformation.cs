@@ -67,12 +67,12 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
     protected DevicePlatform    _platform = DevicePlatform.Unknown;
     protected DeviceTypes       _type;
     protected LogEventProperty? _property;
+    protected string            _deviceID = EMPTY;
     protected string?           _deviceName;
+    protected string?           _ip;
     protected string?           _manufacturer;
     protected string?           _model;
     protected string?           _osVersion;
-    protected string            _deviceID = EMPTY;
-    protected string?           _ip;
     protected string?           _packageName;
     protected string?           _version;
 
@@ -131,7 +131,7 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
                                                                   Enricher.GetProperty(PackageName,  nameof(PackageName)),
                                                                   Enricher.GetProperty(Platform,     nameof(Platform)),
                                                                   Enricher.GetProperty(Type,         nameof(Type)),
-                                                                  Enricher.GetProperty(Version,      nameof(Version)),
+                                                                  Enricher.GetProperty(Version,      nameof(Version))
                                                               ]));
     public void Enrich( LogEvent log, ILogEventPropertyFactory propertyFactory ) => log.AddPropertyIfAbsent(ToProperty());
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/29/2023  1:49 PM
 
-using System.IO.Pipelines;
 using Jakar.Extensions.UserGuid;
 using Jakar.Extensions.UserLong;
 
@@ -394,7 +393,7 @@ public static class Json
     {
         if ( value is null ) { return null; }
 
-        var x = value.Value;
+        DateOnly x = value.Value;
         return x.ToJsonNode(options);
     }
 
@@ -404,7 +403,7 @@ public static class Json
     {
         if ( value is null ) { return null; }
 
-        var x = value.Value;
+        TimeOnly x = value.Value;
         return x.ToJsonNode(options);
     }
     public static JsonValue ToJsonNode( this decimal value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);

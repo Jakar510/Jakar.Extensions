@@ -14,6 +14,7 @@ try
 #pragma warning restore OpenTelemetry // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     */
 
+    await TestDatabase.TestAsync();
 
     // Tests.Test_Hashes();
 

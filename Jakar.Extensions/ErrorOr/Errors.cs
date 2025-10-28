@@ -20,15 +20,15 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
                                               Alert   = null,
                                               Details = __details
                                           };
+    public static JsonTypeInfo<Errors[]> JsonArrayInfo => JakarExtensionsContext.Default.ErrorsArray;
 
 
-    public static                  JsonSerializerContext  JsonContext   => JakarExtensionsContext.Default;
-    public static                  JsonTypeInfo<Errors>   JsonTypeInfo  => JakarExtensionsContext.Default.Errors;
-    public static                  JsonTypeInfo<Errors[]> JsonArrayInfo => JakarExtensionsContext.Default.ErrorsArray;
-    [JsonRequired] public required Alert?                 Alert         { get; init; }
-    public                         string                 Description   => Details.GetMessage();
-    [JsonRequired] public required Error[]                Details       { get; init; }
-    public                         bool                   IsValid       => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
+    public static                  JsonSerializerContext JsonContext  => JakarExtensionsContext.Default;
+    public static                  JsonTypeInfo<Errors>  JsonTypeInfo => JakarExtensionsContext.Default.Errors;
+    [JsonRequired] public required Alert?                Alert        { get; init; }
+    public                         string                Description  => Details.GetMessage();
+    [JsonRequired] public required Error[]               Details      { get; init; }
+    public                         bool                  IsValid      => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
 
 
     public static Errors Create( params Error[]? details ) => Create(null,                                     details);
@@ -60,7 +60,7 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
     {
         if ( other is null ) { return false; }
 
-        return ReferenceEquals(this, other) || ( Nullable.Equals(Alert, other.Alert) && Error.Equals(Details, other.Details) );
+        return ReferenceEquals(this, other) || ( Equals(Alert, other.Alert) && Error.Equals(Details, other.Details) );
     }
     public override int  CompareTo( Errors? other )                 => string.CompareOrdinal(Description, other?.Description);
     public override bool Equals( object?    obj )                   => ReferenceEquals(this, obj) || ( obj is Errors other && Equals(other) );

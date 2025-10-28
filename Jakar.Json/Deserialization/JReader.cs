@@ -16,7 +16,7 @@ public ref struct JReader
 
     public JReader( in ReadOnlyMemory<char> json )
     {
-        if ( json.IsEmpty ) { throw new ArgumentNullException( nameof(json) ); }
+        if ( json.IsEmpty ) { throw new ArgumentNullException(nameof(json)); }
 
         __span = __json = json.Trim();
     }

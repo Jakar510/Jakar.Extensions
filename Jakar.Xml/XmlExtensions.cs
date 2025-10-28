@@ -114,9 +114,11 @@ public static class XmlExtensions
         return builder.ToString();
     }
     public static string SetMappedIDs<TValue>( this IEnumerable<IEnumerable<TValue>> items )
-        where TValue : IUniqueID<long> => items.Consolidate().SetMappedIDs();
+        where TValue : IUniqueID<long> => items.Consolidate()
+                                               .SetMappedIDs();
     public static string SetMappedIDs<TValue>( this IEnumerable<TValue> items )
-        where TValue : IUniqueID<long> => items.Select(item => item.ID).SetMappedIDs<TValue>();
+        where TValue : IUniqueID<long> => items.Select(item => item.ID)
+                                               .SetMappedIDs<TValue>();
 
     public static string SetMappedIDs<TValue>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml(new Dictionary<string, string> { [Constants.GROUP] = typeof(TValue).GetTableName() });
 

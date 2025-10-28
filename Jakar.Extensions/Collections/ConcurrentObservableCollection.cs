@@ -17,9 +17,9 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
     private static JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                                  __jsonContext;
     private static JsonTypeInfo<ConcurrentObservableCollection<TValue>>?   __jsonTypeInfo;
+    public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
     public static  JsonSerializerContext                                   JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ConcurrentObservableCollection() : base() { }
@@ -51,7 +51,7 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
 
 
     public override int  GetHashCode()                                                                                              => RuntimeHelpers.GetHashCode(this);
-    public override bool Equals( object?                                      other )                                               => ReferenceEquals(this, other) || other is ConcurrentObservableCollection<TValue> x && Equals(x);
+    public override bool Equals( object?                                      other )                                               => ReferenceEquals(this, other) || ( other is ConcurrentObservableCollection<TValue> x && Equals(x) );
     public static   bool operator ==( ConcurrentObservableCollection<TValue>? left, ConcurrentObservableCollection<TValue>? right ) => EqualityComparer<ConcurrentObservableCollection<TValue>>.Default.Equals(left, right);
     public static   bool operator !=( ConcurrentObservableCollection<TValue>? left, ConcurrentObservableCollection<TValue>? right ) => !EqualityComparer<ConcurrentObservableCollection<TValue>>.Default.Equals(left, right);
     public static   bool operator >( ConcurrentObservableCollection<TValue>   left, ConcurrentObservableCollection<TValue>  right ) => Comparer<ConcurrentObservableCollection<TValue>>.Default.Compare(left, right) > 0;
@@ -70,14 +70,14 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     protected internal readonly Lock locker = new();
 
 
-    public AsyncLockerEnumerator<TValue, LockCloser> AsyncValues    { get => new(this); }
-    bool ICollection.                                IsSynchronized { get => true; }
+    public AsyncLockerEnumerator<TValue, LockCloser> AsyncValues    => new(this);
+    bool ICollection.                                IsSynchronized => true;
     public Lock                                      Lock           { get => locker; init => locker = value; }
 
 #pragma warning disable CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
-    object ICollection.SyncRoot { get => locker; }
+    object ICollection.SyncRoot => locker;
 #pragma warning restore CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
-    public LockerEnumerator<TValue, LockCloser> Values { get => new(this); }
+    public LockerEnumerator<TValue, LockCloser> Values => new(this);
 
 
     protected ConcurrentObservableCollection() : base() { }

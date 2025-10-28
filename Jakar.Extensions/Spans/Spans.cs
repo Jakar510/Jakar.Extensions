@@ -40,7 +40,7 @@ public static partial class Spans
         }
 
         // Cast char span to ushort span so numeric SIMD operations work on 16-bit lanes.
-        ReadOnlySpan<ushort> uSpan    = MemoryMarshal.Cast<char, ushort>(span);
+        ReadOnlySpan<ushort> uSpan     = MemoryMarshal.Cast<char, ushort>(span);
         int                  simdCount = Vector<ushort>.Count;
 
         // Pre-built vectors for comparisons
@@ -53,7 +53,7 @@ public static partial class Spans
         Vector<ushort> vAsciiMax     = new(127);
         ref ushort     baseRef       = ref MemoryMarshal.GetReference(uSpan);
         int            i             = 0;
-        int            lastSimdStart = length - ( simdCount );
+        int            lastSimdStart = length - simdCount;
 
         // SIMD loop
         for ( ; i <= lastSimdStart; i += simdCount )

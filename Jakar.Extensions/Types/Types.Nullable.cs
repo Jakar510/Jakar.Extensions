@@ -18,7 +18,7 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "NullableWarningSuppressionIsUsed")]
 public static partial class Types
 {
-    public static readonly Type   NullableType     = typeof(Nullable<>);
+    public static readonly Type NullableType = typeof(Nullable<>);
 
 
     public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper(property.DeclaringType, property.CustomAttributes);
@@ -38,7 +38,7 @@ public static partial class Types
 
             if ( attributeArgument.ArgumentType == typeof(byte[]) )
             {
-                var args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
+                ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
                 if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
             }
             else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }

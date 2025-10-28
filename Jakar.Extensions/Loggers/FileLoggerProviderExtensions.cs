@@ -4,7 +4,6 @@
 namespace Jakar.Extensions;
 
 
-
 /*
 public static class FileLoggerProviderExtensions
 {

@@ -28,11 +28,11 @@ public static class Jsonizer
 
     public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented )
     {
-        JWriter writer = new( value.JsonSize(), formatting );
+        JWriter writer = new(value.JsonSize(), formatting);
 
         try
         {
-            value.Serialize( ref writer );
+            value.Serialize(ref writer);
             string result = writer.ToString();
             return result;
         }

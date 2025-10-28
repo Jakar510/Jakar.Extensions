@@ -8,6 +8,14 @@ using System.Buffers.Text;
 namespace Jakar.Extensions;
 
 
+[InlineArray(16)]
+public struct GuidBytes
+{
+    private byte __value;
+}
+
+
+
 public static class Guids
 {
     public static bool TryAsGuid( in this Span<char> value, [NotNullWhen(true)] out Guid? result )
@@ -85,12 +93,12 @@ public static class Guids
 
     public static string NewBase64()
     {
-        var id = Guid.CreateVersion7(DateTimeOffset.UtcNow);
+        Guid id = Guid.CreateVersion7(DateTimeOffset.UtcNow);
         return NewBase64(in id);
     }
     public static string NewBase64( in this DateTimeOffset timeStamp )
     {
-        var id = Guid.CreateVersion7(timeStamp);
+        Guid id = Guid.CreateVersion7(timeStamp);
         return NewBase64(in id);
     }
     public static string NewBase64( in this DateTimeOffset? timeStamp )
@@ -128,7 +136,9 @@ public static class Guids
     }
 
 
-    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
+    /// <summary>
+    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
+    /// </summary>
     public static bool AsSpan( in this Guid value, scoped ref Span<char> result, out int bytesWritten )
     {
         Guard.IsGreaterThanOrEqualTo(result.Length, 22);

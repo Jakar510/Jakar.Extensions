@@ -20,8 +20,8 @@ public interface IWidget : IWidget<LoginUserState, ModelErrorState>, IModelState
 
 public abstract class Widget : ComponentBase, IWidget
 {
-    [CascadingParameter( Name = ModelErrorState.KEY )] public required ModelErrorState State { get; set; }
-    [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
+    [CascadingParameter(Name = ModelErrorState.KEY)] public required ModelErrorState State { get; set; }
+    [CascadingParameter(Name = LoginUserState.KEY)]  public required LoginUserState  User  { get; set; }
 
     // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
 }

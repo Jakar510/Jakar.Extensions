@@ -34,15 +34,15 @@ public interface IModelErrorState : ICascadingValueName, INotifyPropertyChanged
 [Serializable]
 public class ModelErrorState : BaseClass<ModelErrorState>, IModelErrorState, IJsonModel<ModelErrorState>
 {
-    public const string               KEY     = nameof(ModelErrorState);
-    private      ModelStateDictionary __state = new();
-    private      string?              __errorText;
-
-
-    public static JsonSerializerContext           JsonContext   { get; }
-    public static JsonTypeInfo<ModelErrorState>   JsonTypeInfo  { get; }
-    public static JsonTypeInfo<ModelErrorState[]> JsonArrayInfo { get; }
+    public const  string                          KEY     = nameof(ModelErrorState);
+    private       ModelStateDictionary            __state = new();
+    private       string?                         __errorText;
     public static string                          CascadingName => KEY;
+    public static JsonTypeInfo<ModelErrorState[]> JsonArrayInfo { get; }
+
+
+    public static JsonSerializerContext         JsonContext  { get; }
+    public static JsonTypeInfo<ModelErrorState> JsonTypeInfo { get; }
     public virtual string? ErrorText
     {
         get => __errorText;

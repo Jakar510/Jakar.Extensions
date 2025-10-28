@@ -87,7 +87,12 @@ public partial class DbTable<TSelf>
 
 
     public virtual async ValueTask<ErrorOrResult<TSelf>> Get<T>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string columnName, T? value, CancellationToken token = default ) =>
-        await Get(connection, transaction, true, PostgresParameters.Create<TSelf>().Add(columnName, value), token);
+        await Get(connection,
+                  transaction,
+                  true,
+                  PostgresParameters.Create<TSelf>()
+                                    .Add(columnName, value),
+                  token);
 
 
     public virtual async ValueTask<ErrorOrResult<TSelf>> Get( NpgsqlConnection connection, NpgsqlTransaction? transaction, bool matchAll, PostgresParameters parameters, CancellationToken token = default )

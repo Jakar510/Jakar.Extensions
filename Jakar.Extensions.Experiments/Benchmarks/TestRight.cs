@@ -274,5 +274,5 @@ public enum TestRight
     Network_CapturePackets,
     Network_ClearCache,
     Network_ViewDNSCache,
-    Network_FlushDNSCache,
+    Network_FlushDNSCache
 }

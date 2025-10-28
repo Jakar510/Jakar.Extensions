@@ -44,5 +44,5 @@ public class RecordCollection<TSelf>( int capacity = DEFAULT_CAPACITY ) : IReadO
 
 
     public IEnumerator<TSelf> GetEnumerator() => __records.GetEnumerator();
-    IEnumerator IEnumerable.   GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.  GetEnumerator() => GetEnumerator();
 }

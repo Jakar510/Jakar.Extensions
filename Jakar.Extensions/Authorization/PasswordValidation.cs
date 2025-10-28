@@ -2,10 +2,6 @@
 // 09/07/2022  3:56 PM
 
 
-using System.Formats.Asn1;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -134,7 +130,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
     public readonly                 bool                 RequireSpecialChar       = requireSpecialChar;
     public readonly                 bool                 CantStartWithSpecialChar = cantStartWithSpecialChar;
     public readonly                 ReadOnlySpan<char>   SpecialChars             = specialChars;
-    public static                   Requirements         Default                 { get => Create(PasswordRequirements.Current); }
+    public static                   Requirements         Default                 => Create(PasswordRequirements.Current);
     public static implicit operator Requirements( PasswordRequirements options ) => Create(options);
 
     public static Requirements Create( PasswordRequirements data ) => new(data.BlockedPasswords,
