@@ -26,6 +26,10 @@ public static partial class Spans
     [Pure] public static Span<byte>           AsSpan( this           MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
 
 
+    /// <summary> USE WITH CAUTION </summary>
+    [Pure] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
+
+
     [Pure] public static bool TryAsSegment<TValue>( this ReadOnlyMemory<TValue> value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
     [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
 
