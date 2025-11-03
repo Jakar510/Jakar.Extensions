@@ -16,10 +16,9 @@ public static class Languages
     private static TValue SelectSelf<TValue>( TValue v ) => v;
 
 
-    public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo defaultValue ) =>
-        language is SupportedLanguage.Unspecified || !All.Contains(language)
-            ? defaultValue
-            : new CultureInfo(language.GetShortName());
+    public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo defaultValue ) => language is SupportedLanguage.Unspecified || !All.Contains(language)
+                                                                                                                 ? defaultValue
+                                                                                                                 : new CultureInfo(language.GetShortName());
 
 
     public static string GetName( this SupportedLanguage language ) => language switch
@@ -84,10 +83,10 @@ public static class Languages
     public static string? ToStringFast( this SupportedLanguage? language ) => language?.ToStringFast();
 
 
-    public static SupportedLanguage? GetSupportedLanguage( this CultureInfo culture )
+    public static SupportedLanguage GetSupportedLanguage( this CultureInfo culture )
     {
         string name = culture.DisplayName;
-        if ( string.IsNullOrEmpty(name) ) { return null; }
+        if ( string.IsNullOrEmpty(name) ) { return SupportedLanguage.Unspecified; }
 
         foreach ( ( string key, SupportedLanguage value ) in Values )
         {
@@ -104,14 +103,14 @@ public static class Languages
             if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        return null;
+        return SupportedLanguage.Unspecified;
     }
-    public static SupportedLanguage? GetSupportedLanguage( this IFormatProvider culture )
+    public static SupportedLanguage GetSupportedLanguage( this IFormatProvider culture )
     {
         if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
 
         string? name = culture.ToString();
-        if ( string.IsNullOrEmpty(name) ) { return null; }
+        if ( string.IsNullOrEmpty(name) ) { return SupportedLanguage.Unspecified; }
 
         foreach ( ( string key, SupportedLanguage value ) in Values )
         {
@@ -128,6 +127,6 @@ public static class Languages
             if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        return null;
+        return SupportedLanguage.Unspecified;
     }
 }
