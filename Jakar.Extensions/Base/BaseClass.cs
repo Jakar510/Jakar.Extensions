@@ -6,6 +6,8 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
     protected internal readonly WeakEventManager _eventManager = new();
     protected                   JsonObject?      _additionalData;
+    protected                   bool             _disposed;
+
 
     [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
@@ -14,13 +16,15 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
     public event PropertyChangingEventHandler? PropertyChanging { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
 
 
-    protected virtual void Dispose( bool disposing ) { }
+    protected virtual void Dispose( bool disposing ) => _disposed |= disposing;
     public void Dispose()
     {
         _eventManager.Dispose();
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+    ~BaseClass() => Dispose(false);
+    [StackTraceHidden] protected void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(_disposed, this);
 
 
     [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());

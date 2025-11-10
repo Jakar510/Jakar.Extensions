@@ -54,9 +54,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public LocalFile( string         path, Encoding?                   encoding = null ) : this(new FileInfo(path), encoding) { }
 
 
-    protected override void Dispose( bool remove )
+    protected override void Dispose( bool disposing )
     {
-        if ( remove && this.IsTempFile() && Exists ) { Delete(); }
+        base.Dispose(disposing);
+        if ( disposing && this.IsTempFile() && Exists ) { Delete(); }
     }
 
 

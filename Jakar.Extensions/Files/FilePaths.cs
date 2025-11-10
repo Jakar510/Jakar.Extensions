@@ -60,6 +60,7 @@ public class FilePaths : BaseClass, IDisposable
 
     protected override void Dispose( bool disposing )
     {
+        base.Dispose(disposing);
         if ( !disposing ) { return; }
 
         Disposables.ClearAndDispose(ref _accountsFile);

@@ -44,6 +44,7 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     
     protected override void Dispose( bool disposing )
     {
+        base.Dispose(disposing);
         if ( !disposing ) { return; } 
 
         DisposeAsync()
