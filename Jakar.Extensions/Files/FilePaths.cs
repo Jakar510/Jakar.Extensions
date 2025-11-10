@@ -58,7 +58,7 @@ public class FilePaths : BaseClass, IDisposable
     }
 
 
-    protected virtual void Dispose( bool disposing )
+    protected override void Dispose( bool disposing )
     {
         if ( !disposing ) { return; }
 
@@ -84,12 +84,7 @@ public class FilePaths : BaseClass, IDisposable
 
         _additionalFiles.Clear();
         _additionalFiles = null;
-    }
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    } 
 
 
     public void ClearCache()

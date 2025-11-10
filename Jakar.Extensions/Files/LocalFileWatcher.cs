@@ -10,9 +10,8 @@ namespace Jakar.Extensions;
 [NotSerializable]
 public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>, IEqualComparable<LocalFileWatcher>
 {
-    private readonly WeakEventManager   __eventManager = new();
-    private          FileSystemWatcher? __watcher;
-    private          LocalDirectory?    __directory;
+    private FileSystemWatcher? __watcher;
+    private LocalDirectory?    __directory;
 
 
     public static JsonTypeInfo<LocalFileWatcher[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
@@ -64,11 +63,11 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     public string        SearchFilter { get; set; } = "*";
 
 
-    public event ErrorEventHandler?      Error   { add => __eventManager.AddEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); remove => __eventManager.RemoveEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Changed { add => __eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => __eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Created { add => __eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => __eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Deleted { add => __eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => __eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event RenamedEventHandler?    Renamed { add => __eventManager.AddEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); remove => __eventManager.RemoveEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); }
+    public event ErrorEventHandler?      Error   { add => _eventManager.AddEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); }
+    public event FileSystemEventHandler? Changed { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
+    public event FileSystemEventHandler? Created { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
+    public event FileSystemEventHandler? Deleted { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
+    public event RenamedEventHandler?    Renamed { add => _eventManager.AddEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); }
 
 
     public LocalFileWatcher() { }
@@ -76,11 +75,10 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     public LocalFileWatcher( params ReadOnlySpan<LocalFile> files ) : this() { Add(files); }
     public LocalFileWatcher( LocalDirectory?                directory ) : base() => Directory = directory;
 
-
-    public override void Dispose()
+    protected override void Dispose( bool disposing )
     {
-        Directory = null;
-        base.Dispose();
+        base.Dispose(disposing);
+        if ( disposing ) { Directory = null; }
     }
 
 
@@ -88,26 +86,26 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     {
         LocalFile file = new(e.FullPath);
         AddOrUpdate(file);
-        __eventManager.RaiseEvent(e, nameof(Changed));
+        _eventManager.RaiseEvent(this, e, nameof(Changed));
     }
     private void OnCreated( object sender, FileSystemEventArgs e )
     {
         Add(e.FullPath);
-        __eventManager.RaiseEvent(e, nameof(Created));
+        _eventManager.RaiseEvent(this, e, nameof(Created));
     }
     private void OnDeleted( object sender, FileSystemEventArgs e )
     {
         Remove(e.FullPath);
-        __eventManager.RaiseEvent(e, nameof(Deleted));
+        _eventManager.RaiseEvent(this, e, nameof(Deleted));
     }
-    private void OnError( object sender, ErrorEventArgs e ) => __eventManager.RaiseEvent(e, nameof(Error));
+    private void OnError( object sender, ErrorEventArgs e ) => _eventManager.RaiseEvent(this, e, nameof(Error));
     private void OnRenamed( object sender, RenamedEventArgs e )
     {
         LocalFile? file = this.FirstOrDefault(x => x.FullPath == e.OldFullPath);
         if ( file is not null ) { Remove(file); }
 
         Add(e.FullPath);
-        __eventManager.RaiseEvent(e, nameof(Renamed));
+        _eventManager.RaiseEvent(this, e, nameof(Renamed));
     }
 
 

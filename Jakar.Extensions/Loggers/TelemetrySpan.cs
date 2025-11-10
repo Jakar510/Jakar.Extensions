@@ -65,9 +65,9 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
                                                                            : new ActivityLink(__activity.Context, tags);
 
 
-    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, __activity);
-    [Pure] [MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
-    [Pure] [MustDisposeResource] public static TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
+    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( string                           name )                                           => new(name, __activity);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName] string         name                                   = EMPTY ) => new(name, Activity.Current);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( ref readonly       TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
 
 
     public TelemetrySpan AddTag( string key, string? value )
@@ -136,7 +136,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 
     public async ValueTask WaitForNextTickAsync( PeriodicTimer timer, CancellationToken token )
     {
-        using TelemetrySpan telemetrySpan = SubSpan();
+        using TelemetrySpan telemetrySpan = Create();
 
         await timer.WaitForNextTickAsync(token)
                    .ConfigureAwait(false);
@@ -145,7 +145,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     public ValueTask Delay( long   ms,      CancellationToken token = default ) => Delay(TimeSpan.FromMilliseconds(ms), token);
     public async ValueTask Delay( TimeSpan delay, CancellationToken token = default )
     {
-        using TelemetrySpan telemetrySpan = SubSpan();
+        using TelemetrySpan telemetrySpan = Create();
 
         await Task.Delay(delay, token)
                   .ConfigureAwait(false);

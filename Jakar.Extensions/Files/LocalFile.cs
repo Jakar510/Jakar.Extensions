@@ -52,14 +52,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public LocalFile( DirectoryInfo  path, string                      fileName, Encoding?                   encoding = null ) : this(path.Combine(fileName), encoding) { }
     public LocalFile( string         path, string                      fileName, Encoding?                   encoding = null ) : this(new DirectoryInfo(path), fileName, encoding) { }
     public LocalFile( string         path, Encoding?                   encoding = null ) : this(new FileInfo(path), encoding) { }
-    public void Dispose()
+
+
+    protected override void Dispose( bool remove )
     {
-        Dispose(this.IsTempFile());
-        GC.SuppressFinalize(this);
-    }
-    protected virtual void Dispose( bool remove )
-    {
-        if ( remove && Exists ) { Delete(); }
+        if ( remove && this.IsTempFile() && Exists ) { Delete(); }
     }
 
 

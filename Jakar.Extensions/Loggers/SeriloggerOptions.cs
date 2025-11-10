@@ -83,13 +83,16 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
 
 
     public AppLoggerOptions() => Current = this;
-    public virtual void Dispose()
+
+    protected override void Dispose( bool disposing )
     {
+        base.Dispose(disposing);
+        if ( !disposing ) { return; }
+
         Disposables.ClearAndDispose(ref __appDataDirectory);
         Disposables.ClearAndDispose(ref __cacheDirectory);
         Disposables.ClearAndDispose(ref __seqBuffer);
         Disposables.ClearAndDispose(ref __paths);
-        GC.SuppressFinalize(this);
     }
     public virtual async ValueTask DisposeAsync()
     {

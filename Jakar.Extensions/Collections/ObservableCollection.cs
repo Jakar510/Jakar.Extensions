@@ -100,10 +100,10 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected ObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : this(comparer, new ReadOnlySpan<TValue>(values)) { }
     protected ObservableCollection( IEnumerable<TValue>                 values ) : this(values, Comparer<TValue>.Default) { }
     protected ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
-    public virtual void Dispose()
+    protected override void Dispose( bool disposing )
     {
-        buffer.Clear();
-        GC.SuppressFinalize(this);
+        base.Dispose(disposing);
+        if ( disposing ) { buffer.Clear(); }
     }
 
 
@@ -668,10 +668,10 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
+    [Pure] [MustDisposeResource] protected internal override ArrayBuffer<TValue> FilteredValues()
     {
         ReadOnlySpan<TValue>   span   = AsSpan();
-        FilterBuffer<TValue>   values = new(span.Length);
+        ArrayBuffer<TValue>    values = new(span.Length);
         FilterDelegate<TValue> filter = GetFilter();
 
         for ( int i = 0; i < span.Length; i++ )

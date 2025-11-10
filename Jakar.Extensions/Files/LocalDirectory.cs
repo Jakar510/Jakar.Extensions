@@ -41,10 +41,10 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
         FullPath = info.FullName;
     }
 
-
-    public void Dispose()
+    
+    protected override void Dispose( bool disposing )
     {
-        GC.SuppressFinalize(this);
+        if ( !disposing ) { return; } 
 
         DisposeAsync()
            .CallSynchronously();

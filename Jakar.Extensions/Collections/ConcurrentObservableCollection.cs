@@ -784,12 +784,12 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     IEnumerator IEnumerable.                             GetEnumerator()                               => GetEnumerator();
 
 
-    [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
+    [Pure] [MustDisposeResource] protected internal override ArrayBuffer<TValue> FilteredValues()
     {
         using ( AcquireLock() )
         {
             ReadOnlySpan<TValue>   span   = AsSpan();
-            FilterBuffer<TValue>   values = new(span.Length);
+            ArrayBuffer<TValue>   values = new(span.Length);
             FilterDelegate<TValue> filter = GetFilter();
 
             for ( int i = 0; i < span.Length; i++ )
@@ -839,15 +839,15 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     }
 
 
-    [Pure] [MustDisposeResource] protected internal FilterBuffer<TValue> Copy()
+    [Pure] [MustDisposeResource] protected internal ArrayBuffer<TValue> Copy()
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { return FilteredValues(); }
     }
-    [Pure] [MustDisposeResource] FilterBuffer<TValue> ILockedCollection<TValue, LockCloser>.Copy() => Copy();
-    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token)
+    [Pure] [MustDisposeResource] ArrayBuffer<TValue> ILockedCollection<TValue, LockCloser>.Copy() => Copy();
+    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token)
        .ConfigureAwait(false);
-    [Pure] [MustDisposeResource] protected async ValueTask<FilterBuffer<TValue>> CopyAsync( CancellationToken token )
+    [Pure] [MustDisposeResource] protected async ValueTask<ArrayBuffer<TValue>> CopyAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 

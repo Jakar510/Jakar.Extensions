@@ -244,14 +244,14 @@ public static class Circles
     }
 
 
-    [MustDisposeResource] public static FilterBuffer<ReadOnlyPoint> Intersections<TCircle, TLine>( this TCircle self, CalculatedLine curve, double xMin, double xMax, int samples = 1000, double tolerance = TOLERANCE )
+    [Pure] [MustDisposeResource] public static ArrayBuffer<ReadOnlyPoint> Intersections<TCircle, TLine>( this TCircle self, CalculatedLine curve, double xMin, double xMax, int samples = 1000, double tolerance = TOLERANCE )
         where TCircle : struct, ICircle<TCircle>
         where TLine : struct, ILine<TLine>
     {
-        ReadOnlyPoint               center        = self.Center;
-        double                      r2            = self.Radius * self.Radius;
-        FilterBuffer<ReadOnlyPoint> intersections = new(samples);
-        double                      step          = ( xMax - xMin ) / samples;
+        ReadOnlyPoint              center        = self.Center;
+        double                     r2            = self.Radius * self.Radius;
+        ArrayBuffer<ReadOnlyPoint> intersections = new(samples);
+        double                     step          = ( xMax - xMin ) / samples;
 
         double prevX = xMin;
         double prevD = helper(prevX, curve, center, r2);

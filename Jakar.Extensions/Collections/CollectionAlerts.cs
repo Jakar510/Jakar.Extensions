@@ -2,6 +2,7 @@
 // 04/12/2022  1:54 PM
 
 using ZLinq;
+using ZLinq.Linq;
 
 
 
@@ -12,7 +13,7 @@ public interface ICollectionAlerts : INotifyCollectionChanged, IObservableObject
 
 
 
-public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValueEnumerable<FilterBuffer<TValue>, TValue>, ICollectionAlerts;
+public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValueEnumerable<ArrayBuffer<TValue>, TValue>, ICollectionAlerts;
 
 
 
@@ -44,7 +45,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     public                    FilterDelegate<TValue>?          OverrideFilter { get; set; }
 
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged;
+    public event NotifyCollectionChangedEventHandler? CollectionChanged { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
 
 
     public override bool Equals( TSelf?    other ) => ReferenceEquals(this, other);
@@ -64,7 +65,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     protected      void OnCountChanged() => OnPropertyChanged(nameof(Count));
     protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
-        CollectionChanged?.Invoke(this, e);
+        _eventManager.RaiseEvent(this, e, nameof(CollectionChanged));
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }
     }
 
@@ -73,11 +74,13 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     protected virtual bool                   Filter( int index, ref readonly TValue? value ) => true;
 
 
-    [Pure] [MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
-    [Pure] [MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
+    [Pure] [MustDisposeResource] protected internal abstract ArrayBuffer<TValue>                          FilteredValues();
+    [Pure] [MustDisposeResource] public                      ValueEnumerable<ArrayBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
+
+
     public virtual IEnumerator<TValue> GetEnumerator()
     {
-        using FilterBuffer<TValue> owner = FilteredValues();
+        using ArrayBuffer<TValue> owner = FilteredValues();
         for ( int i = 0; i < owner.Length; i++ ) { yield return owner.Values[i]; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

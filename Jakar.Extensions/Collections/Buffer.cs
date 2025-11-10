@@ -206,14 +206,14 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         return default;
     }
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, _length - 1);
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, _length - 1);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, _length);
         Guard.IsInRange(endInclusive, 0, _length);
         Guard.IsGreaterThanOrEqualTo(endInclusive, start);
-        FilterBuffer<TValue> buffer = new(_length);
+        ArrayBuffer<TValue> buffer = new(_length);
         ReadOnlySpan<TValue> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )

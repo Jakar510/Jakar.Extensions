@@ -150,10 +150,10 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
 
 
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
-    protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
+    protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                        count  = buffer.Count;
-        FilterBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
+        ArrayBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
         FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
         int                                        index  = 0;
 

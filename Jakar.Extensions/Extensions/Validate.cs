@@ -7,6 +7,15 @@ public static partial class Validate
     private static volatile string __demo = "DEMO";
 
 
+    public static object? TryGetTarget( this WeakReference value ) => value.Target;
+    public static TValue? TryGetTarget<TValue>( this WeakReference value )
+        where TValue : class => value.Target as TValue;
+    public static TValue? TryGetTarget<TValue>( this WeakReference<TValue> value )
+        where TValue : class => value.TryGetTarget(out TValue? target)
+                                    ? target
+                                    : null;
+
+
     public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
     public static string FormatNumber( this float value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
 

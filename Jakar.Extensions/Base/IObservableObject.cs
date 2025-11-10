@@ -15,14 +15,7 @@ public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyCha
 
 
     bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value );
-    bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : EqualityComparer<TValue>;
-    bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY );
-    bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : EqualityComparer<TValue>;
-    bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TValue : IComparisonOperators<TValue, TValue, bool>
-        where TComparer : EqualityComparer<TValue>;
+    bool SetProperty<TValue>( ref              TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY );
 }
 
 
@@ -33,16 +26,6 @@ public static class ObservableObjects
     public static readonly ConcurrentDictionary<string, PropertyChangingEventArgs> PropertyChangingEventArgsCache = new(StringComparer.Ordinal);
 
 
-    public static PropertyChangedEventArgs GetPropertyChangedEventArgs( this string property )
-    {
-        if ( !PropertyChangedEventArgsCache.TryGetValue(property, out PropertyChangedEventArgs? args) ) { PropertyChangedEventArgsCache[property] = args = new PropertyChangedEventArgs(property); }
-
-        return args;
-    }
-    public static PropertyChangingEventArgs GetPropertyChangingEventArgs( this string property )
-    {
-        if ( !PropertyChangingEventArgsCache.TryGetValue(property, out PropertyChangingEventArgs? args) ) { PropertyChangingEventArgsCache[property] = args = new PropertyChangingEventArgs(property); }
-
-        return args;
-    }
+    public static PropertyChangedEventArgs  GetPropertyChangedEventArgs( this  string property ) => PropertyChangedEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangedEventArgs(x));
+    public static PropertyChangingEventArgs GetPropertyChangingEventArgs( this string property ) => PropertyChangingEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangingEventArgs(x));
 }

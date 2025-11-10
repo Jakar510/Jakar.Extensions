@@ -2,67 +2,69 @@
 
 
 [Serializable]
-public class BaseClass : IJsonModel, IObservableObject
+public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
-    protected JsonObject? _additionalData;
+    protected internal readonly WeakEventManager _eventManager = new();
+    protected                   JsonObject?      _additionalData;
 
     [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
-    public event PropertyChangedEventHandler?  PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
+    public event PropertyChangedEventHandler?  PropertyChanged  { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+    public event PropertyChangingEventHandler? PropertyChanging { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+
+
+    protected virtual void Dispose( bool disposing ) { }
+    public void Dispose()
+    {
+        _eventManager.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e )                => _eventManager.RaiseEvent(this, e, nameof(PropertyChanged));
+
+
+    public void OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
+    public void OnPropertyChanging( PropertyChangingEventArgs e )                => _eventManager.RaiseEvent(this, e, nameof(PropertyChanging));
 
 
 #pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
-
-
-    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
-    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
-
-
-    public void OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
-    public void OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
-
-
-    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref            TValue backingStore, TValue value )                                                                                                                         => SetPropertyWithoutNotify(ref backingStore, value);
-    bool IObservableObject.SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer                 comparer )                                                                                     => SetPropertyWithoutNotify(ref backingStore, value, comparer);
-    bool IObservableObject.SetProperty<TValue>( ref                         TValue backingStore, TValue value, [CallerMemberName] string propertyName                                                                         = EMPTY ) => SetProperty(ref backingStore, value, propertyName);
-    bool IObservableObject.SetProperty<TValue, TComparer>( ref              TValue backingStore, TValue value, TComparer                 comparer, [CallerMemberName] string propertyName                                     = EMPTY ) => SetProperty(ref backingStore, value, comparer,    propertyName);
-    bool IObservableObject.SetProperty<TValue, TComparer>( ref              TValue backingStore, TValue value, in TValue                 minValue, TComparer                 comparer, [CallerMemberName] string propertyName = EMPTY ) => SetProperty(ref backingStore, value, in minValue, comparer, propertyName);
+    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )                                                 => SetPropertyWithoutNotify(ref backingStore, value);
+    bool IObservableObject.SetProperty<TValue>( ref              TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY ) => SetProperty(ref backingStore, value, propertyName);
+#pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
 
     protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
     {
+        if ( EqualityComparer<TValue>.Default.Equals(backingStore, value) ) { return false; }
+
         backingStore = value;
         return true;
     }
-    protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : EqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
     protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
+        if ( EqualityComparer<TValue>.Default.Equals(backingStore, value) ) { return false; }
+
         OnPropertyChanging(propertyName);
         backingStore = value;
         OnPropertyChanged(propertyName);
 
         return true;
     }
-    protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : EqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
-    protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+    protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, in TValue minValue, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
-        where TComparer : EqualityComparer<TValue>
     {
         value = value < minValue
                     ? minValue
                     : value;
 
-        return SetProperty(ref backingStore, value, comparer, propertyName);
+        return SetProperty(ref backingStore, value, propertyName);
     }
-
-
-#pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
-#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 }
 
 

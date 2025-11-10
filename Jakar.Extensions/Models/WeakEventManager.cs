@@ -1,180 +1,218 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/03/2025  10:57
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
 /// <summary> Weak event manager that allows for garbage collection when the EventHandler is still subscribed </summary>
-/// <typeparam name="TEventArgs">Event args type.</typeparam>
-public sealed class WeakEventManager : BaseClass
+public sealed class WeakEventManager : IDisposable
 {
-    private readonly Dictionary<string, List<Subscription>> _eventHandlers = new();
-    private readonly Lock                                   __lock         = new();
+    private readonly ConcurrentDictionary<string, List<WeakReference<Delegate>>> _eventHandlers = new();
 
 
-    private List<Subscription> Subscriptions( string eventName )
+    private List<WeakReference<Delegate>> this[ string eventName ] => _eventHandlers.GetOrAdd(eventName, static x => new List<WeakReference<Delegate>>(16));
+    public void Dispose() => _eventHandlers.Clear();
+
+
+    private void Add_Subscription( in string eventName, Delegate? handler )
     {
         ArgumentNullException.ThrowIfNull(eventName);
+        if ( handler is null ) { return; }
 
-        return _eventHandlers.GetOrAdd<string, List<Subscription>>(eventName, CreateList);
-        static List<Subscription> CreateList( string x ) => [];
+        List<WeakReference<Delegate>> list = this[eventName];
+        lock ( list ) { list.Add(new WeakReference<Delegate>(handler)); }
     }
-    public void AddEventHandler( EventHandler handler, [CallerMemberName] string eventName = EMPTY )
+    private void Remove_Subscription( string eventName, Delegate? handler )
     {
         ArgumentNullException.ThrowIfNull(eventName);
+        if ( handler is null ) { return; }
 
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Add(Subscription.Create(handler));
-        }
-    }
-    public void AddEventHandler( Action handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
+        List<WeakReference<Delegate>> list = this[eventName];
 
-        lock ( __lock )
+        lock ( list )
         {
-            Subscriptions(eventName)
-               .Add(Subscription.Create(handler));
-        }
-    }
-    public void AddEventHandler<TEventArgs>( EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
+            list.RemoveAll(reference =>
+                           {
+                               if ( reference.TryGetTarget(out Delegate? target) ) { return target == handler; }
 
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Add(Subscription.Create(handler));
-        }
-    }
-    public void AddEventHandler<TEventArgs>( Action<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
-
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Add(Subscription.Create(handler));
+                               return false;
+                           });
         }
     }
 
 
-    public void RemoveEventHandler( EventHandler handler, [CallerMemberName] string eventName = EMPTY )
+    public void AddEventHandler( NotifyCollectionChangedEventHandler?  handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler( PropertyChangedEventHandler?          handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler( PropertyChangingEventHandler?         handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler( EventHandler?                         handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler( Action?                               handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler<TEventArgs>( EventHandler<TEventArgs>? handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+    public void AddEventHandler<TEventArgs>( Action<TEventArgs>?       handler, [CallerMemberName] string eventName = EMPTY ) => Add_Subscription(eventName, handler);
+
+
+    public void RemoveEventHandler( NotifyCollectionChangedEventHandler?  handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler( PropertyChangedEventHandler?          handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler( PropertyChangingEventHandler?         handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler( EventHandler?                         handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler( Action?                               handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler<TEventArgs>( EventHandler<TEventArgs>? handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+    public void RemoveEventHandler<TEventArgs>( Action<TEventArgs>?       handler, [CallerMemberName] string eventName = EMPTY ) => Remove_Subscription(eventName, handler);
+
+
+    public void RaiseEvent<TSender>( TSender? sender, in string eventName )
+        where TSender : class => RaiseEvent(sender, EventArgs.Empty, in eventName);
+    public void RaiseEvent<TSender, TEventArgs>( TSender? sender, TEventArgs args, in string eventName )
+        where TSender : class
     {
         ArgumentNullException.ThrowIfNull(eventName);
+        if ( !_eventHandlers.TryGetValue(eventName, out List<WeakReference<Delegate>>? list) ) { return; }
 
-        lock ( __lock )
+        lock ( list )
         {
-            Subscriptions(eventName)
-               .Remove(Subscription.Create(handler));
-        }
-    }
-    public void RemoveEventHandler( Action handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
+            using ArrayBuffer<WeakReference<Delegate>> buffer = new(list.Count);
 
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Remove(Subscription.Create(handler));
-        }
-    }
-    public void RemoveEventHandler<TEventArgs>( EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
-
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Remove(Subscription.Create(handler));
-        }
-    }
-    public void RemoveEventHandler<TEventArgs>( Action<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
-
-        lock ( __lock )
-        {
-            Subscriptions(eventName)
-               .Remove(Subscription.Create(handler));
-        }
-    }
-
-
-    public void RaiseEvent<TEventArgs>( TEventArgs eventArgs, object? sender = null, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
-
-        lock ( __lock )
-        {
-            ReadOnlySpan<Subscription> subs = CollectionsMarshal.AsSpan(_eventHandlers[eventName]);
-            foreach ( ref readonly Subscription sub in subs ) { sub.Execute(sender, eventArgs); }
-        }
-    }
-    public void RaiseEvent( object? sender = null, [CallerMemberName] string eventName = EMPTY )
-    {
-        ArgumentNullException.ThrowIfNull(eventName);
-
-        lock ( __lock )
-        {
-            ReadOnlySpan<Subscription> subs = CollectionsMarshal.AsSpan(_eventHandlers[eventName]);
-            foreach ( ref readonly Subscription sub in subs ) { sub.Execute(sender, EventArgs.Empty); }
-        }
-    }
-
-
-
-    private readonly struct Subscription : IEquatable<Subscription>
-    {
-        private readonly WeakReference<Delegate>? Handler;
-        private Subscription( Delegate handler ) => Handler = new WeakReference<Delegate>(handler);
-
-
-        public static Subscription Create( Action                               handler ) => new(handler);
-        public static Subscription Create<TEventArgs>( Action<TEventArgs>       handler ) => new(handler);
-        public static Subscription Create( EventHandler                         handler ) => new(handler);
-        public static Subscription Create<TEventArgs>( EventHandler<TEventArgs> handler ) => new(handler);
-
-
-        public void Execute<TEventArgs>( object? sender, TEventArgs args )
-        {
-            if ( Handler is null || !Handler.TryGetTarget(out Delegate? target) ) { return; }
-
-            switch ( target )
+            foreach ( ref readonly WeakReference<Delegate> method in list.AsSpan() )
             {
-                case EventHandler<TEventArgs> handler:
-                    handler(sender, args);
-                    return;
-
-                case Action<TEventArgs> handler:
-                    handler(args);
-                    return;
-
-                case EventHandler handler when args is EventArgs eventArgs:
-                    handler(sender, eventArgs);
-                    return;
-
-                case EventHandler handler:
-                    handler(sender, EventArgs.Empty);
-                    return;
-
-                case Action handler:
-                    handler();
-                    return;
+                if ( method.TryGetTarget(out Delegate? target) ) { Execute(target, sender, args); }
+                else { buffer.Add(in method); }
             }
+
+            foreach ( WeakReference<Delegate> value in buffer ) { list.Remove(value); }
         }
+    }
 
 
-        public          bool Equals( Subscription other )                         => ReferenceEquals(Handler, other.Handler);
-        public override bool Equals( object?      obj )                           => obj is Subscription other && Equals(other);
-        public override int  GetHashCode()                                        => HashCode.Combine(Handler);
-        public static   bool operator ==( Subscription left, Subscription right ) => left.Equals(right);
-        public static   bool operator !=( Subscription left, Subscription right ) => !left.Equals(right);
+    private static void Execute<TSender, TEventArgs>( Delegate target, TSender? sender, TEventArgs args )
+        where TSender : class
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        switch ( target )
+        {
+            case EventHandler<TEventArgs> handler:
+                handler(sender, args);
+                return;
+
+            case Action<TEventArgs> handler:
+                handler(args);
+                return;
+
+            case Action<TSender?, TEventArgs> handler:
+                handler(sender, args);
+                return;
+
+            case Func<TEventArgs, Task> handler:
+                handler(args)
+                   .CallSynchronously();
+
+                return;
+
+            case Func<TEventArgs, ValueTask> handler:
+                handler(args)
+                   .CallSynchronously();
+
+                return;
+
+            case Func<object?, TEventArgs, Task> handler:
+                handler(sender, args)
+                   .CallSynchronously();
+
+                return;
+
+            case Func<object?, TEventArgs, ValueTask> handler:
+                handler(sender, args)
+                   .CallSynchronously();
+
+                return;
+
+            case Func<TSender?, TEventArgs, Task> handler:
+                handler(sender, args)
+                   .CallSynchronously();
+
+                return;
+
+            case Func<TSender?, TEventArgs, ValueTask> handler:
+                handler(sender, args)
+                   .CallSynchronously();
+
+                return;
+
+            case NotifyCollectionChangedEventHandler handler when args is NotifyCollectionChangedEventArgs e:
+                handler(sender, e);
+                return;
+
+            case PropertyChangedEventHandler handler when args is PropertyChangedEventArgs e:
+                handler(sender, e);
+                return;
+
+            case PropertyChangingEventHandler handler when args is PropertyChangingEventArgs e:
+                handler(sender, e);
+                return;
+
+            case EventHandler handler when args is EventArgs e:
+                handler(sender, e);
+                return;
+
+            case EventHandler handler:
+                handler(sender, EventArgs.Empty);
+                return;
+
+            case Action handler:
+                handler();
+                return;
+
+            default:
+                invokeDynamic(target, sender, args);
+                return;
+
+                // Safe fallback for any custom delegate (nonstandard signature)
+                static void invokeDynamic( Delegate target, TSender? sender, TEventArgs args )
+                {
+                    ParameterInfo[] parameters = target.Method.GetParameters();
+
+                    // Try to match common parameter count patterns
+                    object?[] arguments = parameters.Length switch
+                                          {
+                                              0 => [],
+                                              1 => [args],
+                                              2 => [sender, args],
+                                              _ => buildDynamicArgumentArray(parameters, sender, args)
+                                          };
+
+                    object? result = target.DynamicInvoke(arguments);
+
+                    switch ( result )
+                    {
+                        case Task task:
+                            task.CallSynchronously();
+                            return;
+
+                        case ValueTask task:
+                            task.CallSynchronously();
+                            return;
+                    }
+                }
+
+                static object?[] buildDynamicArgumentArray( ReadOnlySpan<ParameterInfo> parameters, TSender? sender, TEventArgs args )
+                {
+                    object?[] result = new object?[parameters.Length];
+
+                    for ( int i = 0; i < parameters.Length; i++ )
+                    {
+                        Type type = parameters[i].ParameterType;
+
+                        result[i] = i switch
+                                    {
+                                        0 when type.IsInstanceOfType(sender) => sender,
+                                        1 when type.IsInstanceOfType(args)   => args,
+                                        _ => type.IsValueType
+                                                 ? Activator.CreateInstance(type)
+                                                 : null
+                                    };
+                    }
+
+                    return result;
+                }
+        }
     }
 }
