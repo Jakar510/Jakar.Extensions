@@ -45,7 +45,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     public                    FilterDelegate<TValue>?          OverrideFilter { get; set; }
 
 
-    public event NotifyCollectionChangedEventHandler? CollectionChanged { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
 
     public override bool Equals( TSelf?    other ) => ReferenceEquals(this, other);
@@ -65,7 +65,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     protected      void OnCountChanged() => OnPropertyChanged(nameof(Count));
     protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
-        _eventManager.RaiseEvent(this, e, nameof(CollectionChanged));
+        CollectionChanged?.Invoke(this, e);
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }
     }
 

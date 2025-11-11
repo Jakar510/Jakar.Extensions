@@ -4,22 +4,20 @@
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
-    protected internal readonly WeakEventManager _eventManager = new();
-    protected                   JsonObject?      _additionalData;
-    protected                   bool             _disposed;
+    protected JsonObject? _additionalData;
+    protected bool        _disposed;
 
 
     [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
-    public event PropertyChangedEventHandler?  PropertyChanged  { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
-    public event PropertyChangingEventHandler? PropertyChanging { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+    public event PropertyChangedEventHandler?  PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
 
 
     protected virtual void Dispose( bool disposing ) => _disposed |= disposing;
     public void Dispose()
     {
-        _eventManager.Dispose();
         Dispose(true);
         GC.SuppressFinalize(this);
     }
@@ -28,11 +26,11 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
 
 
     [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
-    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e )                => _eventManager.RaiseEvent(this, e, nameof(PropertyChanged));
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
 
 
     public void OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
-    public void OnPropertyChanging( PropertyChangingEventArgs e )                => _eventManager.RaiseEvent(this, e, nameof(PropertyChanging));
+    public void OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
 
 
 #pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments

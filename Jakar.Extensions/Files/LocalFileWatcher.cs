@@ -63,11 +63,11 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     public string        SearchFilter { get; set; } = "*";
 
 
-    public event ErrorEventHandler?      Error   { add => _eventManager.AddEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, ErrorEventArgs      x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Changed { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Created { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event FileSystemEventHandler? Deleted { add => _eventManager.AddEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, FileSystemEventArgs x ) => value?.Invoke(sender ?? this, x)); }
-    public event RenamedEventHandler?    Renamed { add => _eventManager.AddEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); remove => _eventManager.RemoveEventHandler(( object? sender, RenamedEventArgs    x ) => value?.Invoke(sender ?? this, x)); }
+    public event ErrorEventHandler?      Error;
+    public event FileSystemEventHandler? Changed;
+    public event FileSystemEventHandler? Created;
+    public event FileSystemEventHandler? Deleted;
+    public event RenamedEventHandler?    Renamed;
 
 
     public LocalFileWatcher() { }
@@ -86,26 +86,38 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     {
         LocalFile file = new(e.FullPath);
         AddOrUpdate(file);
-        _eventManager.RaiseEvent(this, e, nameof(Changed));
+        Changed?.Invoke(this, e);
     }
     private void OnCreated( object sender, FileSystemEventArgs e )
     {
         Add(e.FullPath);
-        _eventManager.RaiseEvent(this, e, nameof(Created));
+        Created?.Invoke(this, e);
     }
     private void OnDeleted( object sender, FileSystemEventArgs e )
     {
         Remove(e.FullPath);
-        _eventManager.RaiseEvent(this, e, nameof(Deleted));
+        Deleted?.Invoke(this, e);
     }
-    private void OnError( object sender, ErrorEventArgs e ) => _eventManager.RaiseEvent(this, e, nameof(Error));
+    private void OnError( object sender, ErrorEventArgs e ) => Error?.Invoke(this, e);
     private void OnRenamed( object sender, RenamedEventArgs e )
     {
-        LocalFile? file = this.FirstOrDefault(x => x.FullPath == e.OldFullPath);
+        using ArrayBuffer<LocalFile> arrayBuffer = FilteredValues();
+        LocalFile?                   file        = firstOrDefault(in e, arrayBuffer.Values);
         if ( file is not null ) { Remove(file); }
 
         Add(e.FullPath);
-        _eventManager.RaiseEvent(this, e, nameof(Renamed));
+        Renamed?.Invoke(this, e);
+        return;
+
+        static LocalFile? firstOrDefault( ref readonly RenamedEventArgs e, params ReadOnlySpan<LocalFile> files )
+        {
+            foreach ( LocalFile file in files )
+            {
+                if ( file.FullPath == e.OldFullPath ) { return file; }
+            }
+
+            return null;
+        }
     }
 
 

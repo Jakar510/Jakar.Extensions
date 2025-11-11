@@ -1,22 +1,15 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class Command<TValue> : BaseClass, ICommand
+public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, bool>? canExecute = null ) : BaseClass, ICommand
 {
     protected          bool?                    _canExecuteValue;
-    protected readonly Func<TValue?, bool>?     _canExecute;
-    protected readonly Executable               _execute;
+    protected readonly Func<TValue?, bool>?     _canExecute = canExecute;
+    protected readonly Executable               _execute    = execute;
     protected          CancellationTokenSource? _source;
 
 
-    public event EventHandler? CanExecuteChanged { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
-
-
-    public Command( Executable execute, Func<TValue?, bool>? canExecute = null )
-    {
-        _execute    = execute;
-        _canExecute = canExecute;
-    }
+    public event EventHandler? CanExecuteChanged;
 
 
     bool ICommand.CanExecute( object? parameter ) => CanExecute(parameter);
@@ -29,7 +22,7 @@ public class Command<TValue> : BaseClass, ICommand
         if ( Nullable.Equals(_canExecuteValue, result) ) { return result; }
 
         _canExecuteValue = result;
-        _eventManager.RaiseEvent(this, nameof(CanExecuteChanged));
+        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         return result;
     }
     protected virtual bool CanExecute( object? parameter ) => CanExecute(parameter is TValue value
@@ -56,14 +49,14 @@ public class Command<TValue> : BaseClass, ICommand
 
 
     public readonly struct Executable( int                                index,
-                                       Action?                            Action,
-                                       Action<TValue?>?                   ValueAction,
-                                       EventHandler?                      EventHandler,
-                                       EventHandler<TValue?>?             ValueEventHandler,
-                                       Func<TValue?, Task>?               TaskHandler,
-                                       Func<TValue?, ValueTask>?          ValueTaskHandler,
-                                       Func<object?, TValue?, Task>?      SenderTaskHandler,
-                                       Func<object?, TValue?, ValueTask>? SenderValueTaskHandler )
+                                       Action?                            action,
+                                       Action<TValue?>?                   valueAction,
+                                       EventHandler?                      eventHandler,
+                                       EventHandler<TValue?>?             valueEventHandler,
+                                       Func<TValue?, Task>?               taskHandler,
+                                       Func<TValue?, ValueTask>?          valueTaskHandler,
+                                       Func<object?, TValue?, Task>?      senderTaskHandler,
+                                       Func<object?, TValue?, ValueTask>? senderValueTaskHandler )
     {
         public static implicit operator Executable( Action                            action ) => new(0, action, null, null, null, null, null, null, null);
         public static implicit operator Executable( Action<TValue?>                   action ) => new(1, null, action, null, null, null, null, null, null);
@@ -80,37 +73,37 @@ public class Command<TValue> : BaseClass, ICommand
             switch ( index )
             {
                 case 0:
-                    Action?.Invoke();
+                    action?.Invoke();
                     return;
 
                 case 1:
-                    ValueAction?.Invoke(parameter);
+                    valueAction?.Invoke(parameter);
                     return;
 
                 case 2:
-                    ValueEventHandler?.Invoke(sender, parameter);
+                    valueEventHandler?.Invoke(sender, parameter);
                     return;
 
                 case 3:
-                    EventHandler?.Invoke(sender, EventArgs.Empty);
+                    eventHandler?.Invoke(sender, EventArgs.Empty);
                     return;
 
                 case 4:
-                    TaskHandler?.Invoke(parameter);
+                    taskHandler?.Invoke(parameter);
                     return;
 
                 case 5:
-                    ValueTaskHandler?.Invoke(parameter);
+                    valueTaskHandler?.Invoke(parameter);
                     return;
 
                 case 6:
-                    Debug.Assert(SenderTaskHandler is not null, nameof(SenderTaskHandler) + " is not null");
-                    await SenderTaskHandler.Invoke(sender, parameter);
+                    Debug.Assert(senderTaskHandler is not null, nameof(senderTaskHandler) + " is not null");
+                    await senderTaskHandler.Invoke(sender, parameter);
                     return;
 
                 case 7:
-                    Debug.Assert(SenderValueTaskHandler is not null, nameof(SenderValueTaskHandler) + " is not null");
-                    await SenderValueTaskHandler.Invoke(sender, parameter);
+                    Debug.Assert(senderValueTaskHandler is not null, nameof(senderValueTaskHandler) + " is not null");
+                    await senderValueTaskHandler.Invoke(sender, parameter);
                     return;
 
 

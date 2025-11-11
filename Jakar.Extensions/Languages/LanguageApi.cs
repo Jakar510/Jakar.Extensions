@@ -4,16 +4,16 @@
 [Serializable]
 public class LanguageApi : BaseClass
 {
-    private const  string             SHARED_KEY               = "LanguageApi";
-    public const   string             CURRENT_LANGUAGE_VERSION = "CurrentLanguageVersion";
-    public const   string             SELECTED_LANGUAGE_NAME   = "SelectedLanguageDisplayName";
-    private static LanguageApi?       _api;
-    private        CultureInfo        _currentCulture   = CultureInfo.CurrentCulture;
-    private        CultureInfo        _currentUiCulture = CultureInfo.CurrentUICulture;
-    private        CultureInfo?       _defaultThreadCurrentCulture;
-    private        CultureInfo?       _defaultThreadCurrentUiCulture;
-    private        Language?          _selectedLanguage;
-    private        LanguageCollection _languages = new(Language.Supported);
+    protected const  string             SHARED_KEY               = "LanguageApi";
+    public const     string             CURRENT_LANGUAGE_VERSION = "CurrentLanguageVersion";
+    public const     string             SELECTED_LANGUAGE_NAME   = "SelectedLanguageDisplayName";
+    protected static LanguageApi?       _api;
+    protected        CultureInfo        _currentCulture   = CultureInfo.CurrentCulture;
+    protected        CultureInfo        _currentUiCulture = CultureInfo.CurrentUICulture;
+    protected        CultureInfo?       _defaultThreadCurrentCulture;
+    protected        CultureInfo?       _defaultThreadCurrentUiCulture;
+    protected        Language?          _selectedLanguage;
+    protected        LanguageCollection _languages = new(Language.Supported);
 
 
     public static LanguageApi Current => _api ??= Create();
@@ -69,7 +69,7 @@ public class LanguageApi : BaseClass
     }
 
 
-    public event Action<Language>? OnLanguageChanged { add => _eventManager.AddEventHandler(value); remove => _eventManager.RemoveEventHandler(value); }
+    public event EventHandler<Language>? OnLanguageChanged;
 
 
     public LanguageApi() : this(CultureInfo.CurrentUICulture) { }
@@ -80,7 +80,7 @@ public class LanguageApi : BaseClass
     }
 
 
-    private static LanguageApi Create()
+    protected static LanguageApi Create()
     {
         SupportedLanguage language = (SupportedLanguage)SHARED_KEY.GetPreference(CURRENT_LANGUAGE_VERSION, SupportedLanguage.English.AsLong());
         LanguageApi       api      = new(language);
@@ -93,6 +93,6 @@ public class LanguageApi : BaseClass
         CurrentUICulture = value;
         SHARED_KEY.SetPreference(SELECTED_LANGUAGE_NAME,   value.DisplayName);
         SHARED_KEY.SetPreference(CURRENT_LANGUAGE_VERSION, value.Version.AsLong());
-        _eventManager.RaiseEvent(this, value, nameof(OnLanguageChanged));
+        OnLanguageChanged?.Invoke(this, value);
     }
 }
