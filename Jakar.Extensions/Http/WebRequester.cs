@@ -65,11 +65,11 @@ public class TelemetryHttpClientHandler : HttpClientHandler
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) : IDisposable
+public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) : IAsyncDisposable, IDisposable
 {
     public readonly   Encoding   Encoding = encoding ?? Encoding.Default;
     internal readonly HttpClient Client   = client;
-    private readonly  IHostInfo  __host   = host;
+    internal readonly IHostInfo  Host     = host;
     internal readonly ILogger?   Logger   = logger;
 
 
@@ -78,6 +78,11 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public TimeSpan           Timeout               { get => Client.Timeout; set => Client.Timeout = value; }
 
 
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+        return ValueTask.CompletedTask;
+    }
     public void Dispose() => Client.Dispose();
 
 
@@ -92,7 +97,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     private static IHttpClientFactory GetHttpClientFactory( IServiceProvider provider ) => provider.GetRequiredService<IHttpClientFactory>();
 
 
-    private Uri        CreateUrl( string  relativePath )                              => new(__host.HostInfo, relativePath);
+    private Uri        CreateUrl( string  relativePath )                              => new(Host.HostInfo, relativePath);
     private WebHandler CreateHandler( Uri url, HttpMethod method )                    => new(this, new HttpRequestMessage(method, url));
     private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value ) => new(this, new HttpRequestMessage(method, url) { Content = value });
 

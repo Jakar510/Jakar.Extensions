@@ -121,7 +121,11 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+            if ( !response.IsSuccessStatusCode )
+            {
+                return await Create(response, token)
+                          .ConfigureAwait(false);
+            }
 
             TValue result = await func(response, token);
             return new WebResponse<TValue>(response, result);
@@ -129,7 +133,9 @@ public sealed class WebResponse<TValue>
         catch ( HttpRequestException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, CancellationToken token )
@@ -138,7 +144,11 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+            if ( !response.IsSuccessStatusCode )
+            {
+                return await Create(response, token)
+                          .ConfigureAwait(false);
+            }
 
             TValue result = await func(response, arg, token);
             return new WebResponse<TValue>(response, result);
@@ -146,7 +156,9 @@ public sealed class WebResponse<TValue>
         catch ( HttpRequestException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
 
@@ -161,21 +173,31 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+                if ( !response.IsSuccessStatusCode )
+                {
+                    return await Create(response, token)
+                              .ConfigureAwait(false);
+                }
 
                 TValue result = await func(response, token);
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token); }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
+            {
+                await policy.IncrementAndWait(ref count, token)
+                            .ConfigureAwait(false);
+            }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
         catch ( AggregateException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
@@ -188,21 +210,33 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+                if ( !response.IsSuccessStatusCode )
+                {
+                    return await Create(response, token)
+                              .ConfigureAwait(false);
+                }
 
-                TValue result = await func(response, arg, token);
+                TValue result = await func(response, arg, token)
+                                   .ConfigureAwait(false);
+
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token); }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
+            {
+                await policy.IncrementAndWait(ref count, token)
+                            .ConfigureAwait(false);
+            }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
         catch ( AggregateException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
 
@@ -210,15 +244,21 @@ public sealed class WebResponse<TValue>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await using Stream? stream        = await response.Content.ReadAsStreamAsync(token);
-        string              error;
+
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
+                                                   .ConfigureAwait(false);
+
+        string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new(stream);
-            string             errorMessage = await reader.ReadToEndAsync(token);
+            using StreamReader reader = new(stream);
+
+            string errorMessage = await reader.ReadToEndAsync(token)
+                                              .ConfigureAwait(false);
+
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, errorMessage); }
 
             error = errorMessage;
@@ -236,8 +276,11 @@ public sealed class WebResponse<TValue>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new(stream);
-            string             errorMessage = await reader.ReadToEndAsync(token);
+            using StreamReader reader = new(stream);
+
+            string errorMessage = await reader.ReadToEndAsync(token)
+                                              .ConfigureAwait(false);
+
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, e, errorMessage); }
 
             error = errorMessage;

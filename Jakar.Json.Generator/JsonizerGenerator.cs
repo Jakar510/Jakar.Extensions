@@ -20,11 +20,14 @@ namespace Jakar.Json.Generator;
 /// </summary>
 [Generator]
 [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
-public class JsonizerGenerator : ISourceGenerator
+public class JsonizerGenerator : ISourceGenerator, IIncrementalGenerator
 {
     public const            string FROM_JSON   = "FromJson";
     public const            string GENERATED   = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
     private static readonly string __attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
+
+
+    public void Initialize( IncrementalGeneratorInitializationContext context ) { }
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
@@ -155,7 +158,7 @@ public class JsonizerGenerator : ISourceGenerator
     /// <summary> Created on demand before each generation pass </summary>
     public sealed class SyntaxReceiver : ISyntaxContextReceiver
     {
-        public List<IFieldSymbol> Fields { get; } = new();
+        public List<IFieldSymbol> Fields { get; } = [];
 
 
         /// <summary> Called for every syntax node in the compilation, we can inspect the nodes and save any information useful for generation </summary>

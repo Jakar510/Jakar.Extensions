@@ -216,3 +216,143 @@ public sealed class WeakEventManager : IDisposable
         }
     }
 }
+
+
+
+public sealed class WeakEventManagerAlternate
+{
+    private readonly Dictionary<string, List<Subscription>> __eventHandlers = new(StringComparer.Ordinal);
+
+
+    public void AddEventHandler<TEventArgs>( EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
+        where TEventArgs : EventArgs
+    {
+        if ( string.IsNullOrEmpty(eventName) ) { throw new ArgumentNullException(nameof(eventName)); }
+
+        if ( handler is null ) { throw new ArgumentNullException(nameof(handler)); }
+
+        AddEventHandler(eventName, handler.Target, handler.GetMethodInfo());
+    }
+    public void AddEventHandler( Delegate? handler, [CallerMemberName] string eventName = EMPTY )
+    {
+        if ( string.IsNullOrEmpty(eventName) ) { throw new ArgumentNullException(nameof(eventName)); }
+
+        if ( handler == null ) { throw new ArgumentNullException(nameof(handler)); }
+
+        AddEventHandler(eventName, handler.Target, handler.GetMethodInfo());
+    }
+
+
+    public void RemoveEventHandler<TEventArgs>( EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = EMPTY )
+        where TEventArgs : EventArgs
+    {
+        if ( string.IsNullOrEmpty(eventName) ) { throw new ArgumentNullException(nameof(eventName)); }
+
+        if ( handler is null ) { throw new ArgumentNullException(nameof(handler)); }
+
+        RemoveEventHandler(eventName, handler.Target, handler.GetMethodInfo());
+    }
+    public void RemoveEventHandler( Delegate? handler, [CallerMemberName] string eventName = EMPTY )
+    {
+        if ( string.IsNullOrEmpty(eventName) ) { throw new ArgumentNullException(nameof(eventName)); }
+
+        if ( handler == null ) { throw new ArgumentNullException(nameof(handler)); }
+
+        RemoveEventHandler(eventName, handler.Target, handler.GetMethodInfo());
+    }
+
+
+    private void AddEventHandler( string eventName, object? handlerTarget, MethodInfo methodInfo )
+    {
+        if ( !__eventHandlers.TryGetValue(eventName, out List<Subscription>? targets) ) { __eventHandlers.Add(eventName, targets = []); }
+
+        if ( handlerTarget == null )
+        {
+            // This event handler is a static method
+            targets.Add(new Subscription(null, methodInfo));
+            return;
+        }
+
+        targets.Add(new Subscription(new WeakReference(handlerTarget), methodInfo));
+    }
+    private void RemoveEventHandler( string eventName, object? handlerTarget, MemberInfo methodInfo )
+    {
+        if ( !__eventHandlers.TryGetValue(eventName, out List<Subscription>? subscriptions) ) { return; }
+
+        for ( int n = subscriptions.Count - 1; n >= 0; n-- )
+        {
+            Subscription current = subscriptions[n];
+
+            if ( current.Subscriber is { IsAlive: false } )
+            {
+                // If not alive, remove and continue
+                subscriptions.RemoveAt(n);
+                continue;
+            }
+
+            if ( current.Subscriber?.Target == handlerTarget && current.Handler.Name == methodInfo.Name )
+            {
+                // Found the match, we can break
+                subscriptions.RemoveAt(n);
+                break;
+            }
+        }
+    }
+
+
+    public void HandleEvent( object? sender, object? args, string eventName )
+    {
+        List<(object? subscriber, MethodInfo handler)> toRaise  = [];
+        List<Subscription>                             toRemove = [];
+
+        if ( __eventHandlers.TryGetValue(eventName, out List<Subscription>? target) )
+        {
+            for ( int i = 0; i < target.Count; i++ )
+            {
+                Subscription subscription = target[i];
+                bool         isStatic     = subscription.Subscriber is null;
+
+                if ( isStatic )
+                {
+                    // For a static method, we'll just pass null as the first parameter of MethodInfo.Invoke
+                    toRaise.Add(( null, subscription.Handler ));
+                    continue;
+                }
+
+                object? subscriber = subscription.Subscriber?.Target;
+
+                if ( subscriber == null )
+
+                    // The subscriber was collected, so there's no need to keep this subscription around
+                {
+                    toRemove.Add(subscription);
+                }
+                else { toRaise.Add(( subscriber, subscription.Handler )); }
+            }
+
+            for ( int i = 0; i < toRemove.Count; i++ )
+            {
+                Subscription subscription = toRemove[i];
+                target.Remove(subscription);
+            }
+        }
+
+        for ( int i = 0; i < toRaise.Count; i++ )
+        {
+            ( object? subscriber, MethodInfo handler ) = toRaise[i];
+            handler.Invoke(subscriber, [sender, args]);
+        }
+    }
+
+
+
+    private readonly struct Subscription( WeakReference? subscriber, MethodInfo handler ) : IEquatable<Subscription>
+    {
+        public readonly WeakReference? Subscriber = subscriber;
+        public readonly MethodInfo     Handler    = handler ?? throw new ArgumentNullException(nameof(handler));
+
+        public          bool Equals( Subscription other ) => Subscriber == other.Subscriber && Handler == other.Handler;
+        public override bool Equals( object?      obj )   => obj is Subscription other      && Equals(other);
+        public override int  GetHashCode()                => Subscriber?.GetHashCode() ?? 0 ^ Handler.GetHashCode();
+    }
+}
