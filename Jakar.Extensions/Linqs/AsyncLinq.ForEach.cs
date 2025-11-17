@@ -3,12 +3,6 @@
 
 public static partial class AsyncLinq
 {
-    public static async Task ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> action )
-    {
-        foreach ( TElement item in source ) { await action(item); }
-    }
-
-
     extension<TKey, TElement>( IDictionary<TKey, TElement> dict )
     {
         public async Task ForEachAsync( Func<TKey, TElement, Task> action )
@@ -25,12 +19,6 @@ public static partial class AsyncLinq
         }
     }
 
-
-
-    public static async Task ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task> action )
-    {
-        await foreach ( TElement item in source ) { await action(item); }
-    }
 
 
     extension<TElement>( IEnumerable<TElement> source )
@@ -99,6 +87,37 @@ public static partial class AsyncLinq
                                           .AsParallel()
                                           .Select(awaitPartition));
         }
+
+        public async Task ForEachAsync( Func<TElement, Task> action )
+        {
+            foreach ( TElement item in source ) { await action(item); }
+        }
+        public async ValueTask ForEachAsync( Func<TElement, ValueTask> action )
+        {
+            foreach ( TElement item in source ) { await action(item); }
+        }
+
+        /// <summary> If <paramref name="source"/> is an <see cref="List{TElement}"/> , items should not be added or removed while the calling. </summary>
+        public void ForEach( Action<TElement> action )
+        {
+            switch ( source )
+            {
+                case List<TElement> list:
+                    ForEach(CollectionsMarshal.AsSpan(list), action);
+                    return;
+
+                case TElement[] array:
+                    ForEach(array.AsSpan(), action);
+                    return;
+
+                default:
+                    foreach ( TElement item in source ) { action(item); }
+
+                    return;
+            }
+        }
+        public void ForEachParallel( Action<TElement> action ) => source.AsParallel()
+                                                                        .ForAll(action);
     }
 
 
@@ -147,6 +166,14 @@ public static partial class AsyncLinq
 
             block.Complete();
             await block.Completion;
+        }
+        public async Task ForEachAsync( Func<TElement, Task> action )
+        {
+            await foreach ( TElement item in source ) { await action(item); }
+        }
+        public async ValueTask ForEachAsync( Func<TElement, ValueTask> action )
+        {
+            await foreach ( TElement item in source ) { await action(item); }
         }
     }
 
@@ -274,10 +301,9 @@ public static partial class AsyncLinq
             results.Add(result);
         }
     }
-    public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
-    {
-        foreach ( TElement item in source ) { await action(item); }
-    }
+
+
+
     extension<TKey, TElement>( IDictionary<TKey, TElement> dict )
     {
         public async ValueTask ForEachAsync( Func<TKey, TElement, ValueTask> action )
@@ -296,35 +322,11 @@ public static partial class AsyncLinq
 
 
 
-    public static async ValueTask ForEachAsync<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask> action )
-    {
-        await foreach ( TElement item in source ) { await action(item); }
-    }
-    /// <summary> If <paramref name="source"/> is an <see cref="List{TElement}"/> , items should not be added or removed while the calling. </summary>
-    /// <typeparam name="TElement"> </typeparam>
-    public static void ForEach<TElement>( this IEnumerable<TElement> source, Action<TElement> action )
-    {
-        switch ( source )
-        {
-            case List<TElement> list:
-                ForEach(CollectionsMarshal.AsSpan(list), action);
-                return;
-
-            case TElement[] array:
-                ForEach(array.AsSpan(), action);
-                return;
-
-            default:
-                foreach ( TElement item in source ) { action(item); }
-
-                return;
-        }
-    }
-
     public static void ForEach<TElement>( this ReadOnlySpan<TElement> source, Action<TElement> action )
     {
         foreach ( ref readonly TElement item in source ) { action(item); }
     }
+
 
 
     extension<TKey, TElement>( IDictionary<TKey, TElement> dict )
@@ -342,9 +344,4 @@ public static partial class AsyncLinq
             foreach ( TElement value in dict.Values ) { action(value); }
         }
     }
-
-
-
-    public static void ForEachParallel<TElement>( this IEnumerable<TElement> source, Action<TElement> action ) => source.AsParallel()
-                                                                                                                        .ForAll(action);
 }

@@ -11,7 +11,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>, IEqualComparable<ConcurrentObservableCollection<TValue>>
+public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
     private static JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>? __jsonArrayInfo;

@@ -19,13 +19,28 @@ public static partial class AsyncLinq
         where TList : IReadOnlyList<TElement> => new(source, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool                         IsEmpty( this         ICollection collection )      => collection.Count == 0;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEmpty( this ICollection collection ) => collection.Count == 0;
+
+
+
     extension<TElement>( IAsyncEnumerable<TElement> source )
     {
-        public                                                           ValueTask<HashSet<TElement>> ToHashSet( CancellationToken      token = default ) => source.ToHashSet(EqualityComparer<TElement>.Default, token);
+        public ValueTask<HashSet<TElement>> ToHashSet( CancellationToken token = default ) => source.ToHashSet(EqualityComparer<TElement>.Default, token);
         public async ValueTask<HashSet<TElement>> ToHashSet( EqualityComparer<TElement> comparer, CancellationToken token = default )
         {
             HashSet<TElement> list = new(comparer);
+            await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
+
+            return list;
+        }
+        public async ValueTask<TElement[]> ToArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> array = await source.ToList(initialCapacity, token);
+            return array.ToArray();
+        }
+        public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> list = new(initialCapacity);
             await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
             return list;
@@ -48,11 +63,6 @@ public static partial class AsyncLinq
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( this int length ) => GC.AllocateUninitializedArray<TElement>(length);
 
 
-    public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-    {
-        List<TElement> array = await sequence.ToList(initialCapacity, token);
-        return array.ToArray();
-    }
     public static TElement[] ToArray<TElement>( IEnumerable<TElement> sequence )
         where TElement : IEquatable<TElement>
     {
@@ -130,6 +140,7 @@ public static partial class AsyncLinq
     }
 
 
+
     extension<TElement>( TElement[] array )
         where TElement : IComparable<TElement>
     {
@@ -152,13 +163,7 @@ public static partial class AsyncLinq
 
 
 
-    public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-    {
-        List<TElement> list = new(initialCapacity);
-        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
-        return list;
-    }
     extension<TElement>( IAsyncEnumerable<TElement> source )
         where TElement : IEquatable<TElement>
     {

@@ -3,27 +3,6 @@
 
 public static partial class AsyncLinq
 {
-    public static async ValueTask Add<TElement>( this ConcurrentBag<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
-    {
-        await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
-    }
-    public static async ValueTask Add<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
-        where TElement : IEquatable<TElement>
-    {
-        if ( collection is ConcurrentObservableCollection<TElement> list )
-        {
-            await list.AddAsync(values, token);
-            return;
-        }
-
-        if ( collection is ObservableCollection<TElement> list2 )
-        {
-            await list2.AddAsync(values, token);
-            return;
-        }
-
-        await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
-    }
     public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
         where TElement : IEquatable<TElement>
     {
@@ -35,6 +14,9 @@ public static partial class AsyncLinq
 
         await foreach ( TElement value in values.WithCancellation(token) ) { collection.AddOrUpdate(value); }
     }
+
+
+
     extension<TElement>( ICollection<TElement> collection )
         where TElement : IEquatable<TElement>
     {
@@ -58,6 +40,21 @@ public static partial class AsyncLinq
 
             await foreach ( TElement value in values.WithCancellation(token) ) { collection.TryAdd(value); }
         }
+        public async ValueTask Add( IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        {
+            switch ( collection )
+            {
+                case ConcurrentObservableCollection<TElement> list:
+                    await list.AddAsync(values, token);
+                    return;
+
+                case ObservableCollection<TElement> list:
+                    await list.AddAsync(values, token);
+                    return;
+            }
+
+            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
+        }
     }
 
 
@@ -71,6 +68,10 @@ public static partial class AsyncLinq
         public void Add( IEnumerable<TElement> values )
         {
             foreach ( TElement value in values ) { collection.Add(value); }
+        }
+        public async ValueTask Add( IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        {
+            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
         }
     }
 
