@@ -26,65 +26,66 @@ public static partial class Types
     public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
 
 
-    private static bool IsNullableHelper( this Type memberType, in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
+    extension( Type memberType )
     {
-        if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType(memberType) is not null; }
-
-        CustomAttributeData? nullable = customAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE);
-
-        if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
+        private bool IsNullableHelper( in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
         {
-            CustomAttributeTypedArgument attributeArgument = nullable.ConstructorArguments[0];
+            if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType(memberType) is not null; }
 
-            if ( attributeArgument.ArgumentType == typeof(byte[]) )
+            CustomAttributeData? nullable = customAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE);
+
+            if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
             {
-                ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
-                if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
+                CustomAttributeTypedArgument attributeArgument = nullable.ConstructorArguments[0];
+
+                if ( attributeArgument.ArgumentType == typeof(byte[]) )
+                {
+                    ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
+                    if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
+                }
+                else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }
             }
-            else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }
-        }
 
-        for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
-        {
-            CustomAttributeData? context = type.CustomAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE_CONTEXT);
-            if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
-        }
-
-        return false; // Couldn't find a suitable attribute
-    }
-
-
-    public static bool TryGetUnderlyingType( this Type type, [NotNullWhen(true)] out Type? result )
-    {
-        if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
-        {
-            foreach ( Type argument in type.GenericTypeArguments.AsSpan() )
+            for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
             {
-                result = argument;
+                CustomAttributeData? context = type.CustomAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE_CONTEXT);
+                if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
+            }
+
+            return false; // Couldn't find a suitable attribute
+        }
+        public bool TryGetUnderlyingType( [NotNullWhen(true)] out Type? result )
+        {
+            if ( memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            {
+                foreach ( Type argument in memberType.GenericTypeArguments.AsSpan() )
+                {
+                    result = argument;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+        public bool TryGetUnderlyingEnumType( [NotNullWhen(true)] out Type? result )
+        {
+            if ( memberType.IsEnum )
+            {
+                result = Enum.GetUnderlyingType(memberType);
                 return true;
             }
-        }
 
-        result = null;
-        return false;
-    }
-    public static bool TryGetUnderlyingEnumType( this Type type, [NotNullWhen(true)] out Type? result )
-    {
-        if ( type.IsEnum )
-        {
-            result = Enum.GetUnderlyingType(type);
-            return true;
-        }
-
-        if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
-        {
-            foreach ( Type argument in type.GenericTypeArguments.AsSpan() )
+            if ( memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>) )
             {
-                if ( argument.TryGetUnderlyingEnumType(out result) ) { return true; }
+                foreach ( Type argument in memberType.GenericTypeArguments.AsSpan() )
+                {
+                    if ( argument.TryGetUnderlyingEnumType(out result) ) { return true; }
+                }
             }
-        }
 
-        result = null;
-        return false;
+            result = null;
+            return false;
+        }
     }
 }

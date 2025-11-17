@@ -4829,7 +4829,7 @@
 				<para> Based on System.ParamsArray </para>
 			</summary>
 		</member>
-		<member name="M:Jakar.Extensions.ParamsArray`1.#ctor(System.Buffers.IMemoryOwner{`0},System.Int32)">
+		<member name="M:Jakar.Extensions.ParamsArray`1.#ctor(System.IMemoryOwner{`0},System.Int32)">
 			<summary>
 				<para> Based on System.ParamsArray </para>
 			</summary>

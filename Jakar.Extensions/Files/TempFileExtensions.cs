@@ -6,17 +6,19 @@ public static class TempFile
 {
     public static bool IsTempFile( this ITempFile file ) => file.IsTemporary;
 
-    public static TItem SetNormal<TItem>( this TItem file )
+    extension<TItem>( TItem file )
         where TItem : ITempFile
     {
-        file.IsTemporary = false;
-        return file;
-    }
-    public static TItem SetTemporary<TItem>( this TItem file )
-        where TItem : ITempFile
-    {
-        file.IsTemporary = true;
-        return file;
+        public TItem SetNormal()
+        {
+            file.IsTemporary = false;
+            return file;
+        }
+        public TItem SetTemporary()
+        {
+            file.IsTemporary = true;
+            return file;
+        }
     }
 
 

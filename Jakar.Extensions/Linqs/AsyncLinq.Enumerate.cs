@@ -3,28 +3,34 @@
 
 public static partial class AsyncLinq
 {
-    public static async IAsyncEnumerable<(int Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, int start = 0 )
+    extension<TElement>( IAsyncEnumerable<TElement> source )
     {
-        int index = start;
-
-        await foreach ( TElement element in source )
+        public async IAsyncEnumerable<(int Index, TElement Value)> Enumerate( int start = 0 )
         {
-            checked { index++; }
+            int index = start;
 
-            yield return ( index, element );
+            await foreach ( TElement element in source )
+            {
+                checked { index++; }
+
+                yield return ( index, element );
+            }
+        }
+        public async IAsyncEnumerable<(long Index, TElement Value)> Enumerate( long start = 0 )
+        {
+            long index = start;
+
+            await foreach ( TElement element in source )
+            {
+                checked { index++; }
+
+                yield return ( index, element );
+            }
         }
     }
-    public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0 )
-    {
-        long index = start;
 
-        await foreach ( TElement element in source )
-        {
-            checked { index++; }
 
-            yield return ( index, element );
-        }
-    }
+
     public static IEnumerable<(int index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
     {
         int index = start;
@@ -69,26 +75,30 @@ public static partial class AsyncLinq
             index++;
         }
     }
-    public static IEnumerable<(int index, TKey key, TElement value)> Enumerate<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
+    extension<TKey, TElement>( IDictionary<TKey, TElement> element )
     {
-        int index = start;
-
-        foreach ( ( TKey key, TElement value ) in element )
+        public IEnumerable<(int index, TKey key, TElement value)> Enumerate( int start = 0 )
         {
-            yield return ( index, key, value );
-            index++;
+            int index = start;
+
+            foreach ( ( TKey key, TElement value ) in element )
+            {
+                yield return ( index, key, value );
+                index++;
+            }
+        }
+        public IEnumerable<(long index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs( long start = 0 )
+        {
+            long index = start;
+
+            foreach ( KeyValuePair<TKey, TElement> pair in element )
+            {
+                yield return ( index, pair );
+                index++;
+            }
         }
     }
-    public static IEnumerable<(long index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
-    {
-        long index = start;
 
-        foreach ( KeyValuePair<TKey, TElement> pair in element )
-        {
-            yield return ( index, pair );
-            index++;
-        }
-    }
 
 
     public static IEnumerable<(long index, object key, object? value)> Enumerate( this IDictionary element, long start = 0 )

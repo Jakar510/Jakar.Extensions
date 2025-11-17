@@ -15,12 +15,16 @@ public static class Constants
     public static readonly DateOnly       SQLMinDateOnly = new(1753, 1, 1);
 
 
-    public static string GetAndOr( this bool matchAll ) => matchAll
-                                                               ? AND
-                                                               : OR;
-    public static string ToStringFast( this bool value ) => value
-                                                                ? TRUE
-                                                                : FALSE;
+
+    extension( bool matchAll )
+    {
+        public string GetAndOr() => matchAll
+                                        ? AND
+                                        : OR;
+        public string ToStringFast() => matchAll
+                                            ? TRUE
+                                            : FALSE;
+    }
 
 
 

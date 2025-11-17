@@ -42,35 +42,41 @@ public static class Claims
     public const ClaimType DEFAULTS = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.Group;
 
 
-    public static bool TryParse( this ClaimsPrincipal principal, out Guid userID )
+    extension( ClaimsPrincipal principal )
     {
-        Claim? claim = principal.Claims.FirstOrDefault(checkUserID);
-
-        if ( Guid.TryParse(claim?.Value, out Guid id) )
+        public bool TryParse( out Guid userID )
         {
-            userID = id;
-            return true;
+            Claim? claim = principal.Claims.FirstOrDefault(checkUserID);
+
+            if ( Guid.TryParse(claim?.Value, out Guid id) )
+            {
+                userID = id;
+                return true;
+            }
+
+            userID = Guid.Empty;
+            return false;
+            static bool checkUserID( Claim claim ) => claim.IsUserID();
         }
-
-        userID = Guid.Empty;
-        return false;
-        static bool checkUserID( Claim claim ) => claim.IsUserID();
-    }
-    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen(true)] out Guid? userID )
-    {
-        Claim? claim = principal.Claims.FirstOrDefault(checkUserID);
-
-        if ( Guid.TryParse(claim?.Value, out Guid id) )
+        public bool TryParse( [NotNullWhen(true)] out Guid? userID )
         {
-            userID = id;
-            return true;
-        }
+            Claim? claim = principal.Claims.FirstOrDefault(checkUserID);
 
-        userID = null;
-        return false;
-        static bool checkUserID( Claim claim ) => claim.IsUserID();
+            if ( Guid.TryParse(claim?.Value, out Guid id) )
+            {
+                userID = id;
+                return true;
+            }
+
+            userID = null;
+            return false;
+            static bool checkUserID( Claim claim ) => claim.IsUserID();
+        }
+        public bool TryParse( out Guid userID, out string userName ) => TryParse(principal.Claims.ToArray(), out userID, out userName);
     }
-    public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName ) => TryParse(principal.Claims.ToArray(), out userID, out userName);
+
+
+
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName )
     {
         userName = claims.FirstOrDefault(IsUserName)
@@ -167,51 +173,61 @@ public static class Claims
                                                                                                                                                              ?.Value,
                                                                                                                                                         userID.ToString(),
                                                                                                                                                         StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsAuthorized( this             ClaimsPrincipal principal, Guid userID ) => principal.Claims.IsAuthorized(userID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsAuthorized( this             ClaimsIdentity  principal, Guid userID ) => principal.Claims.IsAuthorized(userID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsUserID( this                 Claim           claim )                                              => string.Equals(claim.Type, ClaimType.UserID.ToClaimTypes(),                 StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsUserName( this               Claim           claim )                                              => string.Equals(claim.Type, ClaimType.UserName.ToClaimTypes(),               StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsFirstName( this              Claim           claim )                                              => string.Equals(claim.Type, ClaimType.FirstName.ToClaimTypes(),              StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsLastName( this               Claim           claim )                                              => string.Equals(claim.Type, ClaimType.LastName.ToClaimTypes(),               StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsFullName( this               Claim           claim )                                              => string.Equals(claim.Type, ClaimType.FullName.ToClaimTypes(),               StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsGender( this                 Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Gender.ToClaimTypes(),                 StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsSubscriptionExpiration( this Claim           claim )                                              => string.Equals(claim.Type, ClaimType.SubscriptionExpiration.ToClaimTypes(), StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsExpired( this                Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Expired.ToClaimTypes(),                StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsEmail( this                  Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Email.ToClaimTypes(),                  StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsMobilePhone( this            Claim           claim )                                              => string.Equals(claim.Type, ClaimType.MobilePhone.ToClaimTypes(),            StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsStreetAddressLine1( this     Claim           claim )                                              => string.Equals(claim.Type, ClaimType.StreetAddressLine1.ToClaimTypes(),     StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsStreetAddressLine2( this     Claim           claim )                                              => string.Equals(claim.Type, ClaimType.StreetAddressLine2.ToClaimTypes(),     StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsStateOrProvince( this        Claim           claim )                                              => string.Equals(claim.Type, ClaimType.StateOrProvince.ToClaimTypes(),        StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsCountry( this                Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Country.ToClaimTypes(),                StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsPostalCode( this             Claim           claim )                                              => string.Equals(claim.Type, ClaimType.PostalCode.ToClaimTypes(),             StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsWebSite( this                Claim           claim )                                              => string.Equals(claim.Type, ClaimType.WebSite.ToClaimTypes(),                StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsGroup( this                  Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Group.ToClaimTypes(),                  StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsRole( this                   Claim           claim )                                              => string.Equals(claim.Type, ClaimType.Role.ToClaimTypes(),                   StringComparison.Ordinal);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateOnly        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.Date, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateOnly?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.Date, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, TimeOnly        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Time, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, TimeOnly?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Time, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, string?         value, string? issuer = null ) => new(type.ToClaimTypes(), value             ?? EMPTY, ClaimValueTypes.String, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateTime        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.DateTime, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateTime?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.DateTime, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateTimeOffset  value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.DateTime, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, DateTimeOffset? value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.DateTime, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, TimeSpan        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.DaytimeDuration, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, TimeSpan?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.DaytimeDuration, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, double          value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.Double, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, double?         value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.Double, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, int             value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Integer32, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, int?            value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Integer32, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, long            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Integer64, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, long?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Integer64, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, uint            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.UInteger32, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, uint?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.UInteger32, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, ulong           value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.UInteger64, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, ulong?          value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.UInteger64, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, bool            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Boolean, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, bool?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Boolean, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, Email           value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Email, issuer);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Claim ToClaim( this                  ClaimType       type, Email?          value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Email, issuer);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsAuthorized( this ClaimsPrincipal principal, Guid userID ) => principal.Claims.IsAuthorized(userID);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool  IsAuthorized( this ClaimsIdentity  principal, Guid userID ) => principal.Claims.IsAuthorized(userID);
+    extension( Claim                          claim )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsUserID()                 => string.Equals(claim.Type, ClaimType.UserID.ToClaimTypes(),                 StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsUserName()               => string.Equals(claim.Type, ClaimType.UserName.ToClaimTypes(),               StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsFirstName()              => string.Equals(claim.Type, ClaimType.FirstName.ToClaimTypes(),              StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsLastName()               => string.Equals(claim.Type, ClaimType.LastName.ToClaimTypes(),               StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsFullName()               => string.Equals(claim.Type, ClaimType.FullName.ToClaimTypes(),               StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsGender()                 => string.Equals(claim.Type, ClaimType.Gender.ToClaimTypes(),                 StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsSubscriptionExpiration() => string.Equals(claim.Type, ClaimType.SubscriptionExpiration.ToClaimTypes(), StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsExpired()                => string.Equals(claim.Type, ClaimType.Expired.ToClaimTypes(),                StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEmail()                  => string.Equals(claim.Type, ClaimType.Email.ToClaimTypes(),                  StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsMobilePhone()            => string.Equals(claim.Type, ClaimType.MobilePhone.ToClaimTypes(),            StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsStreetAddressLine1()     => string.Equals(claim.Type, ClaimType.StreetAddressLine1.ToClaimTypes(),     StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsStreetAddressLine2()     => string.Equals(claim.Type, ClaimType.StreetAddressLine2.ToClaimTypes(),     StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsStateOrProvince()        => string.Equals(claim.Type, ClaimType.StateOrProvince.ToClaimTypes(),        StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsCountry()                => string.Equals(claim.Type, ClaimType.Country.ToClaimTypes(),                StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsPostalCode()             => string.Equals(claim.Type, ClaimType.PostalCode.ToClaimTypes(),             StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsWebSite()                => string.Equals(claim.Type, ClaimType.WebSite.ToClaimTypes(),                StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsGroup()                  => string.Equals(claim.Type, ClaimType.Group.ToClaimTypes(),                  StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsRole()                   => string.Equals(claim.Type, ClaimType.Role.ToClaimTypes(),                   StringComparison.Ordinal);
+    }
+
+
+
+    extension( ClaimType      type )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateOnly        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.Date, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateOnly?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.Date, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( TimeOnly        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Time, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( TimeOnly?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Time, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( string?         value, string? issuer = null ) => new(type.ToClaimTypes(), value             ?? EMPTY, ClaimValueTypes.String, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateTime        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.DateTime, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateTime?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.DateTime, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateTimeOffset  value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.DateTime, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( DateTimeOffset? value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.DateTime, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( TimeSpan        value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.DaytimeDuration, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( TimeSpan?       value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.DaytimeDuration, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( double          value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(CultureInfo.CurrentCulture), ClaimValueTypes.Double, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( double?         value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString(CultureInfo.CurrentCulture) ?? EMPTY, ClaimValueTypes.Double, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( int             value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Integer32, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( int?            value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Integer32, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( long            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Integer64, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( long?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Integer64, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( uint            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.UInteger32, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( uint?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.UInteger32, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( ulong           value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.UInteger64, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( ulong?          value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.UInteger64, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( bool            value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Boolean, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( bool?           value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Boolean, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( Email           value, string? issuer = null ) => new(type.ToClaimTypes(), value.ToString(), ClaimValueTypes.Email, issuer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Claim ToClaim( Email?          value, string? issuer = null ) => new(type.ToClaimTypes(), value?.ToString() ?? EMPTY, ClaimValueTypes.Email, issuer);
+    }
+
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool HasFlag<TValue>( in TValue value, in TValue flag )

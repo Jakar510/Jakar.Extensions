@@ -112,16 +112,19 @@ public static class UserData
     }
 
 
-    public static DateTimeOffset GetExpires( this IUserData user, scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
-    public static DateTimeOffset GetExpires( this IUserData user, scoped in DateTimeOffset now, scoped in TimeSpan offset )
+    extension( IUserData user )
     {
-        DateTimeOffset date = now + offset;
-        if ( user.SubscriptionExpires is null ) { return date; }
+        public DateTimeOffset GetExpires( scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
+        public DateTimeOffset GetExpires( scoped in DateTimeOffset now, scoped in TimeSpan offset )
+        {
+            DateTimeOffset date = now + offset;
+            if ( user.SubscriptionExpires is null ) { return date; }
 
-        DateTimeOffset expires = user.SubscriptionExpires.Value;
+            DateTimeOffset expires = user.SubscriptionExpires.Value;
 
-        return date > expires
-                   ? expires
-                   : date;
+            return date > expires
+                       ? expires
+                       : date;
+        }
     }
 }

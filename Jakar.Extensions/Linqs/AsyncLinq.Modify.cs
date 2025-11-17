@@ -35,98 +35,120 @@ public static partial class AsyncLinq
 
         await foreach ( TElement value in values.WithCancellation(token) ) { collection.AddOrUpdate(value); }
     }
-    public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
+    extension<TElement>( ICollection<TElement> collection )
         where TElement : IEquatable<TElement>
     {
-        if ( collection is ConcurrentObservableCollection<TElement> list )
+        public async ValueTask Remove( IAsyncEnumerable<TElement> values, CancellationToken token = default )
         {
-            await list.RemoveAsync(values, token);
-            return;
-        }
+            if ( collection is ConcurrentObservableCollection<TElement> list )
+            {
+                await list.RemoveAsync(values, token);
+                return;
+            }
 
-        await foreach ( TElement value in values.WithCancellation(token) ) { collection.Remove(value); }
-    }
-    public static async ValueTask TryAdd<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
-        where TElement : IEquatable<TElement>
-    {
-        if ( collection is ConcurrentObservableCollection<TElement> list )
+            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Remove(value); }
+        }
+        public async ValueTask TryAdd( IAsyncEnumerable<TElement> values, CancellationToken token = default )
         {
-            await list.TryAddAsync(values, token);
-            return;
+            if ( collection is ConcurrentObservableCollection<TElement> list )
+            {
+                await list.TryAddAsync(values, token);
+                return;
+            }
+
+            await foreach ( TElement value in values.WithCancellation(token) ) { collection.TryAdd(value); }
         }
-
-        await foreach ( TElement value in values.WithCancellation(token) ) { collection.TryAdd(value); }
-    }
-    public static void Add<TElement>( this ConcurrentBag<TElement> collection, params ReadOnlySpan<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.Add(value); }
-    }
-    public static void Add<TElement>( this ConcurrentBag<TElement> collection, IEnumerable<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.Add(value); }
     }
 
 
-    public static void Add<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
+
+    extension<TElement>( ConcurrentBag<TElement> collection )
     {
-        foreach ( TElement value in values ) { collection.Add(value); }
-    }
-    public static void Add<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.Add(value); }
+        public void Add( params ReadOnlySpan<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Add(value); }
+        }
+        public void Add( IEnumerable<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Add(value); }
+        }
     }
 
 
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, IEnumerable<TKey> keys )
-    {
-        foreach ( TKey value in keys ) { dict.AddDefault(value); }
-    }
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, params ReadOnlySpan<TKey> keys )
-    {
-        foreach ( TKey value in keys ) { dict.AddDefault(value); }
-    }
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add(key, default);
 
-
-    public static void AddOrUpdate<TElement>( this IList<TElement> collection, params ReadOnlySpan<TElement> values )
+    extension<TElement>( ICollection<TElement> collection )
     {
-        foreach ( TElement value in values ) { collection.AddOrUpdate(value); }
-    }
-    public static void AddOrUpdate<TElement>( this IList<TElement> collection, IEnumerable<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.AddOrUpdate(value); }
-    }
-    public static void AddOrUpdate<TElement>( this IList<TElement> collection, TElement value )
-    {
-        int index = collection.IndexOf(value);
-
-        if ( index >= 0 ) { collection[index] = value; }
-        else { collection.Add(value); }
+        public void Add( params ReadOnlySpan<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Add(value); }
+        }
+        public void Add( IEnumerable<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Add(value); }
+        }
     }
 
 
-    public static void Remove<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
+
+    extension<TKey, TElement>( IDictionary<TKey, TElement?> dict )
     {
-        foreach ( TElement value in values ) { collection.Remove(value); }
-    }
-    public static void Remove<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.Remove(value); }
+        public void AddDefault( IEnumerable<TKey> keys )
+        {
+            foreach ( TKey value in keys ) { dict.AddDefault(value); }
+        }
+        public void AddDefault( params ReadOnlySpan<TKey> keys )
+        {
+            foreach ( TKey value in keys ) { dict.AddDefault(value); }
+        }
+        public void AddDefault( TKey key ) => dict.Add(key, default);
     }
 
 
-    public static void TryAdd<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.TryAdd(value); }
-    }
-    public static void TryAdd<TElement>( this ICollection<TElement> collection, IEnumerable<TElement> values )
-    {
-        foreach ( TElement value in values ) { collection.TryAdd(value); }
-    }
-    public static void TryAdd<TElement>( this ICollection<TElement> collection, TElement value )
-    {
-        if ( collection.Contains(value) ) { return; }
 
-        collection.Add(value);
+    extension<TElement>( IList<TElement> collection )
+    {
+        public void AddOrUpdate( params ReadOnlySpan<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.AddOrUpdate(value); }
+        }
+        public void AddOrUpdate( IEnumerable<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.AddOrUpdate(value); }
+        }
+        public void AddOrUpdate( TElement value )
+        {
+            int index = collection.IndexOf(value);
+
+            if ( index >= 0 ) { collection[index] = value; }
+            else { collection.Add(value); }
+        }
+    }
+
+
+
+    extension<TElement>( ICollection<TElement> collection )
+    {
+        public void Remove( params ReadOnlySpan<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Remove(value); }
+        }
+        public void Remove( IEnumerable<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.Remove(value); }
+        }
+        public void TryAdd( params ReadOnlySpan<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.TryAdd(value); }
+        }
+        public void TryAdd( IEnumerable<TElement> values )
+        {
+            foreach ( TElement value in values ) { collection.TryAdd(value); }
+        }
+        public void TryAdd( TElement value )
+        {
+            if ( collection.Contains(value) ) { return; }
+
+            collection.Add(value);
+        }
     }
 }

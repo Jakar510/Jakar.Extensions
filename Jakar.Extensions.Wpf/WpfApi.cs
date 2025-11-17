@@ -3,78 +3,93 @@
 
 public static partial class WpfApi
 {
-    public static BitmapImage         ConvertImage( this LocalFile        file )                                                 => new(file.ToUri());
-    public static DispatcherOperation CallAsync( this    DispatcherObject view, Action func, CancellationToken token = default ) => view.Dispatcher.CallAsync(func, token);
-    public static DispatcherOperation CallAsync<T1>( this DispatcherObject view, Action<T1> func, T1 arg1, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, token);
-    public static DispatcherOperation CallAsync<T1, T2>( this DispatcherObject view, Action<T1, T2> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3>( this DispatcherObject view, Action<T1, T2, T3> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3, T4>( this DispatcherObject view, Action<T1, T2, T3, T4> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3, T4, T5>( this DispatcherObject view, Action<T1, T2, T3, T4, T5> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+    public static BitmapImage ConvertImage( this LocalFile file ) => new(file.ToUri());
 
 
-    public static DispatcherOperation CallAsync( this Dispatcher dispatcher, Action func, CancellationToken token = default ) => dispatcher.BeginInvoke(func, DispatcherPriority.Normal, token);
-    public static DispatcherOperation CallAsync<T1>( this Dispatcher dispatcher, Action<T1> func, T1 arg1, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(() => func(arg1), DispatcherPriority.Normal, token);
-    public static DispatcherOperation CallAsync<T1, T2>( this Dispatcher dispatcher, Action<T1, T2> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(() => func(arg1, arg2), DispatcherPriority.Normal, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3>( this Dispatcher dispatcher, Action<T1, T2, T3> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(() => func(arg1, arg2, arg3), DispatcherPriority.Normal, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3, T4>( this Dispatcher dispatcher, Action<T1, T2, T3, T4> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(() => func(arg1, arg2, arg3, arg4), DispatcherPriority.Normal, token);
-    public static DispatcherOperation CallAsync<T1, T2, T3, T4, T5>( this Dispatcher dispatcher, Action<T1, T2, T3, T4, T5> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(() => func(arg1, arg2, arg3, arg4, arg5), DispatcherPriority.Normal, token);
+
+    extension( DispatcherObject self )
+    {
+        public DispatcherOperation CallAsync( Action func, CancellationToken token = default ) => self.Dispatcher.CallAsync(func, token);
+        public DispatcherOperation CallAsync<T1>( Action<T1> func, T1 arg1, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, token);
+        public DispatcherOperation CallAsync<T1, T2>( Action<T1, T2> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, token);
+        public DispatcherOperation CallAsync<T1, T2, T3>( Action<T1, T2, T3> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
+        public DispatcherOperation CallAsync<T1, T2, T3, T4>( Action<T1, T2, T3, T4> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
+        public DispatcherOperation CallAsync<T1, T2, T3, T4, T5>( Action<T1, T2, T3, T4, T5> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+    }
 
 
-    public static DispatcherOperation<Task> CallAsync( this     DispatcherObject view, Func<Task>     func, CancellationToken token                        = default ) => view.Dispatcher.CallAsync(func, token);
-    public static DispatcherOperation<Task> CallAsync<T1>( this DispatcherObject view, Func<T1, Task> func, T1                arg, CancellationToken token = default ) => view.Dispatcher.CallAsync(func, arg, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2>( this DispatcherObject view, Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this DispatcherObject view, Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( this DispatcherObject view, Func<T1, T2, T3, T4, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( this DispatcherObject view, Func<T1, T2, T3, T4, T5, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+
+    extension( Dispatcher self )
+    {
+        public DispatcherOperation CallAsync( Action func, CancellationToken token = default ) => self.BeginInvoke(func, DispatcherPriority.Normal, token);
+        public DispatcherOperation CallAsync<T1>( Action<T1> func, T1 arg1, CancellationToken token = default ) =>
+            self.InvokeAsync(() => func(arg1), DispatcherPriority.Normal, token);
+        public DispatcherOperation CallAsync<T1, T2>( Action<T1, T2> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.InvokeAsync(() => func(arg1, arg2), DispatcherPriority.Normal, token);
+        public DispatcherOperation CallAsync<T1, T2, T3>( Action<T1, T2, T3> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.InvokeAsync(() => func(arg1, arg2, arg3), DispatcherPriority.Normal, token);
+        public DispatcherOperation CallAsync<T1, T2, T3, T4>( Action<T1, T2, T3, T4> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.InvokeAsync(() => func(arg1, arg2, arg3, arg4), DispatcherPriority.Normal, token);
+        public DispatcherOperation CallAsync<T1, T2, T3, T4, T5>( Action<T1, T2, T3, T4, T5> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.InvokeAsync(() => func(arg1, arg2, arg3, arg4, arg5), DispatcherPriority.Normal, token);
+    }
 
 
-    public static DispatcherOperation<Task> CallAsync<T1>( this DispatcherObject view, Func<T1, CancellationToken, Task> func, T1 arg, CancellationToken token = default ) => view.Dispatcher.CallAsync(func, arg, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2>( this DispatcherObject view, Func<T1, T2, CancellationToken, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this DispatcherObject view, Func<T1, T2, T3, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( this DispatcherObject view, Func<T1, T2, T3, T4, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( this DispatcherObject view, Func<T1, T2, T3, T4, T5, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        view.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+
+    extension( DispatcherObject self )
+    {
+        public DispatcherOperation<Task> CallAsync( Func<Task>         func, CancellationToken token                        = default ) => self.Dispatcher.CallAsync(func, token);
+        public DispatcherOperation<Task> CallAsync<T1>( Func<T1, Task> func, T1                arg, CancellationToken token = default ) => self.Dispatcher.CallAsync(func, arg, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2>( Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3>( Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( Func<T1, T2, T3, T4, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( Func<T1, T2, T3, T4, T5, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+        public DispatcherOperation<Task> CallAsync<T1>( Func<T1, CancellationToken, Task> func, T1 arg, CancellationToken token = default ) => self.Dispatcher.CallAsync(func, arg, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2>( Func<T1, T2, CancellationToken, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3>( Func<T1, T2, T3, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( Func<T1, T2, T3, T4, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( Func<T1, T2, T3, T4, T5, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.Dispatcher.CallAsync(func, arg1, arg2, arg3, arg4, arg5, token);
+    }
 
 
-    public static DispatcherOperation<Task> CallAsync( this     Dispatcher dispatcher, Func<Task>     func, CancellationToken token                        = default ) => dispatcher.InvokeAsync(func,                        DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, Task> func, T1                arg, CancellationToken token = default ) => dispatcher.InvokeAsync(async () => await func(arg), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2>( this Dispatcher dispatcher, Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this Dispatcher dispatcher, Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( this Dispatcher dispatcher, Func<T1, T2, T3, T4, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( this Dispatcher dispatcher, Func<T1, T2, T3, T4, T5, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, arg5), DispatcherPriority.Normal, token);
 
+    extension( Dispatcher self )
+    {
+        public DispatcherOperation<Task> CallAsync( Func<Task>         func, CancellationToken token                        = default ) => self.InvokeAsync(func,                        DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1>( Func<T1, Task> func, T1                arg, CancellationToken token = default ) => self.InvokeAsync(async () => await func(arg), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2>( Func<T1, T2, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3>( Func<T1, T2, T3, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( Func<T1, T2, T3, T4, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( Func<T1, T2, T3, T4, T5, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, arg5), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1>( Func<T1, CancellationToken, Task> func, T1 arg, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg, token), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2>( Func<T1, T2, CancellationToken, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, token), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3>( Func<T1, T2, T3, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3, token), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( Func<T1, T2, T3, T4, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, token), DispatcherPriority.Normal, token);
+        public DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( Func<T1, T2, T3, T4, T5, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
+            self.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, arg5, token), DispatcherPriority.Normal, token);
+    }
 
-    public static DispatcherOperation<Task> CallAsync<T1>( this Dispatcher dispatcher, Func<T1, CancellationToken, Task> func, T1 arg, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg, token), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2>( this Dispatcher dispatcher, Func<T1, T2, CancellationToken, Task> func, T1 arg1, T2 arg2, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, token), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3>( this Dispatcher dispatcher, Func<T1, T2, T3, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3, token), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4>( this Dispatcher dispatcher, Func<T1, T2, T3, T4, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, token), DispatcherPriority.Normal, token);
-    public static DispatcherOperation<Task> CallAsync<T1, T2, T3, T4, T5>( this Dispatcher dispatcher, Func<T1, T2, T3, T4, T5, CancellationToken, Task> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, CancellationToken token = default ) =>
-        dispatcher.InvokeAsync(async () => await func(arg1, arg2, arg3, arg4, arg5, token), DispatcherPriority.Normal, token);
 
 
     /// <summary>
@@ -103,38 +118,41 @@ public static partial class WpfApi
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static ListCollectionView ToCollectionView<TValue>( this ConcurrentObservableCollection<TValue> list )
+
+    extension<TValue>( ConcurrentObservableCollection<TValue> self )
         where TValue : IEquatable<TValue>
     {
-        BindingOperations.EnableCollectionSynchronization(list, list.Lock);
-        ListCollectionView collection = new(list);
-        return collection;
+        public ListCollectionView ToCollectionView()
+        {
+            BindingOperations.EnableCollectionSynchronization(self, self.Lock);
+            ListCollectionView collection = new(self);
+            return collection;
+        }
+        public ListCollectionView ToCollectionView<TComparer>( TComparer comparer )
+            where TComparer : IComparer<TValue>, IComparer
+        {
+            BindingOperations.EnableCollectionSynchronization(self, self.Lock);
+
+            ListCollectionView collection = new(self) { CustomSort = comparer };
+
+            return collection;
+        }
+        public ListCollectionView ToCollectionView<TComparer>( TComparer comparer, Func<TValue, bool> filter )
+            where TComparer : IComparer<TValue>, IComparer
+        {
+            BindingOperations.EnableCollectionSynchronization(self, self.Lock);
+
+            ListCollectionView collection = new(self)
+                                            {
+                                                Filter     = doFilter,
+                                                CustomSort = comparer
+                                            };
+
+            return collection;
+            bool doFilter( object item ) => item is TValue value && filter(value);
+        }
     }
-    public static ListCollectionView ToCollectionView<TValue, TComparer>( this ConcurrentObservableCollection<TValue> list, TComparer comparer )
-        where TComparer : IComparer<TValue>, IComparer
-        where TValue : IEquatable<TValue>
-    {
-        BindingOperations.EnableCollectionSynchronization(list, list.Lock);
 
-        ListCollectionView collection = new(list) { CustomSort = comparer };
-
-        return collection;
-    }
-    public static ListCollectionView ToCollectionView<TValue, TComparer>( this ConcurrentObservableCollection<TValue> list, TComparer comparer, Func<TValue, bool> filter )
-        where TComparer : IComparer<TValue>, IComparer
-        where TValue : IEquatable<TValue>
-    {
-        BindingOperations.EnableCollectionSynchronization(list, list.Lock);
-
-        ListCollectionView collection = new(list)
-                                        {
-                                            Filter     = doFilter,
-                                            CustomSort = comparer
-                                        };
-
-        return collection;
-        bool doFilter( object item ) => item is TValue value && filter(value);
-    }
 
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

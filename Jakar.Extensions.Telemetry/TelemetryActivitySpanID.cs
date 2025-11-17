@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 01/09/2025  16:01
 
-using System;
-using ZLinq;
-
-
-
 namespace Jakar.Extensions.Telemetry;
 
 
@@ -69,7 +64,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
 
     public static string Collate( TelemetryActivity? current )
     {
-        List<TelemetryActivitySpanID> values = new(Buffers.DEFAULT_CAPACITY);
+        List<TelemetryActivitySpanID> values = new(DEFAULT_CAPACITY);
 
         while ( current is not null )
         {

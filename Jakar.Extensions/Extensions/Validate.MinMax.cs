@@ -3,24 +3,24 @@
 
 public static partial class Validate
 {
-    public static TValue? Min<TValue>( [NotNullIfNotNull("left")] this TValue? left, [NotNullIfNotNull("right")] TValue? right )
+    extension<TValue>( [NotNullIfNotNull("left")] TValue? left )
         where TValue : struct, IComparable<TValue>
     {
-        if ( left is null && right is null ) { return null; }
+        public TValue? Min( [NotNullIfNotNull("right")] TValue? right )
+        {
+            if ( left is null && right is null ) { return null; }
 
-        return Nullable.Compare(left, right) == NOT_FOUND
-                   ? left  ?? right
-                   : right ?? left;
-    }
+            return Nullable.Compare(left, right) == NOT_FOUND
+                       ? left  ?? right
+                       : right ?? left;
+        }
+        public TValue? Max( [NotNullIfNotNull("right")] TValue? right )
+        {
+            if ( left is null && right is null ) { return null; }
 
-
-    public static TValue? Max<TValue>( [NotNullIfNotNull("left")] this TValue? left, [NotNullIfNotNull("right")] TValue? right )
-        where TValue : struct, IComparable<TValue>
-    {
-        if ( left is null && right is null ) { return null; }
-
-        return Nullable.Compare(left, right) == 1
-                   ? left  ?? right
-                   : right ?? left;
+            return Nullable.Compare(left, right) == 1
+                       ? left  ?? right
+                       : right ?? left;
+        }
     }
 }

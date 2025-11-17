@@ -3,38 +3,36 @@
 
 public static class ExceptionExtensions
 {
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
+    extension( Exception e )
     {
-        if ( e is null ) { throw new NullReferenceException(nameof(e)); }
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public Dictionary<string, object?> GetInnerExceptions( ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
+        {
+            if ( e is null ) { throw new NullReferenceException(nameof(e)); }
 
-        if ( e.InnerException is null ) { return dict; }
+            if ( e.InnerException is null ) { return dict; }
 
-        e.Details(out Dictionary<string, object?> inner, includeFullMethodInfo);
+            e.Details(out Dictionary<string, object?> inner, includeFullMethodInfo);
 
-        dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions(ref inner, includeFullMethodInfo);
+            dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions(ref inner, includeFullMethodInfo);
 
-        return dict;
+            return dict;
+        }
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public Dictionary<string, object?> GetProperties()
+        {
+            Dictionary<string, object?> dictionary = new();
+
+            e.GetProperties(ref dictionary);
+
+            return dictionary;
+        }
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public ExceptionDetails Details() => new(e, false);
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public ExceptionDetails FullDetails() => new(e);
     }
 
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static Dictionary<string, object?> GetProperties( this Exception e )
-    {
-        Dictionary<string, object?> dictionary = new();
-
-        e.GetProperties(ref dictionary);
-
-        return dictionary;
-    }
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static ExceptionDetails Details( this Exception e ) => new(e, false);
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static ExceptionDetails FullDetails( this Exception e ) => new(e);
 
 
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static IEnumerable<string> Frames( StackTrace trace )
@@ -75,89 +73,86 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodName( this      Exception e ) => e.TargetSite?.MethodName();
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
-
-
-    [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static JsonNode? GetData( this Exception e ) => JsonSerializer.SerializeToNode(e.Data, JakarExtensionsContext.Default.IDictionary);
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static void Details( this Exception e, out Dictionary<string, string?> dict )
+    extension( Exception          e )
     {
-        dict = new Dictionary<string, string?>(10);
-        e.Details(dict);
-    }
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static void Details<TValue>( this Exception e, in TValue dict )
-        where TValue : class, IDictionary<string, string?>
-    {
-        dict[nameof(Type)] = e.GetType()
-                              .FullName;
-
-        dict[nameof(e.Source)]           = e.Source;
-        dict[nameof(e.Message)]          = e.Message;
-        dict[nameof(e.StackTrace)]       = e.StackTrace;
-        dict[nameof(Exception.HelpLink)] = e.HelpLink;
-        dict[nameof(MethodSignature)]    = e.MethodSignature();
-        dict[nameof(e.ToString)]         = e.ToString();
-    }
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
-    {
-        dict = new Dictionary<string, object?>
-               {
-                   [nameof(Type)] = e.GetType()
-                                     .FullName,
-                   [nameof(Exception.HResult)]    = e.HResult,
-                   [nameof(Exception.HelpLink)]   = e.HelpLink,
-                   [nameof(Exception.Source)]     = e.Source,
-                   [nameof(Exception.Message)]    = e.Message,
-                   [nameof(Exception.Data)]       = e.GetData(),
-                   [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines()
-               };
-
-
-        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
-        else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
-
-        e.GetProperties(ref dict);
-    }
-
-
-    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref Dictionary<string, object?> dictionary )
-        where TValue : Exception
-    {
-        foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodClass()     => e.TargetSite?.MethodClass();
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodName()      => e.TargetSite?.MethodName();
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodSignature() => e.TargetSite?.MethodSignature();
+        [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public JsonNode? GetData() => JsonSerializer.SerializeToNode(e.Data, JakarExtensionsContext.Default.IDictionary);
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public void Details( out Dictionary<string, string?> dict )
         {
-            string key = info.Name;
+            dict = new Dictionary<string, string?>(10);
+            e.Details(dict);
+        }
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public void Details<TValue>( in TValue dict )
+            where TValue : class, IDictionary<string, string?>
+        {
+            dict[nameof(Type)] = e.GetType()
+                                  .FullName;
 
-            if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
+            dict[nameof(e.Source)]           = e.Source;
+            dict[nameof(e.Message)]          = e.Message;
+            dict[nameof(e.StackTrace)]       = e.StackTrace;
+            dict[nameof(Exception.HelpLink)] = e.HelpLink;
+            dict[nameof(MethodSignature)]    = e.MethodSignature();
+            dict[nameof(e.ToString)]         = e.ToString();
+        }
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public void Details( out Dictionary<string, object?> dict, bool includeFullMethodInfo )
+        {
+            dict = new Dictionary<string, object?>
+                   {
+                       [nameof(Type)] = e.GetType()
+                                         .FullName,
+                       [nameof(Exception.HResult)]    = e.HResult,
+                       [nameof(Exception.HelpLink)]   = e.HelpLink,
+                       [nameof(Exception.Source)]     = e.Source,
+                       [nameof(Exception.Message)]    = e.Message,
+                       [nameof(Exception.Data)]       = e.GetData(),
+                       [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines()
+                   };
 
-            dictionary[key] = info.GetValue(e, null);
+
+            if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
+            else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+
+            e.GetProperties(ref dict);
         }
     }
 
 
-    [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref JsonObject dictionary )
+
+    extension<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( TValue e )
         where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+        public void GetProperties( ref Dictionary<string, object?> dictionary )
         {
-            string key = info.Name;
-            if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
+            foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+            {
+                string key = info.Name;
 
-            object? value = info.GetValue(e, null);
-            dictionary[key] = JsonSerializer.SerializeToNode(value, JakarExtensionsContext.Default.Object);
+                if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
+
+                dictionary[key] = info.GetValue(e, null);
+            }
+        }
+        [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public void GetProperties( ref JsonObject dictionary )
+        {
+            foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
+            {
+                string key = info.Name;
+                if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
+
+                object? value = info.GetValue(e, null);
+                dictionary[key] = JsonSerializer.SerializeToNode(value, JakarExtensionsContext.Default.Object);
+            }
         }
     }
+
 
 
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]

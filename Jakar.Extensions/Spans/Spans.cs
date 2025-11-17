@@ -112,36 +112,39 @@ public static partial class Spans
 
 
     // Returns true if all lanes of 'mask' are non-zero (i.e., true)
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private static bool AllTrue( this ref readonly Vector<ushort> mask )
+    extension( ref readonly Vector<ushort> mask )
     {
-        int count = Vector<ushort>.Count;
-
-        for ( int j = 0; j < count; j++ )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] private bool AllTrue()
         {
-            ushort lane = mask[j];
+            int count = Vector<ushort>.Count;
 
-            if ( lane == 0 ) // lane false
+            for ( int j = 0; j < count; j++ )
             {
-                return false;
-            }
-        }
+                ushort lane = mask[j];
 
-        return true;
+                if ( lane == 0 ) // lane false
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] private bool AnyTrue()
+        {
+            int count = Vector<ushort>.Count;
+
+            for ( int j = 0; j < count; j++ )
+            {
+                ushort lane = mask[j];
+                if ( lane != 0 ) { return true; }
+            }
+
+            return false;
+        }
     }
 
     // Returns true if any lane of 'mask' is non-zero
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private static bool AnyTrue( this ref readonly Vector<ushort> mask )
-    {
-        int count = Vector<ushort>.Count;
-
-        for ( int j = 0; j < count; j++ )
-        {
-            ushort lane = mask[j];
-            if ( lane != 0 ) { return true; }
-        }
-
-        return false;
-    }
 
 
     [Pure] public static bool IsNullOrWhiteSpace( this scoped ref readonly Buffer<char> value )
@@ -178,45 +181,49 @@ public static partial class Spans
                 .IsCompleted;
 
 
-    [Pure] public static bool SequenceEqualAny( this scoped ref readonly ReadOnlySpan<string> left, params ReadOnlySpan<string> right )
+    extension( scoped ref readonly ReadOnlySpan<string> left )
     {
-        if ( left.Length != right.Length ) { return false; }
-
-        string[] leftSpan  = ArrayPool<string>.Shared.Rent(left.Length);
-        string[] rightSpan = ArrayPool<string>.Shared.Rent(right.Length);
-
-        try
+        [Pure] public bool SequenceEqualAny( params ReadOnlySpan<string> right )
         {
-            left.CopyTo(leftSpan);
-            right.CopyTo(rightSpan);
-            Array.Sort(leftSpan);
-            Array.Sort(rightSpan);
+            if ( left.Length != right.Length ) { return false; }
 
-            return leftSpan.SequenceEqual(rightSpan);
+            string[] leftSpan  = ArrayPool<string>.Shared.Rent(left.Length);
+            string[] rightSpan = ArrayPool<string>.Shared.Rent(right.Length);
+
+            try
+            {
+                left.CopyTo(leftSpan);
+                right.CopyTo(rightSpan);
+                Array.Sort(leftSpan);
+                Array.Sort(rightSpan);
+
+                return leftSpan.SequenceEqual(rightSpan);
+            }
+            finally
+            {
+                ArrayPool<string>.Shared.Return(leftSpan);
+                ArrayPool<string>.Shared.Return(rightSpan);
+            }
         }
-        finally
+        [Pure] public bool SequenceEqual( params ReadOnlySpan<string> right )
         {
-            ArrayPool<string>.Shared.Return(leftSpan);
-            ArrayPool<string>.Shared.Return(rightSpan);
+            if ( left.Length != right.Length ) { return false; }
+
+            for ( int i = 0; i < left.Length; i++ )
+            {
+                ReadOnlySpan<char> x = left[i];
+                ReadOnlySpan<char> y = right[i];
+
+                if ( x.SequenceEqual(y) ) { continue; }
+
+                return false;
+            }
+
+            return true;
         }
     }
 
-    [Pure] public static bool SequenceEqual( this scoped ref readonly ReadOnlySpan<string> left, params ReadOnlySpan<string> right )
-    {
-        if ( left.Length != right.Length ) { return false; }
 
-        for ( int i = 0; i < left.Length; i++ )
-        {
-            ReadOnlySpan<char> x = left[i];
-            ReadOnlySpan<char> y = right[i];
-
-            if ( x.SequenceEqual(y) ) { continue; }
-
-            return false;
-        }
-
-        return true;
-    }
 
     [Pure] public static int LastIndexOf<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, TValue c, int endIndex )
         where TValue : IEquatable<TValue> =>
@@ -226,49 +233,46 @@ public static partial class Spans
                .LastIndexOf(c);
 
 
-    [Pure] public static EnumerateEnumerator<TValue> Enumerate<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span ) => new(span);
-
-    [Pure] public static EnumerateEnumerator<TValue> Enumerate<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, int startIndex ) => new(startIndex, span);
-
-
-    public static void CopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer )
+    extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> span )
     {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-        value.CopyTo(buffer);
-    }
-
-    public static void CopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer, TValue defaultValue )
-    {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-        value.CopyTo(buffer);
-
-        buffer[value.Length..]
-           .Fill(defaultValue);
-
-        // for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
-    }
-
-
-    public static bool TryCopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer )
-    {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-        return value.TryCopyTo(buffer);
-    }
-
-    public static bool TryCopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer, TValue defaultValue )
-    {
-        Guard.IsInRangeFor(value.Length - 1, buffer, nameof(buffer));
-
-        if ( !value.TryCopyTo(buffer) ) { return false; }
-
-        if ( buffer.Length > value.Length )
+        [Pure] public EnumerateEnumerator<TValue> Enumerate()                 => new(span);
+        [Pure] public EnumerateEnumerator<TValue> Enumerate( int startIndex ) => new(startIndex, span);
+        public void CopyTo( ref Span<TValue> buffer )
         {
-            buffer[value.Length..]
-               .Fill(defaultValue);
+            Guard.IsInRangeFor(span.Length - 1, buffer, nameof(buffer));
+            span.CopyTo(buffer);
         }
+        public void CopyTo( ref Span<TValue> buffer, TValue defaultValue )
+        {
+            Guard.IsInRangeFor(span.Length - 1, buffer, nameof(buffer));
+            span.CopyTo(buffer);
 
-        return true;
+            buffer[span.Length..]
+               .Fill(defaultValue);
+
+            // for ( int i = value.Length; i < buffer.Length; i++ ) { buffer[i] = defaultValue; }
+        }
+        public bool TryCopyTo( ref Span<TValue> buffer )
+        {
+            Guard.IsInRangeFor(span.Length - 1, buffer, nameof(buffer));
+            return span.TryCopyTo(buffer);
+        }
+        public bool TryCopyTo( ref Span<TValue> buffer, TValue defaultValue )
+        {
+            Guard.IsInRangeFor(span.Length - 1, buffer, nameof(buffer));
+
+            if ( !span.TryCopyTo(buffer) ) { return false; }
+
+            if ( buffer.Length > span.Length )
+            {
+                buffer[span.Length..]
+                   .Fill(defaultValue);
+            }
+
+            return true;
+        }
     }
+
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<TValue> CreateSpan<TValue>( int size ) => size.GetArray<TValue>();

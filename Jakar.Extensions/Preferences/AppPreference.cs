@@ -41,58 +41,53 @@ public static class AppPreference
                                                               : NULL;
 
 
-    public static string GetPreference( this string sharedName, string key, string defaultValue = EMPTY, string? alternateKey = null ) => Source.Get(key, sharedName, defaultValue, alternateKey);
-    public static TValue GetPreference<TValue>( this string sharedName, string key, TValue defaultValue, in string? alternateKey = null )
-        where TValue : IParsable<TValue>, IFormattable
+    extension( string sharedName )
     {
-        string value = Source.Get(key, sharedName, defaultValue.ToString(null, CultureInfo.CurrentCulture), alternateKey);
-
-        return TValue.TryParse(value, CultureInfo.CurrentCulture, out TValue? result)
-                   ? result
-                   : defaultValue;
-    }
-
-
-    public static bool GetPreference( this string sharedName, string key, bool defaultValue, string? alternateKey = null )
-    {
-        string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
-        return result.GetBool() is true;
-    }
-    public static bool? GetPreference( this string sharedName, string key, bool? defaultValue, string? alternateKey = null )
-    {
-        string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
-        return result.GetBool();
-    }
-    public static Uri GetPreference( this string sharedName, string key, in Uri defaultValue, string? alternateKey = null )
-    {
-        string value = sharedName.GetPreference(key, defaultValue.OriginalString, alternateKey);
-
-        try
+        public string GetPreference( string key, string defaultValue = EMPTY, string? alternateKey = null ) => Source.Get(key, sharedName, defaultValue, alternateKey);
+        public TValue GetPreference<TValue>( string key, TValue defaultValue, in string? alternateKey = null )
+            where TValue : IParsable<TValue>, IFormattable
         {
-            return Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri? host)
-                       ? host
+            string value = Source.Get(key, sharedName, defaultValue.ToString(null, CultureInfo.CurrentCulture), alternateKey);
+
+            return TValue.TryParse(value, CultureInfo.CurrentCulture, out TValue? result)
+                       ? result
                        : defaultValue;
         }
-        catch ( Exception e )
+        public bool GetPreference( string key, bool defaultValue, string? alternateKey = null )
         {
-            Debug.WriteLine(e);
-            sharedName.RemovePreference(key, alternateKey);
-            return defaultValue;
+            string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
+            return result.GetBool() is true;
         }
+        public bool? GetPreference( string key, bool? defaultValue, string? alternateKey = null )
+        {
+            string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
+            return result.GetBool();
+        }
+        public Uri GetPreference( string key, in Uri defaultValue, string? alternateKey = null )
+        {
+            string value = sharedName.GetPreference(key, defaultValue.OriginalString, alternateKey);
+
+            try
+            {
+                return Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri? host)
+                           ? host
+                           : defaultValue;
+            }
+            catch ( Exception e )
+            {
+                Debug.WriteLine(e);
+                sharedName.RemovePreference(key, alternateKey);
+                return defaultValue;
+            }
+        }
+        public void SetPreference( string key, bool?   value ) => sharedName.SetPreference(key, value.GetString());
+        public void SetPreference( string key, bool    value ) => sharedName.SetPreference(key, value.GetString());
+        public void SetPreference( string key, Uri     value ) => sharedName.SetPreference(key, value.ToString());
+        public void SetPreference( string key, string? value ) => Source.Set(key, value ?? EMPTY, sharedName);
+        public void SetPreference<TValue>( string key, TValue value )
+            where TValue : IParsable<TValue>, IFormattable => Source.Set(key, value, sharedName);
+        public void RemovePreference( string key, string? alternateKey = null ) => Source.Remove(key, sharedName, alternateKey);
     }
-
-
-    public static void SetPreference( this string sharedName, string key, bool?   value ) => sharedName.SetPreference(key, value.GetString());
-    public static void SetPreference( this string sharedName, string key, bool    value ) => sharedName.SetPreference(key, value.GetString());
-    public static void SetPreference( this string sharedName, string key, Uri     value ) => sharedName.SetPreference(key, value.ToString());
-    public static void SetPreference( this string sharedName, string key, string? value ) => Source.Set(key, value ?? EMPTY, sharedName);
-
-
-    public static void SetPreference<TValue>( this string sharedName, string key, TValue value )
-        where TValue : IParsable<TValue>, IFormattable => Source.Set(key, value, sharedName);
-
-
-    public static void RemovePreference( this string sharedName, string key, string? alternateKey = null ) => Source.Remove(key, sharedName, alternateKey);
 
 
 

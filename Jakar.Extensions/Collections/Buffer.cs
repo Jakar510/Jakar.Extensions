@@ -213,7 +213,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         Guard.IsInRange(start,        0, _length);
         Guard.IsInRange(endInclusive, 0, _length);
         Guard.IsGreaterThanOrEqualTo(endInclusive, start);
-        ArrayBuffer<TValue> buffer = new(_length);
+        ArrayBuffer<TValue>  buffer = new(_length);
         ReadOnlySpan<TValue> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
@@ -225,16 +225,8 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public readonly bool Contains( TValue value )
-    {
-        ReadOnlySpan<TValue> values = Values;
-        return values.Contains(value);
-    }
-    public readonly bool Contains( params ReadOnlySpan<TValue> value )
-    {
-        ReadOnlySpan<TValue> values = Values;
-        return values.Contains(in value, EqualityComparer<TValue>.Default);
-    }
+    public readonly bool Contains( TValue                      value ) => Values.Contains(value);
+    public readonly bool Contains( params ReadOnlySpan<TValue> value ) => Values.ContainsAll(value);
 
 
     public bool RemoveAt( int index )

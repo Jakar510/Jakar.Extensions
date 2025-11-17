@@ -19,11 +19,15 @@ public static partial class Spans
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
-    [Pure] public static Memory<byte>         AsMemory( this         MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
-    [Pure] public static ReadOnlyMemory<byte> AsReadOnlyMemory( this MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
-    [Pure] public static ArraySegment<byte>   AsArraySegment( this   MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
-    [Pure] public static ReadOnlySpan<byte>   AsReadOnlySpan( this   MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
-    [Pure] public static Span<byte>           AsSpan( this           MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+    extension( MemoryStream              stream )
+    {
+        [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ArraySegment<byte>   AsArraySegment()   => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ReadOnlySpan<byte>   AsReadOnlySpan()   => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public Span<byte>           AsSpan()           => new(stream.GetBuffer(), 0, (int)stream.Length);
+    }
+
 
 
     /// <summary> USE WITH CAUTION </summary>
@@ -34,12 +38,18 @@ public static partial class Spans
     [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
 
 
-    [Pure] public static Memory<TValue>         ToMemory<TValue>( this                     IEnumerable<TValue> value ) => value as TValue[] ?? value.ToArray();
-    [Pure] public static ReadOnlyMemory<TValue> ToReadOnlyMemory<TValue>( this             IEnumerable<TValue> value ) => value as TValue[] ?? value.ToArray();
-    [Pure] public static Memory<byte>           ToMemory( this scoped ref readonly         Span<byte>          value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<byte>   ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte>  value ) => value.ToArray();
-    [Pure] public static Memory<char>           ToMemory( this scoped ref readonly         ReadOnlySpan<char>  value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<char>   ToReadOnlyMemory( this scoped ref readonly Span<char>          value ) => value.ToArray();
+    extension<TValue>( IEnumerable<TValue>                                  value )
+    {
+        [Pure] public Memory<TValue>         ToMemory()         => value as TValue[] ?? value.ToArray();
+        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => value as TValue[] ?? value.ToArray();
+    }
+
+
+
+    [Pure] public static Memory<byte>           ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<byte>   ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte> value ) => value.ToArray();
+    [Pure] public static Memory<char>           ToMemory( this scoped ref readonly         ReadOnlySpan<char> value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<char>   ToReadOnlyMemory( this scoped ref readonly Span<char>         value ) => value.ToArray();
 
 
     [Pure] public static string? ConvertToString( this scoped ref readonly Memory<char> value ) => MemoryMarshal.TryGetString(value, out string? result, out _, out _)

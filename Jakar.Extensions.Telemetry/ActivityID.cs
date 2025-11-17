@@ -1,12 +1,12 @@
 ﻿namespace Jakar.Extensions.Telemetry;
 
 
-[DefaultValue(nameof(Empty)), JsonConverter(typeof(Converter))]
+[DefaultValue(nameof(Empty))]
 public readonly record struct ActivityID( in Guid ID ) : ISpanParsable<ActivityID>
 {
-    public static readonly ActivityID Empty   = new(Guid.Empty);
+    public static readonly ActivityID Empty    = new(Guid.Empty);
     private readonly       string     __string = ID.ToString();
-    public readonly        Guid       ID      = ID;
+    public readonly        Guid       ID       = ID;
     public override        string     ToString() => __string;
 
 
@@ -35,28 +35,6 @@ public readonly record struct ActivityID( in Guid ID ) : ISpanParsable<ActivityI
     }
 
 
-
-    public sealed class Converter : JsonConverter<ActivityID>
-    {
-        public override void WriteJson( JsonWriter writer, ActivityID value, JsonSerializer serializer ) { writer.WriteValue(value.__string); }
-        public override ActivityID ReadJson( JsonReader reader, Type objectType, ActivityID existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value switch
-                                                                                                                                                                 {
-                                                                                                                                                                     Guid id  => Create(id),
-                                                                                                                                                                     string s => Create(s.AsGuid()) ?? existingValue,
-                                                                                                                                                                     _        => throw new ExpectedValueTypeException(nameof(reader.Value), reader.Value, typeof(Guid), typeof(string))
-                                                                                                                                                                 };
-    }
-
-
-
-    public sealed class NullableConverter : JsonConverter<ActivityID?>
-    {
-        public override void WriteJson( JsonWriter writer, ActivityID? value, JsonSerializer serializer ) { writer.WriteValue(value?.__string); }
-        public override ActivityID? ReadJson( JsonReader reader, Type objectType, ActivityID? existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value switch
-                                                                                                                                                                   {
-                                                                                                                                                                       Guid id  => Create(id),
-                                                                                                                                                                       string s => Create(s.AsGuid()) ?? existingValue,
-                                                                                                                                                                       _        => throw new ExpectedValueTypeException(nameof(reader.Value), reader.Value, typeof(Guid), typeof(string))
-                                                                                                                                                                   };
-    }
+    // public sealed class Converter : JsonConverter<ActivityID> { }
+    // public sealed class NullableConverter : JsonConverter<ActivityID?> { }
 }

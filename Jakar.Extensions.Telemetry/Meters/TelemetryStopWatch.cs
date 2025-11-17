@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 05/05/2025  00:01
 
-using System.IO;
-
-
-
 namespace Jakar.Extensions.Telemetry.Meters;
 
 
@@ -26,6 +22,6 @@ public readonly struct TelemetryStopWatch( string caller, TextWriter? writer = n
     public override string ToString() => SpanDuration.ToString(Elapsed, $"[{__caller}] ");
 
 
-    public static TelemetryStopWatch Start( [CallerMemberName] string caller                                   = BaseRecord.EMPTY ) => new(caller);
-    public static TelemetryStopWatch Start( TextWriter                writer, [CallerMemberName] string caller = BaseRecord.EMPTY ) => new(caller, writer);
+    public static TelemetryStopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => new(caller);
+    public static TelemetryStopWatch Start( TextWriter                writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
 }

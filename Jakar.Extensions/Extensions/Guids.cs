@@ -2,6 +2,7 @@
 // 04/15/2022  5:45 PM
 
 using System.Buffers.Text;
+using System.Text;
 
 
 
@@ -109,108 +110,106 @@ public static class Guids
 
         return NewBase64(in id);
     }
-    public static string NewBase64( in this Guid value )
-    {
-        Span<char> result = stackalloc char[22];
-        value.AsSpan(ref result, out int bytesWritten);
-        return new string(result[..bytesWritten]);
-    }
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
+
     /// <param name="value"> </param>
-    /// <returns> </returns>
-    public static string ToBase64( in this Guid value )
+    extension( in Guid value )
     {
-        Span<char> result = stackalloc char[22];
-        value.AsSpan(ref result, out int bytesWritten);
-        return new string(result[..bytesWritten]);
-    }
-    public static string ToHex( in this Guid value )
-    {
-        Span<byte> result = stackalloc byte[32];
-        value.AsSpan(ref result, out int bytesWritten);
-        return Convert.ToHexString(result[..bytesWritten]);
-    }
-
-
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
-    public static bool AsSpan( in this Guid value, scoped ref Span<char> result, out int bytesWritten )
-    {
-        Guard.IsGreaterThanOrEqualTo(result.Length, 22);
-        Span<byte> base64Bytes = stackalloc byte[24];
-        Span<byte> idBytes     = stackalloc byte[16];
-        if ( !value.TryWriteBytes(idBytes, BitConverter.IsLittleEndian, out bytesWritten) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
-
-
-        System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out bytesWritten);
-        result = result[..bytesWritten];
-
-        for ( int i = 0; i < bytesWritten; i++ )
+        public string NewBase64()
         {
-            result[i] = base64Bytes[i] switch
-                        {
-                            SLASH_BYTE => HYPHEN,
-                            PLUS_BYTE  => UNDERSCORE,
-                            _          => (char)base64Bytes[i]
-                        };
+            Span<char> result = stackalloc char[22];
+            value.AsSpan(ref result, out int bytesWritten);
+            return new string(result[..bytesWritten]);
         }
-
-        return true;
-    }
-    public static bool AsSpan( in this Guid value, scoped ref Span<byte> result, out int bytesWritten, StandardFormat format = default )
-    {
-        Guard.IsGreaterThanOrEqualTo(result.Length, 16);
-        return Utf8Formatter.TryFormat(value, result, out bytesWritten, format);
-    }
-
-
-    public static (long Lower, long Upper) AsLong( in this Guid value ) =>
-        value.AsLong(out long lower, out long upper)
-            ? ( lower, upper )
-            : throw new InvalidOperationException("Guid.TryWriteBytes failed");
-    public static (ulong Lower, ulong Upper) AsULong( in this Guid value ) =>
-        value.AsLong(out ulong lower, out ulong upper)
-            ? ( lower, upper )
-            : throw new InvalidOperationException("Guid.TryWriteBytes failed");
-
-
-    public static bool AsLong( in this Guid value, out long lower, out long upper )
-    {
-        const int  SIZE = sizeof(long);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-
-        if ( value.TryWriteBytes(span) )
+        /// <summary>
+        ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
+        /// </summary>
+        /// <returns> </returns>
+        public string ToBase64()
         {
-            lower = BitConverter.ToInt64(span[..SIZE]);
-            upper = BitConverter.ToInt64(span[SIZE..]);
+            Span<char> result = stackalloc char[22];
+            value.AsSpan(ref result, out int bytesWritten);
+            return new string(result[..bytesWritten]);
+        }
+        public string ToHex()
+        {
+            Span<byte> result = stackalloc byte[32];
+            value.AsSpan(ref result, out int bytesWritten);
+            return Convert.ToHexString(result[..bytesWritten]);
+        }
+        /// <summary>
+        ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
+        /// </summary>
+        public bool AsSpan( scoped ref Span<char> result, out int bytesWritten )
+        {
+            Guard.IsGreaterThanOrEqualTo(result.Length, 22);
+            Span<byte> base64Bytes = stackalloc byte[24];
+            Span<byte> idBytes     = stackalloc byte[16];
+            if ( !value.TryWriteBytes(idBytes, BitConverter.IsLittleEndian, out bytesWritten) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
+
+            System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out bytesWritten);
+            result = result[..bytesWritten];
+
+            for ( int i = 0; i < bytesWritten; i++ )
+            {
+                result[i] = base64Bytes[i] switch
+                            {
+                                SLASH_BYTE => HYPHEN,
+                                PLUS_BYTE  => UNDERSCORE,
+                                _          => (char)base64Bytes[i]
+                            };
+            }
+
             return true;
         }
-
-        lower = 0;
-        upper = 0;
-        return false;
-    }
-    public static bool AsLong( in this Guid value, out ulong lower, out ulong upper )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-
-        if ( value.TryWriteBytes(span) )
+        public bool AsSpan( scoped ref Span<byte> result, out int bytesWritten, StandardFormat format = default )
         {
-            lower = BitConverter.ToUInt64(span[..SIZE]);
-            upper = BitConverter.ToUInt64(span[SIZE..]);
-            return true;
+            Guard.IsGreaterThanOrEqualTo(result.Length, 16);
+            return Utf8Formatter.TryFormat(value, result, out bytesWritten, format);
         }
+        public (long Lower, long Upper) AsLong() =>
+            value.AsLong(out long lower, out long upper)
+                ? ( lower, upper )
+                : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+        public (ulong Lower, ulong Upper) AsULong() =>
+            value.AsLong(out ulong lower, out ulong upper)
+                ? ( lower, upper )
+                : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+        public bool AsLong( out long lower, out long upper )
+        {
+            const int  SIZE = sizeof(long);
+            Span<byte> span = stackalloc byte[SIZE * 2];
 
-        lower = 0;
-        upper = 0;
-        return false;
+            if ( value.TryWriteBytes(span) )
+            {
+                lower = BitConverter.ToInt64(span[..SIZE]);
+                upper = BitConverter.ToInt64(span[SIZE..]);
+                return true;
+            }
+
+            lower = 0;
+            upper = 0;
+            return false;
+        }
+        public bool AsLong( out ulong lower, out ulong upper )
+        {
+            const int  SIZE = sizeof(ulong);
+            Span<byte> span = stackalloc byte[SIZE * 2];
+
+            if ( value.TryWriteBytes(span) )
+            {
+                lower = BitConverter.ToUInt64(span[..SIZE]);
+                upper = BitConverter.ToUInt64(span[SIZE..]);
+                return true;
+            }
+
+            lower = 0;
+            upper = 0;
+            return false;
+        }
     }
+
 
 
     public static Guid AsGuid( in this (long Lower, long Upper) value )
@@ -269,22 +268,28 @@ public static class Guids
 
         return new Guid(span[..bytesWritten]);
     }
-    public static Int128 AsInt128( in this Guid value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
 
-        return value.TryWriteBytes(span)
-                   ? new Int128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
-                   : throw new InvalidOperationException("Guid.TryWriteBytes failed");
-    }
-    public static UInt128 AsUInt128( in this Guid value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
 
-        return value.TryWriteBytes(span)
-                   ? new UInt128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
-                   : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+
+    extension( in Guid value )
+    {
+        public Int128 AsInt128()
+        {
+            const int  SIZE = sizeof(ulong);
+            Span<byte> span = stackalloc byte[SIZE * 2];
+
+            return value.TryWriteBytes(span)
+                       ? new Int128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
+                       : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+        }
+        public UInt128 AsUInt128()
+        {
+            const int  SIZE = sizeof(ulong);
+            Span<byte> span = stackalloc byte[SIZE * 2];
+
+            return value.TryWriteBytes(span)
+                       ? new UInt128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
+                       : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+        }
     }
 }

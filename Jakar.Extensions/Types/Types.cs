@@ -7,31 +7,38 @@ namespace Jakar.Extensions;
 
 public static partial class Types
 {
-    public static bool IsInitOnly( this PropertyInfo propertyInfo ) => propertyInfo.IsInitOnly(typeof(IsExternalInit));
-
-    public static bool IsInitOnly( this PropertyInfo propertyInfo, Type isExternalInit )
+    extension( PropertyInfo propertyInfo )
     {
-        MethodInfo? setMethod = propertyInfo.SetMethod;
-        if ( setMethod is null ) { return false; }
+        public bool IsInitOnly() => propertyInfo.IsInitOnly(typeof(IsExternalInit));
+        public bool IsInitOnly( Type isExternalInit )
+        {
+            MethodInfo? setMethod = propertyInfo.SetMethod;
+            if ( setMethod is null ) { return false; }
 
-        if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException(nameof(setMethod.ReturnParameter)); }
+            if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException(nameof(setMethod.ReturnParameter)); }
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
-                        .Contains(isExternalInit);
+            return setMethod.ReturnParameter.GetRequiredCustomModifiers()
+                            .Contains(isExternalInit);
+        }
     }
+
+
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqualType( this         Type   value, Type other ) => value                                  == other;
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqualType<TValue>( this TValue value, Type other ) => ( value?.GetType() ?? typeof(TValue) ) == other;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEqualType<TValue>( this Type   other ) => typeof(TValue) == other;
+    extension( Type        other )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public        bool IsEqualType<TValue>() => typeof(TValue) == other;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsOneOfType( params ReadOnlySpan<Type> types ) => types.AsValueEnumerable()
+                                                                                                                              .Any(other.IsEqualType);
+    }
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsOneOfType( this Type value, params ReadOnlySpan<Type> types ) => types.AsValueEnumerable()
-                                                                                                                                                  .Any(value.IsEqualType);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsOneOfType<TValue>( this TValue value, params ReadOnlySpan<Type> types ) => ( value?.GetType() ?? typeof(TValue) ).IsOneOfType(types);
 
 

@@ -15,59 +15,59 @@ public static class Enricher
     private static readonly ConcurrentDictionary<string, LogEventProperty> __sourceContexts = new();
 
 
-    /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
     /// <param name="activity"> The activity. </param>
-    /// <returns> The span unique identifier. </returns>
-    public static string GetSpanID( this Activity activity )
+    extension( Activity activity )
     {
-        ArgumentNullException.ThrowIfNull(activity);
+        /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span unique identifier. </returns>
+        public string GetSpanID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
 
-        string? spanId = activity.IdFormat switch
-                         {
-                             ActivityIdFormat.Hierarchical => activity.Id,
-                             ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
-                             ActivityIdFormat.Unknown      => null,
-                             _                             => null
-                         };
+            string? spanId = activity.IdFormat switch
+                             {
+                                 ActivityIdFormat.Hierarchical => activity.Id,
+                                 ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
+                                 ActivityIdFormat.Unknown      => null,
+                                 _                             => null
+                             };
 
-        return spanId ?? EMPTY;
+            return spanId ?? EMPTY;
+        }
+        /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span trace unique identifier. </returns>
+        public string GetTraceID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
+
+            string? traceId = activity.IdFormat switch
+                              {
+                                  ActivityIdFormat.Hierarchical => activity.RootId,
+                                  ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
+                                  ActivityIdFormat.Unknown      => null,
+                                  _                             => null
+                              };
+
+            return traceId ?? EMPTY;
+        }
+        /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span parent unique identifier. </returns>
+        public string GetParentID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
+
+            string? parentId = activity.IdFormat switch
+                               {
+                                   ActivityIdFormat.Hierarchical => activity.ParentId,
+                                   ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
+                                   ActivityIdFormat.Unknown      => null,
+                                   _                             => null
+                               };
+
+            return parentId ?? EMPTY;
+        }
     }
 
-    /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
-    /// <param name="activity"> The activity. </param>
-    /// <returns> The span trace unique identifier. </returns>
-    public static string GetTraceID( this Activity activity )
-    {
-        ArgumentNullException.ThrowIfNull(activity);
-
-        string? traceId = activity.IdFormat switch
-                          {
-                              ActivityIdFormat.Hierarchical => activity.RootId,
-                              ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
-                              ActivityIdFormat.Unknown      => null,
-                              _                             => null
-                          };
-
-        return traceId ?? EMPTY;
-    }
-
-    /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
-    /// <param name="activity"> The activity. </param>
-    /// <returns> The span parent unique identifier. </returns>
-    public static string GetParentID( this Activity activity )
-    {
-        ArgumentNullException.ThrowIfNull(activity);
-
-        string? parentId = activity.IdFormat switch
-                           {
-                               ActivityIdFormat.Hierarchical => activity.ParentId,
-                               ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
-                               ActivityIdFormat.Unknown      => null,
-                               _                             => null
-                           };
-
-        return parentId ?? EMPTY;
-    }
 
 
     public static void             TryEnrich( this         LogEvent log, string sourceContext ) => log.AddPropertyIfAbsent(__sourceContexts.GetOrAdd(sourceContext, GetSourceProperty));

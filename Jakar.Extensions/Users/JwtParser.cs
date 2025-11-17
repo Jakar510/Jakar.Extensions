@@ -108,31 +108,35 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
 public static class JwtParserExtensions
 {
-    private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
+    extension( IConfiguration configuration )
     {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string?             value         = configuration[fileKey];
-
-        if ( !string.IsNullOrWhiteSpace(value) )
+        private async ValueTask<byte[]> GetJWTKey( string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
         {
-            LocalFile file = value;
+            using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+            string?             value         = configuration[fileKey];
 
-            return file.Exists
-                       ? await file.ReadAsync()
-                                   .AsBytes(token)
-                       : throw new FileNotFoundException(file.FullPath);
+            if ( !string.IsNullOrWhiteSpace(value) )
+            {
+                LocalFile file = value;
+
+                return file.Exists
+                           ? await file.ReadAsync()
+                                       .AsBytes(token)
+                           : throw new FileNotFoundException(file.FullPath);
+            }
+
+            value = configuration[jwt];
+
+            return !string.IsNullOrWhiteSpace(value)
+                       ? Encoding.UTF8.GetBytes(value)
+                       : throw new KeyNotFoundException($"Keys not found: [ {nameof(jwt)}: {jwt}, {nameof(fileKey)}: {fileKey} ]");
         }
-
-        value = configuration[jwt];
-
-        return !string.IsNullOrWhiteSpace(value)
-                   ? Encoding.UTF8.GetBytes(value)
-                   : throw new KeyNotFoundException($"Keys not found: [ {nameof(jwt)}: {jwt}, {nameof(fileKey)}: {fileKey} ]");
+        public async ValueTask<SigningCredentials>   GetSigningCredentials( string   algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt     = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey), algorithm);
+        public async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( string jwt       = JWT,                                    string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey));
     }
 
 
-    public static async ValueTask<SigningCredentials>   GetSigningCredentials( this   IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt     = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey), algorithm);
-    public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt       = JWT,                                    string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey));
+
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IWebAppSettings settings, string authenticationType, string? audience = null, string? issuer = null, string jwt = JWT, string fileKey = JWT_KEY, TimeSpan? clockSkew = null )
     {
         IConfiguration       configuration = settings.Configuration;

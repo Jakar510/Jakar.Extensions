@@ -3,60 +3,58 @@
 
 public static partial class Types
 {
-    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type ) => type.HasInterface(typeof(ISet<>));
-
-
-    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type classType, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
+    extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type )
     {
-        if ( classType.IsSet(out IReadOnlyList<Type>? itemTypes) )
+        public bool IsSet() => type.HasInterface(typeof(ISet<>));
+        public bool IsSet( [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
         {
-            itemType      = itemTypes[0];
-            isBuiltInType = itemType.IsBuiltInType();
-            return true;
-        }
-
-        isBuiltInType = null;
-        itemType      = null;
-        return false;
-    }
-
-
-    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type propertyType, [NotNullWhen(true)] out Type? itemType )
-    {
-        if ( propertyType.IsSet(out IReadOnlyList<Type>? itemTypes) )
-        {
-            itemType = itemTypes[0];
-            return true;
-        }
-
-        itemType = null;
-        return false;
-    }
-
-    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type classType, [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
-    {
-        if ( classType.IsGenericType && classType.IsSet() )
-        {
-            itemTypes = classType.GetGenericArguments();
-            return true;
-        }
-
-        foreach ( Type interfaceType in classType.GetInterfaces() )
-        {
-            if ( interfaceType == typeof(ISet<>) )
+            if ( type.IsSet(out IReadOnlyList<Type>? itemTypes) )
             {
-                itemTypes = interfaceType.GetGenericArguments();
+                itemType      = itemTypes[0];
+                isBuiltInType = itemType.IsBuiltInType();
                 return true;
             }
 
-            if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISet<>) )
+            isBuiltInType = null;
+            itemType      = null;
+            return false;
+        }
+        public bool IsSet( [NotNullWhen(true)] out Type? itemType )
+        {
+            if ( type.IsSet(out IReadOnlyList<Type>? itemTypes) )
             {
-                itemTypes = interfaceType.GetGenericArguments();
+                itemType = itemTypes[0];
                 return true;
             }
-        }
 
-        itemTypes = null;
-        return false;
+            itemType = null;
+            return false;
+        }
+        public bool IsSet( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+        {
+            if ( type.IsGenericType && type.IsSet() )
+            {
+                itemTypes = type.GetGenericArguments();
+                return true;
+            }
+
+            foreach ( Type interfaceType in type.GetInterfaces() )
+            {
+                if ( interfaceType == typeof(ISet<>) )
+                {
+                    itemTypes = interfaceType.GetGenericArguments();
+                    return true;
+                }
+
+                if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISet<>) )
+                {
+                    itemTypes = interfaceType.GetGenericArguments();
+                    return true;
+                }
+            }
+
+            itemTypes = null;
+            return false;
+        }
     }
 }

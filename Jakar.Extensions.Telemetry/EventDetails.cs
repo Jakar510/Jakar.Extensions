@@ -10,7 +10,7 @@ public sealed class EventDetails : Dictionary<string, string?>
     public EventDetails( IDictionary<string, string?> dictionary ) : base( dictionary ) => EnsureCapacity( 20 );
 
 
-    public override string ToString() => this.ToJson();
+    // public override string ToString() => this.ToJson();
     public static void AddAppState<TValue>( ref readonly TValue dictionary, string appName )
         where TValue : class, IDictionary<string, object?> => dictionary[nameof(AppState)] = AppState( appName );
     public static EventDetails AppState( string appName ) =>

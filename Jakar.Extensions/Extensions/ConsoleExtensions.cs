@@ -49,14 +49,18 @@ public static class ConsoleExtensions
     }
 
 
-    public static string GetMessage( this string self, string start = INFORMATION, char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
-    public static string GetWarning( this string self, string start = WARNING,     char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
-    public static string GetError( this   string self, string start = ERROR,       char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+    extension( string      self )
+    {
+        public string GetMessage( string start = INFORMATION, char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+        public string GetWarning( string start = WARNING,     char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+        public string GetError( string   start = ERROR,       char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
+        public string GetCount( int      count,               char c = '-', int length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
+    }
 
 
-    public static string GetCount( this         string              self, int  count,   char c      = '-', int length = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
-    public static string GetCount( this         ICollection         self, char c = '-', int  length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
-    public static string GetCount<TValue>( this ICollection<TValue> self, char c = '-', int  length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+
+    public static string GetCount( this         ICollection         self,  char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+    public static string GetCount<TValue>( this ICollection<TValue> self,  char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
 
 
     public static void Print( this Span<char>         self ) => Console.Write(self.ToString());

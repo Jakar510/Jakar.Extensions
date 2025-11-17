@@ -7,17 +7,18 @@ public static class DrawingSizeExtensions
         where TEnum : unmanaged, Enum => new Size(baseSize, baseSize).GetScaledSizes(scales);
 
 
-    [RequiresDynamicCode(nameof(GetScaledSizes))] public static IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( this Size baseSize, params TEnum[] scales )
-        where TEnum : unmanaged, Enum
+    extension( Size baseSize )
     {
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TEnum scale in scales )
+        [RequiresDynamicCode(nameof(GetScaledSizes))] public IEnumerable<(TEnum, Size)> GetScaledSizes<TEnum>( params TEnum[] scales )
+            where TEnum : unmanaged, Enum
         {
-            int value = scale.GetEnumValue<int, TEnum>();
-            yield return ( scale, baseSize.Scaled(value) );
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach ( TEnum scale in scales )
+            {
+                int value = scale.GetEnumValue<int, TEnum>();
+                yield return ( scale, baseSize.Scaled(value) );
+            }
         }
+        public Size Scaled( int value ) => new(baseSize.Width * value, baseSize.Height * value);
     }
-
-
-    public static Size Scaled( this Size baseSize, int value ) => new(baseSize.Width * value, baseSize.Height * value);
 }

@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 06/25/2025  16:28
 
-using ZLinq;
-using ZLinq.Internal;
-
-
-
 namespace Jakar.Extensions.Telemetry;
 
 
@@ -79,7 +74,7 @@ public record struct Pairs( int Capacity ) : IEnumerable<Pair>, IValueEnumerable
     public readonly   ReadOnlySpan<Pair> Values => Span[.._length];
 
 
-    public Pairs() : this(Buffers.DEFAULT_CAPACITY) { }
+    public Pairs() : this(DEFAULT_CAPACITY) { }
     public void Dispose()
     {
         if ( _owner is not null ) { ArrayPool<Pair>.Shared.Return(_owner); }

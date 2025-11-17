@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework> 
+		<TargetFramework>net10.0</TargetFramework> 
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>

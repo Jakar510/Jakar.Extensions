@@ -70,7 +70,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
             if ( line.IsNullOrWhiteSpace() ) { continue; }
 
 
-            Debug.Assert(!line.Contains('\n', '\r'));
+            Debug.Assert(line.ContainsNone('\n', '\r'));
 
             switch ( line[0] )
             {

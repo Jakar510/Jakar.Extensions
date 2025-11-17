@@ -6,12 +6,16 @@ namespace Jakar.Extensions;
 
 public static class StatusExtensions
 {
-    public static HttpStatusCode ToStatus( this Status         code ) => (HttpStatusCode)code;
-    public static Status         ToStatus( this HttpStatusCode code ) => (Status)code;
+    public static HttpStatusCode ToStatus( this Status    code ) => (HttpStatusCode)code;
+    extension( HttpStatusCode code )
+    {
+        public        Status         ToStatus()                      => (Status)code;
+        public string ToStringFast() => code.ToStatus()
+                                            .ToStringFast();
+    }
 
 
-    public static string ToStringFast( this HttpStatusCode status ) => status.ToStatus()
-                                                                             .ToStringFast();
+
     public static string ToStringFast( this Status status ) => status switch
                                                                {
                                                                    Status.Continue                      => nameof(Status.Continue),

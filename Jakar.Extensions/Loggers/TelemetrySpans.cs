@@ -84,22 +84,24 @@ public static class TelemetrySpans
             : throw new InvalidOperationException("Activity.Current is not the same as the activity.");
 
 
-    public static IEnumerable<ActivityLink> Link( this IEnumerable<Activity>      activity, ActivityTagsCollection?    tags = null ) => activity.Select(x => x.Link(tags));
-    public static IEnumerable<ActivityLink> Link( this IEnumerable<TelemetrySpan> activity, ActivityTagsCollection?    tags = null ) => activity.Select(x => x.Link(tags));
-    public static ActivityLink              Link( this Activity                   activity, in ActivityTagsCollection? tags = null ) => new(activity.Context, tags);
-
-
-    public static void TrackEvent( this Activity activity, in ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY ) => activity.AddEvent(caller.GetEvent(tags));
-    public static void TrackEvent<T>( this Activity activity, T value, ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY )
+    public static IEnumerable<ActivityLink> Link( this IEnumerable<Activity>      activity, ActivityTagsCollection? tags = null ) => activity.Select(x => x.Link(tags));
+    public static IEnumerable<ActivityLink> Link( this IEnumerable<TelemetrySpan> activity, ActivityTagsCollection? tags = null ) => activity.Select(x => x.Link(tags));
+    extension( Activity                        activity )
     {
-        tags                ??= new ActivityTagsCollection();
-        tags[nameof(value)] =   value;
-        activity.AddEvent(caller.GetEvent(tags));
+        public ActivityLink Link( in       ActivityTagsCollection? tags = null )                                           => new(activity.Context, tags);
+        public void         TrackEvent( in ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY ) => activity.AddEvent(caller.GetEvent(tags));
+        public void TrackEvent<T>( T value, ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY )
+        {
+            tags                ??= new ActivityTagsCollection();
+            tags[nameof(value)] =   value;
+            activity.AddEvent(caller.GetEvent(tags));
+        }
+        public void SetAttribute( string key, object? value ) => activity.SetTag(key, value);
+        public void AddAttribute( string key, object? value ) => activity.AddTag(key, value);
     }
 
 
-    public static void            SetAttribute( this Activity activity, string                  key, object? value ) => activity.SetTag(key, value);
-    public static void            AddAttribute( this Activity activity, string                  key, object? value ) => activity.AddTag(key, value);
+
     public static ActivityEvent   GetEvent( this     string   name,     ActivityTagsCollection? tags = null ) => new(name, DateTimeOffset.UtcNow, tags);
     public static ActivityContext RandomContext()                    => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
     public static string          GetClassName<T>( this T instance ) => ( instance?.GetType() ?? typeof(T) ).Name;

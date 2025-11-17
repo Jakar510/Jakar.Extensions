@@ -6,59 +6,60 @@ namespace Jakar.Extensions;
 
 public static partial class AsyncLinq
 {
-    public static TElement? First<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
+    extension<TElement>( IEnumerable<TElement> enumerable )
     {
-        foreach ( TElement element in enumerable )
+        public TElement? First<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            if ( selector(element, value) ) { return element; }
-        }
+            foreach ( TElement element in enumerable )
+            {
+                if ( selector(element, value) ) { return element; }
+            }
 
-        return default;
-    }
-    public static TElement? FirstOrDefault<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
-    {
-        foreach ( TElement element in enumerable )
+            return default;
+        }
+        public TElement? FirstOrDefault<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            if ( selector(element, value) ) { return element; }
+            foreach ( TElement element in enumerable )
+            {
+                if ( selector(element, value) ) { return element; }
+            }
+
+            return default;
         }
-
-        return default;
-    }
-
-
-    public static TElement? Single<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
-    {
-        Enumerable.Range(0, 10)
-                  .AsAsyncEnumerable();
-
-        TElement? result = default;
-
-        foreach ( TElement element in enumerable )
+        public TElement? Single<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            if ( !selector(element, value) ) { continue; }
+            Enumerable.Range(0, 10)
+                      .AsAsyncEnumerable();
 
-            if ( result is not null ) { throw new InvalidOperationException($"{nameof(enumerable)} has multiple results"); }
+            TElement? result = default;
 
-            result = element;
-            break;
+            foreach ( TElement element in enumerable )
+            {
+                if ( !selector(element, value) ) { continue; }
+
+                if ( result is not null ) { throw new InvalidOperationException($"{nameof(enumerable)} has multiple results"); }
+
+                result = element;
+                break;
+            }
+
+            return result;
         }
-
-        return result;
-    }
-    public static TElement? SingleOrDefault<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
-    {
-        TElement? result = default;
-
-        foreach ( TElement element in enumerable )
+        public TElement? SingleOrDefault<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            if ( !selector(element, value) ) { continue; }
+            TElement? result = default;
 
-            if ( result is not null ) { return default; }
+            foreach ( TElement element in enumerable )
+            {
+                if ( !selector(element, value) ) { continue; }
 
-            result = element;
-            break;
+                if ( result is not null ) { return default; }
+
+                result = element;
+                break;
+            }
+
+            return result;
         }
-
-        return result;
     }
 }

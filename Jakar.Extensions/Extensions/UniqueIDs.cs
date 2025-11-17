@@ -7,122 +7,136 @@ namespace Jakar.Extensions;
 public static class UniqueIDs
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    short  value ) => value > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    short? value ) => value is > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this short? value ) => value is null or <= 0;
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this short? value, [NotNullWhen(true)] out long? id )
+    extension( short?         value )
     {
-        if ( value.HasValue )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID()    => value is > 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID() => value is null or <= 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID( [NotNullWhen(true)] out long? id )
         {
-            id = value.Value;
-            return id.IsValidID();
-        }
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsValidID();
+            }
 
-        id = null;
-        return false;
+            id = null;
+            return false;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID( [NotNullWhen(true)] out long? id )
+        {
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsNotValidID();
+            }
+
+            id = null;
+            return false;
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this short? value, [NotNullWhen(true)] out long? id )
-    {
-        if ( value.HasValue )
-        {
-            id = value.Value;
-            return id.IsNotValidID();
-        }
 
-        id = null;
-        return false;
-    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    int  value ) => value > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    int? value ) => value is > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this int? value ) => value is null or <= 0;
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this int? value, [NotNullWhen(true)] out long? id )
+    extension( int?         value )
     {
-        if ( value.HasValue )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID()    => value is > 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID() => value is null or <= 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID( [NotNullWhen(true)] out long? id )
         {
-            id = value.Value;
-            return id.IsValidID();
-        }
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsValidID();
+            }
 
-        id = null;
-        return false;
+            id = null;
+            return false;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID( [NotNullWhen(true)] out long? id )
+        {
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsNotValidID();
+            }
+
+            id = null;
+            return false;
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this int? value, [NotNullWhen(true)] out long? id )
-    {
-        if ( value.HasValue )
-        {
-            id = value.Value;
-            return id.IsNotValidID();
-        }
 
-        id = null;
-        return false;
-    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    long  value ) => value > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    long? value ) => value is > 0;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this long? value ) => value is null or <= 0;
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this long? value, [NotNullWhen(true)] out long? id )
+    extension( long?         value )
     {
-        if ( value.HasValue )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID()    => value is > 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID() => value is null or <= 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID( [NotNullWhen(true)] out long? id )
         {
-            id = value.Value;
-            return id.IsValidID();
-        }
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsValidID();
+            }
 
-        id = null;
-        return false;
+            id = null;
+            return false;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID( [NotNullWhen(true)] out long? id )
+        {
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsNotValidID();
+            }
+
+            id = null;
+            return false;
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this long? value, [NotNullWhen(true)] out long? id )
-    {
-        if ( value.HasValue )
-        {
-            id = value.Value;
-            return id.IsNotValidID();
-        }
 
-        id = null;
-        return false;
-    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    Guid  value ) => !value.IsNotValidID();
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this    Guid? value ) => value.HasValue && value.Value.IsValidID();
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this Guid? value ) => value.HasValue && value.Value.IsValidID();
+    extension( Guid?         value )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID()    => value.HasValue && value.Value.IsValidID();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID() => value.HasValue && value.Value.IsValidID();
+    }
 #if NET9_0_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this Guid value ) => Guid.Empty.Equals(value) || Guid.AllBitsSet.Equals(value);
 #else
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid value ) => Guid.Empty.Equals( value );
 #endif
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this Guid? value, [NotNullWhen(true)] out Guid? id )
+    extension( Guid? value )
     {
-        if ( value.HasValue )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID( [NotNullWhen(true)] out Guid? id )
         {
-            id = value.Value;
-            return id.IsValidID();
-        }
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsValidID();
+            }
 
-        id = null;
-        return false;
+            id = null;
+            return false;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID( [NotNullWhen(true)] out Guid? id )
+        {
+            if ( value.HasValue )
+            {
+                id = value.Value;
+                return id.IsNotValidID();
+            }
+
+            id = null;
+            return false;
+        }
     }
 
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this Guid? value, [NotNullWhen(true)] out Guid? id )
-    {
-        if ( value.HasValue )
-        {
-            id = value.Value;
-            return id.IsNotValidID();
-        }
-
-        id = null;
-        return false;
-    }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsValidID( this IUniqueID<short> value ) => value.ID.IsValidID();

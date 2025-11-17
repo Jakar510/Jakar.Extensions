@@ -2,8 +2,6 @@
 // 06/25/2024  10:06
 
 using System.Diagnostics;
-using ZLinq;
-using ZLinq.Linq;
 
 
 
@@ -14,7 +12,7 @@ namespace Jakar.Extensions.Telemetry;
 public sealed class TelemetryActivitySource( in AppInformation appContext ) : IValueEnumerable<TelemetryActivitySource.Enumerator, TelemetryActivity>, IDisposable
 {
     internal readonly AppInformation                                  appContext   = appContext;
-    private readonly  ConcurrentDictionary<string, TelemetryActivity> __activities = new(Environment.ProcessorCount, Buffers.DEFAULT_CAPACITY, StringComparer.Ordinal);
+    private readonly  ConcurrentDictionary<string, TelemetryActivity> __activities = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal);
 
 
     public          IEnumerable<TelemetryActivity> Activities  => __activities.Values;

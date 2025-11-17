@@ -5,7 +5,6 @@ namespace Jakar.Extensions.Telemetry;
 
 
 /// <summary> Represents an operation with context to be used for logging. </summary>
-[JsonObject, SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible")]
 public sealed class TelemetryActivity( string operationName, in TelemetryActivityContext context ) : IDisposable
 {
     public const      string                   OPERATION_NAME = "OperationName";
@@ -103,7 +102,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
         Events.AddLast(value);
         return this;
     }
-    public TelemetryActivity AddEvent( [CallerMemberName] string caller = BaseRecord.EMPTY ) => AddEvent(new TelemetryEvent(caller));
+    public TelemetryActivity AddEvent( [CallerMemberName] string caller = EMPTY ) => AddEvent(new TelemetryEvent(caller));
 
 
     public void AddTag( string                    key, string? value ) => AddTag(new Pair(key, value));

@@ -53,11 +53,14 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     [Pure] public TelemetrySpan CreateSubSpan( TelemetryActivity parent, string name, ActivityKind kind = ActivityKind.Internal ) => new(this, parent, name);
 
 
-    [Pure]
-    public TelemetryActivity GetActivity( string operationName, TelemetryActivity? parent = null, ActivityKind kind = ActivityKind.Internal )
+    [Pure] public TelemetryActivity GetActivity( string operationName, TelemetryActivity? parent = null, ActivityKind kind = ActivityKind.Internal )
     {
         ArgumentException.ThrowIfNullOrEmpty(operationName);
-        TelemetryActivity activity = Source.GetOrAddActivity(operationName).SetKind(kind).SetParent(parent);
+
+        TelemetryActivity activity = Source.GetOrAddActivity(operationName)
+                                           .SetKind(kind)
+                                           .SetParent(parent);
+
         activity.SetStatus(StatusCode.Ok);
         return activity.Start();
     }
@@ -122,16 +125,16 @@ public readonly struct TelemetrySpan : IDisposable, IActivityTracer
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryEvent GetEvent( string name, Pairs tags ) => new(name, DateTimeOffset.UtcNow, tags);
     public                                                           void           SetInactive() => TelemetryActivity.Current = _parent;
-    public void SetCurrent( [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void SetCurrent( [CallerMemberName] string caller = EMPTY )
     {
         TelemetryActivity.Current = Activity;
         Activity.AddEvent(caller);
     }
 
 
-    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                             = BaseRecord.EMPTY ) => new(_source, Activity, caller);
-    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetryActivity parent, [CallerMemberName] string caller = BaseRecord.EMPTY ) => new(source, parent, caller);
-    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetrySpan     parent, [CallerMemberName] string caller = BaseRecord.EMPTY ) => new(source, parent.Activity, caller);
+    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                             = EMPTY ) => new(_source, Activity, caller);
+    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetryActivity parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent, caller);
+    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetrySpan     parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent.Activity, caller);
 
 
     public TelemetrySpan AddTag( string key, string? value )

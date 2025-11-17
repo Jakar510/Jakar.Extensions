@@ -26,6 +26,10 @@ public static class ObservableObjects
     public static readonly ConcurrentDictionary<string, PropertyChangingEventArgs> PropertyChangingEventArgsCache = new(StringComparer.Ordinal);
 
 
-    public static PropertyChangedEventArgs  GetPropertyChangedEventArgs( this  string property ) => PropertyChangedEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangedEventArgs(x));
-    public static PropertyChangingEventArgs GetPropertyChangingEventArgs( this string property ) => PropertyChangingEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangingEventArgs(x));
+
+    extension( string property )
+    {
+        public PropertyChangedEventArgs  AsPropertyChangedEventArgs()  => PropertyChangedEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangedEventArgs(x));
+        public PropertyChangingEventArgs AsPropertyChangingEventArgs() => PropertyChangingEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangingEventArgs(x));
+    }
 }
