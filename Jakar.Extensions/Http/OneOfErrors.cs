@@ -21,7 +21,8 @@ public readonly struct OneOfErrors( JsonNode? json, string? text, Errors? errors
 
     public static implicit operator OneOfErrors( string input ) => From(input);
 
-    public static implicit operator OneOfErrors( Errors input ) => From(input);
+    public static implicit operator OneOfErrors( Errors    input ) => From(input);
+    public static implicit operator OneOfErrors( Exception input ) => Extensions.Errors.Create(input);
 
 
     public static OneOfErrors From( JsonNode input ) => new(input, null, null);

@@ -27,7 +27,7 @@ public sealed class WebResponse<TValue>
 
 
     [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
-    public                                                         bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
+    public                                                         bool IsSuccessStatusCode { [MemberNotNullWhen(true, nameof(Payload))] get => Payload is not null && StatusCode < Status.BadRequest; }
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this(response, default, null, error) { }
@@ -98,9 +98,19 @@ public sealed class WebResponse<TValue>
         errorMessage = Errors;
         return false;
     }
-    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
-    private Errors GetError( string detail ) => Error.Create(Exception?.Value, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
+
+
+    public Errors GetError() => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
+    private Errors GetError( string title )
+    {
+        Exception? e = Exception?.Value;
+        if ( e is null ) { return new Error(StatusCode, INTERNAL_SERVER_ERROR_TYPE, title, ErrorMessage(), URL?.OriginalString, StringTags.Empty); }
+
+        return Error.Create(e, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
+    }
+
+
+    public string ErrorMessage() => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
 
 
     public void EnsureSuccessStatusCode()
