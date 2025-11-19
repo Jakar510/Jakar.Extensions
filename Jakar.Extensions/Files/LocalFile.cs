@@ -1027,6 +1027,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// </returns>
         ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
             where TValue : IJsonModel<TValue>;
+
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
