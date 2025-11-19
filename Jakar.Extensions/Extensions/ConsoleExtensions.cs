@@ -49,18 +49,27 @@ public static class ConsoleExtensions
     }
 
 
-    extension( string      self )
+
+    extension( string self )
     {
         public string GetMessage( string start = INFORMATION, char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
         public string GetWarning( string start = WARNING,     char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
         public string GetError( string   start = ERROR,       char c = '-', int padding = 40 ) => $"{start.Wrapper(c, padding)}  {self}";
         public string GetCount( int      count,               char c = '-', int length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
+        
+        
+        public void WriteToConsole()
+        {
+            Console.WriteLine();
+            Console.WriteLine(self);
+            Console.WriteLine();
+        }
     }
 
 
 
-    public static string GetCount( this         ICollection         self,  char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
-    public static string GetCount<TValue>( this ICollection<TValue> self,  char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+    public static string GetCount( this         ICollection         self, char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
+    public static string GetCount<TValue>( this ICollection<TValue> self, char c = '-', int length = 80 ) => $"{c.Repeat(length)}   {self.GetType().Name}.Count: => {self.Count}";
 
 
     public static void Print( this Span<char>         self ) => Console.Write(self.ToString());
@@ -94,23 +103,17 @@ public static class ConsoleExtensions
     public static void WriteToConsole<TValue>( this TValue self )
         where TValue : notnull => self.ToString()
                                      ?.WriteToConsole();
-    public static void WriteToConsole( this string self )
-    {
-        Console.WriteLine();
-        Console.WriteLine(self);
-        Console.WriteLine();
-    }
 
 
-    public static void WriteToDebug( this Span<char>         self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
-    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
-    public static void WriteToDebug( this string             self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
-    public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString()
+    public static void WriteToDebug( this Span<char>         self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
+    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
+    public static void WriteToDebug( this string             self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
+    public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString()
                                                                                                                                                                             .WriteToDebug(variable, caller);
-    public static void WriteToDebug( this Buffer<char>       self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
-    public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
-    public static void WriteToDebug( this object             self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
+    public static void WriteToDebug( this Buffer<char>       self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
+    public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
+    public static void WriteToDebug( this object             self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
 
-    public static void WriteToDebug<TValue>( this TValue self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null )
+    public static void WriteToDebug<TValue>( this TValue self, [CallerArgumentExpression(nameof(self))] string? variable = null, [CallerMemberName] string? caller = null )
         where TValue : notnull => Debug.WriteLine($"{caller} -> {variable} '{self}'");
 }

@@ -3,14 +3,14 @@
 
 public static class OneOfChecks
 {
-    extension( PropertyChangedEventArgs      e )
+    extension( PropertyChangedEventArgs self )
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property )                                      => string.Equals(e.PropertyName, property, StringComparison.Ordinal);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property1, string property2 )                   => e.IsEqual(property1) || e.IsEqual(property2);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property1, string property2, string property3 ) => e.IsEqual(property1) || e.IsEqual(property2) || e.IsEqual(property3);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property )                                                              => property.SequenceEqual(e.PropertyName);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property1, ReadOnlySpan<char> property2 )                               => e.IsEqual(property1) || e.IsEqual(property2);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property1, ReadOnlySpan<char> property2, ReadOnlySpan<char> property3 ) => e.IsEqual(property1) || e.IsEqual(property2) || e.IsEqual(property3);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property )                                      => string.Equals(self.PropertyName, property, StringComparison.Ordinal);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property1, string property2 )                   => self.IsEqual(property1) || self.IsEqual(property2);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( string             property1, string property2, string property3 ) => self.IsEqual(property1) || self.IsEqual(property2) || self.IsEqual(property3);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property )                                                              => property.SequenceEqual(self.PropertyName);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property1, ReadOnlySpan<char> property2 )                               => self.IsEqual(property1) || self.IsEqual(property2);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsEqual( ReadOnlySpan<char> property1, ReadOnlySpan<char> property2, ReadOnlySpan<char> property3 ) => self.IsEqual(property1) || self.IsEqual(property2) || self.IsEqual(property3);
     }
 
 
@@ -42,7 +42,8 @@ public static class OneOfChecks
     }
 
 
-    extension( PropertyChangedEventArgs e )
+
+    extension( PropertyChangedEventArgs self )
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsOneOf<TValue>( TValue properties )
             where TValue : IEnumerable<string>
@@ -50,16 +51,16 @@ public static class OneOfChecks
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach ( string property in properties )
             {
-                if ( e.IsEqual(property) ) { return true; }
+                if ( self.IsEqual(property) ) { return true; }
             }
 
             return false;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsOneOf( params ReadOnlySpan<string> properties )
         {
-            if ( string.IsNullOrEmpty(e.PropertyName) ) { return false; }
+            if ( string.IsNullOrEmpty(self.PropertyName) ) { return false; }
 
-            return e.PropertyName.IsOneOf(properties);
+            return self.PropertyName.IsOneOf(properties);
         }
     }
 }

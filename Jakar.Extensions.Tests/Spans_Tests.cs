@@ -331,8 +331,8 @@ public class Spans_Tests : Assert
     [Test] [TestCase("Abc_a1524dbz123", "1", "Abc_a524dbz23")] [TestCase("Abc_a1524dbz123", "2", "Abc_a154dbz13")]
     public void RemoveAll( string value, string other, string expected )
     {
-        ReadOnlySpan<char> result = Spans.Remove<char>(value, other);
-        this.AreEqual(expected, result);
+        using ArrayBuffer<char> result = Spans.Remove<char>(value, other);
+        this.AreEqual(expected, result.Values);
     }
 
 

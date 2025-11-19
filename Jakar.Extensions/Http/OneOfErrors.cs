@@ -49,6 +49,18 @@ public readonly struct OneOfErrors( JsonNode? json, string? text, Errors? errors
 
         return default;
     }
+    public TValue? Match<TArg, TValue>( TArg arg, Func<TArg, JsonNode, TValue>? f0, Func<TArg, string, TValue>? f1, Func<TArg, Errors, TValue>? f2 )
+    {
+        if ( IsJson && f0 is not null ) { return f0(arg, Json); }
+
+        if ( IsText && f1 is not null ) { return f1(arg, Text); }
+
+        if ( IsErrors && f2 is not null ) { return f2(arg, Errors); }
+
+        return default;
+    }
+
+
     public async ValueTask<TValue?> MatchAsync<TValue>( Func<JsonNode, ValueTask<TValue>>? f0, Func<string, ValueTask<TValue>>? f1, Func<Errors, ValueTask<TValue>>? f2 )
     {
         if ( IsJson && f0 is not null ) { return await f0(Json); }
@@ -66,6 +78,28 @@ public readonly struct OneOfErrors( JsonNode? json, string? text, Errors? errors
         if ( IsText && f1 is not null ) { return await f1(Text, token); }
 
         if ( IsErrors && f2 is not null ) { return await f2(Errors, token); }
+
+        return default;
+    }
+
+
+    public async ValueTask<TValue?> MatchAsync<TArg, TValue>( TArg arg, Func<TArg, JsonNode, ValueTask<TValue>>? f0, Func<TArg, string, ValueTask<TValue>>? f1, Func<TArg, Errors, ValueTask<TValue>>? f2 )
+    {
+        if ( IsJson && f0 is not null ) { return await f0(arg, Json); }
+
+        if ( IsText && f1 is not null ) { return await f1(arg, Text); }
+
+        if ( IsErrors && f2 is not null ) { return await f2(arg, Errors); }
+
+        return default;
+    }
+    public async ValueTask<TValue?> MatchAsync<TArg, TValue>( TArg arg, Func<TArg, JsonNode, CancellationToken, ValueTask<TValue>>? f0, Func<TArg, string, CancellationToken, ValueTask<TValue>>? f1, Func<TArg, Errors, CancellationToken, ValueTask<TValue>>? f2, CancellationToken token )
+    {
+        if ( IsJson && f0 is not null ) { return await f0(arg, Json, token); }
+
+        if ( IsText && f1 is not null ) { return await f1(arg, Text, token); }
+
+        if ( IsErrors && f2 is not null ) { return await f2(arg, Errors, token); }
 
         return default;
     }

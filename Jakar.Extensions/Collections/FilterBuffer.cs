@@ -35,6 +35,10 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
         this = Empty;
         if ( self.__array is not null ) { ArrayPool<TValue>.Shared.Return(self.__array); }
     }
+
+    public static implicit operator ReadOnlySpan<TValue>( ArrayBuffer<TValue> self ) => self.Values;
+
+
     public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => new ReadOnlySpan<TValue>(__array, 0, length).GetEnumerator();
 
 

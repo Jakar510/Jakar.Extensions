@@ -100,13 +100,19 @@ public sealed class WebResponse<TValue>
     }
 
 
-    public Errors GetError() => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
+    public Errors GetError() => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Error.Create(StatusCode);
     private Errors GetError( string title )
     {
         Exception? e = Exception?.Value;
-        if ( e is null ) { return new Error(StatusCode, INTERNAL_SERVER_ERROR_TYPE, title, ErrorMessage(), URL?.OriginalString, StringTags.Empty); }
+        if ( e is null ) { return new Error(StatusCode, title, ErrorMessage(), URL?.OriginalString, StringTags.Empty); }
 
-        return Error.Create(e, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
+        Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors);
+        return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);
+
+
+        static Errors FromString( WebResponse<TValue> response, string   s )      => s;
+        static Errors FromNode( WebResponse<TValue>   response, JsonNode node )   => Error.Create(response.StatusCode, node.ToJson());
+        static Errors FromErrors( WebResponse<TValue> response, Errors   errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
     }
 
 

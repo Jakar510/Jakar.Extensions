@@ -33,7 +33,7 @@ public sealed class Alert() : BaseClass<Alert>, IJsonModel<Alert>, IEqualCompara
     public static implicit operator Alert( string? value ) => new(value);
 
 
-    [Pure] public Error ToError() => new(null, null, Title, Message, null, StringTags.Empty);
+    [Pure] public Error ToError( Status status = Status.NotSet ) => Error.Create(status, Title, Message, null, StringTags.Empty);
 
 
     public override int CompareTo( Alert? other )

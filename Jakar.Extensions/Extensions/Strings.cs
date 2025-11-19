@@ -11,7 +11,9 @@ public static class Strings
                                                                               { '[', ']' }
                                                                           }.ToImmutableDictionary();
 
-    extension( string      source )
+
+
+    extension( string source )
     {
         public bool ContainsAbout( string search ) => source.Contains(search, StringComparison.OrdinalIgnoreCase);
         public bool ContainsExact( string search ) => source.Contains(search, StringComparison.Ordinal);
@@ -97,7 +99,8 @@ public static class Strings
     }
 
 
-    extension( string      value )
+
+    extension( string value )
     {
         public                       byte[]       ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
         [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding  encoding )        => AsSpanBytes(value.AsSpan(), encoding);
@@ -111,6 +114,7 @@ public static class Strings
         encoding.GetBytes(value, span.Span);
         return span;
     }
+
 
 
     extension( string value )
@@ -179,6 +183,7 @@ public static class Strings
     }
 
 
+
     /// <param name="str"> </param>
     extension( string str )
     {
@@ -212,6 +217,7 @@ public static class Strings
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, __ends);
 
 
+
     extension<TValue>( Span<TValue> span )
         where TValue : unmanaged, IEquatable<TValue>
     {
@@ -237,10 +243,11 @@ public static class Strings
     public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding encoding ) => value.Span.ConvertToString(encoding);
 
 
-    extension( string      source )
+
+    extension( string self )
     {
-        public string RemoveAll( string old ) => source.Replace(old,           EMPTY, StringComparison.Ordinal);
-        public string RemoveAll( char   old ) => source.Replace(old.Repeat(1), EMPTY);
+        public string RemoveAll( string old ) => self.Replace(old,           EMPTY, StringComparison.Ordinal);
+        public string RemoveAll( char   old ) => self.Replace(old.Repeat(1), EMPTY);
     }
 
 
@@ -255,8 +262,9 @@ public static class Strings
     /// </returns>
     public static string Repeat( this char c, int count ) => new(c, count);
 
-    /// <param name="value"> </param>
-    extension( string value )
+
+
+    extension( string self )
     {
         /// <summary>
         ///     <seealso href="https://stackoverflow.com/a/720915/9530917"/>
@@ -265,17 +273,17 @@ public static class Strings
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        public string Repeat( int count ) => new StringBuilder(value.Length * count).Insert(0, value, count)
-                                                                                    .ToString();
-        public string ReplaceAll( string old, string newString ) => value.Replace(old, newString, StringComparison.Ordinal);
-        public string ReplaceAll( char   old, char   newString ) => value.Replace(old, newString);
-        public string ToScreamingCase() => value.ToSnakeCase()
-                                                .ToUpper()
-                                                .Replace("__", "_");
+        public string Repeat( int count ) => new StringBuilder(self.Length * count).Insert(0, self, count)
+                                                                                   .ToString();
+        public string ReplaceAll( string old, string newString ) => self.Replace(old, newString, StringComparison.Ordinal);
+        public string ReplaceAll( char   old, char   newString ) => self.Replace(old, newString);
+        public string ToScreamingCase() => self.ToSnakeCase()
+                                               .ToUpper()
+                                               .Replace("__", "_");
         /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-        public string ToSnakeCase() => value.ToSnakeCase(CultureInfo.InvariantCulture);
+        public string ToSnakeCase() => self.ToSnakeCase(CultureInfo.InvariantCulture);
         /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-        public string ToSnakeCase( CultureInfo cultureInfo ) => ToSnakeCase(value.AsSpan(), cultureInfo);
+        public string ToSnakeCase( CultureInfo cultureInfo ) => ToSnakeCase(self.AsSpan(), cultureInfo);
     }
 
 
@@ -342,6 +350,7 @@ public static class Strings
 
         static bool isNextLower( in UnicodeCategory? category, in int index, scoped ref readonly ReadOnlySpan<char> span ) => category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower(span[index + 1]);
     }
+
 
 
     /// <param name="self"> </param>

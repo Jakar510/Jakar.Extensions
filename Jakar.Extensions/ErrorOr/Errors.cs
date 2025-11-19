@@ -31,9 +31,9 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
     public                         bool                  IsValid      => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
 
 
-    public static Errors Create( params Error[]? details ) => Create(null,                                     details);
-    public static Errors Create( Error           details ) => Create(new Alert(details.Title, details.Detail), details);
-    public static Errors Create( Alert           details ) => Create(details,                                  details.ToError());
+    public static Errors Create( params Error[]? details )                                => Create(null,                                          details);
+    public static Errors Create( Error           details, Status status = Status.NotSet ) => Create(new Alert(details.Title, details.Description), details);
+    public static Errors Create( Alert           details, Status status = Status.NotSet ) => Create(details,                                       details.ToError(status));
     public static Errors Create( Exception? e )
     {
         List<Error> errors = [];
@@ -61,6 +61,7 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
     public static implicit operator Errors( Error                 details ) => Create(details);
     public static implicit operator Errors( Error[]               details ) => Create(null, details);
     public static implicit operator Errors( List<Error>           details ) => Create(details.ToArray());
+    public static implicit operator Errors( Span<Error>           details ) => Create(details.ToArray());
     public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create(details.ToArray());
 
 

@@ -54,53 +54,82 @@ public static partial class Tasks
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Task<TValue> Run<TValue>( this Func<CancellationToken, ValueTask<TValue>> func, CancellationToken token = default ) => Task.Run(new Caller<TValue>(func, token).Execute, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public static Task WhenAny( this IEnumerable<Task> tasks ) => Task.WhenAny(tasks.GetInternalArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAny(tasks.GetInternalArray());
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public static Task WhenAll( this IEnumerable<Task> tasks ) => Task.WhenAll(tasks.GetInternalArray());
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public static Task<TResult[]> WhenAll<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAll(tasks.GetInternalArray());
-
-    extension( IEnumerable<Task> tasks )
+    extension<TResult>( IEnumerable<Task<TResult>> self )
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-        public void WaitAll( CancellationToken token = default ) => tasks.WhenAll()
-                                                                         .Wait(token);
+        public Task<Task<TResult>> WhenAny() => Task.WhenAny(self.GetInternalArray());
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-        public int WaitAny( CancellationToken token = default ) => Task.WaitAny(tasks.ToArray(), token);
-    }
+        public Task<TResult[]> WhenAll() => Task.WhenAll(self.GetInternalArray());
 
-
-
-    public static async IAsyncEnumerable<TValue> WheneverAny<TValue>( this IEnumerable<ValueTask<TValue>> tasks, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        await foreach ( TValue result in tasks.Select(static x => x.AsTask())
-                                              .WheneverAny(token) ) { yield return result; }
-    }
-    public static async IAsyncEnumerable<TValue> WheneverAny<TValue>( this IEnumerable<Task<TValue>> tasks, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        List<Task<TValue>> list = [..tasks];
-
-        while ( token.ShouldContinue() && list.Count > 0 )
+        public async IAsyncEnumerable<TResult> WheneverAny( [EnumeratorCancellation] CancellationToken token = default )
         {
-            Task<TValue> task = await Task.WhenAny(list);
-            list.Remove(task);
-            yield return await task;
+            List<Task<TResult>> list = [..self];
+
+            while ( token.ShouldContinue() && list.Count > 0 )
+            {
+                Task<TResult> task = await Task.WhenAny(list);
+                list.Remove(task);
+                yield return await task;
+            }
         }
     }
 
 
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
-    /// </summary>
-    /// <exception cref="AggregateException"> </exception>
-    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks ) => await Task.WhenAll(tasks.Select(static x => x.AsTask()));
-    public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => await Task.WhenAll(tasks.Select(static x => x.AsTask()));
+
+    extension( IEnumerable<Task> self )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
+        public void WaitAll( CancellationToken token = default ) => self.WhenAll()
+                                                                        .Wait(token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
+        public int WaitAny( CancellationToken token = default ) => Task.WaitAny(self.ToArray(), token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
+        public Task WhenAny() => Task.WhenAny(self.GetInternalArray());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
+        public Task WhenAll() => Task.WhenAll(self.GetInternalArray());
+    }
+
+
+
+    extension( IEnumerable<ValueTask> self )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void WaitAll( CancellationToken token = default ) => Task.WaitAll(self.Select(static x => x.AsTask())
+                                                                                                                                        .ToArray(),
+                                                                                                                                    token);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int WaitAny( CancellationToken token = default ) => Task.WaitAny(self.Select(static x => x.AsTask())
+                                                                                                                                       .ToArray(),
+                                                                                                                                   token);
+      
+        /// <summary>
+        ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
+        /// </summary>
+        /// <exception cref="AggregateException"> </exception>
+        public async ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask()));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
+    }
+
+
+
+    extension<TValue>( IEnumerable<ValueTask<TValue>> self )
+    {
+        public async IAsyncEnumerable<TValue> WheneverAny( [EnumeratorCancellation] CancellationToken token = default )
+        {
+            await foreach ( TValue result in self.Select(static x => x.AsTask())
+                                                 .WheneverAny(token) ) { yield return result; }
+        }
+        public async ValueTask<TValue[]> WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask()));
+        public async ValueTask<TValue> WhenAny()
+        {
+            Task<TValue> result = await Task.WhenAny(self.Select(static x => x.AsTask()));
+            return await result;
+        }
+    }
+
 
 
     public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
@@ -145,54 +174,30 @@ public static partial class Tasks
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Task                WhenAny( this          IEnumerable<ValueTask>          tasks ) => Task.WhenAny(tasks.Select(static x => x.AsTask()));
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => Task.WhenAny(tasks.Select(static x => x.AsTask()));
-    extension( IEnumerable<ValueTask> tasks )
+
+    extension( CancellationToken self )
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void WaitAll( CancellationToken token = default ) => Task.WaitAll(tasks.Select(static x => x.AsTask())
-                                                                                                                                         .ToArray(),
-                                                                                                                                    token);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int WaitAny( CancellationToken token = default ) => Task.WaitAny(tasks.Select(static x => x.AsTask())
-                                                                                                                                        .ToArray(),
-                                                                                                                                   token);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task               AsTask()               => Task.FromCanceled(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task<TResult>      AsTask<TResult>()      => Task.FromCanceled<TResult>(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask          AsValueTask()          => ValueTask.FromCanceled(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask<TResult> AsValueTask<TResult>() => ValueTask.FromCanceled<TResult>(self);
     }
 
 
 
-    extension( CancellationToken               token )
+    extension( Exception self )
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task          AsTask()          => Task.FromCanceled(token);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task<TResult> AsTask<TResult>() => Task.FromCanceled<TResult>(token);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task               AsTask()               => Task.FromException(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task<TResult>      AsTask<TResult>()      => Task.FromException<TResult>(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask          AsValueTask()          => ValueTask.FromException(self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask<TResult> AsValueTask<TResult>() => ValueTask.FromException<TResult>(self);
     }
 
 
 
-    extension( Exception               e )
+    extension<TResult>( TResult result )
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task          AsTask()          => Task.FromException(e);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task<TResult> AsTask<TResult>() => Task.FromException<TResult>(e);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task<TResult>      AsTask()      => Task.FromResult(result);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask<TResult> AsValueTask() => ValueTask.FromResult(result);
     }
-
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Task<TResult> AsTask<TResult>( this TResult   result ) => Task.FromResult(result);
-
-
-    extension( CancellationToken token )
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask          AsValueTask()          => ValueTask.FromCanceled(token);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask<TResult> AsValueTask<TResult>() => ValueTask.FromCanceled<TResult>(token);
-    }
-
-
-
-    extension( Exception         e )
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask          AsValueTask()          => ValueTask.FromException(e);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask<TResult> AsValueTask<TResult>() => ValueTask.FromException<TResult>(e);
-    }
-
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ValueTask<TResult> AsValueTask<TResult>( this TResult           result ) => ValueTask.FromResult(result);
 }

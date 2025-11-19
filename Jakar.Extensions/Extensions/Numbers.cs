@@ -29,37 +29,40 @@ public static class Numbers
     [MethodImpl(MethodImplOptions.AggressiveInlining)] [Pure] public static decimal Clamp( this decimal value, decimal min, decimal max ) => Math.Clamp(value, min, max);
 
 
-    extension<T>( T value )
+
+    extension<T>( T self )
         where T : IComparisonOperators<T, T, bool>
     {
         public T Clamp( T min, T max )
         {
             if ( min > max ) { throw new ArgumentException($"{nameof(min)}: {min} > {nameof(max)}: {max}"); }
 
-            if ( value < min ) { return min; }
+            if ( self < min ) { return min; }
 
-            if ( value > max ) { return max; }
+            if ( self > max ) { return max; }
 
-            return value;
+            return self;
         }
-        public T Min( T other ) => value < other
+        public T Min( T other ) => self < other
                                        ? other
-                                       : value;
-        public T Max( T other ) => value > other
+                                       : self;
+        public T Max( T other ) => self > other
                                        ? other
-                                       : value;
+                                       : self;
     }
 
 
 
-    extension( string? value )
+    extension( string? self )
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public TResult As<TResult>( TResult defaultValue )
-            where TResult : struct, INumber<TResult> => TResult.TryParse(value, CultureInfo.CurrentUICulture, out TResult result)
+            where TResult : struct, INumber<TResult> => TResult.TryParse(self, CultureInfo.CurrentUICulture, out TResult result)
                                                             ? result
                                                             : defaultValue;
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public TResult? As<TResult>( TResult? defaultValue )
-            where TResult : struct, INumber<TResult> => TResult.TryParse(value, CultureInfo.CurrentUICulture, out TResult result)
+            where TResult : struct, INumber<TResult> => TResult.TryParse(self, CultureInfo.CurrentUICulture, out TResult result)
                                                             ? result
                                                             : defaultValue;
     }
@@ -108,21 +111,22 @@ public static class Numbers
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort AsUShort( this long    value ) => (ushort)value;
 
 
-    extension<TEnum>( TEnum value )
+
+    extension<TEnum>( TEnum self )
         where TEnum : unmanaged, Enum
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public byte   AsByte()   => Unsafe.As<TEnum, byte>(ref value);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public sbyte  AsSByte()  => Unsafe.As<TEnum, sbyte>(ref value);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ushort AsUShort() => Unsafe.As<TEnum, ushort>(ref value);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public short  AsShort()  => Unsafe.As<TEnum, short>(ref value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public byte   AsByte()   => Unsafe.As<TEnum, byte>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public sbyte  AsSByte()  => Unsafe.As<TEnum, sbyte>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ushort AsUShort() => Unsafe.As<TEnum, ushort>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public short  AsShort()  => Unsafe.As<TEnum, short>(ref self);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe int AsInt()
         {
             // This handles all enum underlying types safely and efficiently.
             return sizeof(TEnum) switch
                    {
-                       1 => Unsafe.As<TEnum, byte>(ref value),
-                       2 => Unsafe.As<TEnum, ushort>(ref value),
-                       4 => Unsafe.As<TEnum, int>(ref value),
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, int>(ref self),
                        _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
                    };
         }
@@ -131,9 +135,9 @@ public static class Numbers
             // This handles all enum underlying types safely and efficiently.
             return sizeof(TEnum) switch
                    {
-                       1 => Unsafe.As<TEnum, byte>(ref value),
-                       2 => Unsafe.As<TEnum, ushort>(ref value),
-                       4 => Unsafe.As<TEnum, uint>(ref value),
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
                        _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
                    };
         }
@@ -142,10 +146,10 @@ public static class Numbers
             // This handles all enum underlying types safely and efficiently.
             return sizeof(TEnum) switch
                    {
-                       1 => Unsafe.As<TEnum, byte>(ref value),
-                       2 => Unsafe.As<TEnum, ushort>(ref value),
-                       4 => Unsafe.As<TEnum, uint>(ref value),
-                       8 => Unsafe.As<TEnum, long>(ref value),
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
+                       8 => Unsafe.As<TEnum, long>(ref self),
                        _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
                    };
         }
@@ -154,10 +158,10 @@ public static class Numbers
             // This handles all enum underlying types safely and efficiently.
             return sizeof(TEnum) switch
                    {
-                       1 => Unsafe.As<TEnum, byte>(ref value),
-                       2 => Unsafe.As<TEnum, ushort>(ref value),
-                       4 => Unsafe.As<TEnum, uint>(ref value),
-                       8 => Unsafe.As<TEnum, ulong>(ref value),
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
+                       8 => Unsafe.As<TEnum, ulong>(ref self),
                        _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
                    };
         }
