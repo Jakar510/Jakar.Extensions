@@ -65,7 +65,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.9" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
@@ -90,9 +90,9 @@
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.2" />
     <PackageVersion Include="Microsoft.Identity.Client" Version="4.77.1" />
     <PackageVersion Include="Microsoft.Identity.Web" Version="4.0.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
-    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.10" />

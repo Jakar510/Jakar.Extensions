@@ -53,7 +53,8 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-    public TelemetrySource( in AppInformation info )
+    public TelemetrySource( AppVersion version, Guid appID, string appName, string? packageName ) : this(new AppInformation(version, appID, appName, packageName)) { }
+    public TelemetrySource( AppInformation info )
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
         Activity.Current = null;

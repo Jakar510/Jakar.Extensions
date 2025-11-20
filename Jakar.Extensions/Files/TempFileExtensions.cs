@@ -4,20 +4,21 @@
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class TempFile
 {
-    public static bool IsTempFile( this ITempFile file ) => file.IsTemporary;
-
-    extension<TItem>( TItem file )
-        where TItem : ITempFile
+    extension<TSelf>( TSelf self )
+        where TSelf : ITempFile
     {
-        public TItem SetNormal()
+        public bool IsTempFile() => self.IsTemporary;
+
+
+        public TSelf SetNormal()
         {
-            file.IsTemporary = false;
-            return file;
+            self.IsTemporary = false;
+            return self;
         }
-        public TItem SetTemporary()
+        public TSelf SetTemporary()
         {
-            file.IsTemporary = true;
-            return file;
+            self.IsTemporary = true;
+            return self;
         }
     }
 

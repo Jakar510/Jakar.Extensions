@@ -52,17 +52,39 @@ public interface ILoginRequestProvider<out TRequest, in TValue> : ILoginRequestP
 
 public static class LoginRequestExtensions
 {
-    public static NetworkCredential GetNetworkCredentials( this ILoginRequest   request )                                        => new(request.UserName, request.Password.ToSecureString());
-    public static bool              IsValidPassword( this       IChangePassword request )                                        => request.IsValidPassword(PasswordValidator.Default);
-    public static bool              IsValidPassword( this       ILoginRequest   request )                                        => request.IsValidPassword(PasswordValidator.Default);
-    public static bool              IsValidPassword( this       IChangePassword request, scoped in PasswordValidator validator ) => !string.IsNullOrWhiteSpace(request.Password) && string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal) && validator.Validate(request.Password);
-    public static bool              IsValidPassword( this       ILoginRequest   request, scoped in PasswordValidator validator ) => !string.IsNullOrWhiteSpace(request.Password) && validator.Validate(request.Password);
-    public static bool              IsValidUserName( this       IUserName       request ) => !string.IsNullOrWhiteSpace(request.UserName);
-    public static bool              IsValid( this               ILoginRequest   request ) => request.IsValidUserName() && request.IsValidPassword();
-    public static bool IsValidRequest<TValue>( this ILoginRequest<TValue> request ) => request.Data is IValidator validator
-                                                                                           ? request.IsValidUserName() && request.IsValidPassword() && validator.IsValid
-                                                                                           : request.IsValidUserName() && request.IsValidPassword();
-    public static bool IsValidRequest( this IChangePassword request ) => request.IsValidUserName() && request.IsValidPassword();
+    extension( IUserName self )
+    {
+        public bool IsValidUserName() => !string.IsNullOrWhiteSpace(self.UserName);
+    }
+
+
+
+    extension( ILoginRequest self )
+    {
+        public NetworkCredential GetNetworkCredentials()                                  => new(self.UserName, self.Password.ToSecureString());
+        public bool              IsValidPassword()                                        => self.IsValidPassword(PasswordValidator.Default);
+        public bool              IsValidPassword( scoped in PasswordValidator validator ) => !string.IsNullOrWhiteSpace(self.Password) && validator.Validate(self.Password);
+        public bool              IsValid()                                                => self.IsValidUserName()                    && self.IsValidPassword();
+        public bool              IsValid( scoped in PasswordValidator validator )         => self.IsValidUserName()                    && self.IsValidPassword(in validator);
+    }
+
+
+
+    extension( IChangePassword self )
+    {
+        public bool IsValidRequest()                                         => self.IsValidUserName() && self.IsValidPassword();
+        public bool IsValidPassword()                                        => self.IsValidPassword(PasswordValidator.Default);
+        public bool IsValidPassword( scoped in PasswordValidator validator ) => !string.IsNullOrWhiteSpace(self.Password) && string.Equals(self.Password, self.ConfirmPassword, StringComparison.Ordinal) && validator.Validate(self.Password);
+    }
+
+
+
+    extension<TValue>( ILoginRequest<TValue> self )
+    {
+        public bool IsValidRequest() => self.Data is IValidator validator
+                                            ? self.IsValid() && validator.IsValid
+                                            : self.IsValid();
+    }
 }
 
 
