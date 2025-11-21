@@ -185,7 +185,8 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         ReadOnlyMemory<byte> content = await file.ReadAsync()
-                                                 .AsMemory(token);
+                                                 .AsMemory(token)
+                                                 .ConfigureAwait(false);
 
         return Create(TFileMetaData.Create(file), content.Span);
     }
@@ -193,7 +194,10 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek(0, SeekOrigin.Begin);
-        using MemoryStream memory = await stream.ToMemoryStream();
+
+        using MemoryStream memory = await stream.ToMemoryStream()
+                                                .ConfigureAwait(false);
+
         return Create(metaData, memory);
     }
 
@@ -241,18 +245,15 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 [method: JsonConstructor]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
-    public static                      JsonTypeInfo<FileMetaData[]> JsonArrayInfo   => JakarExtensionsContext.Default.FileMetaDataArray;
-    public static                      JsonSerializerContext        JsonContext     => JakarExtensionsContext.Default;
-    public static                      JsonTypeInfo<FileMetaData>   JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
-    [StringLength(DESCRIPTION)] public string?                      FileDescription { get; set; }  = fileDescription;
-    [StringLength(NAME)]        public string?                      FileName        { get; init; } = fileName;
-    [StringLength(TYPE)]        public string?                      FileType        { get; init; } = fileType;
-    public                             MimeType?                    MimeType        { get; init; } = mimeType;
+    [StringLength(DESCRIPTION)] public string?   FileDescription { get; set; }  = fileDescription;
+    [StringLength(NAME)]        public string?   FileName        { get; init; } = fileName;
+    [StringLength(TYPE)]        public string?   FileType        { get; init; } = fileType;
+    public                             MimeType? MimeType        { get; init; } = mimeType;
 
 
     public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)
     {
-        if ( value.AdditionalData is not null ) { AdditionalData = new JsonObject(value.AdditionalData); }
+        if ( value.AdditionalData is not null ) { AdditionalData = new JObject(value.AdditionalData); }
     }
     public FileMetaData( LocalFile value ) : this(value.Name, value.ContentType, value.Mime) { }
 

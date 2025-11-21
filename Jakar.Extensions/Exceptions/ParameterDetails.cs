@@ -7,16 +7,13 @@ namespace Jakar.Extensions;
 [Serializable]
 public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualComparable<ParameterDetails>, IJsonModel<ParameterDetails>
 {
-    public static JsonTypeInfo<ParameterDetails[]> JsonArrayInfo   => JakarExtensionsContext.Default.ParameterDetailsArray;
-    public static JsonSerializerContext            JsonContext     => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<ParameterDetails>   JsonTypeInfo    => JakarExtensionsContext.Default.ParameterDetails;
-    public        bool                             HasDefaultValue { get; init; }
-    public        bool                             IsIn            { get; init; }
-    public        bool                             IsOptional      { get; init; }
-    public        bool                             IsOut           { get; init; }
-    public        string?                          Name            { get; init; }
-    public        int                              Position        { get; init; }
-    public        string?                          Type            { get; init; }
+    public bool    HasDefaultValue { get; init; }
+    public bool    IsIn            { get; init; }
+    public bool    IsOptional      { get; init; }
+    public bool    IsOut           { get; init; }
+    public string? Name            { get; init; }
+    public int     Position        { get; init; }
+    public string? Type            { get; init; }
 
 
     public ParameterDetails() { }
@@ -33,7 +30,7 @@ public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualCompar
 
 
     public static ParameterDetails[] Create( MethodBase method ) => Create(method.GetParameters());
-    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items ) => items.Select(x => new ParameterDetails(x))
+    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items ) => items.Select(static x => new ParameterDetails(x))
                                                                                         .ToArray();
 
 

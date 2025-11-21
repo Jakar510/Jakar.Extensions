@@ -2,6 +2,7 @@
 // 4/1/2024  22:4
 
 using System.Security.Claims;
+using OpenTelemetry.Resources;
 
 
 
@@ -52,9 +53,9 @@ public static class UserData
         where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
         where TAddress : IAddress<TID>, IEquatable<TAddress>
     {
-        using IMemoryOwner<Claim> claims = MemoryPool<Claim>.Shared.Rent(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
-        int                       size   = 0;
-        Span<Claim>               span   = claims.Memory.Span;
+        using ArrayBuffer<Claim> owner = new(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
+        int                      size  = 0;
+        Span<Claim>              span  = owner.Span;
 
 
         span[size++] = ClaimType.UserID.ToClaim(model.UserID.ToString(), issuer);
@@ -112,16 +113,20 @@ public static class UserData
     }
 
 
-    public static DateTimeOffset GetExpires( this IUserData user, scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
-    public static DateTimeOffset GetExpires( this IUserData user, scoped in DateTimeOffset now, scoped in TimeSpan offset )
+
+    extension( IUserData user )
     {
-        DateTimeOffset date = now + offset;
-        if ( user.SubscriptionExpires is null ) { return date; }
+        public DateTimeOffset GetExpires( scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
+        public DateTimeOffset GetExpires( scoped in DateTimeOffset now, scoped in TimeSpan offset )
+        {
+            DateTimeOffset date = now + offset;
+            if ( user.SubscriptionExpires is null ) { return date; }
 
-        DateTimeOffset expires = user.SubscriptionExpires.Value;
+            DateTimeOffset expires = user.SubscriptionExpires.Value;
 
-        return date > expires
-                   ? expires
-                   : date;
+            return date > expires
+                       ? expires
+                       : date;
+        }
     }
 }

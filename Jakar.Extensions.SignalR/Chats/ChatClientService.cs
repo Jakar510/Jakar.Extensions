@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/21/2025  16:51
 
-using AsyncAwaitBestPractices;
 using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

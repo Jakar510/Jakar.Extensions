@@ -54,24 +54,14 @@ public static class Properties
 public class ViewModelProperty<TCommand>() : BaseClass()
     where TCommand : class, ICommand
 {
-    private bool      __isEnabled = true;
-    private bool      __isVisible = true;
-    private object?   __commandParameter;
-    private string?   __description;
-    private string?   __hint;
-    private string?   __placeholder;
-    private string?   __title;
-    private TCommand? __command;
-
-
-    public TCommand? Command          { get => __command;          set => SetProperty(ref __command,          value); }
-    public object?   CommandParameter { get => __commandParameter; set => SetProperty(ref __commandParameter, value); }
-    public string?   Description      { get => __description;      set => SetProperty(ref __description,      value); }
-    public string?   Hint             { get => __hint;             set => SetProperty(ref __hint,             value); }
-    public bool      IsEnabled        { get => __isEnabled;        set => SetProperty(ref __isEnabled,        value); }
-    public bool      IsVisible        { get => __isVisible;        set => SetProperty(ref __isVisible,        value); }
-    public string?   Placeholder      { get => __placeholder;      set => SetProperty(ref __placeholder,      value); }
-    public string?   Title            { get => __title;            set => SetProperty(ref __title,            value); }
+    public TCommand? Command          { get; set => SetProperty(ref field, value); }
+    public object?   CommandParameter { get; set => SetProperty(ref field, value); }
+    public string?   Description      { get; set => SetProperty(ref field, value); }
+    public string?   Hint             { get; set => SetProperty(ref field, value); }
+    public bool      IsEnabled        { get; set => SetProperty(ref field, value); } = true;
+    public bool      IsVisible        { get; set => SetProperty(ref field, value); } = true;
+    public string?   Placeholder      { get; set => SetProperty(ref field, value); }
+    public string?   Title            { get; set => SetProperty(ref field, value); }
 }
 
 

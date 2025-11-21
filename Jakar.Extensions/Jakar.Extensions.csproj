@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0</TargetFrameworks>
+		<TargetFrameworks>net10.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>9.19.1</Version>
+		<Version>10.0.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -73,7 +73,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</IsAotCompatible>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -91,7 +91,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="AsyncAwaitBestPractices" />
+		<!-- <PackageReference Include="AsyncAwaitBestPractices" /> -->
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
@@ -102,6 +102,7 @@
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
+		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
@@ -121,7 +122,6 @@
 		<PackageReference Include="System.Net.Http.Json" />
 		<PackageReference Include="System.Text.Encoding.CodePages" />
 		<PackageReference Include="System.Text.Encodings.Web" />
-		<PackageReference Include="System.Text.Json" />
 		<PackageReference Include="System.Text.RegularExpressions" />
 		<PackageReference Include="System.Threading.Tasks" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" />

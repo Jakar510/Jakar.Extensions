@@ -29,36 +29,44 @@ public static class Numbers
     [MethodImpl(MethodImplOptions.AggressiveInlining)] [Pure] public static decimal Clamp( this decimal value, decimal min, decimal max ) => Math.Clamp(value, min, max);
 
 
-    public static T Clamp<T>( this T value, T min, T max )
+
+    extension<T>( T self )
         where T : IComparisonOperators<T, T, bool>
     {
-        if ( min > max ) { throw new ArgumentException($"{nameof(min)}: {min} > {nameof(max)}: {max}"); }
+        public T Clamp( T min, T max )
+        {
+            if ( min > max ) { throw new ArgumentException($"{nameof(min)}: {min} > {nameof(max)}: {max}"); }
 
-        if ( value < min ) { return min; }
+            if ( self < min ) { return min; }
 
-        if ( value > max ) { return max; }
+            if ( self > max ) { return max; }
 
-        return value;
+            return self;
+        }
+        public T Min( T other ) => self < other
+                                       ? other
+                                       : self;
+        public T Max( T other ) => self > other
+                                       ? other
+                                       : self;
     }
-    public static T Min<T>( this T value, T other )
-        where T : IComparisonOperators<T, T, bool> => value < other
-                                                          ? other
-                                                          : value;
-    public static T Max<T>( this T value, T other )
-        where T : IComparisonOperators<T, T, bool> => value > other
-                                                          ? other
-                                                          : value;
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TResult As<TResult>( this string? value, TResult defaultValue )
-        where TResult : struct, INumber<TResult> => TResult.TryParse(value, CultureInfo.CurrentUICulture, out TResult result)
-                                                        ? result
-                                                        : defaultValue;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TResult? As<TResult>( this string? value, TResult? defaultValue )
-        where TResult : struct, INumber<TResult> => TResult.TryParse(value, CultureInfo.CurrentUICulture, out TResult result)
-                                                        ? result
-                                                        : defaultValue;
+    extension( string? self )
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public TResult As<TResult>( TResult defaultValue )
+            where TResult : struct, INumber<TResult> => TResult.TryParse(self, CultureInfo.CurrentUICulture, out TResult result)
+                                                            ? result
+                                                            : defaultValue;
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public TResult? As<TResult>( TResult? defaultValue )
+            where TResult : struct, INumber<TResult> => TResult.TryParse(self, CultureInfo.CurrentUICulture, out TResult result)
+                                                            ? result
+                                                            : defaultValue;
+    }
+
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static byte  AsByte( this  decimal value ) => (byte)value;
@@ -103,71 +111,66 @@ public static class Numbers
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort AsUShort( this long    value ) => (ushort)value;
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static byte AsByte<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, byte>(ref value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static sbyte AsSByte<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, sbyte>(ref value);
 
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort AsUShort<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, ushort>(ref value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short AsShort<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, short>(ref value);
-
-
-// #pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe int AsInt<TEnum>( this TEnum value )
+    extension<TEnum>( TEnum self )
         where TEnum : unmanaged, Enum
     {
-        // This handles all enum underlying types safely and efficiently.
-        return sizeof(TEnum) switch
-               {
-                   1 => Unsafe.As<TEnum, byte>(ref value),
-                   2 => Unsafe.As<TEnum, ushort>(ref value),
-                   4 => Unsafe.As<TEnum, int>(ref value),
-                   _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
-               };
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe uint AsUInt<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
-    {
-        // This handles all enum underlying types safely and efficiently.
-        return sizeof(TEnum) switch
-               {
-                   1 => Unsafe.As<TEnum, byte>(ref value),
-                   2 => Unsafe.As<TEnum, ushort>(ref value),
-                   4 => Unsafe.As<TEnum, uint>(ref value),
-                   _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
-               };
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public byte   AsByte()   => Unsafe.As<TEnum, byte>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public sbyte  AsSByte()  => Unsafe.As<TEnum, sbyte>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public ushort AsUShort() => Unsafe.As<TEnum, ushort>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public short  AsShort()  => Unsafe.As<TEnum, short>(ref self);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe int AsInt()
+        {
+            // This handles all enum underlying types safely and efficiently.
+            return sizeof(TEnum) switch
+                   {
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, int>(ref self),
+                       _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
+                   };
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe uint AsUInt()
+        {
+            // This handles all enum underlying types safely and efficiently.
+            return sizeof(TEnum) switch
+                   {
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
+                       _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
+                   };
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe long AsLong()
+        {
+            // This handles all enum underlying types safely and efficiently.
+            return sizeof(TEnum) switch
+                   {
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
+                       8 => Unsafe.As<TEnum, long>(ref self),
+                       _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
+                   };
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public unsafe ulong AsULong()
+        {
+            // This handles all enum underlying types safely and efficiently.
+            return sizeof(TEnum) switch
+                   {
+                       1 => Unsafe.As<TEnum, byte>(ref self),
+                       2 => Unsafe.As<TEnum, ushort>(ref self),
+                       4 => Unsafe.As<TEnum, uint>(ref self),
+                       8 => Unsafe.As<TEnum, ulong>(ref self),
+                       _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
+                   };
+        }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe long AsLong<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
-    {
-        // This handles all enum underlying types safely and efficiently.
-        return sizeof(TEnum) switch
-               {
-                   1 => Unsafe.As<TEnum, byte>(ref value),
-                   2 => Unsafe.As<TEnum, ushort>(ref value),
-                   4 => Unsafe.As<TEnum, uint>(ref value),
-                   8 => Unsafe.As<TEnum, long>(ref value),
-                   _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
-               };
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe ulong AsULong<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
-    {
-        // This handles all enum underlying types safely and efficiently.
-        return sizeof(TEnum) switch
-               {
-                   1 => Unsafe.As<TEnum, byte>(ref value),
-                   2 => Unsafe.As<TEnum, ushort>(ref value),
-                   4 => Unsafe.As<TEnum, uint>(ref value),
-                   8 => Unsafe.As<TEnum, ulong>(ref value),
-                   _ => throw new InvalidOperationException($"Unexpected enum size {sizeof(TEnum)}")
-               };
-    }
 
-// #pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+    // #pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+
+
+    // #pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 }

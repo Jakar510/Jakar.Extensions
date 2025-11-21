@@ -18,8 +18,8 @@ public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue
     ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
-    [Pure] [MustDisposeResource] FilterBuffer<TValue>                               Copy();
-    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
+    [Pure] [MustDisposeResource] ArrayBuffer<TValue>                               Copy();
+    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> CopyAsync( CancellationToken token );
 }
 
 
@@ -66,7 +66,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     [Pure] [MustDisposeResource] public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        while ( token.ShouldContinue() && !locker.TryEnter(__timeOut) ) { await Task.Delay(1, token); }
+        while ( token.ShouldContinue() && !locker.TryEnter(__timeOut) ) { await Task.Delay(1, token).ConfigureAwait(false); }
 
         return new LockCloser(locker);
     }
@@ -156,25 +156,25 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     public async ValueTask DisposeAsync()
     {
         Exit();
-        if ( __autoResetEvent is not null ) { await Disposables.CastAndDisposeAsync(__autoResetEvent); }
+        if ( __autoResetEvent is not null ) { await Disposables.CastAndDisposeAsync(__autoResetEvent).ConfigureAwait(false); }
 
-        if ( __barrier is not null ) { await Disposables.CastAndDisposeAsync(__barrier); }
+        if ( __barrier is not null ) { await Disposables.CastAndDisposeAsync(__barrier).ConfigureAwait(false); }
 
-        if ( __countdownEvent is not null ) { await Disposables.CastAndDisposeAsync(__countdownEvent); }
+        if ( __countdownEvent is not null ) { await Disposables.CastAndDisposeAsync(__countdownEvent).ConfigureAwait(false); }
 
-        if ( __eventWaitHandle is not null ) { await Disposables.CastAndDisposeAsync(__eventWaitHandle); }
+        if ( __eventWaitHandle is not null ) { await Disposables.CastAndDisposeAsync(__eventWaitHandle).ConfigureAwait(false); }
 
-        if ( __manualResetEvent is not null ) { await Disposables.CastAndDisposeAsync(__manualResetEvent); }
+        if ( __manualResetEvent is not null ) { await Disposables.CastAndDisposeAsync(__manualResetEvent).ConfigureAwait(false); }
 
-        if ( __manualResetEventSlim is not null ) { await Disposables.CastAndDisposeAsync(__manualResetEventSlim); }
+        if ( __manualResetEventSlim is not null ) { await Disposables.CastAndDisposeAsync(__manualResetEventSlim).ConfigureAwait(false); }
 
-        if ( __mutex is not null ) { await Disposables.CastAndDisposeAsync(__mutex); }
+        if ( __mutex is not null ) { await Disposables.CastAndDisposeAsync(__mutex).ConfigureAwait(false); }
 
-        if ( __readerWriterLockSlim is not null ) { await Disposables.CastAndDisposeAsync(__readerWriterLockSlim); }
+        if ( __readerWriterLockSlim is not null ) { await Disposables.CastAndDisposeAsync(__readerWriterLockSlim).ConfigureAwait(false); }
 
-        if ( __semaphore is not null ) { await Disposables.CastAndDisposeAsync(__semaphore); }
+        if ( __semaphore is not null ) { await Disposables.CastAndDisposeAsync(__semaphore).ConfigureAwait(false); }
 
-        if ( __semaphoreSlim is not null ) { await Disposables.CastAndDisposeAsync(__semaphoreSlim); }
+        if ( __semaphoreSlim is not null ) { await Disposables.CastAndDisposeAsync(__semaphoreSlim).ConfigureAwait(false); }
     }
 
 
@@ -321,8 +321,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__semaphoreSlim is not null, $"{nameof(__semaphoreSlim)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                                ? await __semaphoreSlim.WaitAsync(TimeOut.Value,    token)
-                                : await __semaphoreSlim.WaitAsync(Timeout.Infinite, token);
+                                ? await __semaphoreSlim.WaitAsync(TimeOut.Value,    token).ConfigureAwait(false)
+                                : await __semaphoreSlim.WaitAsync(Timeout.Infinite, token).ConfigureAwait(false);
 
                 return new Closer(this);
             }

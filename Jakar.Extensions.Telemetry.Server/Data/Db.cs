@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Npgsql;
+using ZiggyCreatures.Caching.Fusion;
 
 
 
@@ -10,8 +11,9 @@ public class Db : Database.Database
 {
     public DbTable<ApplicationRecord> Applications { get; }
 
-    public Db( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, tableCache, options ) { Applications = Create<ApplicationRecord>(); }
+
+    public Db( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base(configuration, options, cache) => Applications = Create<ApplicationRecord>();
 
 
-    protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure.ToString() );
+    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure.ToString());
 }

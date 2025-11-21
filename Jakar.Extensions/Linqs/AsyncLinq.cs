@@ -19,15 +19,40 @@ public static partial class AsyncLinq
         where TList : IReadOnlyList<TElement> => new(source, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool                         IsEmpty( this             ICollection                collection )                                => collection.Count == 0;
-    public static                                                    ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet(EqualityComparer<TElement>.Default, token);
-    public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, EqualityComparer<TElement> comparer, CancellationToken token = default )
-    {
-        HashSet<TElement> list = new(comparer);
-        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEmpty( this ICollection collection ) => collection.Count == 0;
 
-        return list;
+
+
+    extension<TElement>( IAsyncEnumerable<TElement> source )
+    {
+        public ValueTask<HashSet<TElement>> ToHashSet( CancellationToken token = default ) => source.ToHashSet(EqualityComparer<TElement>.Default, token);
+        public async ValueTask<HashSet<TElement>> ToHashSet( EqualityComparer<TElement> comparer, CancellationToken token = default )
+        {
+            HashSet<TElement> list = new(comparer);
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) ) { list.Add(element); }
+
+            return list;
+        }
+        public async ValueTask<TElement[]> ToArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> array = await source.ToList(initialCapacity, token)
+                                               .ConfigureAwait(false);
+
+            return array.ToArray();
+        }
+        public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> list = new(initialCapacity);
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) ) { list.Add(element); }
+
+            return list;
+        }
     }
+
 
 
     public static List<char>     ToList( this           string                        sequence ) => ToList(sequence, sequence.Length);
@@ -44,11 +69,6 @@ public static partial class AsyncLinq
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( this int length ) => GC.AllocateUninitializedArray<TElement>(length);
 
 
-    public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-    {
-        List<TElement> array = await sequence.ToList(initialCapacity, token);
-        return array.ToArray();
-    }
     public static TElement[] ToArray<TElement>( IEnumerable<TElement> sequence )
         where TElement : IEquatable<TElement>
     {
@@ -126,47 +146,57 @@ public static partial class AsyncLinq
     }
 
 
-    public static TElement[] Sorted<TElement>( this TElement[] array )
+
+    extension<TElement>( TElement[] array )
         where TElement : IComparable<TElement>
     {
-        Array.Sort(array);
-        return array;
-    }
-    public static TElement[] Sorted<TElement>( this TElement[] array, Comparer<TElement> comparer )
-        where TElement : IComparable<TElement>
-    {
-        Array.Sort(array, comparer);
-        return array;
-    }
-    public static TElement[] Sorted<TElement>( this TElement[] array, Comparison<TElement> comparer )
-        where TElement : IComparable<TElement>
-    {
-        Array.Sort(array, comparer);
-        return array;
+        public TElement[] Sorted()
+        {
+            Array.Sort((Array)array);
+            return array;
+        }
+        public TElement[] Sorted( Comparer<TElement> comparer )
+        {
+            Array.Sort(array, comparer);
+            return array;
+        }
+        public TElement[] Sorted( Comparison<TElement> comparer )
+        {
+            Array.Sort(array, comparer);
+            return array;
+        }
     }
 
 
-    public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-    {
-        List<TElement> list = new(initialCapacity);
-        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
-        return list;
-    }
-    public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+    extension<TElement>( IAsyncEnumerable<TElement> source )
         where TElement : IEquatable<TElement>
     {
-        ObservableCollection<TElement> list = new(initialCapacity);
-        await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
+        public async ValueTask<ObservableCollection<TElement>> ToObservableCollection( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            ObservableCollection<TElement> list = new(initialCapacity);
 
-        return list;
-    }
-    public static async ValueTask<ConcurrentObservableCollection<TElement>> ToConcurrentObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-        where TElement : IEquatable<TElement>
-    {
-        ConcurrentObservableCollection<TElement> list = new(initialCapacity);
-        await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) )
+            {
+                await list.AddAsync(element, token)
+                          .ConfigureAwait(false);
+            }
 
-        return list;
+            return list;
+        }
+        public async ValueTask<ConcurrentObservableCollection<TElement>> ToConcurrentObservableCollection( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            ConcurrentObservableCollection<TElement> list = new(initialCapacity);
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) )
+            {
+                await list.AddAsync(element, token)
+                          .ConfigureAwait(false);
+            }
+
+            return list;
+        }
     }
 }

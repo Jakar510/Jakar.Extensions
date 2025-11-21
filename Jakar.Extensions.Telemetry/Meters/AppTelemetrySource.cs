@@ -9,10 +9,9 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     public readonly Meters                  Meters;
     public readonly TelemetryActivitySource Source;
     public readonly TelemetrySpan           App;
-    private         TelemetryActivity?      __rootActivity;
 
     public static string?           DeviceID     { get; set; }
-    public        TelemetryActivity RootActivity => __rootActivity ??= GetActivity(Info.AppName);
+    public        TelemetryActivity RootActivity => field ??= GetActivity(Info.AppName);
 
 
     public TelemetrySource( in AppInformation info ) : base(in info)
@@ -21,7 +20,7 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
 
         Activity.Current = null;
         Source           = new TelemetryActivitySource(in info);
-        App              = CreateSubSpan(RootActivity, Info.AppName);
+        App              = CreateSubSpan(Validate.ThrowIfNull(RootActivity), Info.AppName);
         Meters           = new Meters(this);
     }
     public override void Dispose()
@@ -53,11 +52,14 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     [Pure] public TelemetrySpan CreateSubSpan( TelemetryActivity parent, string name, ActivityKind kind = ActivityKind.Internal ) => new(this, parent, name);
 
 
-    [Pure]
-    public TelemetryActivity GetActivity( string operationName, TelemetryActivity? parent = null, ActivityKind kind = ActivityKind.Internal )
+    [Pure] public TelemetryActivity GetActivity( string operationName, TelemetryActivity? parent = null, ActivityKind kind = ActivityKind.Internal )
     {
         ArgumentException.ThrowIfNullOrEmpty(operationName);
-        TelemetryActivity activity = Source.GetOrAddActivity(operationName).SetKind(kind).SetParent(parent);
+
+        TelemetryActivity activity = Source.GetOrAddActivity(operationName)
+                                           .SetKind(kind)
+                                           .SetParent(parent);
+
         activity.SetStatus(StatusCode.Ok);
         return activity.Start();
     }
@@ -122,16 +124,16 @@ public readonly struct TelemetrySpan : IDisposable, IActivityTracer
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryEvent GetEvent( string name, Pairs tags ) => new(name, DateTimeOffset.UtcNow, tags);
     public                                                           void           SetInactive() => TelemetryActivity.Current = _parent;
-    public void SetCurrent( [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void SetCurrent( [CallerMemberName] string caller = EMPTY )
     {
         TelemetryActivity.Current = Activity;
         Activity.AddEvent(caller);
     }
 
 
-    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                             = BaseRecord.EMPTY ) => new(_source, Activity, caller);
-    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetryActivity parent, [CallerMemberName] string caller = BaseRecord.EMPTY ) => new(source, parent, caller);
-    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetrySpan     parent, [CallerMemberName] string caller = BaseRecord.EMPTY ) => new(source, parent.Activity, caller);
+    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                             = EMPTY ) => new(_source, Activity, caller);
+    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetryActivity parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent, caller);
+    [Pure] public static TelemetrySpan Create( TelemetrySource                  source, TelemetrySpan     parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent.Activity, caller);
 
 
     public TelemetrySpan AddTag( string key, string? value )

@@ -10,7 +10,6 @@ global using System.Runtime.CompilerServices;
 global using System.Text;
 global using Dapper.Contrib.Extensions;
 global using Jakar.Database;
-global using Jakar.Database.Caches;
 global using Jakar.Extensions.Blazor;
 global using Jakar.Extensions.Telemetry;
 global using Jakar.Extensions.Telemetry.Server;

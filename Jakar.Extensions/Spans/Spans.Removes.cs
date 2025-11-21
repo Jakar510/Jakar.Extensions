@@ -6,37 +6,36 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, TValue c )
+    extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> source )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        Span<TValue> result = stackalloc TValue[source.Length];
-        RemoveAll(in source, in c, in result, out int length);
+        public ReadOnlySpan<TValue> RemoveAll( TValue c )
+        {
+            Span<TValue> result = stackalloc TValue[source.Length];
+            RemoveAll(in source, in c, in result, out int length);
 
-        return result[..length]
-           .ToArray();
+            return result[..length]
+               .ToArray();
+        }
+        public ReadOnlySpan<TValue> RemoveAll( params ReadOnlySpan<TValue> removed )
+        {
+            Span<TValue>         result = stackalloc TValue[source.Length];
+            RemoveAll(in source, in removed, in result, out int length);
+
+            return result[..length]
+               .ToArray();
+        }
     }
 
-
-    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, params ReadOnlySpan<TValue> removed )
-        where TValue : unmanaged, IEquatable<TValue>
-    {
-        Span<TValue>         result = stackalloc TValue[source.Length];
-        ReadOnlySpan<TValue> temp   = removed;
-        RemoveAll(in source, in temp, in result, out int length);
-
-        return result[..length]
-           .ToArray();
-    }
 
 
     public static Span<TValue> RemoveAll<TValue>( this scoped ref readonly Span<TValue> source, params ReadOnlySpan<TValue> removed )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        using IMemoryOwner<TValue> owner  = MemoryPool<TValue>.Shared.Rent(source.Length);
-        Span<TValue>               result = owner.Memory.Span;
-        ReadOnlySpan<TValue>       temp   = removed;
-        ReadOnlySpan<TValue>       span   = source;
-        RemoveAll(in span, in temp, in result, out int length);
+        using ArrayBuffer<TValue> owner  = new(source.Length);
+        Span<TValue>              result = owner.Span;
+        ReadOnlySpan<TValue>      span   = source;
+        RemoveAll(in span, in removed, in result, out int length);
 
         return result[..length]
            .ToArray();

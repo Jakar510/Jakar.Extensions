@@ -5,7 +5,6 @@ namespace Jakar.Extensions.Telemetry;
 
 
 /// <summary> Represents an operation with context to be used for logging. </summary>
-[JsonObject, SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible")]
 public sealed class TelemetryActivity( string operationName, in TelemetryActivityContext context ) : IDisposable
 {
     public const      string                   OPERATION_NAME = "OperationName";
@@ -15,9 +14,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
     private           DateTimeOffset?          __endTimeUtc;
     private           DateTimeOffset?          __startTimeUtc;
     private           StatusCode?              __status;
-    private           string?                  __displayName;
     private           string?                  __statusDescription;
-    private           TelemetryActivity?       __child;
     internal          TelemetryActivity?       parent;
     private           TimeSpan?                __duration;
 
@@ -25,28 +22,28 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
     public static TelemetryActivity? Current { get; set; }
     public TelemetryActivity? Child
     {
-        get => __child;
+        get;
         set
         {
-            __child = value;
-            if ( __child is not null ) { __child.parent = this; }
+            field = value;
+            if ( field is not null ) { field.parent = this; }
         }
     }
-    public TelemetryActivityContext   Context           { get => context;                        init => context = value; }
-    public string                     DisplayName       { get => __displayName ?? OperationName; set => __displayName = value; }
-    public TimeSpan?                  Duration          { get => __duration;                     init => __duration = value; }
-    public DateTimeOffset?            EndTimeUtc        { get => __endTimeUtc;                   init => __endTimeUtc = value; }
-    public ValueLinkedList<TelemetryEvent> Events            { get;                                   init; } = [];
-    public bool                       IsStopped         { get => __isStopped;                    init => __isStopped = value; }
-    public ActivityKind               Kind              { get => __kind;                         init => __kind = value; }
-    public TelemetryMeters            Meters            { get;                                   init; } = new();
-    public string                     OperationName     { get;                                   init; } = operationName;
-    public TelemetryActivityContext?  Parent            => parent?.Context;
-    public string                     SpanID            => TelemetryActivitySpanID.Collate(this);
-    public DateTimeOffset?            StartTimeUtc      { get => __startTimeUtc;      init => __startTimeUtc = value; }
-    public StatusCode?                Status            { get => __status;            init => __status = value; }
-    public string?                    StatusDescription { get => __statusDescription; init => __statusDescription = value; }
-    public Pairs                      Tags              { get;                        init; } = [];
+    public TelemetryActivityContext        Context           { get => context;                init => context = value; }
+    public string                          DisplayName       { get => field ?? OperationName; set; }
+    public TimeSpan?                       Duration          { get => __duration;             init => __duration = value; }
+    public DateTimeOffset?                 EndTimeUtc        { get => __endTimeUtc;           init => __endTimeUtc = value; }
+    public ValueLinkedList<TelemetryEvent> Events            { get;                           init; } = [];
+    public bool                            IsStopped         { get => __isStopped;            init => __isStopped = value; }
+    public ActivityKind                    Kind              { get => __kind;                 init => __kind = value; }
+    public TelemetryMeters                 Meters            { get;                           init; } = new();
+    public string                          OperationName     { get;                           init; } = operationName;
+    public TelemetryActivityContext?       Parent            => parent?.Context;
+    public string                          SpanID            => TelemetryActivitySpanID.Collate(this);
+    public DateTimeOffset?                 StartTimeUtc      { get => __startTimeUtc;      init => __startTimeUtc = value; }
+    public StatusCode?                     Status            { get => __status;            init => __status = value; }
+    public string?                         StatusDescription { get => __statusDescription; init => __statusDescription = value; }
+    public Pairs                           Tags              { get;                        init; } = [];
 
 
     public void Dispose() => Stop();
@@ -103,7 +100,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
         Events.AddLast(value);
         return this;
     }
-    public TelemetryActivity AddEvent( [CallerMemberName] string caller = BaseRecord.EMPTY ) => AddEvent(new TelemetryEvent(caller));
+    public TelemetryActivity AddEvent( [CallerMemberName] string caller = EMPTY ) => AddEvent(new TelemetryEvent(caller));
 
 
     public void AddTag( string                    key, string? value ) => AddTag(new Pair(key, value));

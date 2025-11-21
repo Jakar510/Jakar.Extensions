@@ -102,6 +102,88 @@ public interface IErrorTitles
     string Validation                                      { get; }
     string VariantAlsoNegotiates                           { get; }
     string WiFiIsDisabled                                  { get; }
+}
+
+
+
+public static class ErrorTitles
+{
+    public static string GetErrorTitle( this IErrorTitles titles, Status status )
+    {
+        return status switch
+               {
+                   Status.NotSet                        => titles.NotSet,
+                   Status.Continue                      => titles.Continue,
+                   Status.SwitchingProtocols            => titles.SwitchingProtocols,
+                   Status.Processing                    => titles.Processing,
+                   Status.EarlyHints                    => titles.EarlyHints,
+                   Status.Ok                            => titles.Ok,
+                   Status.Created                       => titles.Created,
+                   Status.Accepted                      => titles.Accepted,
+                   Status.NonAuthoritativeInformation   => titles.NonAuthoritativeInformation,
+                   Status.NoContent                     => titles.NoContent,
+                   Status.ResetContent                  => titles.ResetContent,
+                   Status.PartialContent                => titles.PartialContent,
+                   Status.MultiStatus                   => titles.MultiStatus,
+                   Status.AlreadyReported               => titles.AlreadyReported,
+                   Status.ImUsed                        => titles.ImUsed,
+                   Status.Ambiguous                     => titles.Ambiguous,
+                   Status.Moved                         => titles.Moved,
+                   Status.Found                         => titles.Found,
+                   Status.RedirectMethod                => titles.RedirectMethod,
+                   Status.NotModified                   => titles.NotModified,
+                   Status.UseProxy                      => titles.UseProxy,
+                   Status.Unused                        => titles.Unused,
+                   Status.RedirectKeepVerb              => titles.RedirectKeepVerb,
+                   Status.PermanentRedirect             => titles.PermanentRedirect,
+                   Status.BadRequest                    => titles.BadRequest,
+                   Status.Unauthorized                  => titles.Unauthorized,
+                   Status.PaymentRequired               => titles.PaymentRequired,
+                   Status.Forbidden                     => titles.Forbidden,
+                   Status.NotFound                      => titles.NotFound,
+                   Status.MethodNotAllowed              => titles.MethodNotAllowed,
+                   Status.NotAcceptable                 => titles.NotAcceptable,
+                   Status.ProxyAuthenticationRequired   => titles.ProxyAuthenticationRequired,
+                   Status.RequestTimeout                => titles.RequestTimeout,
+                   Status.Conflict                      => titles.Conflict,
+                   Status.Gone                          => titles.Gone,
+                   Status.LengthRequired                => titles.LengthRequired,
+                   Status.PreconditionFailed            => titles.PreconditionFailed,
+                   Status.RequestEntityTooLarge         => titles.RequestEntityTooLarge,
+                   Status.RequestUriTooLong             => titles.RequestUriTooLong,
+                   Status.UnsupportedMediaType          => titles.UnsupportedMediaType,
+                   Status.RequestedRangeNotSatisfiable  => titles.RequestedRangeNotSatisfiable,
+                   Status.ExpectationFailed             => titles.ExpectationFailed,
+                   Status.Teapot                        => titles.Teapot,
+                   Status.MisdirectedRequest            => titles.MisdirectedRequest,
+                   Status.UnprocessableEntity           => titles.UnprocessableEntity,
+                   Status.Locked                        => titles.Locked,
+                   Status.FailedDependency              => titles.FailedDependency,
+                   Status.TooEarly                      => titles.TooEarly,
+                   Status.UpgradeRequired               => titles.UpgradeRequired,
+                   Status.PreconditionRequired          => titles.PreconditionFailed,
+                   Status.TooManyRequests               => titles.TooManyRequests,
+                   Status.Disabled                      => titles.Disabled,
+                   Status.RequestHeaderFieldsTooLarge   => titles.RequestHeaderFieldsTooLarge,
+                   Status.AlreadyExists                 => titles.AlreadyExists,
+                   Status.NoResponse                    => titles.NoResponse,
+                   Status.UnavailableForLegalReasons    => titles.UnavailableForLegalReasons,
+                   Status.SessionExpired                => titles.SessionExpired,
+                   Status.ClientClosedRequest           => titles.ClientClosedRequest,
+                   Status.InternalServerError           => titles.InternalServerError,
+                   Status.NotImplemented                => titles.NotImplemented,
+                   Status.BadGateway                    => titles.BadGateway,
+                   Status.ServiceUnavailable            => titles.ServerIsUnavailable,
+                   Status.GatewayTimeout                => titles.GatewayTimeout,
+                   Status.HttpVersionNotSupported       => titles.HttpVersionNotSupported,
+                   Status.VariantAlsoNegotiates         => titles.VariantAlsoNegotiates,
+                   Status.InsufficientStorage           => titles.InsufficientStorage,
+                   Status.LoopDetected                  => titles.LoopDetected,
+                   Status.NotExtended                   => titles.NotExtended,
+                   Status.NetworkAuthenticationRequired => titles.NetworkAuthenticationRequired,
+                   _                                    => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+               };
+    }
 
 
 
@@ -110,69 +192,69 @@ public interface IErrorTitles
     {
         public static readonly IErrorTitles Instance = new Defaults();
         public                 string       Accepted                                        => "Accepted";
-        public                 string       AlreadyExists                                   => "AlreadyExists";
-        public                 string       AlreadyReported                                 => "AlreadyReported";
+        public                 string       AlreadyExists                                   => "Already Exists";
+        public                 string       AlreadyReported                                 => "Already Reported";
         public                 string       Ambiguous                                       => "Ambiguous";
-        public                 string       BadGateway                                      => "BadGateway";
-        public                 string       BadRequest                                      => "BadRequest";
+        public                 string       BadGateway                                      => "Bad Gateway";
+        public                 string       BadRequest                                      => "Bad Request";
         public                 string       BlockedPassed                                   => "Password cannot be a blocked password";
-        public                 string       ClientClosedRequest                             => "ClientClosedRequest";
+        public                 string       ClientClosedRequest                             => "Client Closed Request";
         public                 string       ClientIsOutdated                                => "Client is outdated";
         public                 string       ClientIsUnavailable                             => "Client is unavailable";
         public                 string       Conflict                                        => "A conflict has occurred";
         public                 string       Continue                                        => "Continue";
         public                 string       Created                                         => "Created";
         public                 string       Disabled                                        => "User is disabled";
-        public                 string       EarlyHints                                      => "EarlyHints";
-        public                 string       ExpectationFailed                               => "ExpectationFailed";
+        public                 string       EarlyHints                                      => "Early Hints";
+        public                 string       ExpectationFailed                               => "Expectation Failed";
         public                 string       ExpiredSubscription                             => "User's subscription is expired";
         public                 string       FailedDependency                                => "FailedDependency";
         public                 string       Forbidden                                       => "A 'Forbidden' has occurred";
         public                 string       Found                                           => "Found";
-        public                 string       GatewayTimeout                                  => "GatewayTimeout";
+        public                 string       GatewayTimeout                                  => "Gateway Timeout";
         public                 string       General                                         => "A failure has occurred";
         public                 string       GivenPortIsNotAValidPortNumberInRangeOf1To65535 => "Given port is not a valid port number in range of 1 to 65535";
         public                 string       Gone                                            => "Gone";
-        public                 string       HttpVersionNotSupported                         => "HttpVersionNotSupported";
+        public                 string       HttpVersionNotSupported                         => "Http Version Not Supported";
         public                 string       ImUsed                                          => "ImUsed";
-        public                 string       InsufficientStorage                             => "InsufficientStorage";
-        public                 string       InternalServerError                             => "InternalServerError";
+        public                 string       InsufficientStorage                             => "Insufficient Storage";
+        public                 string       InternalServerError                             => "Internal Server Error";
         public                 string       InvalidCredentials                              => "Invalid credentials";
         public                 string       InvalidSubscription                             => "User's subscription is no longer valid";
         public                 string       InvalidValue                                    => "Invalid value";
         public                 string       LengthPassed                                    => "Password not long enough";
-        public                 string       LengthRequired                                  => "LengthRequired";
+        public                 string       LengthRequired                                  => "Length Required";
         public                 string       Locked                                          => "User is locked";
         public                 string       LoopDetected                                    => "LoopDetected";
         public                 string       LowerPassed                                     => "Password must contain a lower case character";
-        public                 string       MethodNotAllowed                                => "MethodNotAllowed";
-        public                 string       MisdirectedRequest                              => "MisdirectedRequest";
+        public                 string       MethodNotAllowed                                => "Method Not Allowed";
+        public                 string       MisdirectedRequest                              => "Misdirected Request";
         public                 string       Moved                                           => "Moved";
-        public                 string       MultiStatus                                     => "MultiStatus";
+        public                 string       MultiStatus                                     => "Multi Status";
         public                 string       MustBeTrimmed                                   => "Password must be trimmed";
         public                 string       MustHaveValidDeviceName                         => "Must have valid device name";
         public                 string       MustHaveValidIPHostName                         => "Must have valid IP host name";
         public                 string       NetworkAuthenticationRequired                   => "NetworkAuthenticationRequired";
-        public                 string       NoContent                                       => "NoContent";
+        public                 string       NoContent                                       => "No Content";
         public                 string       NoInternet                                      => "No internet";
-        public                 string       NonAuthoritativeInformation                     => "NonAuthoritativeInformation";
+        public                 string       NonAuthoritativeInformation                     => "Non Authoritative Information";
         public                 string       NoResponse                                      => "NoResponse";
         public                 string       NoSubscription                                  => "User is not subscribed";
-        public                 string       NotAcceptable                                   => "NotAcceptable";
-        public                 string       NotExtended                                     => "NotExtended";
+        public                 string       NotAcceptable                                   => "Not Acceptable";
+        public                 string       NotExtended                                     => "Not Extended";
         public                 string       NotFound                                        => "A 'Not Found' has occurred";
-        public                 string       NotImplemented                                  => "NotImplemented";
-        public                 string       NotModified                                     => "NotModified";
+        public                 string       NotImplemented                                  => "Not Implemented";
+        public                 string       NotModified                                     => "Not Modified";
         public                 string       NotSet                                          => "NotSet";
         public                 string       NumericPassed                                   => "Password must contain a number";
         public                 string       Ok                                              => "Ok";
-        public                 string       PartialContent                                  => "PartialContent";
+        public                 string       PartialContent                                  => "Partial Content";
         public                 string       PasswordCannotBeEmpty                           => "Password cannot be empty";
         public                 string       PasswordValidation                              => "Password validation failed";
-        public                 string       PaymentRequired                                 => "PaymentRequired";
-        public                 string       PermanentRedirect                               => "PermanentRedirect";
-        public                 string       PreconditionFailed                              => "PreconditionFailed";
-        public                 string       PreconditionRequired                            => "PreconditionRequired";
+        public                 string       PaymentRequired                                 => "Payment Required";
+        public                 string       PermanentRedirect                               => "Permanent Redirect";
+        public                 string       PreconditionFailed                              => "Precondition Failed";
+        public                 string       PreconditionRequired                            => "Precondition Required";
         public                 string       Processing                                      => "Processing";
         public                 string       ProxyAuthenticationRequired                     => "ProxyAuthenticationRequired";
         public                 string       RedirectKeepVerb                                => "RedirectKeepVerb";

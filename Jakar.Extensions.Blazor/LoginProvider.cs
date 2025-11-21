@@ -24,21 +24,17 @@ public interface ILoginUserState : ICascadingValueName, INotifyPropertyChanged, 
 
 public class LoginUserState( HttpContext context, IAuthenticationService authentication ) : BaseClass, ILoginUserState
 {
-    public const       string                    KEY             = nameof(LoginUserState);
-    protected readonly HttpContext               _context        = context;
-    protected readonly IAuthenticationService    _authentication = authentication;
-    private            AuthenticationProperties? __properties;
-    private            Guid?                     __userID;
-    private            string?                   __userName;
-    private            UserModel?                __model;
-    public static      string                    AuthenticationScheme { get; set; } = JwtBearerDefaults.AuthenticationScheme;
+    public const       string                 KEY             = nameof(LoginUserState);
+    protected readonly HttpContext            _context        = context;
+    protected readonly IAuthenticationService _authentication = authentication;
+    public static      string                 AuthenticationScheme { get; set; } = JwtBearerDefaults.AuthenticationScheme;
 
 
     public static  string                    CascadingName => KEY;
-    public virtual UserModel?                Model         { get => __model;      set => SetProperty(ref __model,      value); }
-    public virtual AuthenticationProperties? Properties    { get => __properties; set => SetProperty(ref __properties, value); }
-    public virtual Guid?                     UserID        { get => __userID;     set => SetProperty(ref __userID,     value); }
-    public virtual string?                   UserName      { get => __userName;   set => SetProperty(ref __userName,   value); }
+    public virtual UserModel?                Model         { get; set => SetProperty(ref field, value); }
+    public virtual AuthenticationProperties? Properties    { get; set => SetProperty(ref field, value); }
+    public virtual Guid?                     UserID        { get; set => SetProperty(ref field, value); }
+    public virtual string?                   UserName      { get; set => SetProperty(ref field, value); }
 
 
     public static LoginUserState Get( IServiceProvider provider ) => provider.GetRequiredService<LoginUserState>();

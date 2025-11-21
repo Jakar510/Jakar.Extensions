@@ -16,20 +16,17 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
-    public static       JsonTypeInfo<LocalDirectory[]> JsonArrayInfo     => JakarExtensionsContext.Default.LocalDirectoryArray;
-    public static       JsonSerializerContext          JsonContext       => JakarExtensionsContext.Default;
-    public static       JsonTypeInfo<LocalDirectory>   JsonTypeInfo      => JakarExtensionsContext.Default.LocalDirectory;
-    public              DateTime                       CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public              bool                           DoesNotExist      => !Exists;
-    public              bool                           Exists            => Info.Exists;
-    [JsonIgnore] public DirectoryInfo                  Info              => _info;
-    bool TempFile.ITempFile.                           IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
-    public              DateTime                       LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              DateTime                       LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              string                         Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory?                Parent            => GetParent();
-    public              string                         Root              => Directory.GetDirectoryRoot(FullPath);
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);              set => Environment.CurrentDirectory = value.FullPath; }
+    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public              bool            DoesNotExist      => !Exists;
+    public              bool            Exists            => Info.Exists;
+    [JsonIgnore] public DirectoryInfo   Info              => _info;
+    bool TempFile.ITempFile.            IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              string          Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
+    public              string          Root              => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
@@ -42,9 +39,10 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     }
 
 
-    public void Dispose()
+    protected override void Dispose( bool disposing )
     {
-        GC.SuppressFinalize(this);
+        base.Dispose(disposing);
+        if ( !disposing ) { return; }
 
         DisposeAsync()
            .CallSynchronously();
@@ -55,7 +53,7 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
         GC.SuppressFinalize(this);
         if ( DoesNotExist || !this.IsTempFile() ) { return; }
 
-        await DeleteAllRecursivelyAsync();
+        await DeleteAllRecursivelyAsync().ConfigureAwait(false);
     }
 
 
@@ -337,9 +335,9 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             using MemoryStream data = await file.ReadAsync()
-                                                .AsStream(token);
+                                                .AsStream(token).ConfigureAwait(false);
 
-            await data.CopyToAsync(stream, token);
+            await data.CopyToAsync(stream, token).ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -356,9 +354,9 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token);
+                                                  .AsMemory(token).ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token);
+            await stream.WriteAsync(data, token).ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -375,9 +373,9 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token);
+                                                  .AsMemory(token).ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token);
+            await stream.WriteAsync(data, token).ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -394,9 +392,9 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token);
+                                                  .AsMemory(token).ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token);
+            await stream.WriteAsync(data, token).ConfigureAwait(false);
         }
 
         return zipFilePath;

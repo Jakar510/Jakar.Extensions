@@ -34,8 +34,7 @@ public abstract class ChatRooms<TSelf, TRoom> : ConcurrentObservableCollection<T
     where TRoom : IChatRoom<TRoom>
     where TSelf : ChatRooms<TSelf, TRoom>, ICollectionAlerts<TSelf, TRoom>
 {
-    private bool __showAll;
-    public  bool ShowAll { get => __showAll; set => SetProperty(ref __showAll, value); }
+    public bool ShowAll { get; set => SetProperty(ref field, value); }
 
 
     protected ChatRooms() : this(DEFAULT_CAPACITY) { }

@@ -11,14 +11,6 @@ namespace Jakar.Extensions;
 public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableConcurrentDictionary<ObservableConcurrentDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableConcurrentDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
-    private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>? __jsonArrayInfo;
-    private static JsonSerializerContext?                                        __jsonContext;
-    private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>?   __jsonTypeInfo;
-    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
-    public static  JsonSerializerContext                                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-
-
     public ObservableConcurrentDictionary() : this(DEFAULT_CAPACITY) { }
     public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>>         collection ) : this() => Add(collection);
     public ObservableConcurrentDictionary( params ReadOnlySpan<KeyValuePair<TKey, TValue>> collection ) : this() => Add(collection);
@@ -164,10 +156,10 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
 
 
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
-    protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
+    protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                        count  = buffer.Count;
-        FilterBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
+        ArrayBuffer<KeyValuePair<TKey, TValue>>    values = new(count);
         FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
         int                                        index  = 0;
 

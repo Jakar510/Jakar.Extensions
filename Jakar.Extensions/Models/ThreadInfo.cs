@@ -16,13 +16,10 @@ public readonly struct ThreadInformation( string name, int managedThreadID, Lang
     public ThreadInformation() : this(Thread.CurrentThread) { }
     public ThreadInformation( Thread                          thread ) : this(thread.Name ?? EMPTY, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }
     public static implicit operator ThreadInformation( Thread thread ) => new(thread);
-    public readonly                 string                            Name             = name;
-    public readonly                 int                               ManagedThreadID  = managedThreadID;
-    public readonly                 Language                          CurrentCulture   = currentCulture;
-    public readonly                 Language                          CurrentUICulture = currentUICulture;
-    public static                   JsonSerializerContext             JsonContext   => JakarExtensionsContext.Default;
-    public static                   JsonTypeInfo<ThreadInformation>   JsonTypeInfo  => JakarExtensionsContext.Default.ThreadInformation;
-    public static                   JsonTypeInfo<ThreadInformation[]> JsonArrayInfo => JakarExtensionsContext.Default.ThreadInformationArray;
+    public readonly                 string   Name             = name;
+    public readonly                 int      ManagedThreadID  = managedThreadID;
+    public readonly                 Language CurrentCulture   = currentCulture;
+    public readonly                 Language CurrentUICulture = currentUICulture;
 
 
     public static ThreadInformation Create() => new();
@@ -50,7 +47,7 @@ public readonly struct ThreadInformation( string name, int managedThreadID, Lang
         result = default;
         return false;
     }
-    public static ThreadInformation FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static ThreadInformation FromJson( string json ) => json.FromJson<ThreadInformation>();
 
 
     public int CompareTo( object? other ) => other is ThreadInformation info

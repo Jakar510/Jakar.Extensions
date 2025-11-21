@@ -51,17 +51,16 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 public class StringCollectionBenchmarks
 {
     private ImmutableArray<string> __array;
-    private int                    __count;
     private ReadOnlyMemory<string> __memory;
     private string[]               __values = GetArray(10);
 
 
     [Params(10, 1000, 10_000, 100_000)] public int Count
     {
-        get => __count;
+        get;
         set
         {
-            __count  = value;
+            field    = value;
             __values = GetArray(10000);
             __array  = [..__values];
             __memory = __values;

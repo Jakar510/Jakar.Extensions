@@ -5,11 +5,12 @@ public static class ApiEndpoints
 {
     public static void AddEndpoints( this WebApplication application )
     {
-        application.MapPost( Endpoints.SAVE_ACTIVITY, SaveActivity ).WithDisplayName( nameof(SaveActivity) );
+        application.MapPost(Endpoints.SAVE_ACTIVITY, SaveActivity)
+                   .WithDisplayName(nameof(SaveActivity));
 
         // application.MapPost(  )
     }
 
 
-    public static async Task SaveActivity( [FromBody] ActivityCollection collection, CancellationToken token ) { }
+    public static async Task SaveActivity( [FromBody] Activity activity, CancellationToken token ) { }
 }

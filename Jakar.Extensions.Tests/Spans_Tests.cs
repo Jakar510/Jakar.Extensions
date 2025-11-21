@@ -29,11 +29,11 @@ public class Spans_Tests : Assert
     }
 
 
-    [Test] [TestCase(ALPHANUMERIC, "abc", true)] public void Contains( string value, string other, bool expected )
+    [Test] [TestCase(ALPHANUMERIC, "abc", true)] public void ContainsExact( string value, string other, bool expected )
     {
         ReadOnlySpan<char> valueSpan = value;
         ReadOnlySpan<char> otherSpan = other;
-        bool               results   = valueSpan.Contains(otherSpan);
+        bool               results   = valueSpan.ContainsExact(otherSpan);
         this.AreEqual(expected, results);
     }
 
@@ -126,7 +126,7 @@ public class Spans_Tests : Assert
         string               result = array.ConvertToString(Encoding.Unicode);
         Console.WriteLine(value);
         Console.WriteLine(result);
-        this.AreEqual<char>(value, result);
+        this.AreEqual(value, result);
     }
 
 
@@ -136,7 +136,7 @@ public class Spans_Tests : Assert
         ReadOnlySpan<char> valueSpan = value;
         this.IsTrue(Spans.TryCopyTo(in valueSpan, ref span, c));
         string result = span.ToString();
-        this.AreEqual<char>(expected, result);
+        this.AreEqual(expected, result);
     }
 
 
@@ -331,8 +331,8 @@ public class Spans_Tests : Assert
     [Test] [TestCase("Abc_a1524dbz123", "1", "Abc_a524dbz23")] [TestCase("Abc_a1524dbz123", "2", "Abc_a154dbz13")]
     public void RemoveAll( string value, string other, string expected )
     {
-        ReadOnlySpan<char> result = Spans.Remove<char>(value, other);
-        this.AreEqual(expected, result);
+        using ArrayBuffer<char> result = Spans.Remove<char>(value, other);
+        this.AreEqual(expected, result.Values);
     }
 
 

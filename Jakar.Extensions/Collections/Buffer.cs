@@ -206,14 +206,14 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         return default;
     }
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, _length - 1);
-    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, _length - 1);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, _length);
         Guard.IsInRange(endInclusive, 0, _length);
         Guard.IsGreaterThanOrEqualTo(endInclusive, start);
-        FilterBuffer<TValue> buffer = new(_length);
+        ArrayBuffer<TValue>  buffer = new(_length);
         ReadOnlySpan<TValue> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
@@ -225,16 +225,8 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public readonly bool Contains( TValue value )
-    {
-        ReadOnlySpan<TValue> values = Values;
-        return values.Contains(value);
-    }
-    public readonly bool Contains( params ReadOnlySpan<TValue> value )
-    {
-        ReadOnlySpan<TValue> values = Values;
-        return values.Contains(in value, EqualityComparer<TValue>.Default);
-    }
+    public readonly bool Contains( TValue                      value ) => Values.Contains(value);
+    public readonly bool Contains( params ReadOnlySpan<TValue> value ) => Values.ContainsAll(value);
 
 
     public bool RemoveAt( int index )
@@ -276,9 +268,9 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     public void Insert( int start, TValue value, int count = 1 )
     {
         Guard.IsGreaterThanOrEqualTo(count, 0);
-        using IMemoryOwner<TValue> owner = MemoryPool<TValue>.Shared.Rent(count);
-        owner.Memory.Span.Fill(value);
-        Insert(start, owner.Memory.Span);
+        using ArrayBuffer<TValue> owner = new(count);
+        owner.Span.Fill(value);
+        Insert(start, owner.Span);
     }
     public void Insert( int start, params ReadOnlySpan<TValue> values )
     {

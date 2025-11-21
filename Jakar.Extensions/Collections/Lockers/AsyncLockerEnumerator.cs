@@ -4,14 +4,14 @@
 namespace Jakar.Extensions;
 
 
-public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+public sealed class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
     where TCloser : IDisposable
 {
     private const    int                                START_INDEX  = 0;
     private readonly ILockedCollection<TValue, TCloser> __collection = collection;
     private          bool                               __isDisposed;
     private          CancellationToken                  __token = token;
-    private          FilterBuffer<TValue>?              __buffer;
+    private          ArrayBuffer<TValue>?              __buffer;
     private          int                                __index = START_INDEX;
 
 
@@ -23,7 +23,6 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
 
     public ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize(this);
         __isDisposed = true;
         __buffer?.Dispose();
         __buffer = null;

@@ -2,20 +2,13 @@
 // 06/24/2024  19:06
 
 
-using Serilog.Core;
-using Serilog.Events;
-using System.Threading;
-using ZLinq;
-
-
-
 namespace Jakar.Extensions.Telemetry.Meters;
 
 
 public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDisposable
 {
-    private readonly TelemetrySource                                  __source      = source;
-    private readonly Dictionary<Type, Dictionary<string, Instrument>> __instruments = new(Buffers.DEFAULT_CAPACITY);
+    private readonly TelemetrySource                                       __source      = source;
+    private readonly Dictionary<string, Dictionary<string, Instrument>> __instruments = new(DEFAULT_CAPACITY);
 
 
     public void Dispose()
@@ -30,13 +23,19 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
         __instruments.Clear();
     }
 
+
     public void Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
     {
-        IEnumerable<LogEventProperty> properties = Save();
-        foreach ( LogEventProperty property in properties ) { logEvent.AddPropertyIfAbsent(property); }
+        foreach ( LogEventProperty property in Save() ) { logEvent.AddPropertyIfAbsent(property); }
     }
 
-    public Instrument<TValue> CreateMeter<TValue>( Type type, string name )
+
+    internal ValueEnumerable<Select<SelectMany<FromDictionary<string, Dictionary<string, Instrument>>, KeyValuePair<string, Dictionary<string, Instrument>>, Instrument>, Instrument, LogEventProperty>, LogEventProperty> Save() => __instruments.AsValueEnumerable()
+                                                                                                                                                                                                                                                       .SelectMany(static x => x.Value.Values)
+                                                                                                                                                                                                                                                       .Select(static x => x.Save());
+
+
+    public Instrument<TValue> CreateMeter<TValue>( string type, string name )
         where TValue : IEquatable<TValue>
     {
         ref Dictionary<string, Instrument>? instruments = ref CollectionsMarshal.GetValueRefOrAddDefault(__instruments, type, out bool _);
@@ -47,18 +46,6 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
         instrument        = new Instrument<TValue>(this, name);
         instruments[name] = instrument;
         return (Instrument<TValue>)instrument;
-    }
-    public IEnumerable<LogEventProperty> Save() => __instruments.Values.SelectMany(static x => x.Values).Select(static x => x.Save());
-
-
-
-    public enum Type
-    {
-        Save,
-        Refresh,
-        DBCall,
-        NetworkCall,
-        Navigation,
     }
 
 
@@ -93,7 +80,10 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
         {
             lock ( _lock )
             {
-                LogEventProperty[] array = __values.AsValueEnumerable().Select(GetPair).ToArray();
+                LogEventProperty[] array = __values.AsValueEnumerable()
+                                                   .Select(GetPair)
+                                                   .ToArray();
+
                 __values.Clear();
                 return array;
             }
@@ -154,47 +144,41 @@ public class TelemetryMeter<TValue> : IDisposable
     }
 
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( string name, string unit, string description, params Pair[]? tags )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( string name, string unit, string description, params Pair[]? tags )
     {
         MeterInstrumentInfo info = new(name, unit, description, tags);
         return CreateCounter(in info);
     }
 
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( ref readonly MeterInstrumentInfo info )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( ref readonly MeterInstrumentInfo info )
     {
         TelemetryCounter<TValue> instrument = new(this, in info);
         return AddInstrument(instrument);
     }
 
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>> func, string name, string unit, string description, params Pair[]? tags )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>> func, string name, string unit, string description, params Pair[]? tags )
     {
         MeterInstrumentInfo info = new(name, unit, description, tags);
         return CreateCounter(func, in info);
     }
 
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>[]> func, string name, string unit, string description, params Pair[]? tags )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>[]> func, string name, string unit, string description, params Pair[]? tags )
     {
         MeterInstrumentInfo info = new(name, unit, description, tags);
         return CreateCounter(func, in info);
     }
 
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>> func, ref readonly MeterInstrumentInfo info )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>> func, ref readonly MeterInstrumentInfo info )
     {
         TelemetryCounter<TValue> instrument = new(this, in info, func);
         return AddInstrument(instrument);
     }
 
-    [Pure]
-    public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>[]> func, ref readonly MeterInstrumentInfo info )
+    [Pure] public TelemetryCounter<TValue> CreateCounter( Func<Reading<TValue>[]> func, ref readonly MeterInstrumentInfo info )
     {
         TelemetryCounter<TValue> instrument = new(this, in info, func);
         return AddInstrument(instrument);
@@ -211,7 +195,7 @@ public class TelemetryMeter<TValue> : IDisposable
 
 
 
-    public sealed class Collection() : ConcurrentDictionary<string, TelemetryMeter<TValue>>(Environment.ProcessorCount, Buffers.DEFAULT_CAPACITY, StringComparer.Ordinal), IDisposable
+    public sealed class Collection() : ConcurrentDictionary<string, TelemetryMeter<TValue>>(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal), IDisposable
     {
         public static Collection Create() => new();
         public Collection( IEnumerable<KeyValuePair<string, TelemetryMeter<TValue>>> values ) : this()
@@ -254,20 +238,21 @@ public class TelemetryMeter<TValue> : IDisposable
 
 
         public             TValue                 CurrentValue { get => __current ??= _meter?.DefaultCurrentValue ?? TValue.Zero; [MemberNotNull(nameof(__current))] protected internal set => __current = value; }
-        public required    MeterInstrumentInfo    Info         { get;                                                            init; }
+        public required    MeterInstrumentInfo    Info         { get;                                                             init; }
         public             Reading<TValue>?       LastValue    => Reading<TValue>.TryGetLastValue(CollectionsMarshal.AsSpan(Readings));
-        protected internal TelemetryMeter<TValue> Meter        { get => GetMeter();                                            init => _meter = value; }
+        protected internal TelemetryMeter<TValue> Meter        { get => GetMeter();                                             init => _meter = value; }
         public             TValue                 Precision    { get => __precision ??= _meter?.DefaultPrecision ?? TValue.One; set => __precision = value; }
-        public             List<Reading<TValue>>  Readings     { get;                                                          init; } = [];
-        public             string                 Type         => GetType().Name;
+        public             List<Reading<TValue>>  Readings     { get;                                                           init; } = [];
+
+        public string Type => GetType()
+           .Name;
 
 
         public event OnMeterMeasurement<TValue>? OnMeasurement;
 
         protected MeterInstrument() { }
 
-        [SetsRequiredMembers]
-        public MeterInstrument( TelemetryMeter<TValue> meter, ref readonly MeterInstrumentInfo info )
+        [SetsRequiredMembers] public MeterInstrument( TelemetryMeter<TValue> meter, ref readonly MeterInstrumentInfo info )
         {
             _meter = meter;
             Info   = info;

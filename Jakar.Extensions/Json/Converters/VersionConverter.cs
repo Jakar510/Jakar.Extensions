@@ -4,27 +4,33 @@
 public sealed class VersionConverter() : JsonConverter<Version>()
 {
     public static readonly VersionConverter Instance = new();
-    public override Version? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+
+
+    public override Version? ReadJson( JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        switch ( reader.TokenType )
+        if ( reader.TokenType is JsonToken.Null ) { return null; }
+
+        if ( reader.TokenType is not JsonToken.String ) { throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing Version. Expected string."); }
+
+        string? s = ( (string?)reader.Value )?.Trim();
+
+        try
         {
-            case JsonTokenType.Null:
-                return null;
-
-            case JsonTokenType.String:
-            {
-                string? s = reader.GetString();
-                if ( string.IsNullOrWhiteSpace(s) ) { return null; }
-
-                if ( Version.TryParse(s, out Version? v) ) { return v; }
-
-                throw new JsonException($"Invalid version string: '{s}'");
-            }
-
-            default:
-                throw new JsonException($"Unexpected token parsing Version. TokenType={reader.TokenType}");
+            return string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : new Version(s);
         }
+        catch ( Exception ex ) { throw new JsonSerializationException($"Invalid Version string '{s}'.", ex); }
     }
 
-    public override void Write( Utf8JsonWriter writer, Version value, JsonSerializerOptions options ) { writer.WriteStringValue(value.ToString()); }
+    public override void WriteJson( JsonWriter writer, Version? value, JsonSerializer serializer )
+    {
+        if ( value is null )
+        {
+            writer.WriteNull();
+            return;
+        }
+
+        writer.WriteValue(value.ToString());
+    }
 }

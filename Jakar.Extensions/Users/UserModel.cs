@@ -204,12 +204,12 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         Rights            = value.Rights;
         return With(value.AdditionalData);
     }
-    public TSelf With( JsonObject? data )
+    public TSelf With( JObject? data )
     {
         if ( data?.Count is null or 0 ) { return (TSelf)this; }
 
-        JsonObject dict = AdditionalData ??= new JsonObject();
-        foreach ( ( string key, JsonNode? jToken ) in data ) { dict[key] = jToken; }
+        JObject dict = AdditionalData ??= new JObject();
+        foreach ( ( string key, JToken? jToken ) in data ) { dict[key] = jToken; }
 
         return (TSelf)this;
     }

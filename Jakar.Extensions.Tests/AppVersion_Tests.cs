@@ -10,6 +10,7 @@ public class AppVersion_Tests : Assert
     [Test] [TestCase(1, 0, 0, 0, 0, 0, "1.0.0.0.0.0")] public void Construct_Complete( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, string expected )
     {
         AppVersion version = new(major, minor, maintenance, majorRevision, minorRevision, build);
+
         this.AreEqual(expected, version.ToString());
     }
 

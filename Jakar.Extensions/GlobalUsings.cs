@@ -35,13 +35,16 @@ global using System.Numerics;
 global using System.Reflection.Emit;
 global using System.Runtime.InteropServices;
 global using System.Security;
-global using System.Text.Json;
-global using System.Text.Json.Nodes;
-global using System.Text.Json.Serialization;
-global using System.Text.Json.Serialization.Metadata;
 global using System.Threading.Tasks.Dataflow;
 global using System.Web;
 global using System.Windows.Input;
+global using Newtonsoft.Json;
+global using Newtonsoft.Json.Converters;
+global using Newtonsoft.Json.Utilities;
+global using Newtonsoft.Json.Schema;
+global using Newtonsoft.Json.Serialization;
+global using Newtonsoft.Json.Linq;
+global using Newtonsoft.Json.Linq.JsonPath;
 global using Nito.Collections;
 global using JetBrains.Annotations;
 global using ValueOf;
@@ -76,5 +79,5 @@ global using MsJsonConverterAttribute = System.Text.Json.Serialization.JsonConve
 global using MsJsonExtensionDataAttribute = System.Text.Json.Serialization.JsonExtensionDataAttribute;
 global using MsJsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using MsJsonSerializer = System.Text.Json.JsonSerializer;
-global using MsJsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
+global using MsJsonSerializerOptions = System.Text.Json.JsonSerializerSettings;
 */

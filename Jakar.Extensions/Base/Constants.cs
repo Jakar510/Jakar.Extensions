@@ -15,12 +15,95 @@ public static class Constants
     public static readonly DateOnly       SQLMinDateOnly = new(1753, 1, 1);
 
 
-    public static string GetAndOr( this bool matchAll ) => matchAll
-                                                               ? AND
-                                                               : OR;
-    public static string ToStringFast( this bool value ) => value
-                                                                ? TRUE
-                                                                : FALSE;
+
+    extension( bool matchAll )
+    {
+        public string GetAndOr() => matchAll
+                                        ? AND
+                                        : OR;
+        public string ToStringFast() => matchAll
+                                            ? TRUE
+                                            : FALSE;
+    }
+
+
+
+    public static string GetErrorType( this Status status )
+    {
+        return status switch
+               {
+                   Status.NotSet                        => NOT_SET_TYPE,
+                   Status.Continue                      => CONTINUE_TYPE,
+                   Status.SwitchingProtocols            => SWITCHING_PROTOCOLS_TYPE,
+                   Status.Processing                    => PROCESSING_TYPE,
+                   Status.EarlyHints                    => EARLY_HINTS_TYPE,
+                   Status.Ok                            => OK_TYPE,
+                   Status.Created                       => CREATED_TYPE,
+                   Status.Accepted                      => ACCEPTED_TYPE,
+                   Status.NonAuthoritativeInformation   => NON_AUTHORITATIVE_INFORMATION_TYPE,
+                   Status.NoContent                     => NO_CONTENT_TYPE,
+                   Status.ResetContent                  => RESET_CONTENT_TYPE,
+                   Status.PartialContent                => PARTIAL_CONTENT_TYPE,
+                   Status.MultiStatus                   => MULTI_STATUS_TYPE,
+                   Status.AlreadyReported               => ALREADY_REPORTED_TYPE,
+                   Status.ImUsed                        => IM_USED_TYPE,
+                   Status.Ambiguous                     => AMBIGUOUS_TYPE,
+                   Status.Moved                         => MOVED_TYPE,
+                   Status.Found                         => FOUND_TYPE,
+                   Status.RedirectMethod                => REDIRECT_METHOD_TYPE,
+                   Status.NotModified                   => NOT_MODIFIED_TYPE,
+                   Status.UseProxy                      => USE_PROXY_TYPE,
+                   Status.Unused                        => UNUSED_TYPE,
+                   Status.RedirectKeepVerb              => REDIRECT_KEEP_VERB_TYPE,
+                   Status.PermanentRedirect             => PERMANENT_REDIRECT_TYPE,
+                   Status.BadRequest                    => BAD_REQUEST_TYPE,
+                   Status.Unauthorized                  => UNAUTHORIZED_TYPE,
+                   Status.PaymentRequired               => PAYMENT_REQUIRED_TYPE,
+                   Status.Forbidden                     => FORBIDDEN_TYPE,
+                   Status.NotFound                      => NOT_FOUND_TYPE,
+                   Status.MethodNotAllowed              => METHOD_NOT_ALLOWED_TYPE,
+                   Status.NotAcceptable                 => NOT_ACCEPTABLE_TYPE,
+                   Status.ProxyAuthenticationRequired   => PROXY_AUTHENTICATION_REQUIRED_TYPE,
+                   Status.RequestTimeout                => REQUEST_TIMEOUT_TYPE,
+                   Status.Conflict                      => CONFLICT_TYPE,
+                   Status.Gone                          => GONE_TYPE,
+                   Status.LengthRequired                => LENGTH_REQUIRED_TYPE,
+                   Status.PreconditionFailed            => PRECONDITION_FAILED_TYPE,
+                   Status.RequestEntityTooLarge         => REQUEST_ENTITY_TOO_LARGE_TYPE,
+                   Status.RequestUriTooLong             => REQUEST_URI_TOO_LONG_TYPE,
+                   Status.UnsupportedMediaType          => UNSUPPORTED_MEDIA_TYPE_TYPE,
+                   Status.RequestedRangeNotSatisfiable  => REQUESTED_RANGE_NOT_SATISFIABLE_TYPE,
+                   Status.ExpectationFailed             => EXPECTATION_FAILED_TYPE,
+                   Status.Teapot                        => TEAPOT_TYPE,
+                   Status.MisdirectedRequest            => MISDIRECTED_REQUEST_TYPE,
+                   Status.UnprocessableEntity           => UNPROCESSABLE_ENTITY_TYPE,
+                   Status.Locked                        => LOCKED_TYPE,
+                   Status.FailedDependency              => FAILED_DEPENDENCY_TYPE,
+                   Status.TooEarly                      => TOO_EARLY_TYPE,
+                   Status.UpgradeRequired               => UPGRADE_REQUIRED_TYPE,
+                   Status.PreconditionRequired          => PRECONDITION_REQUIRED_TYPE,
+                   Status.TooManyRequests               => TOO_MANY_REQUESTS_TYPE,
+                   Status.Disabled                      => DISABLED_TYPE,
+                   Status.RequestHeaderFieldsTooLarge   => REQUEST_HEADER_FIELDS_TOO_LARGE_TYPE,
+                   Status.AlreadyExists                 => ALREADY_EXISTS_TYPE,
+                   Status.NoResponse                    => NO_RESPONSE_TYPE,
+                   Status.UnavailableForLegalReasons    => UNAVAILABLE_FOR_LEGAL_REASONS_TYPE,
+                   Status.SessionExpired                => SESSION_EXPIRED_TYPE,
+                   Status.ClientClosedRequest           => CLIENT_CLOSED_REQUEST_TYPE,
+                   Status.InternalServerError           => INTERNAL_SERVER_ERROR_TYPE,
+                   Status.NotImplemented                => NOT_IMPLEMENTED_TYPE,
+                   Status.BadGateway                    => BAD_GATEWAY_TYPE,
+                   Status.ServiceUnavailable            => SERVICE_UNAVAILABLE_TYPE,
+                   Status.GatewayTimeout                => GATEWAY_TIMEOUT_TYPE,
+                   Status.HttpVersionNotSupported       => HTTP_VERSION_NOT_SUPPORTED_TYPE,
+                   Status.VariantAlsoNegotiates         => VARIANT_ALSO_NEGOTIATES_TYPE,
+                   Status.InsufficientStorage           => INSUFFICIENT_STORAGE_TYPE,
+                   Status.LoopDetected                  => LOOP_DETECTED_TYPE,
+                   Status.NotExtended                   => NOT_EXTENDED_TYPE,
+                   Status.NetworkAuthenticationRequired => NETWORK_AUTHENTICATION_REQUIRED_TYPE,
+                   _                                    => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+               };
+    }
 
 
 

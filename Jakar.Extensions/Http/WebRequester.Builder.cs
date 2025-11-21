@@ -2,6 +2,11 @@
 // 05/03/2022  9:01 AM
 
 
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -65,6 +70,8 @@ public partial class WebRequester
 
             return client;
         }
+
+
         protected virtual HttpMessageHandler GetHandler()
         {
             SocketsHttpHandler handler = new();
@@ -187,6 +194,87 @@ public partial class WebRequester
         {
             __maxAutomaticRedirections = value;
             __allowAutoRedirect        = value > 0;
+            return this;
+        }
+
+
+        public Builder With_SslOptions( SslClientAuthenticationOptions value )
+        {
+            __sslOptions = value;
+            return this;
+        }
+        public Builder With_Ssl( RemoteCertificateValidationCallback value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.RemoteCertificateValidationCallback = value;
+            return this;
+        }
+        public Builder With_Ssl( Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool> value ) => With_Ssl(( object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors ) => value((HttpRequestMessage)sender, certificate as X509Certificate2, chain, sslPolicyErrors));
+        public Builder With_Ssl( X509ChainPolicy value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.CertificateChainPolicy = value;
+            return this;
+        }
+        public Builder With_Ssl( CipherSuitesPolicy value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.CipherSuitesPolicy = value;
+            return this;
+        }
+        public Builder With_Ssl( SslStreamCertificateContext value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.ClientCertificateContext = value;
+            return this;
+        }
+        public Builder With_Ssl( bool AllowRenegotiation, bool AllowTlsResume )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.AllowTlsResume     = AllowTlsResume;
+            options.AllowRenegotiation = AllowRenegotiation;
+            return this;
+        }
+        public Builder With_Ssl( X509CertificateCollection value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.ClientCertificates = value;
+            return this;
+        }
+        public Builder With_Ssl( List<SslApplicationProtocol> value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.ApplicationProtocols = value;
+            return this;
+        }
+        public Builder With_Ssl( params ReadOnlySpan<SslApplicationProtocol> value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.ApplicationProtocols = [..value];
+            return this;
+        }
+        public Builder With_Ssl( Uri targetHost )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.TargetHost = targetHost.ToString();
+            return this;
+        }
+        public Builder With_Ssl( SslProtocols value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.EnabledSslProtocols = value;
+            return this;
+        }
+        public Builder With_Ssl( EncryptionPolicy value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.EncryptionPolicy = value;
+            return this;
+        }
+        public Builder With_Ssl( X509RevocationMode value )
+        {
+            SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
+            options.CertificateRevocationCheckMode = value;
             return this;
         }
 

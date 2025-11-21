@@ -20,11 +20,6 @@ public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long 
     public readonly GcMemoryInformation MemoryInfo                     = info;
 
 
-    public static JsonSerializerContext  JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<GcInfo>   JsonTypeInfo  => JakarExtensionsContext.Default.GcInfo;
-    public static JsonTypeInfo<GcInfo[]> JsonArrayInfo => JakarExtensionsContext.Default.GcInfoArray;
-
-
     public GcInfo() : this(GC.GetTotalMemory(false), GC.GetTotalAllocatedBytes(), GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalPauseDuration(), GC.GetGCMemoryInfo()) { }
     public static GcInfo Create() => new();
     public LogEventProperty GetProperty() => new(nameof(GcInfo),
@@ -54,7 +49,7 @@ public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long 
         result = default;
         return false;
     }
-    public static GcInfo FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static GcInfo FromJson( string json ) => json.FromJson<GcInfo>();
 
 
     public int CompareTo( object? other ) => other is GcInfo app

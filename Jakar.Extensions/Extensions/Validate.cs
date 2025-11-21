@@ -7,16 +7,45 @@ public static partial class Validate
     private static volatile string __demo = "DEMO";
 
 
-    public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this float value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+
+    extension( WeakReference self )
+    {
+        public object? TryGetTarget() => self.Target;
+        public TValue? TryGetTarget<TValue>()
+            where TValue : class => self.Target as TValue;
+    }
 
 
-    public static string FormatNumber( this double value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this double value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+
+    public static TValue? TryGetTarget<TValue>( this WeakReference<TValue> value )
+        where TValue : class => value.TryGetTarget(out TValue? target)
+                                    ? target
+                                    : null;
 
 
-    public static string FormatNumber( this decimal value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+
+    extension( float self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
+
+
+    extension( double self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
+
+
+    extension( decimal self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
 
 
     public static bool IsDemo( this string value, params ReadOnlySpan<string> options )

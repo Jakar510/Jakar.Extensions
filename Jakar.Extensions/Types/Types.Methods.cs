@@ -1,13 +1,37 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Linq;
+using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static partial class Types
 {
-    public static MethodDetails    MethodInfo( this       MethodBase    method )    => new(method);
     public static ParameterDetails GetParameterInfo( this ParameterInfo parameter ) => new(parameter);
 
 
-    public static string  MethodName( this      MethodBase method ) => method.Name;
-    public static string  MethodSignature( this MethodBase method ) => $"{method.Name}( {string.Join(", ", method.GetParameters().Select(static x => x.ParameterType.FullName))} )";
-    public static string? MethodClass( this     MethodBase method ) => method.DeclaringType?.FullName;
+
+    extension( MethodBase self )
+    {
+        public string MethodName() => self.Name;
+        public string MethodSignature()
+        {
+            StringBuilder sb = new();
+            sb.Append(self.Name);
+            sb.Append("( ");
+
+            using PooledArray<string> strings = self.GetParameters()
+                                              .AsValueEnumerable()
+                                              .Select(static x => x.ParameterType.FullName ?? x.ParameterType.Name)
+                                              .ToArrayPool();
+
+            sb.AppendJoin(", ", strings.Span);
+
+            sb.Append(" )");
+            return sb.ToString();
+        }
+        public string?       MethodClass() => self.DeclaringType?.FullName;
+        public MethodDetails MethodInfo()  => new(self);
+    }
 }

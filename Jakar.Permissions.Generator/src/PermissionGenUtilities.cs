@@ -11,6 +11,7 @@ using Jakar.Permissions.Generator.Runtime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -95,29 +96,31 @@ internal static class PermissionGenUtilities
         string projectDir = Directory.GetCurrentDirectory();
         if ( string.IsNullOrEmpty(projectDir) ) { return ImmutableArray<AdditionalText>.Empty; }
 
-        ImmutableArray<AdditionalText> found = Constants.Candidates.Select(name => Path.Combine(projectDir, name))
-                                                        .Where(File.Exists)
-                                                        .Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))
-                                                        .ToImmutableArray();
+        ImmutableArray<AdditionalText> found =
+        [
+            ..Constants.Candidates.Select(name => Path.Combine(projectDir, name))
+                       .Where(File.Exists)
+                       .Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))
+        ];
 
         return found;
     }
 
     public static List<string> ParsePermissions( string json )
     {
-        JsonNode?    node = JsonNode.Parse(json);
+        JToken       node = JToken.Parse(json);
         List<string> list = new(64);
 
-        if ( node is not null ) { BuildPermissionList(node, list, null); }
+        BuildPermissionList(node, list, null);
 
         return list;
     }
 
-    private static void BuildPermissionList( JsonNode node, List<string> result, string? prefix )
+    private static void BuildPermissionList( JToken node, List<string> result, string? prefix )
     {
-        if ( node is JsonObject obj )
+        if ( node is JObject obj )
         {
-            foreach ( KeyValuePair<string, JsonNode?> kvp in obj )
+            foreach ( KeyValuePair<string, JToken?> kvp in obj )
             {
                 string path = string.IsNullOrEmpty(prefix)
                                   ? kvp.Key
@@ -126,11 +129,11 @@ internal static class PermissionGenUtilities
                 BuildPermissionList(kvp.Value!, result, path);
             }
         }
-        else if ( node is JsonArray arr )
+        else if ( node is JArray array )
         {
-            foreach ( JsonNode? child in arr )
+            foreach ( JToken? child in array )
             {
-                if ( child is JsonValue v && v.TryGetValue(out string? str) ) { result.Add($"{prefix}.{str}"); }
+                if ( child is JValue { HasValues: true } v ) { result.Add($"{prefix}.{v.Value}"); }
             }
         }
     }
@@ -309,11 +312,10 @@ internal static class PermissionGenUtilities
 
 
 
-    private sealed class Node
+    private sealed class Node( string name )
     {
         public Dictionary<string, Node>                  Children { get; } = [];
         public List<(string Field, int Id, string Path)> Fields   { get; } = [];
-        public string                                    Name     { get; }
-        public Node( string name ) => Name = name;
+        public string                                    Name     { get; } = name;
     }
 }

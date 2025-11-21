@@ -15,6 +15,7 @@
 // JsonNet_SystemTextJson_Benchmarks.Test();
 
 
+/*
 using Permissions<TestRight> permissions = Permissions<TestRight>.Default;
 permissions.Grant(TestRight.Analytics_ClearTraces);
 permissions.Grant(TestRight.Analytics_CreateAlert);
@@ -33,3 +34,21 @@ Console.WriteLine();
 Console.WriteLine(permissions.ToString());
 Console.WriteLine();
 Console.WriteLine();
+*/
+
+
+UserModel model = new();
+
+model.PropertyChanged  += OnPropertyChanged;
+model.PropertyChanging += OnPropertyChanging;
+
+
+model.UserName    = "NewUserName";
+model.Description = "New Description";
+
+
+return;
+
+
+void OnPropertyChanged( object?  sender, PropertyChangedEventArgs  args ) => Console.WriteLine($"PropertyChanged: {args.PropertyName}");
+void OnPropertyChanging( object? sender, PropertyChangingEventArgs args ) => Console.WriteLine($"PropertyChanging: {args.PropertyName}");

@@ -58,8 +58,9 @@ public class FilePaths : BaseClass, IDisposable
     }
 
 
-    protected virtual void Dispose( bool disposing )
+    protected override void Dispose( bool disposing )
     {
+        base.Dispose(disposing);
         if ( !disposing ) { return; }
 
         Disposables.ClearAndDispose(ref _accountsFile);
@@ -84,12 +85,7 @@ public class FilePaths : BaseClass, IDisposable
 
         _additionalFiles.Clear();
         _additionalFiles = null;
-    }
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+    } 
 
 
     public void ClearCache()
@@ -132,14 +128,14 @@ public class FilePaths : BaseClass, IDisposable
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = Cache.Join(fileName);
-        await file.WriteAsync(stream, token);
+        await file.WriteAsync(stream, token).ConfigureAwait(false);
         return file;
     }
     public async ValueTask<LocalFile> SaveFileAsync( string fileName, ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = Cache.Join(fileName);
-        await file.WriteAsync(payload, token);
+        await file.WriteAsync(payload, token).ConfigureAwait(false);
         return file;
     }
 

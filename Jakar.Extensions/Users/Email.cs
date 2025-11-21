@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 [Serializable]
 [JsonConverter(typeof(EmailJsonConverter))]
-public readonly record struct Email( string Value ) : IParsable<Email>
+public readonly record struct Email( string Value ) : IParsable<Email>, IFormattable
 {
     public static readonly          Email Empty = new(EMPTY);
     public static implicit operator string( Email email ) => email.Value;
@@ -23,19 +23,11 @@ public readonly record struct Email( string Value ) : IParsable<Email>
 
         return result == Empty;
     }
+    public string ToString( string? format, IFormatProvider? formatProvider ) => string.IsNullOrWhiteSpace(format)
+                                                                                     ? Value
+                                                                                     : $"{nameof(Value)}: {Value}";
 }
 
 
 
-public sealed class EmailJsonConverter : SerializeAsStringJsonConverter<EmailJsonConverter, Email>
-{
-    public override Email Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
-    {
-        string? value = reader.GetString();
-
-        return string.IsNullOrWhiteSpace(value)
-                   ? Email.Empty
-                   : new Email(value);
-    }
-    public override void Write( Utf8JsonWriter writer, Email value, JsonSerializerOptions options ) => writer.WriteStringValue(value.ToString());
-}
+public sealed class EmailJsonConverter : SerializeAsStringJsonConverter<EmailJsonConverter, Email>;

@@ -8,14 +8,6 @@
 public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<ObservableDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
-    private static JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>? __jsonArrayInfo;
-    private static JsonSerializerContext?                              __jsonContext;
-    private static JsonTypeInfo<ObservableDictionary<TKey, TValue>>?   __jsonTypeInfo;
-    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
-    public static  JsonSerializerContext                               JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-
-
     public ObservableDictionary() : this(DEFAULT_CAPACITY) { }
     public ObservableDictionary( IDictionary<TKey, TValue>                       dictionary ) : base(dictionary) { }
     public ObservableDictionary( IEnumerable<KeyValuePair<TKey, TValue>>         collection ) : base(collection) { }
@@ -150,10 +142,10 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
 
 
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
-    protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
+    protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                        count  = buffer.Count;
-        FilterBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
+        ArrayBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
         FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
         int                                        index  = 0;
 

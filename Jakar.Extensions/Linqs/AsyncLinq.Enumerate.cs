@@ -1,136 +1,141 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Xml.Linq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static partial class AsyncLinq
 {
-    public static async IAsyncEnumerable<(int Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, int start = 0 )
+    extension<TElement>( IAsyncEnumerable<TElement> self )
     {
-        int index = start;
+        public IAsyncEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>()
+            where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero);
 
-        await foreach ( TElement element in source )
+        public async IAsyncEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>( TNumber start )
+            where TNumber : INumber<TNumber>
         {
-            checked { index++; }
+            TNumber Index = start;
 
-            yield return ( index, element );
-        }
-    }
-    public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0 )
-    {
-        long index = start;
+            await foreach ( TElement x in self.ConfigureAwait(false) )
+            {
+                checked { Index++; }
 
-        await foreach ( TElement element in source )
-        {
-            checked { index++; }
-
-            yield return ( index, element );
-        }
-    }
-    public static IEnumerable<(int index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
-    {
-        int index = start;
-
-        foreach ( KeyValuePair<TKey, TElement> pair in element )
-        {
-            yield return ( index, pair );
-            index++;
+                yield return ( Index, x );
+            }
         }
     }
 
 
-    public static IEnumerable<(int index, object key, object? value)> Enumerate( this IDictionary element, int start = 0 )
-    {
-        int index = start;
 
-        foreach ( DictionaryEntry pair in element )
+    extension( IEnumerable self )
+    {
+        public IEnumerable<(TNumber Index, object? Value)> Enumerate<TNumber>()
+            where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero);
+
+        public IEnumerable<(TNumber Index, object? Value)> Enumerate<TNumber>( TNumber start )
+            where TNumber : INumber<TNumber>
         {
-            yield return ( index, pair.Key, pair.Value );
-            index++;
+            TNumber Index = start;
+
+            foreach ( object? item in self )
+            {
+                yield return ( Index, item );
+                Index++;
+            }
         }
     }
 
 
-    public static IEnumerable<(int index, object? item)> Enumerate( this IEnumerable element, int start )
-    {
-        int index = start;
 
-        foreach ( object? item in element )
-        {
-            yield return ( index, item );
-            index++;
-        }
-    }
-    public static IEnumerable<(int index, TElement item)> Enumerate<TElement>( this IEnumerable<TElement> element, int start )
+    extension<TElement>( IEnumerable<TElement> self )
     {
-        int index = start;
+        public IEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>()
+            where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero);
 
-        foreach ( TElement item in element )
+        public IEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>( TNumber start )
+            where TNumber : INumber<TNumber>
         {
-            yield return ( index, item );
-            index++;
-        }
-    }
-    public static IEnumerable<(int index, TKey key, TElement value)> Enumerate<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
-    {
-        int index = start;
+            TNumber Index = start;
 
-        foreach ( ( TKey key, TElement value ) in element )
-        {
-            yield return ( index, key, value );
-            index++;
-        }
-    }
-    public static IEnumerable<(long index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
-    {
-        long index = start;
-
-        foreach ( KeyValuePair<TKey, TElement> pair in element )
-        {
-            yield return ( index, pair );
-            index++;
+            foreach ( TElement item in self )
+            {
+                yield return ( Index, item );
+                Index++;
+            }
         }
     }
 
 
-    public static IEnumerable<(long index, object key, object? value)> Enumerate( this IDictionary element, long start = 0 )
-    {
-        long index = start;
 
-        foreach ( DictionaryEntry pair in element )
+    extension<TKey, TElement>( IDictionary<TKey, TElement> self )
+        where TKey : notnull
+    {
+        public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>( bool sorted = true )
+            where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero, sorted);
+
+        public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>( TNumber start, bool sorted = true )
+            where TNumber : INumber<TNumber>
         {
-            yield return ( index, pair.Key, pair.Value );
-            index++;
+            TNumber           Index = start;
+            ICollection<TKey> keys  = self.Keys;
+
+            if ( sorted )
+            {
+                List<TKey> list = new(self.Keys);
+                list.Sort();
+                keys = list;
+            }
+
+            foreach ( var Key in keys )
+            {
+                yield return ( Index, Key, self[Key] );
+                Index++;
+            }
+        }
+
+
+        public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>( bool sorted = true )
+            where TNumber : INumber<TNumber> => self.EnumeratePairs(TNumber.Zero, sorted);
+
+        public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>( TNumber start, bool sorted = true )
+            where TNumber : INumber<TNumber>
+        {
+            TNumber           Index = start;
+            ICollection<TKey> keys  = self.Keys;
+
+            if ( sorted )
+            {
+                List<TKey> list = new(self.Keys);
+                list.Sort();
+                keys = list;
+            }
+
+            foreach ( var Key in keys )
+            {
+                yield return ( Index, new KeyValuePair<TKey, TElement>(Key, self[Key]) );
+                Index++;
+            }
         }
     }
 
 
-    public static IEnumerable<(long index, object? item)> Enumerate( this IEnumerable element, long start )
-    {
-        long index = start;
 
-        foreach ( object? item in element )
-        {
-            yield return ( index, item );
-            index++;
-        }
-    }
-    public static IEnumerable<(long index, TElement item)> Enumerate<TElement>( this IEnumerable<TElement> element, long start )
+    extension( IDictionary self )
     {
-        long index = start;
+        public IEnumerable<(TNumber Index, object Key, object? Value)> Enumerate<TNumber>()
+            where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero);
 
-        foreach ( TElement item in element )
+        public IEnumerable<(TNumber Index, object Key, object? Value)> Enumerate<TNumber>( TNumber start )
+            where TNumber : INumber<TNumber>
         {
-            yield return ( index, item );
-            index++;
-        }
-    }
-    public static IEnumerable<(long index, TKey key, TElement value)> Enumerate<TKey, TElement>( this IDictionary<TKey, TElement> element, long start = 0 )
-    {
-        long index = start;
+            TNumber Index = start;
 
-        foreach ( ( TKey key, TElement value ) in element )
-        {
-            yield return ( index, key, value );
-            index++;
+            foreach ( DictionaryEntry Pair in self )
+            {
+                yield return ( Index, Pair.Key, Pair.Value );
+                Index++;
+            }
         }
     }
 }

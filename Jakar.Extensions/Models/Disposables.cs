@@ -48,7 +48,7 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
                 return;
 
             case IAsyncDisposable resourceAsyncDisposable:
-                await resourceAsyncDisposable.DisposeAsync();
+                await resourceAsyncDisposable.DisposeAsync().ConfigureAwait(false);
                 return;
 
             default:

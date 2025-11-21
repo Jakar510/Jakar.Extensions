@@ -27,7 +27,7 @@ public sealed class WebResponse<TValue>
 
 
     [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
-    public                                                         bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
+    public                                                         bool IsSuccessStatusCode { [MemberNotNullWhen(true, nameof(Payload))] get => Payload is not null && StatusCode < Status.BadRequest; }
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this(response, default, null, error) { }
@@ -98,9 +98,25 @@ public sealed class WebResponse<TValue>
         errorMessage = Errors;
         return false;
     }
-    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
-    private Errors GetError( string detail ) => Error.Create(Exception?.Value, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
+
+
+    public Errors GetError() => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Error.Create(StatusCode);
+    private Errors GetError( string title )
+    {
+        Exception? e = Exception?.Value;
+        if ( e is null ) { return new Error(StatusCode, title, ErrorMessage(), URL?.OriginalString, StringTags.Empty); }
+
+        Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors);
+        return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);
+
+
+        static Errors FromString( WebResponse<TValue> response, string s )      => s;
+        static Errors FromNode( WebResponse<TValue>   response, JToken node )   => Error.Create(response.StatusCode, node.ToJson());
+        static Errors FromErrors( WebResponse<TValue> response, Errors errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
+    }
+
+
+    public string ErrorMessage() => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
 
 
     public void EnsureSuccessStatusCode()
@@ -121,15 +137,23 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+            if ( !response.IsSuccessStatusCode )
+            {
+                return await Create(response, token)
+                          .ConfigureAwait(false);
+            }
 
-            TValue result = await func(response, token);
+            TValue result = await func(response, token)
+                               .ConfigureAwait(false);
+
             return new WebResponse<TValue>(response, result);
         }
         catch ( HttpRequestException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, CancellationToken token )
@@ -138,15 +162,23 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+            if ( !response.IsSuccessStatusCode )
+            {
+                return await Create(response, token)
+                          .ConfigureAwait(false);
+            }
 
-            TValue result = await func(response, arg, token);
+            TValue result = await func(response, arg, token)
+                               .ConfigureAwait(false);
+
             return new WebResponse<TValue>(response, result);
         }
         catch ( HttpRequestException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
 
@@ -161,21 +193,33 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+                if ( !response.IsSuccessStatusCode )
+                {
+                    return await Create(response, token)
+                              .ConfigureAwait(false);
+                }
 
-                TValue result = await func(response, token);
+                TValue result = await func(response, token)
+                                   .ConfigureAwait(false);
+
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token); }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
+            {
+                await policy.IncrementAndWait(ref count, token)
+                            .ConfigureAwait(false);
+            }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
         catch ( AggregateException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
@@ -188,21 +232,33 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token); }
+                if ( !response.IsSuccessStatusCode )
+                {
+                    return await Create(response, token)
+                              .ConfigureAwait(false);
+                }
 
-                TValue result = await func(response, arg, token);
+                TValue result = await func(response, arg, token)
+                                   .ConfigureAwait(false);
+
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token); }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
+            {
+                await policy.IncrementAndWait(ref count, token)
+                            .ConfigureAwait(false);
+            }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
         catch ( AggregateException e )
         {
             telemetrySpan.AddException(e);
-            return await Create(response, e, token);
+
+            return await Create(response, e, token)
+                      .ConfigureAwait(false);
         }
     }
 
@@ -210,15 +266,21 @@ public sealed class WebResponse<TValue>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await using Stream? stream        = await response.Content.ReadAsStreamAsync(token);
-        string              error;
+
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
+                                                   .ConfigureAwait(false);
+
+        string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new(stream);
-            string             errorMessage = await reader.ReadToEndAsync(token);
+            using StreamReader reader = new(stream);
+
+            string errorMessage = await reader.ReadToEndAsync(token)
+                                              .ConfigureAwait(false);
+
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, errorMessage); }
 
             error = errorMessage;
@@ -229,15 +291,21 @@ public sealed class WebResponse<TValue>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await using Stream? stream        = await response.Content.ReadAsStreamAsync(token);
-        string              error;
+
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
+                                                   .ConfigureAwait(false);
+
+        string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new(stream);
-            string             errorMessage = await reader.ReadToEndAsync(token);
+            using StreamReader reader = new(stream);
+
+            string errorMessage = await reader.ReadToEndAsync(token)
+                                              .ConfigureAwait(false);
+
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, e, errorMessage); }
 
             error = errorMessage;

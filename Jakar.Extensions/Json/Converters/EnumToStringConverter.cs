@@ -22,37 +22,48 @@ public abstract class EnumToStringConverter<TSelf, TEnum>() : JsonConverter<TEnu
     private static long   ToNumber( TEnum e ) => e.AsLong();
 
 
-    public override TEnum Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+    public override TEnum ReadJson( JsonReader reader, Type objectType, TEnum existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        return reader.TokenType switch
-               {
-                   JsonTokenType.String => ReadFromString(ref reader),
-                   JsonTokenType.Number => ReadFromNumber(ref reader),
-                   _                    => throw new JsonException($"Unexpected token parsing {typeof(TEnum).Name}: {reader.TokenType}")
-               };
+        if ( reader.TokenType is JsonToken.Null )
+        {
+            if ( !objectType.IsGenericType || objectType.GetGenericTypeDefinition() != typeof(Nullable<>) ) throw new JsonSerializationException($"Cannot convert null to {typeof(TEnum).FullName}");
+
+            return default!;
+        }
+
+        switch ( reader.TokenType )
+        {
+            case JsonToken.String:
+            {
+                string s = (string)reader.Value!;
+                if ( _stringToEnum.TryGetValue(s, out TEnum parsed) ) return parsed;
+
+                throw new JsonSerializationException($"Unknown {typeof(TEnum).Name} value '{s}'.");
+            }
+
+            case JsonToken.Integer:
+            {
+                long n = Convert.ToInt64(reader.Value);
+                if ( _intToEnum.TryGetValue(n, out TEnum parsed) ) return parsed;
+
+                throw new JsonSerializationException($"Unknown numeric value {n} for enum {typeof(TEnum).Name}.");
+            }
+        }
+
+        throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing {typeof(TEnum).Name}.");
     }
 
-    private static TEnum ReadFromString( ref Utf8JsonReader reader )
+
+    public override void WriteJson( JsonWriter writer, TEnum value, JsonSerializer serializer )
     {
-        string? str = reader.GetString();
-        if ( str is null ) { throw new JsonException($"Null string for {typeof(TEnum).Name}"); }
+        // Always emit the string name
+        if ( _enumToString.TryGetValue(value, out string? s) )
+        {
+            writer.WriteValue(s);
+            return;
+        }
 
-        if ( _stringToEnum.TryGetValue(str, out TEnum enumValue) || ( long.TryParse(str, out long n) && _intToEnum.TryGetValue(n, out enumValue) ) ) { return enumValue; }
-
-        throw new JsonException($"Invalid value '{str}' for {typeof(TEnum).Name}");
-    }
-
-    private static TEnum ReadFromNumber( ref Utf8JsonReader reader )
-    {
-        if ( reader.TryGetInt32(out int intVal) && Enum.IsDefined(typeof(TEnum), intVal) ) { return (TEnum)Enum.ToObject(typeof(TEnum), intVal); }
-
-        throw new JsonException($"Invalid numeric value for {typeof(TEnum).Name}");
-    }
-
-    public override void Write( Utf8JsonWriter writer, TEnum value, JsonSerializerOptions options )
-    {
-        writer.WriteStringValue(_enumToString.TryGetValue(value, out string? str)
-                                    ? str
-                                    : value.ToString()); // fallback (shouldn’t normally happen)
+        // Should never happen unless enum is corrupted
+        writer.WriteValue(value.ToString());
     }
 }

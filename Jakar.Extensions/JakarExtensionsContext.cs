@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+/*
 [JsonSourceGenerationOptions(MaxDepth = 128,
                              IndentSize = 4,
                              NewLine = "\n",
@@ -17,7 +18,7 @@ namespace Jakar.Extensions;
                              IgnoreReadOnlyFields = false,
                              PropertyNameCaseInsensitive = false,
                              ReadCommentHandling = JsonCommentHandling.Skip,
-                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+                             UnknownTypeHandling = JsonUnknownTypeHandling.JToken,
                              RespectRequiredConstructorParameters = true,
                              Converters = [typeof(EncodingConverter)])]
 [JsonSerializable(typeof(string[]))]
@@ -59,10 +60,10 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(Memory<byte>?[]))]
 [JsonSerializable(typeof(ReadOnlyMemory<byte>[]))]
 [JsonSerializable(typeof(ReadOnlyMemory<byte>?[]))]
-[JsonSerializable(typeof(JsonNode[]))]
-[JsonSerializable(typeof(JsonObject[]))]
+[JsonSerializable(typeof(JToken[]))]
+[JsonSerializable(typeof(JObject[]))]
 [JsonSerializable(typeof(JsonArray[]))]
-[JsonSerializable(typeof(JsonValue[]))]
+[JsonSerializable(typeof(JValue[]))]
 [JsonSerializable(typeof(JsonDocument[]))]
 [JsonSerializable(typeof(JsonElement[]))]
 [JsonSerializable(typeof(Version[]))]
@@ -214,13 +215,13 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
     }
     private static void Register_Jsons()
     {
-        Default.JsonNode.Register();
+        Default.JToken.Register();
         Default.JsonNodeArray.Register();
-        Default.JsonObject.Register();
+        Default.JObject.Register();
         Default.JsonObjectArray.Register();
         Default.JsonArray.Register();
         Default.JsonArrayArray.Register();
-        Default.JsonValue.Register();
+        Default.JValue.Register();
         Default.JsonValueArray.Register();
         Default.JsonDocument.Register();
         Default.JsonDocumentArray.Register();
@@ -308,3 +309,4 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
         Default.HashSetTimeSpan.Register();
     }
 }
+*/

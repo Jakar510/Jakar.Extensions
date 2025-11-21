@@ -1,88 +1,75 @@
-﻿using AsyncAwaitBestPractices;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
 public class LanguageApi : BaseClass
 {
-    protected readonly WeakEventManager<Language> _weakEventManager  = new();
-    private            CultureInfo                __currentCulture   = CultureInfo.CurrentCulture;
-    private            CultureInfo                __currentUiCulture = CultureInfo.CurrentUICulture;
-    private            CultureInfo?               __defaultThreadCurrentCulture;
-    private            CultureInfo?               __defaultThreadCurrentUiCulture;
-    private            Language?                  __selectedLanguage;
-    private            LanguageCollection         __languages = new(Language.Supported);
+    protected const  string             SHARED_KEY               = "LanguageApi";
+    public const     string             CURRENT_LANGUAGE_VERSION = "CurrentLanguageVersion";
+    public const     string             SELECTED_LANGUAGE_NAME   = "SelectedLanguageDisplayName";
+    protected static LanguageApi?       _api;
+    protected        CultureInfo        _currentCulture   = CultureInfo.CurrentCulture;
+    protected        CultureInfo        _currentUiCulture = CultureInfo.CurrentUICulture;
+    protected        CultureInfo?       _defaultThreadCurrentCulture;
+    protected        CultureInfo?       _defaultThreadCurrentUiCulture;
+    protected        Language?          _selectedLanguage;
+    protected        LanguageCollection _languages = new(Language.Supported);
 
 
-    public virtual CultureInfo CurrentCulture
+    public static LanguageApi Current => _api ??= Create();
+
+
+    public CultureInfo CurrentCulture
     {
-        get => __currentCulture;
+        get => _currentCulture;
         set
         {
-            if ( !SetProperty(ref __currentCulture, value) ) { return; }
-
-            CultureInfo.CurrentCulture = value;
+            if ( SetProperty(ref _currentCulture, value) ) { CultureInfo.CurrentCulture = value; }
         }
     }
-    public virtual CultureInfo CurrentUICulture
+    public CultureInfo CurrentUICulture
     {
-        get => __currentUiCulture;
+        get => _currentUiCulture;
         set
         {
-            if ( !SetProperty(ref __currentUiCulture, value) ) { return; }
-
-            CultureInfo.CurrentUICulture = value;
+            if ( SetProperty(ref _currentUiCulture, value) ) { CultureInfo.CurrentUICulture = value; }
         }
     }
-    public virtual CultureInfo? DefaultThreadCurrentCulture
+    public CultureInfo? DefaultThreadCurrentCulture
     {
-        get => __defaultThreadCurrentCulture;
+        get => _defaultThreadCurrentCulture;
         set
         {
-            if ( !SetProperty(ref __defaultThreadCurrentCulture, value) ) { return; }
-
-            CultureInfo.DefaultThreadCurrentCulture = value;
+            if ( SetProperty(ref _defaultThreadCurrentCulture, value) ) { CultureInfo.DefaultThreadCurrentCulture = value; }
         }
     }
-    public virtual CultureInfo? DefaultThreadCurrentUiCulture
+    public CultureInfo? DefaultThreadCurrentUiCulture
     {
-        get => __defaultThreadCurrentUiCulture;
+        get => _defaultThreadCurrentUiCulture;
         set
         {
-            if ( !SetProperty(ref __defaultThreadCurrentUiCulture, value) ) { return; }
-
-            CultureInfo.DefaultThreadCurrentUICulture = value;
+            if ( SetProperty(ref _defaultThreadCurrentUiCulture, value) ) { CultureInfo.DefaultThreadCurrentUICulture = value; }
         }
     }
-    public virtual LanguageCollection Languages
+    public LanguageCollection Languages
     {
-        get => __languages;
+        get => _languages;
         set
         {
-            if ( !SetProperty(ref __languages, value) ) { return; }
-
-            if ( value.Contains(SelectedLanguage) ) { return; }
-
-            value.Add(SelectedLanguage);
+            if ( SetProperty(ref _languages, value) ) { value.TryAdd(SelectedLanguage); }
         }
     }
-    public virtual Language SelectedLanguage
+    public Language SelectedLanguage
     {
-        get => __selectedLanguage ?? throw new NullReferenceException(nameof(__selectedLanguage)); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        get => _selectedLanguage ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
         {
-            if ( !SetProperty(ref __selectedLanguage, value) ) { return; }
-
-            _weakEventManager.RaiseEvent(value, nameof(OnLanguageChanged));
-            CurrentUICulture = value;
+            if ( SetProperty(ref _selectedLanguage, value) ) { LanguageChanged(value); }
         }
     }
 
 
-    public event Action<Language> OnLanguageChanged { add => _weakEventManager.AddEventHandler(value); remove => _weakEventManager.RemoveEventHandler(value); }
+    public event EventHandler<Language>? OnLanguageChanged;
 
 
     public LanguageApi() : this(CultureInfo.CurrentUICulture) { }
@@ -90,5 +77,22 @@ public class LanguageApi : BaseClass
     {
         SelectedLanguage = culture;
         Languages.TryAdd(culture);
+    }
+
+
+    protected static LanguageApi Create()
+    {
+        SupportedLanguage language = (SupportedLanguage)SHARED_KEY.GetPreference(CURRENT_LANGUAGE_VERSION, SupportedLanguage.English.AsLong());
+        LanguageApi       api      = new(language);
+        return api;
+    }
+
+
+    protected virtual void LanguageChanged( Language value )
+    {
+        CurrentUICulture = value;
+        SHARED_KEY.SetPreference(SELECTED_LANGUAGE_NAME,   value.DisplayName);
+        SHARED_KEY.SetPreference(CURRENT_LANGUAGE_VERSION, value.Version.AsLong());
+        OnLanguageChanged?.Invoke(this, value);
     }
 }

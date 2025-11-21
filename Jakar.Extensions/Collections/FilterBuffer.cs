@@ -3,6 +3,7 @@
 
 using ZLinq;
 using ZLinq.Internal;
+using ZLinq.Linq;
 
 
 
@@ -10,62 +11,75 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Empty))]
-public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
+[method: MustDisposeResource]
+public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
 {
-    public static readonly FilterBuffer<TValue> Empty = new(0);
-    private readonly IMemoryOwner<TValue>? __owner = capacity > 0
-                                                         ? MemoryPool<TValue>.Shared.Rent(capacity)
-                                                         : null;
+    public static readonly ArrayBuffer<TValue> Empty = new(0);
+    private readonly TValue[]? __array = capacity > 0
+                                             ? ArrayPool<TValue>.Shared.Rent(capacity)
+                                             : null;
     public readonly int Capacity = capacity;
     internal        int length   = 0;
-    private         int __index  = 0;
+    private         int __index;
 
 
-    public readonly int                    Length => length;
-    public readonly ReadOnlyMemory<TValue> Memory => __owner?.Memory[..length] ?? Memory<TValue>.Empty;
-    public readonly ReadOnlySpan<TValue>   Values => Memory.Span;
+    public readonly int                  Length => length;
+    public readonly Memory<TValue>       Memory => new(__array, 0, length);
+    public readonly Span<TValue>         Span   => new(__array, 0, Capacity);
+    public readonly ReadOnlySpan<TValue> Values => Span[..length];
 
 
-    public FilterBuffer() : this(0) { }
-    public readonly void Dispose() => __owner?.Dispose();
+    public ArrayBuffer() : this(0) { }
+    public void Dispose()
+    {
+        ArrayBuffer<TValue> self = this;
+        this = Empty;
+        if ( self.__array is not null ) { ArrayPool<TValue>.Shared.Return(self.__array); }
+    }
+
+    public static implicit operator ReadOnlySpan<TValue>( ArrayBuffer<TValue> self ) => self.Values;
+
+
+    public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => new ReadOnlySpan<TValue>(__array, 0, length).GetEnumerator();
 
 
     public void Add( TValue value )
     {
-        if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
+        if ( __array is not null ) { __array[length++] = value; }
 
         if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
     }
     public void Add( ref readonly TValue value )
     {
-        if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
+        if ( __array is not null ) { __array[length++] = value; }
 
         if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
     }
 
 
+    public bool TryGetNonEnumeratedCount( out int count )
+    {
+        count = Length;
+        return true;
+    }
     public bool TryGetNext( out TValue current )
     {
-        if ( __index < length )
+        if ( __index < Length )
         {
-            current = Values[__index++];
+            current = Values[__index];
+            __index++;
             return true;
         }
 
         Unsafe.SkipInit(out current);
         return false;
     }
-    public bool TryGetNonEnumeratedCount( out int count )
-    {
-        count = length;
-        return false;
-    }
     public bool TryGetSpan( out ReadOnlySpan<TValue> span )
     {
         span = Values;
-        return false;
+        return true;
     }
-    public bool TryCopyTo( scoped Span<TValue> destination, Index offset )
+    public bool TryCopyTo( Span<TValue> destination, Index offset )
     {
         if ( !EnumeratorHelper.TryGetSlice(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 

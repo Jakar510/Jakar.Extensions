@@ -14,11 +14,20 @@ public static class SelfLogger
     public static SelfLogFailureListener FailureListener { get; set; } = new();
 
 
+    /// <summary> Set the output mechanism for self-log messages to <see cref="Console.Error"/> </summary>
+    public static void Enable() => Enable(Console.Error);
+
+
+    /// <summary> Set the output mechanism for self-log messages. </summary>
+    /// <param name="output"> An action to invoke with self-log messages. </param>
+    /// // ReSharper disable once MemberCanBePrivate.Global
+    /// <exception cref="ArgumentNullException"> When <paramref name="output"/> is <code>null</code> </exception>
+    public static void Enable( Action<string> output ) => __output = Validate.ThrowIfNull(output);
+
+
     /// <summary> Set the output mechanism for self-log messages. </summary>
     /// <param name="output"> A synchronized <see cref="TextWriter"/> to which self-log messages will be written. </param>
     /// <exception cref="ArgumentNullException"> When <paramref name="output"/> is <code>null</code> </exception>
-
-    // ReSharper disable once MemberCanBePrivate.Global
     public static void Enable( TextWriter output )
     {
         ArgumentNullException.ThrowIfNull(output);
@@ -30,34 +39,37 @@ public static class SelfLogger
                });
     }
 
-    /// <summary> Set the output mechanism for self-log messages. </summary>
-    /// <param name="output"> An action to invoke with self-log messages. </param>
-    /// // ReSharper disable once MemberCanBePrivate.Global
-    /// <exception cref="ArgumentNullException"> When <paramref name="output"/> is <code>null</code> </exception>
-    public static void Enable( Action<string> output ) { __output = Validate.ThrowIfNull(output); }
 
     /// <summary> Clear the output mechanism and disable self-log events. </summary>
     /// // ReSharper disable once MemberCanBePrivate.Global
-    public static void Disable() { __output = null; }
+    public static void Disable() => __output = null;
 
 
-    public static void WriteLine<TArg0>( [StructuredMessageTemplate]                             string format, TArg0 arg0 )                                                 { __output?.Invoke(string.Format($"{DateTime.UtcNow:o} {format}", arg0)); }
-    public static void WriteLine<TArg0, TArg1>( [StructuredMessageTemplate]                      string format, TArg0 arg0, TArg1 arg1 )                                     { __output?.Invoke(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1)); }
-    public static void WriteLine<TArg0, TArg1, TArg2>( [StructuredMessageTemplate]               string format, TArg0 arg0, TArg1 arg1, TArg2 arg2 )                         { __output?.Invoke(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2)); }
-    public static void WriteLine<TArg0, TArg1, TArg2, TArg3>( [StructuredMessageTemplate]        string format, TArg0 arg0, TArg1 arg1, TArg2 arg2, TArg3 arg3 )             { __output?.Invoke(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2, arg3)); }
-    public static void WriteLine<TArg0, TArg1, TArg2, TArg3, TArg4>( [StructuredMessageTemplate] string format, TArg0 arg0, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4 ) { __output?.Invoke(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2, arg3, arg4)); }
-
-
-
-    public class SelfLogFailureListener
+    public static void WriteLine( string message )
     {
-        public virtual void OnLoggingFailed<TKind, TLogEvent>( object sender, TKind kind, string message, Exception? exception ) =>
-            __output?.Invoke(exception is not null
-                                 ? string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind}){Environment.NewLine}{exception}")
-                                 : string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind})"));
+        Debug.WriteLine(EMPTY);
+        Debug.WriteLine(message);
+        Debug.WriteLine(EMPTY);
+
+        __output?.Invoke(message);
+    }
+    public static void WriteLine<TArg0>( [StructuredMessageTemplate]                             string format, TArg0 arg0 )                                                 => WriteLine(string.Format($"{DateTime.UtcNow:o} {format}", arg0));
+    public static void WriteLine<TArg0, TArg1>( [StructuredMessageTemplate]                      string format, TArg0 arg0, TArg1 arg1 )                                     => WriteLine(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1));
+    public static void WriteLine<TArg0, TArg1, TArg2>( [StructuredMessageTemplate]               string format, TArg0 arg0, TArg1 arg1, TArg2 arg2 )                         => WriteLine(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2));
+    public static void WriteLine<TArg0, TArg1, TArg2, TArg3>( [StructuredMessageTemplate]        string format, TArg0 arg0, TArg1 arg1, TArg2 arg2, TArg3 arg3 )             => WriteLine(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2, arg3));
+    public static void WriteLine<TArg0, TArg1, TArg2, TArg3, TArg4>( [StructuredMessageTemplate] string format, TArg0 arg0, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4 ) => WriteLine(string.Format($"{DateTime.UtcNow:o} {format}", arg0, arg1, arg2, arg3, arg4));
 
 
-        public virtual void OnLoggingFailed<TKind, TLogEvent>( object sender, TKind kind, string message, IReadOnlyCollection<TLogEvent>? events, Exception? exception )
+
+    public sealed class SelfLogFailureListener
+    {
+        public void OnLoggingFailed<TKind>( object sender, TKind kind, string message, Exception? exception ) =>
+            WriteLine(exception is not null
+                          ? string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind}){Environment.NewLine}{exception}")
+                          : string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind})"));
+
+
+        public void OnLoggingFailed<TKind, TLogEvent>( object sender, TKind kind, string message, IReadOnlyCollection<TLogEvent>? events, Exception? exception )
         {
             Action<string>? action = __output;
             if ( action is null ) { return; }
