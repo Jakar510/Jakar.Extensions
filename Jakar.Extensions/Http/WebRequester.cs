@@ -102,9 +102,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value ) => new(this, new HttpRequestMessage(method, url) { Content = value });
 
 
-    public WebHandler Delete<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, new JsonContent(value.ToJson(), Encoding));
-    public WebHandler Delete<TValue>( string relativePath, TValue      value, JsonTypeInfo<TValue> info ) => Delete(relativePath, new JsonContent(value.ToJson(info), Encoding));
+    public WebHandler Delete<TValue>( string relativePath, TValue      value ) => Delete(CreateUrl(relativePath), new JsonContent(value.ToJson(), Encoding));
     public WebHandler Delete( string         relativePath, HttpContent value ) => Delete(CreateUrl(relativePath), value);
     public WebHandler Delete( Uri            url,          HttpContent value ) => CreateHandler(url, HttpMethod.Delete, value);
     public WebHandler Delete( Uri            url )                                               => CreateHandler(url, HttpMethod.Delete);
@@ -114,16 +112,14 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Delete( string         relativePath, IDictionary<string, string> value )   => Delete(relativePath, new FormUrlEncodedContent(value));
     public WebHandler Delete( string         relativePath, Stream                      value )   => Delete(relativePath, new StreamContent(value));
     public WebHandler Delete( string         relativePath, MultipartContent            content ) => Delete(relativePath, (HttpContent)content);
-    public WebHandler Delete( string         relativePath, string                      value )   => Delete(relativePath, new StringContent(value.ToJson(JakarExtensionsContext.Default.String), Encoding));
+    public WebHandler Delete( string         relativePath, string                      value )   => Delete(relativePath, new StringContent(value.ToJson(), Encoding));
 
 
     public WebHandler Get( Uri    url )          => CreateHandler(url, HttpMethod.Get);
     public WebHandler Get( string relativePath ) => Get(CreateUrl(relativePath));
 
 
-    public WebHandler Patch<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, new JsonContent(value.ToJson(), Encoding));
-    public WebHandler Patch<TValue>( string relativePath, TValue                      value, JsonTypeInfo<TValue> info ) => Patch(relativePath, new JsonContent(value.ToJson(info), Encoding));
+    public WebHandler Patch<TValue>( string relativePath, TValue                      value )   => Patch(CreateUrl(relativePath), new JsonContent(value.ToJson(), Encoding));
     public WebHandler Patch( Uri            url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Patch, value);
     public WebHandler Patch( string         relativePath, HttpContent                 value )   => Patch(CreateUrl(relativePath), value);
     public WebHandler Patch( string         relativePath, byte[]                      value )   => Patch(relativePath,            new ByteArrayContent(value));
@@ -131,12 +127,10 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Patch( string         relativePath, IDictionary<string, string> value )   => Patch(relativePath,            new FormUrlEncodedContent(value));
     public WebHandler Patch( string         relativePath, Stream                      value )   => Patch(relativePath,            new StreamContent(value));
     public WebHandler Patch( string         relativePath, MultipartContent            content ) => Patch(relativePath,            (HttpContent)content);
-    public WebHandler Patch( string         relativePath, string                      value )   => Patch(relativePath,            new StringContent(value.ToJson(JakarExtensionsContext.Default.String), Encoding));
+    public WebHandler Patch( string         relativePath, string                      value )   => Patch(relativePath,            new StringContent(value.ToJson(), Encoding));
 
 
-    public WebHandler Post<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, new JsonContent(value.ToJson(), Encoding));
-    public WebHandler Post<TValue>( string relativePath, TValue                      value, JsonTypeInfo<TValue> info ) => Post(relativePath, new JsonContent(value.ToJson(info), Encoding));
+    public WebHandler Post<TValue>( string relativePath, TValue                      value )   => Post(CreateUrl(relativePath), new JsonContent(value.ToJson(), Encoding));
     public WebHandler Post( Uri            url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Post, value);
     public WebHandler Post( string         relativePath, HttpContent                 value )   => Post(CreateUrl(relativePath), value);
     public WebHandler Post( string         relativePath, byte[]                      value )   => Post(relativePath,            new ByteArrayContent(value));
@@ -144,12 +138,10 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Post( string         relativePath, IDictionary<string, string> value )   => Post(relativePath,            new FormUrlEncodedContent(value));
     public WebHandler Post( string         relativePath, Stream                      value )   => Post(relativePath,            new StreamContent(value));
     public WebHandler Post( string         relativePath, MultipartContent            content ) => Post(relativePath,            (HttpContent)content);
-    public WebHandler Post( string         relativePath, string                      value )   => Post(relativePath,            new StringContent(value.ToJson(JakarExtensionsContext.Default.String), Encoding));
+    public WebHandler Post( string         relativePath, string                      value )   => Post(relativePath,            new StringContent(value.ToJson(), Encoding));
 
 
-    public WebHandler Put<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, new JsonContent(value.ToJson(), Encoding));
-    public WebHandler Put<TValue>( string relativePath, TValue                      value, JsonTypeInfo<TValue> info ) => Put(relativePath, new JsonContent(value.ToJson(info), Encoding));
+    public WebHandler Put<TValue>( string relativePath, TValue                      value )   => Put(CreateUrl(relativePath), new JsonContent(value.ToJson(), Encoding));
     public WebHandler Put( Uri            url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Put, value);
     public WebHandler Put( string         relativePath, HttpContent                 value )   => Put(CreateUrl(relativePath), value);
     public WebHandler Put( string         relativePath, byte[]                      value )   => Put(relativePath,            new ByteArrayContent(value));
@@ -157,5 +149,5 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Put( string         relativePath, IDictionary<string, string> value )   => Put(relativePath,            new FormUrlEncodedContent(value));
     public WebHandler Put( string         relativePath, Stream                      value )   => Put(relativePath,            new StreamContent(value));
     public WebHandler Put( string         relativePath, MultipartContent            content ) => Put(relativePath,            (HttpContent)content);
-    public WebHandler Put( string         relativePath, string                      value )   => Put(relativePath,            new StringContent(value.ToJson(JakarExtensionsContext.Default.String), Encoding));
+    public WebHandler Put( string         relativePath, string                      value )   => Put(relativePath,            new StringContent(value.ToJson(), Encoding));
 }

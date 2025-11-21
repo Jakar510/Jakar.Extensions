@@ -29,19 +29,25 @@ public static partial class AsyncLinq
         public async ValueTask<HashSet<TElement>> ToHashSet( EqualityComparer<TElement> comparer, CancellationToken token = default )
         {
             HashSet<TElement> list = new(comparer);
-            await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) ) { list.Add(element); }
 
             return list;
         }
         public async ValueTask<TElement[]> ToArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
         {
-            List<TElement> array = await source.ToList(initialCapacity, token);
+            List<TElement> array = await source.ToList(initialCapacity, token)
+                                               .ConfigureAwait(false);
+
             return array.ToArray();
         }
         public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
         {
             List<TElement> list = new(initialCapacity);
-            await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) ) { list.Add(element); }
 
             return list;
         }
@@ -163,21 +169,32 @@ public static partial class AsyncLinq
 
 
 
-
     extension<TElement>( IAsyncEnumerable<TElement> source )
         where TElement : IEquatable<TElement>
     {
         public async ValueTask<ObservableCollection<TElement>> ToObservableCollection( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
         {
             ObservableCollection<TElement> list = new(initialCapacity);
-            await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) )
+            {
+                await list.AddAsync(element, token)
+                          .ConfigureAwait(false);
+            }
 
             return list;
         }
         public async ValueTask<ConcurrentObservableCollection<TElement>> ToConcurrentObservableCollection( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
         {
             ConcurrentObservableCollection<TElement> list = new(initialCapacity);
-            await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
+
+            await foreach ( TElement element in source.WithCancellation(token)
+                                                      .ConfigureAwait(false) )
+            {
+                await list.AddAsync(element, token)
+                          .ConfigureAwait(false);
+            }
 
             return list;
         }

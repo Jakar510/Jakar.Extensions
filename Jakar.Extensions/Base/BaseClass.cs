@@ -1,14 +1,18 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Text.Json.Nodes;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
-    protected JsonObject? _additionalData;
-    protected bool        _disposed;
+    protected JObject? _additionalData;
+    protected bool     _disposed;
 
 
-    [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    [JsonExtensionData] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -113,16 +117,17 @@ public abstract class BaseClass<TSelf> : BaseClass, IEquatable<TSelf>, IComparab
         result = null;
         return false;
     }
-    public static TSelf FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TSelf.JsonTypeInfo));
+    public static   TSelf  FromJson( string json ) => json.FromJson<TSelf>();
+    public override string ToString()              => this.ToJson();
 
 
     public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
-    public virtual TSelf WithAdditionalData( JsonObject? additionalData )
+    public virtual TSelf WithAdditionalData( JObject? additionalData )
     {
         if ( additionalData is null ) { return (TSelf)this; }
 
-        JsonObject json = _additionalData ??= new JsonObject();
-        foreach ( ( string key, JsonNode? jToken ) in additionalData ) { json[key] = jToken; }
+        JObject json = _additionalData ??= new JObject();
+        foreach ( ( string key, JToken? jToken ) in additionalData ) { json[key] = jToken; }
 
         return (TSelf)this;
     }

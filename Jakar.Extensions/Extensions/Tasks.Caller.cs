@@ -11,10 +11,10 @@ public static partial class Tasks
     {
         public async Task Execute()
         {
-            if ( Func.IsT0 ) { await Func.AsT0(); }
-            else if ( Func.IsT1 ) { await Func.AsT1(); }
-            else if ( Func.IsT2 ) { await Func.AsT2(Token); }
-            else { await Func.AsT3(Token); }
+            if ( Func.IsT0 ) { await Func.AsT0().ConfigureAwait(false); }
+            else if ( Func.IsT1 ) { await Func.AsT1().ConfigureAwait(false); }
+            else if ( Func.IsT2 ) { await Func.AsT2(Token).ConfigureAwait(false); }
+            else { await Func.AsT3(Token).ConfigureAwait(false); }
         }
     }
 
@@ -25,13 +25,13 @@ public static partial class Tasks
     {
         public async Task<TResult> Execute()
         {
-            if ( Func.IsT0 ) { return await Func.AsT0(); }
+            if ( Func.IsT0 ) { return await Func.AsT0().ConfigureAwait(false); }
 
-            if ( Func.IsT1 ) { return await Func.AsT1(); }
+            if ( Func.IsT1 ) { return await Func.AsT1().ConfigureAwait(false); }
 
-            if ( Func.IsT2 ) { return await Func.AsT2(Token); }
+            if ( Func.IsT2 ) { return await Func.AsT2(Token).ConfigureAwait(false); }
 
-            return await Func.AsT3(Token);
+            return await Func.AsT3(Token).ConfigureAwait(false);
         }
     }
 
@@ -42,13 +42,13 @@ public static partial class Tasks
     {
         public async Task<TResult> Execute()
         {
-            if ( Func.IsT0 ) { return await Func.AsT0(Arg1); }
+            if ( Func.IsT0 ) { return await Func.AsT0(Arg1).ConfigureAwait(false); }
 
-            if ( Func.IsT1 ) { return await Func.AsT1(Arg1); }
+            if ( Func.IsT1 ) { return await Func.AsT1(Arg1).ConfigureAwait(false); }
 
-            if ( Func.IsT2 ) { return await Func.AsT2(Arg1, Token); }
+            if ( Func.IsT2 ) { return await Func.AsT2(Arg1, Token).ConfigureAwait(false); }
 
-            return await Func.AsT3(Arg1, Token);
+            return await Func.AsT3(Arg1, Token).ConfigureAwait(false);
         }
     }
 
@@ -59,13 +59,13 @@ public static partial class Tasks
     {
         public async Task<TResult> Execute()
         {
-            if ( Func.IsT0 ) { return await Func.AsT0(Arg1, Arg2); }
+            if ( Func.IsT0 ) { return await Func.AsT0(Arg1, Arg2).ConfigureAwait(false); }
 
-            if ( Func.IsT1 ) { return await Func.AsT1(Arg1, Arg2); }
+            if ( Func.IsT1 ) { return await Func.AsT1(Arg1, Arg2).ConfigureAwait(false); }
 
-            if ( Func.IsT2 ) { return await Func.AsT2(Arg1, Arg2, Token); }
+            if ( Func.IsT2 ) { return await Func.AsT2(Arg1, Arg2, Token).ConfigureAwait(false); }
 
-            return await Func.AsT3(Arg1, Arg2, Token);
+            return await Func.AsT3(Arg1, Arg2, Token).ConfigureAwait(false);
         }
     }
 }

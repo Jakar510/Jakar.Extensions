@@ -8,38 +8,14 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
-[JsonSourceGenerationOptions(MaxDepth = 128,
-                             IndentSize = 4,
-                             NewLine = "\n",
-                             IndentCharacter = ' ',
-                             WriteIndented = true,
-                             RespectNullableAnnotations = true,
-                             AllowTrailingCommas = true,
-                             AllowOutOfOrderMetadataProperties = true,
-                             IgnoreReadOnlyProperties = true,
-                             IncludeFields = true,
-                             IgnoreReadOnlyFields = false,
-                             PropertyNameCaseInsensitive = false,
-                             ReadCommentHandling = JsonCommentHandling.Skip,
-                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
-                             RespectRequiredConstructorParameters = true)]
-[JsonSerializable(typeof(TestJson[]))]
-[JsonSerializable(typeof(Node[]))]
-public sealed partial class ExperimentContext : JsonSerializerContext;
-
-
-
 public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 {
-    private static readonly Node[]                __empty = [];
-    public static           JsonTypeInfo<Node[]>  JsonArrayInfo => ExperimentContext.Default.NodeArray;
-    public static           JsonSerializerContext JsonContext   => ExperimentContext.Default;
-    public static           JsonTypeInfo<Node>    JsonTypeInfo  => ExperimentContext.Default.Node;
-    public                  Node[]                Children      { get; init; } = __empty;
-    public                  DateTimeOffset        Date          { get; init; }
-    public                  string                Description   { get; init; } = EMPTY;
-    public                  string                Name          { get; init; } = EMPTY;
-    public                  double                Price         { get; init; }
+    private static readonly Node[]         __empty = [];
+    public                  Node[]         Children    { get; init; } = __empty;
+    public                  DateTimeOffset Date        { get; init; }
+    public                  string         Description { get; init; } = EMPTY;
+    public                  string         Name        { get; init; } = EMPTY;
+    public                  double         Price       { get; init; }
 
 
     public Node() { }
@@ -134,20 +110,18 @@ public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
                                                              Email     = "john.doe@mail.com"
                                                          }
                                               };
-    public        Email                    Email         = new("bite@me.com");
-    public        Error                    MutableError  = Error.InternalServerError();
-    public        Error                    ReadOnlyError = Error.InternalServerError();
-    public        Pair                     Pair          = new("date", DateTime.Now.ToLongDateString());
-    public static JsonTypeInfo<TestJson[]> JsonArrayInfo => ExperimentContext.Default.TestJsonArray;
+    public Email Email         = new("bite@me.com");
+    public Error MutableError  = Error.InternalServerError();
+    public Error ReadOnlyError = Error.InternalServerError();
+    public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
 
-    public static JsonSerializerContext          JsonContext  => ExperimentContext.Default;
-    public static JsonTypeInfo<TestJson>         JsonTypeInfo => ExperimentContext.Default.TestJson;
-    public        CreateUserModel                CreateUser   { get; set; } = new();
-    public        Errors                         Errors       { get; set; } = Errors.Empty;
-    public        ObservableCollection<FileData> Files        { get; set; } = [];
-    public        CurrentLocation                Location     { get; set; } = new();
-    public        Node[]                         Nodes        { get; set; } = [];
-    public        UserModel                      User         { get; set; } = new();
+
+    public CreateUserModel                CreateUser { get; set; } = new();
+    public Errors                         Errors     { get; set; } = Errors.Empty;
+    public ObservableCollection<FileData> Files      { get; set; } = [];
+    public CurrentLocation                Location   { get; set; } = new();
+    public Node[]                         Nodes      { get; set; } = [];
+    public UserModel                      User       { get; set; } = new();
 
 
     public static void Print()

@@ -69,9 +69,9 @@ public static partial class Tasks
 
             while ( token.ShouldContinue() && list.Count > 0 )
             {
-                Task<TResult> task = await Task.WhenAny(list);
+                Task<TResult> task = await Task.WhenAny(list).ConfigureAwait(false);
                 list.Remove(task);
-                yield return await task;
+                yield return await task.ConfigureAwait(false);
             }
         }
     }
@@ -109,7 +109,7 @@ public static partial class Tasks
         ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
         /// </summary>
         /// <exception cref="AggregateException"> </exception>
-        public async ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask()));
+        public async ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
     }
 
@@ -120,13 +120,13 @@ public static partial class Tasks
         public async IAsyncEnumerable<TValue> WheneverAny( [EnumeratorCancellation] CancellationToken token = default )
         {
             await foreach ( TValue result in self.Select(static x => x.AsTask())
-                                                 .WheneverAny(token) ) { yield return result; }
+                                                 .WheneverAny(token).ConfigureAwait(false) ) { yield return result; }
         }
-        public async ValueTask<TValue[]> WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask()));
+        public async ValueTask<TValue[]> WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
         public async ValueTask<TValue> WhenAny()
         {
-            Task<TValue> result = await Task.WhenAny(self.Select(static x => x.AsTask()));
-            return await result;
+            Task<TValue> result = await Task.WhenAny(self.Select(static x => x.AsTask())).ConfigureAwait(false);
+            return await result.ConfigureAwait(false);
         }
     }
 
@@ -140,7 +140,7 @@ public static partial class Tasks
                                       MaxDegreeOfParallelism = Environment.ProcessorCount
                                   };
 
-        await Parallel.ForEachAsync(funcs, options, executorAsync);
+        await Parallel.ForEachAsync(funcs, options, executorAsync).ConfigureAwait(false);
         return;
 
         static ValueTask executorAsync( Func<CancellationToken, ValueTask> task, CancellationToken token ) => task(token);
@@ -161,14 +161,14 @@ public static partial class Tasks
 
         ConcurrentBag<TResult>                        results = [];
         Func<CancellationToken, ValueTask<TResult>>[] tasks   = funcs.ToArray();
-        await Parallel.ForAsync(0, tasks.Length, options, executor);
+        await Parallel.ForAsync(0, tasks.Length, options, executor).ConfigureAwait(false);
 
         return results.ToArray();
 
         async ValueTask executor( int i, CancellationToken cancellationToken )
         {
             Func<CancellationToken, ValueTask<TResult>> task   = tasks[i];
-            TResult                                     result = await task(cancellationToken);
+            TResult                                     result = await task(cancellationToken).ConfigureAwait(false);
             results.Add(result);
         }
     }

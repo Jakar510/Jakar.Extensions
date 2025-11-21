@@ -229,6 +229,41 @@ public static partial class Spans
         [Pure] public ValueEnumerable<Select<FromSpan<TValue>, TValue, TNext>, TNext> Select<TNext>( Func<TValue, TNext> func )
             where TNext : IEquatable<TNext> => self.AsValueEnumerable()
                                                    .Select(func);
+        
+
+        [Pure] public bool All( Func<TValue, bool> selector ) => self.AsValueEnumerable()
+                                                                     .All(selector);
+
+        [Pure] public bool All( RefCheck<TValue> selector )
+        {
+            foreach ( ref readonly TValue value in self )
+            {
+                if ( !selector(in value) ) { return false; }
+            }
+
+            return true;
+        }
+
+        [Pure] public bool Any( Func<TValue, bool> selector )
+        {
+            foreach ( ref readonly TValue value in self )
+            {
+                if ( selector(value) ) { return true; }
+            }
+
+            return false;
+        }
+
+        [Pure] public bool Any( RefCheck<TValue> selector )
+        {
+            foreach ( ref readonly TValue value in self )
+            {
+                if ( selector(in value) ) { return true; }
+            }
+
+            return false;
+        }
+
 
         [Pure] public TValue First( Func<TValue, bool> selector ) => self.AsValueEnumerable()
                                                                          .First(selector);
@@ -246,28 +281,6 @@ public static partial class Spans
             throw new NotFoundException();
         }
 
-        [Pure] public bool All( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                     .All(selector);
-
-        [Pure] public bool All( RefCheck<TValue> selector )
-        {
-            foreach ( ref readonly TValue value in self )
-            {
-                if ( !selector(in value) ) { return false; }
-            }
-
-            return true;
-        }
-
-        [Pure] public bool Any( RefCheck<TValue> selector )
-        {
-            foreach ( ref readonly TValue value in self )
-            {
-                if ( selector(in value) ) { return true; }
-            }
-
-            return false;
-        }
 
         [Pure] public TValue Single( RefCheck<TValue> selector )
         {

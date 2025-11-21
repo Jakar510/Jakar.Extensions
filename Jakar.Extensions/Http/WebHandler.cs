@@ -11,23 +11,21 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public readonly struct WebHandler( WebRequester requester, HttpRequestMessage request ) : IAsyncDisposable, IDisposable
 {
-    public const           string             NO_RESPONSE = "NO RESPONSE";
-    public static readonly EventId            EventId     = new(69420, nameof(SendAsync));
-    private readonly       HttpRequestMessage __request   = request;
-    private readonly       WebRequester       __requester = requester;
+    public const           string  NO_RESPONSE = "NO RESPONSE";
+    public static readonly EventId EventId     = new(69420, nameof(SendAsync));
 
 
-    internal HttpClient          Client         => __requester.Client;
-    public   HttpContentHeaders? ContentHeaders => __request.Content?.Headers;
-    internal Encoding            Encoding       => __requester.Encoding;
-    public   HttpRequestHeaders  Headers        => __request.Headers;
-    internal ILogger?            Logger         => __requester.Logger;
-    public   string              Method         => __request.Method.Method;
-    public   HttpRequestOptions  Options        => __request.Options;
-    public   Uri                 RequestUri     => __request.RequestUri ?? throw new NullReferenceException(nameof(__request.RequestUri));
-    internal RetryPolicy?        RetryPolicy    => __requester.Retries;
-    public   AppVersion          Version        { get => __request.Version;       set => __request.Version = value.ToVersion(); }
-    public   HttpVersionPolicy   VersionPolicy  { get => __request.VersionPolicy; set => __request.VersionPolicy = value; }
+    internal HttpClient          Client         => requester.Client;
+    public   HttpContentHeaders? ContentHeaders => request.Content?.Headers;
+    internal Encoding            Encoding       => requester.Encoding;
+    public   HttpRequestHeaders  Headers        => request.Headers;
+    internal ILogger?            Logger         => requester.Logger;
+    public   string              Method         => request.Method.Method;
+    public   HttpRequestOptions  Options        => request.Options;
+    public   Uri                 RequestUri     => request.RequestUri ?? throw new NullReferenceException(nameof(request.RequestUri));
+    internal RetryPolicy?        RetryPolicy    => requester.Retries;
+    public   AppVersion          Version        { get => request.Version;       set => request.Version = value.ToVersion(); }
+    public   HttpVersionPolicy   VersionPolicy  { get => request.VersionPolicy; set => request.VersionPolicy = value; }
 
 
     public ValueTask DisposeAsync()
@@ -35,17 +33,17 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         Dispose();
         return ValueTask.CompletedTask;
     }
-    public void Dispose() => __request.Dispose();
+    public void Dispose() => request.Dispose();
 
 
     public async ValueTask<HttpResponseMessage> SendAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        HttpResponseMessage response = await Client.SendAsync(__request, token)
+        HttpResponseMessage response = await Client.SendAsync(request, token)
                                                    .ConfigureAwait(false);
 
-        Logger?.LogDebug(EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, __request.RequestUri?.OriginalString);
+        Logger?.LogDebug(EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, request.RequestUri?.OriginalString);
         return response;
     }
 
@@ -54,7 +52,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( this )
+        await using ( this )
         {
             using HttpResponseMessage response = await SendAsync(token)
                                                     .ConfigureAwait(false);
@@ -82,30 +80,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( this )
-        {
-            using HttpResponseMessage response = await SendAsync(token)
-                                                    .ConfigureAwait(false);
-
-            try
-            {
-                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create(response, token); }
-
-                TValue result = await func(response, arg, token);
-                return new WebResponse<TValue>(response, result);
-            }
-            catch ( HttpRequestException e )
-            {
-                telemetrySpan.AddException(e);
-                return await WebResponse<TValue>.Create(response, e, token);
-            }
-        }
-    }
-    public async ValueTask<WebResponse<TValue>> CreateResponse<TValue, TArg, TArg2>( Func<HttpResponseMessage, TArg, TArg2, CancellationToken, ValueTask<TValue>> func, TArg arg1, TArg2 arg2, CancellationToken token )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( this )
+        await using ( this )
         {
             using HttpResponseMessage response = await SendAsync(token)
                                                     .ConfigureAwait(false);
@@ -118,7 +93,40 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                                                     .ConfigureAwait(false);
                 }
 
-                TValue result = await func(response, arg1, arg2, token);
+                TValue result = await func(response, arg, token)
+                                   .ConfigureAwait(false);
+
+                return new WebResponse<TValue>(response, result);
+            }
+            catch ( HttpRequestException e )
+            {
+                telemetrySpan.AddException(e);
+
+                return await WebResponse<TValue>.Create(response, e, token)
+                                                .ConfigureAwait(false);
+            }
+        }
+    }
+    public async ValueTask<WebResponse<TValue>> CreateResponse<TValue, TArg, TArg2>( Func<HttpResponseMessage, TArg, TArg2, CancellationToken, ValueTask<TValue>> func, TArg arg1, TArg2 arg2, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        await using ( this )
+        {
+            using HttpResponseMessage response = await SendAsync(token)
+                                                    .ConfigureAwait(false);
+
+            try
+            {
+                if ( !response.IsSuccessStatusCode )
+                {
+                    return await WebResponse<TValue>.Create(response, token)
+                                                    .ConfigureAwait(false);
+                }
+
+                TValue result = await func(response, arg1, arg2, token)
+                                   .ConfigureAwait(false);
+
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e )
@@ -132,27 +140,23 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     }
 
 
-    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                            => CreateResponse(AsBool,  token);
-    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                            => CreateResponse(AsBytes, token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken            token )                            => AsJson(Json.Options, token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( JsonSerializerOptions        options, CancellationToken token ) => CreateResponse(AsJson, options, token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
-    public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
-        where TValue : IJsonModel<TValue> => CreateResponse(AsJson<TValue>, token);
-
-    public ValueTask<WebResponse<LocalFile>>            AsFile( CancellationToken   token )                                   => CreateResponse(AsFile, token);
-    public ValueTask<WebResponse<LocalFile>>            AsFile( string              fileNameHeader, CancellationToken token ) => CreateResponse(AsFile, fileNameHeader, token);
-    public ValueTask<WebResponse<LocalFile>>            AsFile( FileInfo            path,           CancellationToken token ) => CreateResponse(AsFile, path,           token);
-    public ValueTask<WebResponse<LocalFile>>            AsFile( LocalFile           file,           CancellationToken token ) => CreateResponse(AsFile, file,           token);
-    public ValueTask<WebResponse<LocalFile>>            AsFile( MimeType            type,           CancellationToken token ) => CreateResponse(AsFile, type,           token);
-    public ValueTask<WebResponse<MemoryStream>>         AsStream( CancellationToken token ) => CreateResponse(AsStream, token);
-    public ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory( CancellationToken token ) => CreateResponse(AsMemory, token);
-    public ValueTask<WebResponse<string>>               AsString( CancellationToken token ) => CreateResponse(AsString, token);
+    public ValueTask<WebResponse<bool>>                 AsBool( CancellationToken         token )                                   => CreateResponse(AsBool,         token);
+    public ValueTask<WebResponse<byte[]>>               AsBytes( CancellationToken        token )                                   => CreateResponse(AsBytes,        token);
+    public ValueTask<WebResponse<JToken>>               AsJson( CancellationToken         token )                                   => CreateResponse(AsJson,         token);
+    public ValueTask<WebResponse<TValue>>               AsJson<TValue>( CancellationToken token )                                   => CreateResponse(AsJson<TValue>, token);
+    public ValueTask<WebResponse<LocalFile>>            AsFile( CancellationToken         token )                                   => CreateResponse(AsFile,         token);
+    public ValueTask<WebResponse<LocalFile>>            AsFile( string                    fileNameHeader, CancellationToken token ) => CreateResponse(AsFile,         fileNameHeader, token);
+    public ValueTask<WebResponse<LocalFile>>            AsFile( FileInfo                  path,           CancellationToken token ) => CreateResponse(AsFile,         path,           token);
+    public ValueTask<WebResponse<LocalFile>>            AsFile( LocalFile                 file,           CancellationToken token ) => CreateResponse(AsFile,         file,           token);
+    public ValueTask<WebResponse<LocalFile>>            AsFile( MimeType                  type,           CancellationToken token ) => CreateResponse(AsFile,         type,           token);
+    public ValueTask<WebResponse<MemoryStream>>         AsStream( CancellationToken       token ) => CreateResponse(AsStream, token);
+    public ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory( CancellationToken       token ) => CreateResponse(AsMemory, token);
+    public ValueTask<WebResponse<string>>               AsString( CancellationToken       token ) => CreateResponse(AsString, token);
 
 
     public async ValueTask<ErrorOrResult> NoResponse( CancellationToken token )
     {
-        using ( this )
+        await using ( this )
         {
             using HttpResponseMessage response = await SendAsync(token)
                                                     .ConfigureAwait(false);
@@ -164,7 +168,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     }
 
 
-    public static async ValueTask<JsonNode> AsJson( HttpResponseMessage response, JsonSerializerOptions options, CancellationToken token )
+    public static async ValueTask<JToken> AsJson( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
@@ -173,26 +177,24 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await using Stream stream = await content.ReadAsStreamAsync(token)
                                                  .ConfigureAwait(false);
 
-        JsonNode? result = await stream.FromJson(options, token)
-                                       .ConfigureAwait(false);
-
-        return Validate.ThrowIfNull(result);
-    }
-    public static ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
-        where TValue : IJsonModel<TValue> => AsJson(response, TValue.JsonTypeInfo, token);
-    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        response.EnsureSuccessStatusCode();
-        HttpContent content = response.Content;
-
-        await using Stream stream = await content.ReadAsStreamAsync(token)
-                                                 .ConfigureAwait(false);
-
-        TValue? result = await stream.FromJson(info, token)
+        JToken? result = await stream.FromJson(token)
                                      .ConfigureAwait(false);
 
         return Validate.ThrowIfNull(result);
+    }
+    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
+        HttpContent content = response.Content;
+
+        await using Stream stream = await content.ReadAsStreamAsync(token)
+                                                 .ConfigureAwait(false);
+
+        TValue result = await stream.FromJson<TValue>(token)
+                                    .ConfigureAwait(false);
+
+        return result;
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
     {
@@ -231,7 +233,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                                              .ConfigureAwait(false);
 
         await using FileStream fs = LocalFile.CreateTempFileAndOpen(out LocalFile file);
-        await stream.CopyToAsync(fs, token);
+        await stream.CopyToAsync(fs, token).ConfigureAwait(false);
 
         return file;
     }
@@ -278,7 +280,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        return await AsFile(response, file, token);
+        return await AsFile(response, file, token).ConfigureAwait(false);
     }
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file, CancellationToken token )
     {
@@ -301,7 +303,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                                              .ConfigureAwait(false);
 
         await using FileStream fs = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
-        await stream.CopyToAsync(fs, token);
+        await stream.CopyToAsync(fs, token).ConfigureAwait(false);
         return file;
     }
     public static async ValueTask<MemoryStream> AsStream( HttpResponseMessage response, CancellationToken token )
@@ -324,7 +326,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
-    public static async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response, CancellationToken token ) => await AsBytes(response, token);
+    public static async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response, CancellationToken token ) => await AsBytes(response, token).ConfigureAwait(false);
     public static async ValueTask<string> AsString( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

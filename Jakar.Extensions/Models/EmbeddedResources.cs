@@ -52,7 +52,7 @@ public class EmbeddedResources<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         await using Stream  stream        = GetResourceStream(fileName);
-        await file.WriteAsync(stream, token);
+        await file.WriteAsync(stream, token).ConfigureAwait(false);
     }
 
 
@@ -69,29 +69,29 @@ public class EmbeddedResources<TValue>
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using Stream       stream        = GetResourceStream(fileName);
         await using MemoryStream reader        = new();
-        await stream.CopyToAsync(stream);
+        await stream.CopyToAsync(stream).ConfigureAwait(false);
         return reader.GetBuffer();
     }
 
 
-    public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync(fileName, Encoding.Default);
+    public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync(fileName, Encoding.Default).ConfigureAwait(false);
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         await using Stream  stream        = GetResourceStream(fileName);
         using StreamReader  reader        = new(stream, encoding);
-        return await reader.ReadToEndAsync();
+        return await reader.ReadToEndAsync().ConfigureAwait(false);
     }
 
 
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName )
-        where T : IJsonModel<T> => await GetResourceJsonAsync<T>(fileName, Encoding.Default);
+        where T : IJsonModel<T> => await GetResourceJsonAsync<T>(fileName, Encoding.Default).ConfigureAwait(false);
 
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
         where T : IJsonModel<T>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              text          = await GetResourceTextAsync(fileName, encoding);
+        string              text          = await GetResourceTextAsync(fileName, encoding).ConfigureAwait(false);
         return text.FromJson<T>();
     }
 }

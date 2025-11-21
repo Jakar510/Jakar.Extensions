@@ -10,16 +10,13 @@ namespace Jakar.Extensions.Blazor;
 
 public abstract class Page : Widget
 {
-    private IModalReference? __popup;
-
-
     protected IModalReference? _Popup
     {
-        get => __popup;
+        get;
         set
         {
-            __popup?.Close();
-            __popup = value;
+            field?.Close();
+            field = value;
         }
     }
     [Inject]    public required BlazorServices Services { get; set; }

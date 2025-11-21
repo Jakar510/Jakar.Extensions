@@ -2,6 +2,7 @@
 // 4/1/2024  22:4
 
 using System.Security.Claims;
+using OpenTelemetry.Resources;
 
 
 
@@ -52,9 +53,9 @@ public static class UserData
         where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
         where TAddress : IAddress<TID>, IEquatable<TAddress>
     {
-        using IMemoryOwner<Claim> claims = MemoryPool<Claim>.Shared.Rent(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
-        int                       size   = 0;
-        Span<Claim>               span   = claims.Memory.Span;
+        using ArrayBuffer<Claim> owner = new(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
+        int                      size  = 0;
+        Span<Claim>              span  = owner.Span;
 
 
         span[size++] = ClaimType.UserID.ToClaim(model.UserID.ToString(), issuer);
@@ -110,6 +111,7 @@ public static class UserData
 
         return [.. span];
     }
+
 
 
     extension( IUserData user )

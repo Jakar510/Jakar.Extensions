@@ -6,23 +6,19 @@ namespace Jakar.Extensions;
 
 public abstract class BaseViewModel : BaseClass, IChangeable
 {
-    private bool    __isBusy;
-    private string? __title = EMPTY;
-
-
     public virtual bool IsBusy
     {
-        get => __isBusy;
+        get;
         set
         {
-            if ( SetProperty(ref __isBusy, value) ) { OnPropertyChanged(nameof(IsNotBusy)); }
+            if ( SetProperty(ref field, value) ) { OnPropertyChanged(nameof(IsNotBusy)); }
         }
     }
 
     public bool IsNotBusy => !IsBusy;
 
 
-    public string? Title { get => __title; set => SetProperty(ref __title, value); }
+    public string? Title { get; set => SetProperty(ref field, value); } = EMPTY;
 
 
     protected BaseViewModel() { }

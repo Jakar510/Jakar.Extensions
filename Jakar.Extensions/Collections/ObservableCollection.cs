@@ -17,14 +17,6 @@ namespace Jakar.Extensions;
 public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
-    private static JsonTypeInfo<ObservableCollection<TValue>[]>? __jsonArrayInfo;
-    private static JsonSerializerContext?                        __jsonContext;
-    private static JsonTypeInfo<ObservableCollection<TValue>>?   __jsonTypeInfo;
-    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
-    public static  JsonSerializerContext                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-
-
     public ObservableCollection() : this(Comparer<TValue>.Default) { }
     public ObservableCollection( int                                 capacity ) : this(Comparer<TValue>.Default, capacity) { }
     public ObservableCollection( ref readonly Buffer<TValue>         values ) : this(values.Length) => InternalAdd(values.Values);
@@ -513,7 +505,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token) ) { InternalTryAdd(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalTryAdd(in value); }
     }
     public virtual ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
@@ -533,14 +525,14 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token) ) { InternalAdd(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAdd(in value); }
     }
 
 
     public virtual async ValueTask AddOrUpdate( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token) ) { InternalAddOrUpdate(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
     }
     public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate(in value);
     public virtual void AddOrUpdate( IEnumerable<TValue> values )
@@ -587,7 +579,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values));
     public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
-        await foreach ( TValue value in values.WithCancellation(token) ) { InternalRemove(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalRemove(in value); }
     }
     public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.Span));
     public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.AsSpan()));

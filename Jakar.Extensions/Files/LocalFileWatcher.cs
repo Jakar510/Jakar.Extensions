@@ -11,15 +11,11 @@ namespace Jakar.Extensions;
 public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>, IEqualComparable<LocalFileWatcher>
 {
     private FileSystemWatcher? __watcher;
-    private LocalDirectory?    __directory;
 
 
-    public static JsonTypeInfo<LocalFileWatcher[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
-    public static JsonSerializerContext            JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LocalFileWatcher>   JsonTypeInfo  => JakarExtensionsContext.Default.LocalFileWatcher;
     public LocalDirectory? Directory
     {
-        get => __directory;
+        get;
         set
         {
             if ( __watcher is not null )
@@ -33,7 +29,7 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
                 __watcher.Dispose();
             }
 
-            SetProperty(ref __directory, value);
+            SetProperty(ref field, value);
             if ( value is null ) { return; }
 
             __watcher                     =  new FileSystemWatcher(value.FullPath, SearchFilter) { NotifyFilter = Filters };
@@ -102,7 +98,7 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     private void OnRenamed( object sender, RenamedEventArgs e )
     {
         using ArrayBuffer<LocalFile> arrayBuffer = FilteredValues();
-        LocalFile?                   file        = firstOrDefault(in e, arrayBuffer.Values);
+        LocalFile?                   file        = firstOrDefault(in e, arrayBuffer.Span);
         if ( file is not null ) { Remove(file); }
 
         Add(e.FullPath);

@@ -268,9 +268,9 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     public void Insert( int start, TValue value, int count = 1 )
     {
         Guard.IsGreaterThanOrEqualTo(count, 0);
-        using IMemoryOwner<TValue> owner = MemoryPool<TValue>.Shared.Rent(count);
-        owner.Memory.Span.Fill(value);
-        Insert(start, owner.Memory.Span);
+        using ArrayBuffer<TValue> owner = new(count);
+        owner.Span.Fill(value);
+        Insert(start, owner.Span);
     }
     public void Insert( int start, params ReadOnlySpan<TValue> values )
     {

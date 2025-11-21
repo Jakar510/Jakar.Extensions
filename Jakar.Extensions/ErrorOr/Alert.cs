@@ -8,17 +8,12 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Empty))]
 public sealed class Alert() : BaseClass<Alert>, IJsonModel<Alert>, IEqualComparable<Alert>
 {
-    public static readonly Alert                 Empty = new(null);
-    public static          JsonTypeInfo<Alert[]> JsonArrayInfo => JakarExtensionsContext.Default.AlertArray;
-
-
-    public static JsonSerializerContext JsonContext  => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<Alert>   JsonTypeInfo => JakarExtensionsContext.Default.Alert;
-    public        bool                  IsNotValid   => !CheckIsValid(Title, Message);
-    public        bool                  IsValid      => CheckIsValid(Title, Message);
-    public        string?               Message      { get; init; }
-    public        string?               Title        { get; init; }
-    public        TimeSpan?             TTL          { get; init; }
+    public static readonly Alert     Empty = new(null);
+    public                 bool      IsNotValid => !CheckIsValid(Title, Message);
+    public                 bool      IsValid    => CheckIsValid(Title, Message);
+    public                 string?   Message    { get; init; }
+    public                 string?   Title      { get; init; }
+    public                 TimeSpan? TTL        { get; init; }
 
 
     public Alert( string? title, string? message, double ttlSeconds ) : this(title, message, TimeSpan.FromSeconds(ttlSeconds)) { }

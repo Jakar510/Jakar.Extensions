@@ -3,29 +3,40 @@
 
 public sealed class NullableDoubleConverter() : JsonConverter<double?>()
 {
-    public override double? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+    public override double? ReadJson( JsonReader reader, Type objectType, double? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        return reader.TokenType switch
-               {
-                   JsonTokenType.Null => null,
+        switch ( reader.TokenType )
+        {
+            // Handle null token
+            case JsonToken.Null:
+                return null;
 
-                   JsonTokenType.Number when reader.TryGetInt16(out short s)   => s,
-                   JsonTokenType.Number when reader.TryGetInt32(out int i)     => i,
-                   JsonTokenType.Number when reader.TryGetInt64(out long l)    => l,
-                   JsonTokenType.Number when reader.TryGetSingle(out float f)  => f,
-                   JsonTokenType.Number when reader.TryGetDouble(out double d) => d,
+            // Handle number token
+            case JsonToken.Float:
+            case JsonToken.Integer:
+                return Convert.ToDouble(reader.Value, CultureInfo.InvariantCulture);
 
-                   JsonTokenType.String => double.TryParse(reader.GetString(), out double n)
-                                               ? n
-                                               : null,
+            // Handle string token
+            case JsonToken.String:
+            {
+                string s = ( (string?)reader.Value )?.Trim() ?? EMPTY;
 
-                   _ => throw new JsonException($"Unexpected token parsing double?: {reader.TokenType}")
-               };
+                if ( s.Length == 0 ) { return null; }
+
+                if ( double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double result) ) { return result; }
+
+                throw new JsonSerializationException($"Cannot convert string '{s}' to double.");
+            }
+
+            default:
+                throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing nullable double.");
+        }
     }
 
-    public override void Write( Utf8JsonWriter writer, double? value, JsonSerializerOptions options )
+
+    public override void WriteJson( JsonWriter writer, double? value, JsonSerializer serializer )
     {
-        if ( value.HasValue ) { writer.WriteNumberValue(value.Value); }
-        else { writer.WriteNullValue(); }
+        if ( value is null ) { writer.WriteNull(); }
+        else { writer.WriteValue(value.Value.ToString(CultureInfo.InvariantCulture)); }
     }
 }

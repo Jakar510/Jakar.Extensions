@@ -24,24 +24,11 @@ public static class Base64
 
 
     extension<TValue>( TValue jsonSerializablePayload )
-        where TValue : IJsonModel<TValue>
     {
         public string ToBase64() => jsonSerializablePayload.ToBase64(Encoding.Default);
         public string ToBase64( Encoding encoding )
         {
             string temp = jsonSerializablePayload.ToJson();
-            return temp.ToBase64(encoding);
-        }
-    }
-
-
-
-    extension<TValue>( TValue jsonSerializablePayload )
-    {
-        public string ToBase64( JsonTypeInfo<TValue> info ) => jsonSerializablePayload.ToBase64(info, Encoding.Default);
-        public string ToBase64( JsonTypeInfo<TValue> info, Encoding encoding )
-        {
-            string temp = jsonSerializablePayload.ToJson(info);
             return temp.ToBase64(encoding);
         }
     }
@@ -70,10 +57,9 @@ public static class Base64
 
     extension( string b64 )
     {
-        public TValue JsonFromBase64String<TValue>()
-            where TValue : IJsonModel<TValue> => b64.JsonFromBase64String<TValue>(Encoding.Default);
+        public TValue JsonFromBase64String<TValue>() => b64.JsonFromBase64String<TValue>(Encoding.Default);
         public TValue JsonFromBase64String<TValue>( Encoding encoding )
-            where TValue : IJsonModel<TValue>
+            
         {
             byte[] bytes = b64.FromBase64String();
             string temp  = encoding.GetString(bytes);

@@ -3,28 +3,40 @@
 
 public sealed class NullableFloatConverter() : JsonConverter<float?>()
 {
-    public override float? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+    public override float? ReadJson( JsonReader reader, Type objectType, float? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        return reader.TokenType switch
-               {
-                   JsonTokenType.Null => null,
+        switch ( reader.TokenType )
+        {
+            // Handle null token
+            case JsonToken.Null:
+                return null;
 
-                   JsonTokenType.Number when reader.TryGetInt16(out short s)  => s,
-                   JsonTokenType.Number when reader.TryGetInt32(out int i)    => i,
-                   JsonTokenType.Number when reader.TryGetInt64(out long l)   => l,
-                   JsonTokenType.Number when reader.TryGetSingle(out float f) => f,
+            // Handle number token
+            case JsonToken.Float:
+            case JsonToken.Integer:
+                return Convert.ToSingle(reader.Value, CultureInfo.InvariantCulture);
 
-                   JsonTokenType.String => float.TryParse(reader.GetString(), out float n)
-                                               ? n
-                                               : null,
+            // Handle string token
+            case JsonToken.String:
+            {
+                string s = ( (string?)reader.Value )?.Trim() ?? EMPTY;
 
-                   _ => throw new JsonException($"Unexpected token parsing float?: {reader.TokenType}")
-               };
+                if ( s.Length == 0 ) { return null; }
+
+                if ( float.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out float result) ) { return result; }
+
+                throw new JsonSerializationException($"Cannot convert string '{s}' to float.");
+            }
+
+            default:
+                throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing nullable float.");
+        }
     }
 
-    public override void Write( Utf8JsonWriter writer, float? value, JsonSerializerOptions options )
+
+    public override void WriteJson( JsonWriter writer, float? value, JsonSerializer serializer )
     {
-        if ( value.HasValue ) { writer.WriteNumberValue(value.Value); }
-        else { writer.WriteNullValue(); }
+        if ( value is null ) { writer.WriteNull(); }
+        else { writer.WriteValue(value.Value.ToString(CultureInfo.InvariantCulture)); }
     }
 }

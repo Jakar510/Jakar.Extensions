@@ -61,13 +61,13 @@ public sealed class SecuredString( SecureString value ) : IDisposable
         public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token = default, string key = "Default", string section = "ConnectionStrings" )
         {
             using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-            if ( __value0 is not null ) { return await __value0(token); }
+            if ( __value0 is not null ) { return await __value0(token).ConfigureAwait(false); }
 
-            if ( __value1 is not null ) { return await __value1(token); }
+            if ( __value1 is not null ) { return await __value1(token).ConfigureAwait(false); }
 
-            if ( __value2 is not null ) { return await __value2(configuration, token); }
+            if ( __value2 is not null ) { return await __value2(configuration, token).ConfigureAwait(false); }
 
-            if ( __value3 is not null ) { return await __value3(configuration, token); }
+            if ( __value3 is not null ) { return await __value3(configuration, token).ConfigureAwait(false); }
 
             if ( __value4 is not null ) { return __value4(configuration); }
 

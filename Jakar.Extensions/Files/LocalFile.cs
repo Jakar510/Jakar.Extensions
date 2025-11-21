@@ -11,25 +11,22 @@ namespace Jakar.Extensions;
 [Serializable]
 public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
 {
-    public readonly              Encoding                  FileEncoding = encoding ?? Encoding.Default;
-    [JsonIgnore] public readonly FileInfo                  Info         = info;
-    public readonly              string                    FullPath     = info.FullName;
-    private                      bool                      __isTemporary;
-    public static                JsonTypeInfo<LocalFile[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileArray;
+    public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
+    [JsonIgnore] public readonly FileInfo Info         = info;
+    public readonly              string   FullPath     = info.FullName;
+    private                      bool     __isTemporary;
 
 
-    public static JsonSerializerContext   JsonContext     => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LocalFile> JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
-    public        string                  ContentType     => Mime.ToContentType();
-    public        DateTimeOffset          CreationTimeUtc => Info.CreationTimeUtc;
-    public        string?                 DirectoryName   => Info.DirectoryName;
-    public        bool                    DoesNotExist    => !Exists;
-    public        bool                    Exists          => Info.Exists;
-    public        string                  Extension       => Info.Extension;
-    bool TempFile.ITempFile.              IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
-    public DateTimeOffset                 LastAccess      => Info.LastAccessTime;
-    public MimeType                       Mime            => Extension.FromExtension();
-    public string                         Name            => Info.Name;
+    public string           ContentType     => Mime.ToContentType();
+    public DateTimeOffset   CreationTimeUtc => Info.CreationTimeUtc;
+    public string?          DirectoryName   => Info.DirectoryName;
+    public bool             DoesNotExist    => !Exists;
+    public bool             Exists          => Info.Exists;
+    public string           Extension       => Info.Extension;
+    bool TempFile.ITempFile.IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset   LastAccess      => Info.LastAccessTime;
+    public MimeType         Mime            => Extension.FromExtension();
+    public string           Name            => Info.Name;
 
     [JsonIgnore] public LocalDirectory? Parent
     {
@@ -166,7 +163,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        await file.WriteAsync(payload, token);
+
+        await file.WriteAsync(payload, token)
+                  .ConfigureAwait(false);
+
         return file;
     }
 
@@ -185,7 +185,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        await file.WriteAsync(payload, token);
+
+        await file.WriteAsync(payload, token)
+                  .ConfigureAwait(false);
+
         return file;
     }
 
@@ -490,7 +493,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         FileStream          stream        = OpenRead();
-        await newFile.WriteAsync(stream, token);
+
+        await newFile.WriteAsync(stream, token)
+                     .ConfigureAwait(false);
     }
 
 
@@ -502,14 +507,18 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         for ( int i = 0; i < files.Length; i++ )
         {
-            LocalFile          file   = files[i];
-            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
-            await using Stream stream = entry.Open();
+            LocalFile       file  = files[i];
+            ZipArchiveEntry entry = archive.CreateEntry(file.FullPath);
+
+            await using Stream stream = await entry.OpenAsync(token)
+                                                   .ConfigureAwait(false);
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token);
+                                                  .AsMemory(token)
+                                                  .ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token);
+            await stream.WriteAsync(data, token)
+                        .ConfigureAwait(false);
         }
 
         return this;
@@ -519,17 +528,21 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream zipToOpen     = File.Create(FullPath);
-        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
+        await using ZipArchive archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in files )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
-            await using Stream stream = entry.Open();
+            ZipArchiveEntry entry = archive.CreateEntry(file.FullPath);
+
+            await using Stream stream = await entry.OpenAsync(token)
+                                                   .ConfigureAwait(false);
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token);
+                                                  .AsMemory(token)
+                                                  .ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token);
+            await stream.WriteAsync(data, token)
+                        .ConfigureAwait(false);
         }
 
         return this;
@@ -751,13 +764,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
+        using ArrayBuffer<char>  owner         = new(payload.Length);
 
-        using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(payload.Length);
+        payload.CopyTo(owner.Span);
 
-        payload.AsSpan()
-               .CopyTo(owner.Memory.Span);
-
-        await writer.WriteAsync(owner.Memory, token);
+        await writer.WriteAsync(owner.Memory, token)
+                    .ConfigureAwait(false);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -775,7 +787,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await stream.WriteAsync(payload, token);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -793,7 +807,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await stream.WriteAsync(payload, token);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -811,7 +827,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
 
-        await writer.WriteAsync(payload, token);
+        await writer.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -829,7 +846,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         ArgumentNullException.ThrowIfNull(payload);
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await payload.CopyToAsync(stream, token);
+
+        await payload.CopyToAsync(stream, token)
+                     .ConfigureAwait(false);
     }
 
 
@@ -838,22 +857,20 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
-        return await stream.ReadToEndAsync(token);
+
+        return await stream.ReadToEndAsync(token)
+                           .ConfigureAwait(false);
     }
 
     async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using StreamReader  stream        = new(OpenRead(), FileEncoding);
-        string              content       = await stream.ReadToEndAsync(token);
+
+        string content = await stream.ReadToEndAsync(token)
+                                     .ConfigureAwait(false);
+
         return content.FromJson<TValue>();
-    }
-    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using StreamReader  stream        = new(OpenRead(), FileEncoding);
-        string              content       = await stream.ReadToEndAsync(token);
-        return content.FromJson(info);
     }
 
     async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
@@ -861,7 +878,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new();
-        await file.CopyToAsync(stream, token);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         return stream.GetBuffer();
     }
 
@@ -870,7 +890,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new((int)file.Length);
-        await file.CopyToAsync(stream, token);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         ReadOnlyMemory<byte> results = stream.GetBuffer();
         return results;
     }
@@ -880,7 +903,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan    span   = TelemetrySpan.Create();
         await using FileStream file   = OpenRead();
         MemoryStream           stream = new((int)file.Length);
-        await file.CopyToAsync(stream, token);
+
+        await file.CopyToAsync(stream, token)
+                  .ConfigureAwait(false);
+
         return stream;
     }
 
@@ -890,7 +916,15 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? EMPTY; }
+        while ( token.ShouldContinue() )
+        {
+            string? line = await stream.ReadLineAsync(token)
+                                       .ConfigureAwait(false);
+
+            if ( string.IsNullOrWhiteSpace(line) ) { yield break; }
+
+            yield return line;
+        }
     }
 
 
@@ -980,7 +1014,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash   = await hasher.ComputeHashAsync(stream);
+
+            byte[] hash = await hasher.ComputeHashAsync(stream)
+                                      .ConfigureAwait(false);
 
             return BitConverter.ToString(hash);
         }
@@ -1018,15 +1054,6 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// </returns>
         ValueTask<string> AsString( CancellationToken token = default );
 
-        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
-        /// <typeparam name="TValue"> </typeparam>
-        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
-        /// <exception cref="FileNotFoundException"> if file is not found </exception>
-        /// <returns>
-        ///     <typeparamref name="TValue"/>
-        /// </returns>
-        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
-            where TValue : IJsonModel<TValue>;
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
@@ -1035,7 +1062,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
     }
 
 
@@ -1081,8 +1108,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        TValue AsJson<TValue>( in TelemetrySpan parent = default )
-            where TValue : IJsonModel<TValue>;
+        TValue AsJson<TValue>( in TelemetrySpan parent = default );
     }
 
 

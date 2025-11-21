@@ -4,9 +4,9 @@
 [Serializable]
 public record BaseRecord
 {
-    protected JsonObject? _additionalData;
+    protected JObject? _additionalData;
 
-    [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    [JsonExtensionData] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 }
 
 
@@ -46,16 +46,16 @@ public abstract record BaseRecord<TSelf> : BaseRecord, IEquatable<TSelf>, ICompa
         result = null;
         return false;
     }
-    public static TSelf FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TSelf.JsonTypeInfo));
+    public static TSelf FromJson( string json ) => json.FromJson<TSelf>();
 
 
     public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
-    public virtual TSelf WithAdditionalData( JsonObject? additionalData )
+    public virtual TSelf WithAdditionalData( JObject? additionalData )
     {
         if ( additionalData is null ) { return (TSelf)this; }
 
-        JsonObject json = _additionalData ??= new JsonObject();
-        foreach ( ( string key, JsonNode? jToken ) in additionalData ) { json[key] = jToken; }
+        JObject json = _additionalData ??= new JObject();
+        foreach ( ( string key, JToken? jToken ) in additionalData ) { json[key] = jToken; }
 
         return (TSelf)this;
     }

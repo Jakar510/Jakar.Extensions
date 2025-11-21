@@ -38,7 +38,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
                       .Replace("\r\n", "\n");
     }
     protected static string GetTypes( scoped ref readonly ReadOnlySpan<Type> expected ) => GetTypeNames(in expected)
-       .ToJson(JakarExtensionsContext.Default.StringArray);
+       .ToJson();
     protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.AsValueEnumerable()
                                                                                                           .Select(static item => item.FullName)
                                                                                                           .ToArray();
@@ -70,7 +70,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         Data[nameof(Actual)] = Actual?.FullName;
 
         Data[nameof(Expected)] = GetTypeNames(in expected)
-           .ToJson(JakarExtensionsContext.Default.StringArray);
+           .ToJson();
     }
 }
 

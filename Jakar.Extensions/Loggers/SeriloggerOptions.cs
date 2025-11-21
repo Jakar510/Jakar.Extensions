@@ -96,10 +96,10 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     }
     public virtual async ValueTask DisposeAsync()
     {
-        await Disposables.ClearAndDisposeAsync(ref __appDataDirectory);
-        await Disposables.ClearAndDisposeAsync(ref __cacheDirectory);
-        await Disposables.ClearAndDisposeAsync(ref __seqBuffer);
-        await Disposables.ClearAndDisposeAsync(ref __paths);
+        await Disposables.ClearAndDisposeAsync(ref __appDataDirectory).ConfigureAwait(false);
+        await Disposables.ClearAndDisposeAsync(ref __cacheDirectory).ConfigureAwait(false);
+        await Disposables.ClearAndDisposeAsync(ref __seqBuffer).ConfigureAwait(false);
+        await Disposables.ClearAndDisposeAsync(ref __paths).ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 

@@ -26,7 +26,7 @@ public class IsSet_Tests : Assert
     [TestCase(typeof(List<Guid>),                   false)]
     public void IsSet_Test( Type objType, bool expected )
     {
-        // TODO: objType.GetInterfaces().PrintJson(JakarExtensionsContext.Default.TypeArray).WriteToConsole();
+        // TODO: objType.GetInterfaces().PrintJson().WriteToConsole();
         That(objType.IsSet(), Is.EqualTo(expected));
     }
 

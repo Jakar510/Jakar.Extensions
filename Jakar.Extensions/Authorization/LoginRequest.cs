@@ -162,9 +162,6 @@ public abstract class LoginRequest<TSelf, TValue>( string userName, string passw
 [method: JsonConstructor]
 public sealed class LoginRequestVersion( string userName, string password, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userName, password, data), IJsonModel<LoginRequestVersion>, IEqualComparable<LoginRequestVersion>
 {
-    public static JsonTypeInfo<LoginRequestVersion[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestVersionArray;
-    public static JsonSerializerContext               JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LoginRequestVersion>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequestVersion;
     public LoginRequestVersion( ILoginRequest             request, AppVersion data ) : this(request.UserName, request.Password, data) { }
     public LoginRequestVersion( ILoginRequest<AppVersion> request ) : this(request.UserName, request.UserName, request.Data) { }
 
@@ -183,16 +180,13 @@ public sealed class LoginRequestVersion( string userName, string password, AppVe
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class LoginRequestValue( string userName, string password, JsonValue data ) : LoginRequest<LoginRequestValue, JsonValue>(userName, password, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
+public sealed class LoginRequestValue( string userName, string password, JToken data ) : LoginRequest<LoginRequestValue, JToken>(userName, password, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
 {
-    public static JsonTypeInfo<LoginRequestValue[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestValueArray;
-    public static JsonSerializerContext             JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LoginRequestValue>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequestValue;
-    public LoginRequestValue( ILoginRequest            request, JsonValue data ) : this(request.UserName, request.Password, data) { }
-    public LoginRequestValue( ILoginRequest<JsonValue> request ) : this(request.UserName, request.UserName, request.Data) { }
+    public LoginRequestValue( ILoginRequest         request, JToken data ) : this(request.UserName, request.Password, data) { }
+    public LoginRequestValue( ILoginRequest<JValue> request ) : this(request.UserName, request.UserName, request.Data) { }
 
 
-    public static LoginRequestValue Create( ILoginRequest request, JsonValue data ) => new(request.UserName, request.Password, data);
+    public static LoginRequestValue Create( ILoginRequest request, JValue data ) => new(request.UserName, request.Password, data);
 
 
     public override int  GetHashCode()                                                    => HashCode.Combine(UserName, Password, Data);
@@ -211,11 +205,6 @@ public sealed class LoginRequestValue( string userName, string password, JsonVal
 [method: JsonConstructor]
 public sealed class LoginRequest( string userName, string password ) : LoginRequest<LoginRequest>(userName, password), IJsonModel<LoginRequest>, IEqualComparable<LoginRequest>
 {
-    public static JsonTypeInfo<LoginRequest[]> JsonArrayInfo => JakarExtensionsContext.Default.LoginRequestArray;
-    public static JsonSerializerContext        JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LoginRequest>   JsonTypeInfo  => JakarExtensionsContext.Default.LoginRequest;
-
-
     public LoginRequest( ILoginRequest request ) : this(request.UserName, request.Password) { }
 
 

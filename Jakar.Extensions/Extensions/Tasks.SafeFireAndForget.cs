@@ -20,23 +20,53 @@ public static partial class Tasks
     }
 
 
-    public static async void SafeFireAndForget( this Task task, ILogger logger, [CallerArgumentExpression(nameof(task))] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+
+    extension( Task task )
     {
-        try { await task; }
-        catch ( Exception e ) { Log(logger, e, caller, variable); }
+        public async void SafeFireAndForget( Action<Exception> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e ) { onError(e); }
+        }
+        public async void SafeFireAndForget( ILogger logger, [CallerArgumentExpression(nameof(task))] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e ) { Log(logger, e, caller, variable); }
+        }
+        public async void SafeFireAndForget( Func<Exception, Task> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
     }
+
+
+
     extension<TValue>( Task<TValue> task )
     {
         public async void SafeFireAndForget( ILogger logger, [CallerArgumentExpression(nameof(task))] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
         {
-            try { await task; }
+            try { await task.ConfigureAwait(false); }
             catch ( Exception e ) { Log(logger, e, caller, variable); }
         }
         public async void SafeFireAndForget( ILogger logger, Action<TValue> next, [CallerArgumentExpression(nameof(task))] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
         {
             try
             {
-                TValue result = await task;
+                TValue result = await task.ConfigureAwait(false);
                 next(result);
             }
             catch ( Exception e ) { Log(logger, e, caller, variable); }
@@ -45,8 +75,10 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
             catch ( Exception e ) { Log(logger, e, caller, variable); }
         }
@@ -54,32 +86,25 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
             catch ( Exception e ) { Log(logger, e, caller, variable); }
         }
-    }
 
 
-
-    public static async void SafeFireAndForget( this Task task, Action<Exception> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { onError(e); }
-    }
-    extension<TValue>( Task<TValue> task )
-    {
         public async void SafeFireAndForget( Action<Exception> onError )
         {
-            try { await task; }
+            try { await task.ConfigureAwait(false); }
             catch ( Exception e ) { onError(e); }
         }
         public async void SafeFireAndForget( Action<Exception> onError, Action<TValue> next )
         {
             try
             {
-                TValue result = await task;
+                TValue result = await task.ConfigureAwait(false);
                 next(result);
             }
             catch ( Exception e ) { onError(e); }
@@ -88,8 +113,10 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
             catch ( Exception e ) { onError(e); }
         }
@@ -97,32 +124,166 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
+            catch ( Exception e ) { onError(e); }
+        }
+
+
+        public async void SafeFireAndForget( Func<Exception, Task> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, Task> onError, Action<TValue> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+                next(result);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, Task> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, ValueTask> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+
+
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Action<TValue> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+                next(result);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, Task> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, ValueTask> next )
+        {
+            try
+            {
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
+            }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+    }
+
+
+
+    extension( ValueTask task )
+    {
+        public async void SafeFireAndForget( Func<Exception, Task> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Func<Exception, ValueTask> onError )
+        {
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
+        }
+        public async void SafeFireAndForget( Action<Exception> onError )
+        {
+            try { await task.ConfigureAwait(false); }
             catch ( Exception e ) { onError(e); }
         }
     }
 
 
 
-    public static async void SafeFireAndForget( this ValueTask task, Action<Exception> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { onError(e); }
-    }
     extension<TValue>( ValueTask<TValue> task )
     {
         public async void SafeFireAndForget( Action<Exception> onError )
         {
-            try { await task; }
+            try { await task.ConfigureAwait(false); }
             catch ( Exception e ) { onError(e); }
         }
         public async void SafeFireAndForget( Action<Exception> onError, Action<TValue> next )
         {
             try
             {
-                TValue result = await task;
+                TValue result = await task.ConfigureAwait(false);
                 next(result);
             }
             catch ( Exception e ) { onError(e); }
@@ -131,8 +292,10 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
             catch ( Exception e ) { onError(e); }
         }
@@ -140,182 +303,120 @@ public static partial class Tasks
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
             catch ( Exception e ) { onError(e); }
         }
-    }
 
 
-
-    public static async void SafeFireAndForget( this Task task, Func<Exception, Task> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { await onError(e); }
-    }
-    extension<TValue>( Task<TValue> task )
-    {
         public async void SafeFireAndForget( Func<Exception, Task> onError )
         {
-            try { await task; }
-            catch ( Exception e ) { await onError(e); }
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, Task> onError, Action<TValue> next )
         {
             try
             {
-                TValue result = await task;
+                TValue result = await task.ConfigureAwait(false);
                 next(result);
             }
-            catch ( Exception e ) { await onError(e); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, Task> next )
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, ValueTask> next )
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
-        }
-    }
-
-
-
-    public static async void SafeFireAndForget( this ValueTask task, Func<Exception, Task> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { await onError(e); }
-    }
-    extension<TValue>( ValueTask<TValue> task )
-    {
-        public async void SafeFireAndForget( Func<Exception, Task> onError )
-        {
-            try { await task; }
-            catch ( Exception e ) { await onError(e); }
-        }
-        public async void SafeFireAndForget( Func<Exception, Task> onError, Action<TValue> next )
-        {
-            try
+            catch ( Exception e )
             {
-                TValue result = await task;
-                next(result);
+                await onError(e)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
         }
-        public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, Task> next )
-        {
-            try
-            {
-                TValue result = await task;
-                await next(result);
-            }
-            catch ( Exception e ) { await onError(e); }
-        }
-        public async void SafeFireAndForget( Func<Exception, Task> onError, Func<TValue, ValueTask> next )
-        {
-            try
-            {
-                TValue result = await task;
-                await next(result);
-            }
-            catch ( Exception e ) { await onError(e); }
-        }
-    }
 
 
-
-    public static async void SafeFireAndForget( this Task task, Func<Exception, ValueTask> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { await onError(e); }
-    }
-    extension<TValue>( Task<TValue> task )
-    {
         public async void SafeFireAndForget( Func<Exception, ValueTask> onError )
         {
-            try { await task; }
-            catch ( Exception e ) { await onError(e); }
+            try { await task.ConfigureAwait(false); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Action<TValue> next )
         {
             try
             {
-                TValue result = await task;
+                TValue result = await task.ConfigureAwait(false);
                 next(result);
             }
-            catch ( Exception e ) { await onError(e); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, Task> next )
         {
             try
             {
-                TValue result = await task;
-                await next(result);
+                TValue result = await task.ConfigureAwait(false);
+
+                await next(result)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
+            catch ( Exception e )
+            {
+                await onError(e)
+                   .ConfigureAwait(false);
+            }
         }
         public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, ValueTask> next )
         {
             try
             {
-                TValue result = await task;
-                await next(result);
-            }
-            catch ( Exception e ) { await onError(e); }
-        }
-    }
+                TValue result = await task.ConfigureAwait(false);
 
-
-
-    public static async void SafeFireAndForget( this ValueTask task, Func<Exception, ValueTask> onError )
-    {
-        try { await task; }
-        catch ( Exception e ) { await onError(e); }
-    }
-    extension<TValue>( ValueTask<TValue> task )
-    {
-        public async void SafeFireAndForget( Func<Exception, ValueTask> onError )
-        {
-            try { await task; }
-            catch ( Exception e ) { await onError(e); }
-        }
-        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Action<TValue> next )
-        {
-            try
-            {
-                TValue result = await task;
-                next(result);
+                await next(result)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
-        }
-        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, Task> next )
-        {
-            try
+            catch ( Exception e )
             {
-                TValue result = await task;
-                await next(result);
+                await onError(e)
+                   .ConfigureAwait(false);
             }
-            catch ( Exception e ) { await onError(e); }
-        }
-        public async void SafeFireAndForget( Func<Exception, ValueTask> onError, Func<TValue, ValueTask> next )
-        {
-            try
-            {
-                TValue result = await task;
-                await next(result);
-            }
-            catch ( Exception e ) { await onError(e); }
         }
     }
 }

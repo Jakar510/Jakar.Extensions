@@ -153,26 +153,25 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
 
 public sealed class PasswordRequirements : IOptions<PasswordRequirements>
 {
-    private static PasswordRequirements? __current;
-    private        int                   __maxLength = PASSWORDS_MAX_LENGTH;
-    private        int                   __minLength = PASSWORDS_MIN_LENGTH;
+    private int __maxLength = PASSWORDS_MAX_LENGTH;
+    private int __minLength = PASSWORDS_MIN_LENGTH;
 
 
-    public static PasswordRequirements                  Current                  { get => __current ??= new PasswordRequirements(); set => __current = value; }
-    public        string[]                              BlockedPasswords         { get;                                             set; } = [];
-    public        bool                                  CantStartWithNumber      { get;                                             set; } = true;
-    public        bool                                  CantStartWithSpecialChar { get;                                             set; } = true;
-    public        string                                LowerCase                { get;                                             set; } = LOWER_CASE;
-    public        int                                   MaxLength                { get => __maxLength;                              set => __maxLength = Math.Clamp(value, __minLength,          PASSWORDS_MAX_LENGTH); }
-    public        int                                   MinLength                { get => __minLength;                              set => __minLength = Math.Clamp(value, PASSWORDS_MIN_LENGTH, __maxLength); }
-    public        bool                                  MustBeTrimmed            { get;                                             set; } = true;
-    public        string                                Numbers                  { get;                                             set; } = NUMERIC;
-    public        bool                                  RequireLowerCase         { get;                                             set; } = true;
-    public        bool                                  RequireNumber            { get;                                             set; } = true;
-    public        bool                                  RequireSpecialChar       { get;                                             set; } = true;
-    public        bool                                  RequireUpperCase         { get;                                             set; } = true;
-    public        string                                SpecialChars             { get;                                             set; } = SPECIAL_CHARS;
-    public        string                                UpperCase                { get;                                             set; } = UPPER_CASE;
+    public static PasswordRequirements                  Current                  { get => field ??= new PasswordRequirements(); set; }
+    public        string[]                              BlockedPasswords         { get;                                         set; } = [];
+    public        bool                                  CantStartWithNumber      { get;                                         set; } = true;
+    public        bool                                  CantStartWithSpecialChar { get;                                         set; } = true;
+    public        string                                LowerCase                { get;                                         set; } = LOWER_CASE;
+    public        int                                   MaxLength                { get => __maxLength;                          set => __maxLength = Math.Clamp(value, __minLength,          PASSWORDS_MAX_LENGTH); }
+    public        int                                   MinLength                { get => __minLength;                          set => __minLength = Math.Clamp(value, PASSWORDS_MIN_LENGTH, __maxLength); }
+    public        bool                                  MustBeTrimmed            { get;                                         set; } = true;
+    public        string                                Numbers                  { get;                                         set; } = NUMERIC;
+    public        bool                                  RequireLowerCase         { get;                                         set; } = true;
+    public        bool                                  RequireNumber            { get;                                         set; } = true;
+    public        bool                                  RequireSpecialChar       { get;                                         set; } = true;
+    public        bool                                  RequireUpperCase         { get;                                         set; } = true;
+    public        string                                SpecialChars             { get;                                         set; } = SPECIAL_CHARS;
+    public        string                                UpperCase                { get;                                         set; } = UPPER_CASE;
     PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
 
 
@@ -191,7 +190,7 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        try { SetBlockedPasswords(content.FromJson<string[]>(JakarExtensionsContext.Default.StringArray)); }
+        try { SetBlockedPasswords(content.FromJson<string[]>()); }
         catch ( Exception ) { SetBlockedPasswords(content.SplitAndTrimLines()); }
     }
 
@@ -201,13 +200,18 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
         using HttpClient    client        = new();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeTypeNames.Application.JSON));
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeTypeNames.Text.PLAIN));
-        await SetBlockedPasswords(client, uri, token);
+
+        await SetBlockedPasswords(client, uri, token)
+           .ConfigureAwait(false);
     }
 
     public async ValueTask SetBlockedPasswords( HttpClient client, Uri uri, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = await client.GetStringAsync(uri, token);
+
+        string content = await client.GetStringAsync(uri, token)
+                                     .ConfigureAwait(false);
+
         SetBlockedPasswords(content);
     }
 
@@ -216,6 +220,7 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         SetBlockedPasswords(await file.ReadAsync()
-                                      .AsString(token));
+                                      .AsString(token)
+                                      .ConfigureAwait(false));
     }
 }

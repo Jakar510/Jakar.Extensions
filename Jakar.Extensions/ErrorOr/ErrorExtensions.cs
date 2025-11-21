@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/03/2025  13:03
 
+using System.Linq;
 using ZLinq;
 
 
@@ -38,7 +39,14 @@ public static class ErrorExtensions
     }
 
 
-    public static string GetMessage( this Errors             errors ) => string.Join('\n', errors.Details.Select(GetMessage));
+    public static string GetMessage( this Errors errors )
+    {
+        using PooledArray<string> array = errors.Details.AsValueEnumerable()
+                                                .Select(GetMessage)
+                                                .ToArrayPool();
+
+        return string.Join('\n', array.Span);
+    }
     public static string GetMessage( this IEnumerable<Error> errors ) => string.Join('\n', errors.Select(GetMessage));
 
 
@@ -65,10 +73,19 @@ public static class ErrorExtensions
         builder.Append(BULLET)
                .Append(title ?? EMPTY);
 
-        foreach ( string value in tags.Values.AsSpan() )
+        foreach ( string value in tags.Entries.AsSpan() )
         {
             builder.Append(SPACER)
                    .Append(value);
+        }
+
+        foreach ( ref readonly Pair value in tags.Tags.AsSpan() )
+        {
+            if ( value.Value is not null )
+            {
+                builder.Append(SPACER)
+                       .Append(value.Value);
+            }
         }
 
         return builder.ToString();

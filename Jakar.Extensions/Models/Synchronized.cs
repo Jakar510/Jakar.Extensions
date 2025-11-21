@@ -28,19 +28,18 @@ public sealed class Synchronized<TValue>( TValue value )
 public sealed class SynchronizedValue<TValue>( TValue value )
 {
     private readonly Lock   __lock  = new();
-    private          TValue __value = value;
 
     public TValue Value
     {
         get
         {
-            lock ( __lock ) { return __value; }
+            lock ( __lock ) { return field; }
         }
         set
         {
-            lock ( __lock ) { __value = value; }
+            lock ( __lock ) { field = value; }
         }
-    }
+    } = value;
 
 
     public static implicit operator TValue( SynchronizedValue<TValue> value ) => value.Value;

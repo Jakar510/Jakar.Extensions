@@ -17,7 +17,7 @@ public static partial class AsyncLinq
         {
             TNumber Index = start;
 
-            await foreach ( TElement x in self )
+            await foreach ( TElement x in self.ConfigureAwait(false) )
             {
                 checked { Index++; }
 
@@ -71,15 +71,21 @@ public static partial class AsyncLinq
     extension<TKey, TElement>( IDictionary<TKey, TElement> self )
         where TKey : notnull
     {
-        public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>(bool sorted = true )
+        public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>( bool sorted = true )
             where TNumber : INumber<TNumber> => self.Enumerate(TNumber.Zero, sorted);
 
         public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>( TNumber start, bool sorted = true )
             where TNumber : INumber<TNumber>
         {
-            TNumber    Index = start;
-            List<TKey> keys  = new(self.Keys);
-            keys.Sort();
+            TNumber           Index = start;
+            ICollection<TKey> keys  = self.Keys;
+
+            if ( sorted )
+            {
+                List<TKey> list = new(self.Keys);
+                list.Sort();
+                keys = list;
+            }
 
             foreach ( var Key in keys )
             {
@@ -89,7 +95,7 @@ public static partial class AsyncLinq
         }
 
 
-        public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>(bool sorted = true )
+        public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>( bool sorted = true )
             where TNumber : INumber<TNumber> => self.EnumeratePairs(TNumber.Zero, sorted);
 
         public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>( TNumber start, bool sorted = true )

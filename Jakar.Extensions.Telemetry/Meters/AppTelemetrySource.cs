@@ -9,10 +9,9 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     public readonly Meters                  Meters;
     public readonly TelemetryActivitySource Source;
     public readonly TelemetrySpan           App;
-    private         TelemetryActivity?      __rootActivity;
 
     public static string?           DeviceID     { get; set; }
-    public        TelemetryActivity RootActivity => __rootActivity ??= GetActivity(Info.AppName);
+    public        TelemetryActivity RootActivity => field ??= GetActivity(Info.AppName);
 
 
     public TelemetrySource( in AppInformation info ) : base(in info)
@@ -21,7 +20,7 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
 
         Activity.Current = null;
         Source           = new TelemetryActivitySource(in info);
-        App              = CreateSubSpan(RootActivity, Info.AppName);
+        App              = CreateSubSpan(Validate.ThrowIfNull(RootActivity), Info.AppName);
         Meters           = new Meters(this);
     }
     public override void Dispose()

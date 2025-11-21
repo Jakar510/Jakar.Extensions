@@ -32,7 +32,7 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
 
     public virtual async ValueTask Execute( TValue? parameter )
     {
-        try { await _execute.Execute(this, parameter); }
+        try { await _execute.Execute(this, parameter).ConfigureAwait(false); }
         catch ( Exception e ) { SelfLogger.WriteLine("{Error} \n {StackTrace}", e.Message, e.ToString()); }
     }
     protected virtual async void Execute( object? parameter )
@@ -41,7 +41,7 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
         {
             await Execute(parameter is TValue value
                               ? value
-                              : default);
+                              : default).ConfigureAwait(false);
         }
         catch ( Exception e ) { SelfLogger.WriteLine("'{Error}' \n {StackTrace}", e.Message, e.ToString()); }
     }
@@ -98,12 +98,12 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
 
                 case 6:
                     Debug.Assert(senderTaskHandler is not null, nameof(senderTaskHandler) + " is not null");
-                    await senderTaskHandler.Invoke(sender, parameter);
+                    await senderTaskHandler.Invoke(sender, parameter).ConfigureAwait(false);
                     return;
 
                 case 7:
                     Debug.Assert(senderValueTaskHandler is not null, nameof(senderValueTaskHandler) + " is not null");
-                    await senderValueTaskHandler.Invoke(sender, parameter);
+                    await senderValueTaskHandler.Invoke(sender, parameter).ConfigureAwait(false);
                     return;
 
 

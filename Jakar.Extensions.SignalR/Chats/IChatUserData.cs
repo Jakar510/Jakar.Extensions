@@ -22,13 +22,10 @@ public interface IChatUser : IUserID
 
 public sealed class ChatUser( string fullName, string userName, Guid userID ) : BaseClass<ChatUser>, IChatUser, IJsonModel<ChatUser>
 {
-    public static readonly           ChatUser                 Empty = new(EMPTY, EMPTY, Guid.Empty);
-    public static                    JsonTypeInfo<ChatUser[]> JsonArrayInfo => JakarSignalRContext.Default.ChatUserArray;
-    public static                    JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
-    public static                    JsonTypeInfo<ChatUser>   JsonTypeInfo  => JakarSignalRContext.Default.ChatUser;
-    [StringLength(FULL_NAME)] public string                   FullName      { get; init; } = fullName;
-    public                           Guid                     UserID        { get; init; } = userID;
-    [StringLength(USER_NAME)] public string                   UserName      { get; init; } = userName;
+    public static readonly           ChatUser Empty = new(EMPTY, EMPTY, Guid.Empty);
+    [StringLength(FULL_NAME)] public string   FullName { get; init; } = fullName;
+    public                           Guid     UserID   { get; init; } = userID;
+    [StringLength(USER_NAME)] public string   UserName { get; init; } = userName;
 
 
     public ChatUser( IChatUser               data ) : this(data.FullName, data.UserName, data.UserID) { }
@@ -74,11 +71,6 @@ public sealed class ChatUser( string fullName, string userName, Guid userID ) : 
 
 public sealed class ChatUserCollection : ConcurrentObservableCollection<ChatUserCollection, ChatUser>, ICollectionAlerts<ChatUserCollection, ChatUser>
 {
-    public static JsonTypeInfo<ChatUserCollection[]> JsonArrayInfo => JakarSignalRContext.Default.ChatUserCollectionArray;
-    public static JsonSerializerContext              JsonContext   => JakarSignalRContext.Default;
-    public static JsonTypeInfo<ChatUserCollection>   JsonTypeInfo  => JakarSignalRContext.Default.ChatUserCollection;
-
-
     public ChatUserCollection() : this(DEFAULT_CAPACITY) { }
     public ChatUserCollection( int                           capacity ) : base(capacity) { }
     public ChatUserCollection( IEnumerable<ChatUser>         enumerable ) : base(enumerable) { }

@@ -7,24 +7,29 @@ namespace Jakar.Extensions;
 public class EncodingConverter : JsonConverter<Encoding>
 {
     public static readonly EncodingConverter Instance = new();
-    public override Encoding? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+
+    public override Encoding? ReadJson( JsonReader reader, Type objectType, Encoding? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        string? value = reader.GetString();
-        if ( string.IsNullOrWhiteSpace(value) ) { return null; }
+        if ( reader.TokenType is JsonToken.Null ) { return null; }
 
-        if ( string.Equals(value, nameof(Encoding.Default), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.Default; }
+        if ( reader.TokenType is not JsonToken.String ) { throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing Encoding. Expected a string."); }
 
-        if ( string.Equals(value, nameof(Encoding.UTF32), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.UTF32; }
+        string? name = (string?)reader.Value;
+                if ( string.IsNullOrWhiteSpace(name) ) { return null; }
 
-        if ( string.Equals(value, nameof(Encoding.UTF8), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.UTF8; }
-
-        if ( string.Equals(value, nameof(Encoding.Unicode), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.Unicode; }
-
-        if ( string.Equals(value, nameof(Encoding.BigEndianUnicode), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.BigEndianUnicode; }
-
-        if ( string.Equals(value, nameof(Encoding.ASCII), StringComparison.InvariantCultureIgnoreCase) ) { return Encoding.ASCII; }
-
-        return Encoding.GetEncoding(value);
+        try { return Encoding.GetEncoding(name); }
+        catch ( Exception ex ) { throw new JsonSerializationException($"Unknown encoding '{name}'.", ex); }
     }
-    public override void Write( Utf8JsonWriter writer, Encoding value, JsonSerializerOptions options ) { writer.WriteStringValue(value.EncodingName); }
+
+    public override void WriteJson( JsonWriter writer, Encoding? value, JsonSerializer serializer )
+    {
+        if ( value is null )
+        {
+            writer.WriteNull();
+            return;
+        }
+
+        // Use WebName: canonical, stable, lowercase
+        writer.WriteValue(value.WebName);
+    }
 }

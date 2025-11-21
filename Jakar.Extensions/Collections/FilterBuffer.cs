@@ -23,9 +23,10 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     private         int __index;
 
 
-    public readonly int            Length => length;
-    public readonly Memory<TValue> Memory => new(__array, 0, length);
-    public readonly Span<TValue>   Values => new(__array, 0, length);
+    public readonly int                  Length => length;
+    public readonly Memory<TValue>       Memory => new(__array, 0, length);
+    public readonly Span<TValue>         Span   => new(__array, 0, Capacity);
+    public readonly ReadOnlySpan<TValue> Values => Span[..length];
 
 
     public ArrayBuffer() : this(0) { }
@@ -80,7 +81,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     }
     public bool TryCopyTo( Span<TValue> destination, Index offset )
     {
-        if ( !EnumeratorHelper.TryGetSlice<TValue>(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
+        if ( !EnumeratorHelper.TryGetSlice(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 
         slice.CopyTo(destination);
         return true;

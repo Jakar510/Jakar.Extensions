@@ -10,13 +10,13 @@ public static partial class AsyncLinq
     {
         public async ValueTask<TElement> First()
         {
-            await foreach ( TElement element in source ) { return element; }
+            await foreach ( TElement element in source.ConfigureAwait(false) ) { return element; }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
         }
         public async ValueTask<TElement> First( Func<TElement, bool> selector )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( selector(element) ) { return element; }
             }
@@ -25,16 +25,16 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement> First( Func<TElement, ValueTask<bool>> selector )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
-                if ( await selector(element) ) { return element; }
+                if ( await selector(element).ConfigureAwait(false) ) { return element; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
         }
         public async ValueTask<TElement> First<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( selector(element, value) ) { return element; }
             }
@@ -43,22 +43,22 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement> First<TValue>( Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
-                if ( await selector(element, value) ) { return element; }
+                if ( await selector(element, value).ConfigureAwait(false) ) { return element; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
         }
         public async ValueTask<TElement?> FirstOrDefault()
         {
-            await foreach ( TElement element in source ) { return element; }
+            await foreach ( TElement element in source.ConfigureAwait(false) ) { return element; }
 
             return default;
         }
         public async ValueTask<TElement?> FirstOrDefault( Func<TElement, bool> selector )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( selector(element) ) { return element; }
             }
@@ -67,16 +67,16 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement?> FirstOrDefault( Func<TElement, ValueTask<bool>> selector )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
-                if ( await selector(element) ) { return element; }
+                if ( await selector(element).ConfigureAwait(false) ) { return element; }
             }
 
             return default;
         }
         public async ValueTask<TElement?> FirstOrDefault<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( selector(element, value) ) { return element; }
             }
@@ -85,37 +85,37 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement?> FirstOrDefault<TValue>( Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
         {
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
-                if ( await selector(element, value) ) { return element; }
+                if ( await selector(element, value).ConfigureAwait(false) ) { return element; }
             }
 
             return default;
         }
         public async ValueTask<TElement> Last( CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
             return list.Last();
         }
         public async ValueTask<TElement> Last( Func<TElement, bool> selector, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
             return list.Last(selector);
         }
         public async ValueTask<TElement> Last( Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
-                if ( await selector(list[i]) ) { return list[i]; }
+                if ( await selector(list[i]).ConfigureAwait(false) ) { return list[i]; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
         }
         public async ValueTask<TElement> Last<TValue>( Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
@@ -126,39 +126,39 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement> Last<TValue>( Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
-                if ( await selector(list[i], value) ) { return list[i]; }
+                if ( await selector(list[i], value).ConfigureAwait(false) ) { return list[i]; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
         }
         public async ValueTask<TElement?> LastOrDefault( CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
             return list.LastOrDefault();
         }
         public async ValueTask<TElement?> LastOrDefault( Func<TElement, bool> selector, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
             return list.LastOrDefault(selector);
         }
         public async ValueTask<TElement?> LastOrDefault( Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
-                if ( await selector(list[i]) ) { return list[i]; }
+                if ( await selector(list[i]).ConfigureAwait(false) ) { return list[i]; }
             }
 
             return default;
         }
         public async ValueTask<TElement?> LastOrDefault<TValue>( Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
@@ -169,11 +169,11 @@ public static partial class AsyncLinq
         }
         public async ValueTask<TElement?> LastOrDefault<TValue>( Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
         {
-            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
+            List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token).ConfigureAwait(false);
 
             for ( int i = list.Count; i < 0; i-- )
             {
-                if ( await selector(list[i], value) ) { return list[i]; }
+                if ( await selector(list[i], value).ConfigureAwait(false) ) { return list[i]; }
             }
 
             return default;
@@ -182,7 +182,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
@@ -195,7 +195,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
@@ -208,11 +208,11 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-                if ( await selector(element) ) { result = element; }
+                if ( await selector(element).ConfigureAwait(false) ) { result = element; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
@@ -221,7 +221,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
@@ -234,11 +234,11 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-                if ( await selector(element, value) ) { result = element; }
+                if ( await selector(element, value).ConfigureAwait(false) ) { result = element; }
             }
 
             throw new InvalidOperationException($"No records in {nameof(source)}");
@@ -247,7 +247,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { return default; }
 
@@ -260,7 +260,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { return default; }
 
@@ -273,11 +273,11 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { return default; }
 
-                if ( await selector(element) ) { result = element; }
+                if ( await selector(element).ConfigureAwait(false) ) { result = element; }
             }
 
             return default;
@@ -286,7 +286,7 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { return default; }
 
@@ -299,11 +299,11 @@ public static partial class AsyncLinq
         {
             TElement? result = default;
 
-            await foreach ( TElement element in source )
+            await foreach ( TElement element in source.ConfigureAwait(false) )
             {
                 if ( result is not null ) { return default; }
 
-                if ( await selector(element, value) ) { result = element; }
+                if ( await selector(element, value).ConfigureAwait(false) ) { result = element; }
             }
 
             return result;

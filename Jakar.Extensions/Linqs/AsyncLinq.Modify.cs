@@ -8,11 +8,11 @@ public static partial class AsyncLinq
     {
         if ( collection is ConcurrentObservableCollection<TElement> list )
         {
-            await list.AddOrUpdate(values, token);
+            await list.AddOrUpdate(values, token).ConfigureAwait(false);
             return;
         }
 
-        await foreach ( TElement value in values.WithCancellation(token) ) { collection.AddOrUpdate(value); }
+        await foreach ( TElement value in values.WithCancellation(token).ConfigureAwait(false) ) { collection.AddOrUpdate(value); }
     }
 
 
@@ -24,36 +24,36 @@ public static partial class AsyncLinq
         {
             if ( collection is ConcurrentObservableCollection<TElement> list )
             {
-                await list.RemoveAsync(values, token);
+                await list.RemoveAsync(values, token).ConfigureAwait(false);
                 return;
             }
 
-            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Remove(value); }
+            await foreach ( TElement value in values.WithCancellation(token).ConfigureAwait(false) ) { collection.Remove(value); }
         }
         public async ValueTask TryAdd( IAsyncEnumerable<TElement> values, CancellationToken token = default )
         {
             if ( collection is ConcurrentObservableCollection<TElement> list )
             {
-                await list.TryAddAsync(values, token);
+                await list.TryAddAsync(values, token).ConfigureAwait(false);
                 return;
             }
 
-            await foreach ( TElement value in values.WithCancellation(token) ) { collection.TryAdd(value); }
+            await foreach ( TElement value in values.WithCancellation(token).ConfigureAwait(false) ) { collection.TryAdd(value); }
         }
         public async ValueTask Add( IAsyncEnumerable<TElement> values, CancellationToken token = default )
         {
             switch ( collection )
             {
                 case ConcurrentObservableCollection<TElement> list:
-                    await list.AddAsync(values, token);
+                    await list.AddAsync(values, token).ConfigureAwait(false);
                     return;
 
                 case ObservableCollection<TElement> list:
-                    await list.AddAsync(values, token);
+                    await list.AddAsync(values, token).ConfigureAwait(false);
                     return;
             }
 
-            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
+            await foreach ( TElement value in values.WithCancellation(token).ConfigureAwait(false) ) { collection.Add(value); }
         }
     }
 
@@ -71,7 +71,7 @@ public static partial class AsyncLinq
         }
         public async ValueTask Add( IAsyncEnumerable<TElement> values, CancellationToken token = default )
         {
-            await foreach ( TElement value in values.WithCancellation(token) ) { collection.Add(value); }
+            await foreach ( TElement value in values.WithCancellation(token).ConfigureAwait(false) ) { collection.Add(value); }
         }
     }
 

@@ -21,11 +21,6 @@ public readonly struct AppInformation( AppVersion version, Guid appID, string ap
     public readonly        string?        PackageName = packageName;
 
 
-    public static JsonSerializerContext          JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<AppInformation>   JsonTypeInfo  => JakarExtensionsContext.Default.AppInformation;
-    public static JsonTypeInfo<AppInformation[]> JsonArrayInfo => JakarExtensionsContext.Default.AppInformationArray;
-
-
     public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Version, nameof(Version)), Enricher.GetProperty(AppID, nameof(AppID)), Enricher.GetProperty(AppName, nameof(AppName)), Enricher.GetProperty(PackageName, nameof(PackageName))]);
     public LogEventProperty GetProperty()       => new(nameof(AppInformation), GetStructureValue());
 
@@ -48,7 +43,7 @@ public readonly struct AppInformation( AppVersion version, Guid appID, string ap
         result = default;
         return false;
     }
-    public static AppInformation FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static AppInformation FromJson( string json ) => json.FromJson<AppInformation>();
 
 
     public int CompareTo( object? other ) => other is AppInformation app

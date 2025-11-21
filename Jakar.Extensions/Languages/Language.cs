@@ -110,20 +110,29 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
     #region Lists
 
-    public static Language[] NeutralCultures => CultureInfo.GetCultures(CultureTypes.NeutralCultures)
-                                                           .AsValueEnumerable()
-                                                           .Select(Create)
-                                                           .ToArray();
+    public static PooledArray<Language> NeutralCultures
+    {
+        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+                                                .AsValueEnumerable()
+                                                .Select(Create)
+                                                .ToArrayPool();
+    }
 
-    public static Language[] SpecificCultures => CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-                                                            .AsValueEnumerable()
-                                                            .Select(Create)
-                                                            .ToArray();
+    public static PooledArray<Language> SpecificCultures
+    {
+        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                                                .AsValueEnumerable()
+                                                .Select(Create)
+                                                .ToArrayPool();
+    }
 
-    public static Language[] All => CultureInfo.GetCultures(CultureTypes.AllCultures)
-                                               .AsValueEnumerable()
-                                               .Select(Create)
-                                               .ToArray();
+    public static PooledArray<Language> All
+    {
+        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                                .AsValueEnumerable()
+                                                .Select(Create)
+                                                .ToArrayPool();
+    }
 
     public static LanguageCollection Supported { get; } =
         [
@@ -151,11 +160,6 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 [Serializable]
 public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
 {
-    public static JsonTypeInfo<LanguageCollection[]> JsonArrayInfo => JakarExtensionsContext.Default.LanguageCollectionArray;
-    public static JsonSerializerContext              JsonContext   => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LanguageCollection>   JsonTypeInfo  => JakarExtensionsContext.Default.LanguageCollection;
-
-
     public LanguageCollection() : base(DEFAULT_CAPACITY) { }
     public LanguageCollection( int                           capacity ) : base(capacity) { }
     public LanguageCollection( IEnumerable<Language>         items ) : base(items) { }

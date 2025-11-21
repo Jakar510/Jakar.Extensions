@@ -111,6 +111,7 @@ public static partial class Spans
     [MethodImpl(MethodImplOptions.AggressiveInlining)] private static bool IsAsciiWhiteSpace( this char c ) => c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\f' || c == '\v';
 
 
+
     // Returns true if all lanes of 'mask' are non-zero (i.e., true)
     extension( ref readonly Vector<ushort> mask )
     {
@@ -143,6 +144,8 @@ public static partial class Spans
             return false;
         }
     }
+
+
 
     // Returns true if any lane of 'mask' is non-zero
 
@@ -179,6 +182,7 @@ public static partial class Spans
                          if ( !char.IsWhiteSpace(memory.Span[i]) ) { state.Stop(); }
                      })
                 .IsCompleted;
+
 
 
     extension( scoped ref readonly ReadOnlySpan<string> left )
@@ -233,10 +237,15 @@ public static partial class Spans
                .LastIndexOf(c);
 
 
+
     extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> span )
     {
+        [Pure] public EnumerateEnumerator<TValue> Enumerate<TNumber>()
+            where TNumber : struct, INumber<TNumber> => new(span);
+
         [Pure] public EnumerateEnumerator<TValue> Enumerate()                 => new(span);
         [Pure] public EnumerateEnumerator<TValue> Enumerate( int startIndex ) => new(startIndex, span);
+        
         public void CopyTo( ref Span<TValue> buffer )
         {
             Guard.IsInRangeFor(span.Length - 1, buffer, nameof(buffer));
@@ -316,10 +325,6 @@ public static partial class Spans
         Span<TValue> span = [arg0, arg1, arg2, arg3, arg4];
         return MemoryMarshal.CreateSpan(ref span.GetPinnableReference(), span.Length);
     }
-
-
-    [Pure] public static EnumerateEnumerator<TValue> Enumerate<TValue, TNumber>( this scoped ref readonly ReadOnlySpan<TValue> span )
-        where TNumber : struct, INumber<TNumber> => new(span);
 
 
     public static void QuickSort<TValue>( ref Span<TValue> span, Comparison<TValue> comparison )

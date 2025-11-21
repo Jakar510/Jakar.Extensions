@@ -3,11 +3,8 @@
 
 public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
-    [JsonIgnore] public readonly Exception?                       Value;
-    public static                JsonTypeInfo<ExceptionDetails[]> JsonArrayInfo   => JakarExtensionsContext.Default.ExceptionDetailsArray;
-    public static                JsonSerializerContext            JsonContext     => JakarExtensionsContext.Default;
-    public static                JsonTypeInfo<ExceptionDetails>   JsonTypeInfo    => JakarExtensionsContext.Default.ExceptionDetails;
-    public                       JsonNode?                        Data            { get; init; }
+    [JsonIgnore] public readonly Exception?                       Value; 
+    public                       JToken?                        Data            { get; init; }
     public                       string?                          HelpLink        { get; init; }
     public                       int                              HResult         { get; init; }
     public                       ExceptionDetails?                Inner           { get; init; }

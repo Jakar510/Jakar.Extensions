@@ -6,14 +6,6 @@ namespace Jakar.Extensions;
 
 public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHashSet<ObservableHashSet<TValue>, TValue>(values), ICollectionAlerts<ObservableHashSet<TValue>, TValue>
 {
-    private static JsonTypeInfo<ObservableHashSet<TValue>[]>? __jsonArrayInfo;
-    private static JsonSerializerContext?                     __jsonContext;
-    private static JsonTypeInfo<ObservableHashSet<TValue>>?   __jsonTypeInfo;
-    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
-    public static  JsonSerializerContext                      JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableHashSet<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-
-
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
     public ObservableHashSet( int                         capacity ) : this(new HashSet<TValue>(capacity)) { }
     public ObservableHashSet( IEnumerable<TValue>         enumerable ) : this(new HashSet<TValue>(enumerable)) { }
@@ -121,7 +113,7 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     [Pure] [MustDisposeResource] protected internal override ArrayBuffer<TValue> FilteredValues()
     {
         int                    count  = buffer.Count;
-        ArrayBuffer<TValue>   values = new(count);
+        ArrayBuffer<TValue>    values = new(count);
         FilterDelegate<TValue> filter = GetFilter();
         int                    index  = 0;
 

@@ -12,50 +12,53 @@ namespace Jakar.Extensions;
 
 [DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public readonly struct StringTags( Pair[] tags, string[] values ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>
+public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>
 {
-    public static readonly StringTags Empty  = new([], []);
-    public readonly        Pair[]     Tags   = tags;
-    public readonly        string[]   Values = values;
-    public                 bool       IsEmpty => Tags.Length == 0 && Values.Length == 0;
+    public static readonly StringTags Empty   = new([], []);
+    public readonly        Pair[]     Tags    = tags;
+    public readonly        string[]   Entries = entries;
+    public                 bool       IsEmpty => Tags.Length == 0 && Entries.Length == 0;
 
 
     public StringTags( Pair     pair ) : this([pair], []) { }
     public StringTags( Pair[]   pairs ) : this(pairs, []) { }
-    public StringTags( string[] values ) : this([], values) { }
+    public StringTags( string[] entries ) : this([], entries) { }
     public StringTags( string   value ) : this([], [value]) { }
-    public StringTags( ref readonly StringValues values ) : this([],
-                                                                 values.Count > 1
-                                                                     ? (string[])values.ToArray()!
-                                                                     : [values.ToString()]) { }
+    public StringTags( ref readonly StringValues entries ) : this([],
+                                                                  entries.Count > 1
+                                                                      ? (string[])entries.ToArray()!
+                                                                      : [entries.ToString()]) { }
 
 
-    public static implicit operator StringTags( (Pair[] Tags, string[] Values) pair )   => new(pair.Tags, pair.Values);
-    public static implicit operator StringTags( StringValues                   values ) => new(in values);
-    public static implicit operator StringTags( Pair                           value )  => new([value]);
-    public static implicit operator StringTags( Span<Pair>                     value )  => new([..value]);
-    public static implicit operator StringTags( ReadOnlySpan<Pair>             value )  => new([..value]);
-    public static implicit operator StringTags( Pair[]                         values ) => new(values);
-    public static implicit operator StringTags( string                         value )  => new([value]);
-    public static implicit operator StringTags( Span<string>                   value )  => new([..value]);
-    public static implicit operator StringTags( ReadOnlySpan<string>           value )  => new([..value]);
-    public static implicit operator StringTags( string[]                       values ) => new(values);
-    public static implicit operator string[]( StringTags                       value )  => value.Values;
-    public static implicit operator ReadOnlySpan<string>( StringTags           value )  => value.Values;
-    public static implicit operator Pair[]( StringTags                         value )  => value.Tags;
-    public static implicit operator ReadOnlySpan<Pair>( StringTags             value )  => value.Tags;
+    public static implicit operator StringTags( (Pair[] Tags, string[] Entries) pair )    => new(pair.Tags, pair.Entries);
+    public static implicit operator StringTags( StringValues                    entries ) => new(in entries);
+    public static implicit operator StringTags( Pair                            pair )    => new([pair]);
+    public static implicit operator StringTags( Span<Pair>                      pair )    => new([..pair]);
+    public static implicit operator StringTags( ReadOnlySpan<Pair>              pair )    => new([..pair]);
+    public static implicit operator StringTags( Pair[]                          entries ) => new(entries);
+    public static implicit operator StringTags( string                          entry )   => new([entry]);
+    public static implicit operator StringTags( Span<string>                    entry )   => new([..entry]);
+    public static implicit operator StringTags( ReadOnlySpan<string>            entry )   => new([..entry]);
+    public static implicit operator StringTags( string[]                        entries ) => new(entries);
+    public static implicit operator string[]( StringTags                        value )   => value.Entries;
+    public static implicit operator ReadOnlySpan<string>( StringTags            value )   => value.Entries;
+    public static implicit operator Pair[]( StringTags                          value )   => value.Tags;
+    public static implicit operator ReadOnlySpan<Pair>( StringTags              value )   => value.Tags;
 
 
-    public ValueEnumerable<FromArray<string>, string>                                      EnumerateValues()   => new(new FromArray<string>(Values ?? []));
-    public ValueEnumerable<FromArray<Pair>, Pair>                                          EnumeratePairs()    => new(new FromArray<Pair>(Tags     ?? []));
-    ValueEnumerable<FromArray<string>, string> IValueEnumerable<FromArray<string>, string>.AsValueEnumerable() => EnumerateValues();
-    ValueEnumerable<FromArray<Pair>, Pair> IValueEnumerable<FromArray<Pair>, Pair>.        AsValueEnumerable() => EnumeratePairs();
+    public ValueEnumerable<FromArray<string>, string>                                      Values()            => new(new FromArray<string>(Entries ?? []));
+    public ValueEnumerable<FromArray<Pair>, Pair>                                          Pairs()             => new(new FromArray<Pair>(Tags      ?? []));
+    ValueEnumerable<FromArray<string>, string> IValueEnumerable<FromArray<string>, string>.AsValueEnumerable() => Values();
+    ValueEnumerable<FromArray<Pair>, Pair> IValueEnumerable<FromArray<Pair>, Pair>.        AsValueEnumerable() => Pairs();
 
 
-    public          void Deconstruct( out Pair[] tags, out string[] values ) => ( tags, values ) = ( Tags, Values );
-    public          bool Equals( StringTags      other ) => Tags.Equals(other.Tags) && Values.Equals(other.Values);
-    public override bool Equals( object?         obj )   => obj is StringTags other && Equals(other);
-    public override int  GetHashCode()                   => HashCode.Combine(Tags, Values);
+    public void Deconstruct( out Pair[] tags, out string[] entries ) => ( tags, entries ) = ( Tags, Entries );
+    public bool Equals( StringTags other ) => Tags.AsSpan()
+                                                  .SequenceEqual(other.Tags) &&
+                                              Entries.AsSpan()
+                                                     .SequenceEqual(other.Entries);
+    public override bool Equals( object? obj ) => obj is StringTags other && Equals(other);
+    public override int  GetHashCode()         => HashCode.Combine(Tags, Entries);
 
 
     public static bool operator ==( StringTags left, StringTags right ) => Equals(left, right);

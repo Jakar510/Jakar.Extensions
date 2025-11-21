@@ -110,9 +110,9 @@ public sealed class WebResponse<TValue>
         return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);
 
 
-        static Errors FromString( WebResponse<TValue> response, string   s )      => s;
-        static Errors FromNode( WebResponse<TValue>   response, JsonNode node )   => Error.Create(response.StatusCode, node.ToJson());
-        static Errors FromErrors( WebResponse<TValue> response, Errors   errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
+        static Errors FromString( WebResponse<TValue> response, string s )      => s;
+        static Errors FromNode( WebResponse<TValue>   response, JToken node )   => Error.Create(response.StatusCode, node.ToJson());
+        static Errors FromErrors( WebResponse<TValue> response, Errors errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
     }
 
 
@@ -143,7 +143,9 @@ public sealed class WebResponse<TValue>
                           .ConfigureAwait(false);
             }
 
-            TValue result = await func(response, token);
+            TValue result = await func(response, token)
+                               .ConfigureAwait(false);
+
             return new WebResponse<TValue>(response, result);
         }
         catch ( HttpRequestException e )
@@ -166,7 +168,9 @@ public sealed class WebResponse<TValue>
                           .ConfigureAwait(false);
             }
 
-            TValue result = await func(response, arg, token);
+            TValue result = await func(response, arg, token)
+                               .ConfigureAwait(false);
+
             return new WebResponse<TValue>(response, result);
         }
         catch ( HttpRequestException e )
@@ -195,7 +199,9 @@ public sealed class WebResponse<TValue>
                               .ConfigureAwait(false);
                 }
 
-                TValue result = await func(response, token);
+                TValue result = await func(response, token)
+                                   .ConfigureAwait(false);
+
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
@@ -285,8 +291,11 @@ public sealed class WebResponse<TValue>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await using Stream? stream        = await response.Content.ReadAsStreamAsync(token);
-        string              error;
+
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
+                                                   .ConfigureAwait(false);
+
+        string error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }

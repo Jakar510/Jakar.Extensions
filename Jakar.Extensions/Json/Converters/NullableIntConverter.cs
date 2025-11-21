@@ -3,26 +3,40 @@
 
 public sealed class NullableIntConverter() : JsonConverter<int?>()
 {
-    public override int? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+    public override int? ReadJson( JsonReader reader, Type objectType, int? existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
-        return reader.TokenType switch
-               {
-                   JsonTokenType.Null => null,
+        switch ( reader.TokenType )
+        {
+            // Handle null token
+            case JsonToken.Null:
+                return null;
 
-                   JsonTokenType.Number when reader.TryGetInt16(out short s) => s,
-                   JsonTokenType.Number when reader.TryGetInt32(out int i)   => i,
+            // Handle number token
+            case JsonToken.Float:
+            case JsonToken.Integer:
+                return Convert.ToInt32(reader.Value, CultureInfo.InvariantCulture);
 
-                   JsonTokenType.String => int.TryParse(reader.GetString(), out int n)
-                                               ? n
-                                               : null,
+            // Handle string token
+            case JsonToken.String:
+            {
+                string s = ( (string?)reader.Value )?.Trim() ?? EMPTY;
 
-                   _ => throw new JsonException($"Unexpected token parsing float?: {reader.TokenType}")
-               };
+                if ( s.Length == 0 ) { return null; }
+
+                if ( int.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out int result) ) { return result; }
+
+                throw new JsonSerializationException($"Cannot convert string '{s}' to int.");
+            }
+
+            default:
+                throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing nullable int.");
+        }
     }
 
-    public override void Write( Utf8JsonWriter writer, int? value, JsonSerializerOptions options )
+
+    public override void WriteJson( JsonWriter writer, int? value, JsonSerializer serializer )
     {
-        if ( value.HasValue ) { writer.WriteNumberValue(value.Value); }
-        else { writer.WriteNullValue(); }
+        if ( value is null ) { writer.WriteNull(); }
+        else { writer.WriteValue(value.Value.ToString(CultureInfo.InvariantCulture)); }
     }
 }

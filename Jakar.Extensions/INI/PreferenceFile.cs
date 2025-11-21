@@ -55,13 +55,13 @@ public abstract class PreferenceFile<TSelf> : BaseClass<TSelf>, IAsyncDisposable
             _watcher = null;
         }
 
-        await SaveAsync();
+        await SaveAsync().ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 
 
-    public virtual async    Task SaveAsync() => await Config.WriteToFile(__file);
-    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync(__file);
+    public virtual async    Task SaveAsync() => await Config.WriteToFile(__file).ConfigureAwait(false);
+    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync(__file).ConfigureAwait(false);
     protected virtual void WatcherOnChanged( object sender, FileSystemEventArgs e )
     {
         if ( !string.Equals(e.Name, __file.Name, StringComparison.Ordinal) ) { return; }
@@ -75,14 +75,14 @@ public abstract class PreferenceFile<TSelf> : BaseClass<TSelf>, IAsyncDisposable
     public static async ValueTask<TSelf> CreateAsync()
     {
         TSelf result = new();
-        await result.LoadAsync();
+        await result.LoadAsync().ConfigureAwait(false);
         return result;
     }
     public static TSelf Create( LocalFile file ) => new() { File = file };
     public static async ValueTask<TSelf> CreateAsync( LocalFile file )
     {
         TSelf result = Create(file);
-        await result.LoadAsync();
+        await result.LoadAsync().ConfigureAwait(false);
         return result;
     }
 }

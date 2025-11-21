@@ -7,7 +7,7 @@
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>9.19.3</Version>
+		<Version>10.0.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -102,6 +102,7 @@
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
+		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
@@ -121,7 +122,6 @@
 		<PackageReference Include="System.Net.Http.Json" />
 		<PackageReference Include="System.Text.Encoding.CodePages" />
 		<PackageReference Include="System.Text.Encodings.Web" />
-		<PackageReference Include="System.Text.Json" />
 		<PackageReference Include="System.Text.RegularExpressions" />
 		<PackageReference Include="System.Threading.Tasks" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" />

@@ -30,16 +30,15 @@ public abstract class Widget : ComponentBase, IWidget
 
 public class BlazorSetting<T>( T value ) : BaseClass
 {
-    private T __value = value;
     public T Value
     {
-        get => __value;
+        get;
         set
         {
-            SetProperty(ref __value, value);
+            SetProperty(ref field, value);
             _ = ValueChanged.InvokeAsync(value);
         }
-    }
+    } = value;
     public EventCallback<T>     ValueChanged    { get; set; }
     public Expression<Func<T>>? ValueExpression { get; set; }
 }

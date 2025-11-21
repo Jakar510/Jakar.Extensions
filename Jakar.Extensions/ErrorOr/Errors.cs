@@ -20,15 +20,12 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
                                               Alert   = null,
                                               Details = __details
                                           };
-    public static JsonTypeInfo<Errors[]> JsonArrayInfo => JakarExtensionsContext.Default.ErrorsArray;
 
 
-    public static                  JsonSerializerContext JsonContext  => JakarExtensionsContext.Default;
-    public static                  JsonTypeInfo<Errors>  JsonTypeInfo => JakarExtensionsContext.Default.Errors;
-    [JsonRequired] public required Alert?                Alert        { get; init; }
-    public                         string                Description  => Details.GetMessage();
-    [JsonRequired] public required Error[]               Details      { get; init; }
-    public                         bool                  IsValid      => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
+    [JsonRequired] public required Alert?  Alert       { get; init; }
+    public                         string  Description => Details.GetMessage();
+    [JsonRequired] public required Error[] Details     { get; init; }
+    public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
 
 
     public static Errors Create( params Error[]? details )                                => Create(null,                                          details);

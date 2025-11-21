@@ -46,7 +46,8 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         string content = await file.ReadAsync()
-                                   .AsString(token);
+                                   .AsString(token)
+                                   .ConfigureAwait(false);
 
         return Parse(content, provider);
     }
@@ -68,9 +69,6 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         {
             ReadOnlySpan<char> line = rawLine.Trim();
             if ( line.IsNullOrWhiteSpace() ) { continue; }
-
-
-            Debug.Assert(line.ContainsNone('\n', '\r'));
 
             switch ( line[0] )
             {
@@ -172,7 +170,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     }
     public IniConfig Add( KeyValuePair<string, Section> pair )
     {
-        __dictionary.Add(pair);
+        __dictionary[pair.Key] = pair.Value;
         return this;
     }
     public IniConfig Add( IEnumerable<Section> values )
@@ -241,5 +239,6 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         ReadOnlyMemory<byte> buffer = Encoding.Default.GetBytes(ToString());
         return stream.WriteAsync(buffer, token);
     }
-    public async ValueTask WriteToFile( StringWriter writer ) => await writer.WriteAsync(ToString());
+    public async ValueTask WriteToFile( StringWriter writer ) => await writer.WriteAsync(ToString())
+                                                                             .ConfigureAwait(false);
 }

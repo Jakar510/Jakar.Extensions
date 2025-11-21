@@ -115,7 +115,7 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
     public TSelf With( params ReadOnlySpan<TGroupModel> values );
     public TSelf With( IEnumerable<TRoleModel>          values );
     public TSelf With( params ReadOnlySpan<TRoleModel>  values );
-    public TSelf With( JsonObject?                      data );
+    public TSelf With( JObject?                      data );
     public TSelf With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 

@@ -5,18 +5,17 @@
 public static class AppPreference
 {
     private static readonly Lock             __lock = new();
-    private static          IAppPreferences? __source;
 
 
     public static IAppPreferences Source
     {
         get
         {
-            lock ( __lock ) { return __source ??= File.Create(); }
+            lock ( __lock ) { return field ??= File.Create(); }
         }
         set
         {
-            lock ( __lock ) { __source = value; }
+            lock ( __lock ) { field = value; }
         }
     }
 
@@ -101,8 +100,8 @@ public static class AppPreference
         public static File      Create()                           => Create(LocalDirectory.CurrentDirectory);
         public static File      Create( LocalDirectory directory ) => Create(directory.Join(DEFAULT_FILE_NAME));
         public static File      Create( LocalFile      file )      => new(file);
-        public async  ValueTask DisposeAsync()                     => await SaveAsync();
-        private async Task      SaveAsync()                        => await __config.WriteToFile(__file);
+        public async  ValueTask DisposeAsync()                     => await SaveAsync().ConfigureAwait(false);
+        private async Task      SaveAsync()                        => await __config.WriteToFile(__file).ConfigureAwait(false);
 
 
         public bool ContainsKey( string key, string sharedName ) => __config[sharedName]

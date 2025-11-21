@@ -25,9 +25,6 @@ public enum HubEventType
 
 public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
 {
-    public static                                 JsonTypeInfo<HubEvent[]> JsonArrayInfo => JakarSignalRContext.Default.HubEventArray;
-    public static                                 JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
-    public static                                 JsonTypeInfo<HubEvent>   JsonTypeInfo  => JakarSignalRContext.Default.HubEvent;
     [StringLength(CONNECTION_ID)] public required string                   ConnectionID  { get; init; }
     [StringLength(NAME)]          public required string                   Group         { get; init; }
     public                                        InstantMessage?          Message       { get; init; }
@@ -44,6 +41,7 @@ public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
         User         = user;
         Message      = message;
     }
+
 
     public override int CompareTo( HubEvent? other )
     {
