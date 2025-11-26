@@ -22,7 +22,7 @@ public static class SelfLogger
     /// <param name="output"> An action to invoke with self-log messages. </param>
     /// // ReSharper disable once MemberCanBePrivate.Global
     /// <exception cref="ArgumentNullException"> When <paramref name="output"/> is <code>null</code> </exception>
-    public static void Enable( Action<string> output ) => __output = Validate.ThrowIfNull(output);
+    public static void Enable( Action<string> output ) => __output = ThrowIfNull(output);
 
 
     /// <summary> Set the output mechanism for self-log messages. </summary>

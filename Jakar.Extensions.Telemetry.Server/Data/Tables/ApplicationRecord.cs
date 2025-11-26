@@ -12,7 +12,7 @@ namespace Jakar.Extensions.Telemetry.Server.Data.Tables;
 public record ApplicationRecord( string ApplicationName, RecordID<UserRecord>? CreatedBy, RecordID<ApplicationRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ApplicationRecord>(CreatedBy, ID, DateCreated, LastModified), ITableRecord<ApplicationRecord>
 {
     private const string                                      TABLE_NAME = "Applications";
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; }
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; }
     public static JsonTypeInfo<ApplicationRecord[]>           JsonArrayInfo    { get; }
     public static JsonSerializerContext                       JsonContext      { get; }
     public static JsonTypeInfo<ApplicationRecord>             JsonTypeInfo     { get; }

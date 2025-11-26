@@ -31,8 +31,8 @@ public static class Json
 
     extension( string self )
     {
-        public JToken FromJson()         => Validate.ThrowIfNull(JToken.Parse(self));
-        public TValue FromJson<TValue>() => Validate.ThrowIfNull(JsonConvert.DeserializeObject<TValue>(self, Settings));
+        public JToken FromJson()         => ThrowIfNull(JToken.Parse(self));
+        public TValue FromJson<TValue>() => ThrowIfNull(JsonConvert.DeserializeObject<TValue>(self, Settings));
 
         public JObject? GetAdditionalData()
         {
@@ -253,7 +253,7 @@ public static class Json
             JToken jToken = await JToken.LoadAsync(reader, loadSettings, token)
                                         .ConfigureAwait(false);
 
-            return Validate.ThrowIfNull(jToken.ToObject<T>(serializer));
+            return ThrowIfNull(jToken.ToObject<T>(serializer));
         }
 
 

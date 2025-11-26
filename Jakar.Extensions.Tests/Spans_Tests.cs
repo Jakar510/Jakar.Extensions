@@ -207,8 +207,8 @@ public class Spans_Tests : Assert
     [Test] [TestCase(1d)] [TestCase(1, 2)] [TestCase(1, 2, 3)] [TestCase(1, 2, 3, 4)] [TestCase(1, 2, 3, 4, 5)]
     public void Average( params double[] values )
     {
-        this.AreEqual(values.Average(), Spans.Average(values));
-        this.AreEqual(values.Average(), Spans.Average<double>(values));
+        this.AreEqual(values.Average(), values.Average());
+        this.AreEqual(values.Average(), values.Average<double>());
     }
 
 

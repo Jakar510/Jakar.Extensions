@@ -104,7 +104,7 @@ public sealed class WebResponse<TValue>
     private Errors GetError( string title )
     {
         Exception? e = Exception?.Value;
-        if ( e is null ) { return new Error(StatusCode, title, ErrorMessage(), URL?.OriginalString, StringTags.Empty); }
+        if ( e is null ) { return new Error(StatusCode, ErrorMessage(), URL?.OriginalString, StringTags.Empty, type: title); }
 
         Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors);
         return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);

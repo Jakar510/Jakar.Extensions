@@ -20,19 +20,20 @@ public static class ErrorExtensions
         using IMemoryOwner<string> owner  = MemoryPool<string>.Shared.Rent(10);
         Span<string>               errors = owner.Memory.Span;
         int                        count  = 0;
-        if ( results.LengthPassed ) { errors[count++] = Error.Titles.BlockedPassed; }
+        IErrorTitles               titles = IErrorTitles.Current;
+        if ( results.LengthPassed ) { errors[count++] = titles.BlockedPassed; }
 
-        if ( results.MustBeTrimmed ) { errors[count++] = Error.Titles.MustBeTrimmed; }
+        if ( results.MustBeTrimmed ) { errors[count++] = titles.MustBeTrimmed; }
 
-        if ( results.SpecialPassed ) { errors[count++] = Error.Titles.SpecialPassed; }
+        if ( results.SpecialPassed ) { errors[count++] = titles.SpecialPassed; }
 
-        if ( results.NumericPassed ) { errors[count++] = Error.Titles.NumericPassed; }
+        if ( results.NumericPassed ) { errors[count++] = titles.NumericPassed; }
 
-        if ( results.LowerPassed ) { errors[count++] = Error.Titles.LowerPassed; }
+        if ( results.LowerPassed ) { errors[count++] = titles.LowerPassed; }
 
-        if ( results.UpperPassed ) { errors[count++] = Error.Titles.UpperPassed; }
+        if ( results.UpperPassed ) { errors[count++] = titles.UpperPassed; }
 
-        if ( results.BlockedPassed ) { errors[count] = Error.Titles.BlockedPassed; }
+        if ( results.BlockedPassed ) { errors[count] = titles.BlockedPassed; }
 
         string[] values = [.. errors[..count]];
         return values;

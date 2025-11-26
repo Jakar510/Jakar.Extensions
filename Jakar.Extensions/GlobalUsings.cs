@@ -54,6 +54,7 @@ global using Microsoft.Extensions.Options;
 global using OneOf;
 global using OneOf.Types;
 global using static Jakar.Extensions.Claims;
+global using static Jakar.Extensions.Validate;
 global using static Jakar.Extensions.Constants;
 global using static Jakar.Extensions.Constants.Jwt;
 global using static Jakar.Extensions.Constants.Types;

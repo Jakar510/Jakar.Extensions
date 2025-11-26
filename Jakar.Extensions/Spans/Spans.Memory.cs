@@ -19,7 +19,7 @@ public static partial class Spans
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
-    extension( MemoryStream              stream )
+    extension( MemoryStream stream )
     {
         [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
         [Pure] public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(stream.GetBuffer(), 0, (int)stream.Length);
@@ -38,7 +38,7 @@ public static partial class Spans
     [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
 
 
-    extension<TValue>( IEnumerable<TValue>                                  value )
+    extension<TValue>( IEnumerable<TValue> value )
     {
         [Pure] public Memory<TValue>         ToMemory()         => value as TValue[] ?? value.ToArray();
         [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => value as TValue[] ?? value.ToArray();

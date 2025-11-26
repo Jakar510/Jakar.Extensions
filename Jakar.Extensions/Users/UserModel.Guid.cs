@@ -75,7 +75,7 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
 
     public static UserAddress Parse( string value, IFormatProvider? provider )
     {
-        Match match = Validate.Re.Address.Match(value);
+        Match match = Regexes.Address.Match(value);
         return new UserAddress(match);
     }
     public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress? result )

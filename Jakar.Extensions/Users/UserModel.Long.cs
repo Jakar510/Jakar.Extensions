@@ -57,7 +57,7 @@ public interface IUserModel : IUserData<long>, IEscalateToUser, ICreatedByUser, 
 
 
 
-public interface IUserDetailsModel : IUserData, IUserDetailsModel<long>;
+public interface IUserDetailsModel : IUserModel, IUserDetailsModel<long>;
 
 
 
@@ -75,7 +75,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
     public static UserAddress Parse( string value, IFormatProvider? provider )
     {
-        Match match = Validate.Re.Address.Match(value);
+        Match match = Regexes.Address.Match(value);
         return new UserAddress(match);
     }
     public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress? result )
