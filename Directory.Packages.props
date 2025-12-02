@@ -17,8 +17,8 @@
     <PackageVersion Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="5.0.0" />
     <PackageVersion Include="AiForms.Maui.SettingsView" Version="1.0.17" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.7" />
-    <PackageVersion Include="BenchmarkDotNet.Exporters.Plotting" Version="0.15.7" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="BenchmarkDotNet.Exporters.Plotting" Version="0.15.8" />
     <PackageVersion Include="BlazorComponentUtilities" Version="1.8.0" />
     <PackageVersion Include="BlazorPro.BlazorSize" Version="9.0.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -44,7 +44,7 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="10.0.0" />
+    <PackageVersion Include="Jakar.Extensions" Version="10.0.1" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
@@ -100,7 +100,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36714.1" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36726.2" />
     <PackageVersion Include="MimeKit" Version="4.14.0" />
     <PackageVersion Include="MudBlazor" Version="8.15.0" />
     <PackageVersion Include="MudBlazor.Markdown" Version="8.11.0" />
@@ -129,12 +129,12 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.7.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
-    <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.328" />
+    <PackageVersion Include="Otp.NET" Version="1.4.1" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.332" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="8.3.4" />
+    <PackageVersion Include="Radzen.Blazor" Version="8.3.5" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -159,7 +159,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.0.1" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.2.15" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.2.16" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
