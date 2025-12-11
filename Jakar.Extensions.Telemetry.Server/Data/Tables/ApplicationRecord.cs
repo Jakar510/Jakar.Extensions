@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Frozen;
+using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Jakar.Database.DbMigrations;
@@ -11,12 +12,12 @@ namespace Jakar.Extensions.Telemetry.Server.Data.Tables;
 [Table(TABLE_NAME)]
 public record ApplicationRecord( string ApplicationName, RecordID<UserRecord>? CreatedBy, RecordID<ApplicationRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ApplicationRecord>(CreatedBy, ID, DateCreated, LastModified), ITableRecord<ApplicationRecord>
 {
-    private const string                                      TABLE_NAME = "Applications";
+    private const string                                   TABLE_NAME = "Applications";
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; }
-    public static JsonTypeInfo<ApplicationRecord[]>           JsonArrayInfo    { get; }
-    public static JsonSerializerContext                       JsonContext      { get; }
-    public static JsonTypeInfo<ApplicationRecord>             JsonTypeInfo     { get; }
-    public static string                                      TableName        => TABLE_NAME;
+    public static JsonTypeInfo<ApplicationRecord[]>        JsonArrayInfo    { get; }
+    public static JsonSerializerContext                    JsonContext      { get; }
+    public static JsonTypeInfo<ApplicationRecord>          JsonTypeInfo     { get; }
+    public static string                                   TableName        => TABLE_NAME;
 
 
     public static ApplicationRecord Create( string     applicationName, in RecordID<UserRecord>? createdBy, in RecordID<ApplicationRecord> id ) => new(applicationName, createdBy, id, DateTimeOffset.UtcNow);

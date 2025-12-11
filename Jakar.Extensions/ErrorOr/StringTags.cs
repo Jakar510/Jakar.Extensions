@@ -14,12 +14,13 @@ namespace Jakar.Extensions;
 [method: JsonConstructor]
 public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>
 {
-    public static readonly StringTags Empty   = new([], []);
+    public static readonly StringTags Empty   = new();
     public readonly        Pair[]     Tags    = tags;
     public readonly        string[]   Entries = entries;
-    public                 bool       IsEmpty => Tags.Length == 0 && Entries.Length == 0;
+    public                 bool       IsEmpty => Tags?.Length is null or <= 0 && Entries?.Length is null or <= 0;
 
 
+    public StringTags() : this([], []) { }
     public StringTags( Pair     pair ) : this([pair], []) { }
     public StringTags( Pair[]   pairs ) : this(pairs, []) { }
     public StringTags( string[] entries ) : this([], entries) { }
@@ -40,10 +41,10 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
     public static implicit operator StringTags( Span<string>                    entry )   => new([..entry]);
     public static implicit operator StringTags( ReadOnlySpan<string>            entry )   => new([..entry]);
     public static implicit operator StringTags( string[]                        entries ) => new(entries);
-    public static implicit operator string[]( StringTags                        value )   => value.Entries;
-    public static implicit operator ReadOnlySpan<string>( StringTags            value )   => value.Entries;
-    public static implicit operator Pair[]( StringTags                          value )   => value.Tags;
-    public static implicit operator ReadOnlySpan<Pair>( StringTags              value )   => value.Tags;
+    public static implicit operator ReadOnlySpan<string>( StringTags            value )   => new(value.Entries);
+    public static implicit operator ReadOnlySpan<Pair>( StringTags              value )   => new(value.Tags);
+    public static implicit operator ReadOnlyMemory<string>( StringTags          value )   => new(value.Entries);
+    public static implicit operator ReadOnlyMemory<Pair>( StringTags            value )   => new(value.Tags);
 
 
     public ValueEnumerable<FromArray<string>, string>                                      Values()            => new(new FromArray<string>(Entries ?? []));
