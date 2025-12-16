@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/26/2024  13:04
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -50,38 +54,55 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
 
     public static Error Create( Exception e, StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), details, status, type);
-    public static Error Create( Exception e, string? description, string? instance, StringTags details = default, Status? status = null, string? type = null )
+    public static Error Create( Exception e, string? title, string? instance, StringTags details = default, Status? status = null, string? type = null )
     {
         string classType = e.GetType()
                             .Name;
 
-        return new Error(status ?? Statuses.GetStatusFromException(e),
-                         description,
-                         instance,
-                         details,
-                         e.Message,
-                         type is null
-                             ? classType
-                             : $"{type}.{classType}");
+        StringTags tags = e.GetTags();
+
+        return new Error(statusCode: status ?? Statuses.GetStatusFromException(e),
+                         description: e.Message,
+                         instance: instance,
+                         details: details.IsEmpty
+                                      ? tags
+                                      : new StringTags([..tags.Tags, ..details.Tags], [..tags.Entries, ..details.Entries]),
+                         title: title,
+                         type: type is null
+                                   ? classType
+                                   : $"{type}.{classType}");
+    }
+    public static bool TryCreate<TValue>( WebResponse<TValue> response, string? title, [NotNullWhen(true)] out Error? error )
+    {
+        Exception? e = response.Exception?.Value;
+
+        if ( e is not null )
+        {
+            error = Error.Create(e, title, response.URL?.OriginalString, StringTags.Empty, response.StatusCode);
+            return true;
+        }
+
+        error = null;
+        return false;
     }
 
 
-    public static Error Unauthorized( ref readonly PasswordValidator.Results results,  string?    instance                      = null, string? description = null, string? type = null ) => Unauthorized(results.ToStringTags(), instance, description,  IErrorTitles.Current.PasswordValidation);
-    public static Error Unauthorized( string?                                instance, StringTags details                       = default )                                         => Unauthorized(details, instance, title:  IErrorTitles.Current.InvalidCredentials);
+    public static Error Unauthorized( ref readonly PasswordValidator.Results results,  string?    instance                      = null, string? description = null, string? type = null ) => Unauthorized(results.ToStringTags(), instance, description, IErrorTitles.Current.PasswordValidation);
+    public static Error Unauthorized( string?                                instance, StringTags details                       = default )                                         => Unauthorized(details, instance, title: IErrorTitles.Current.InvalidCredentials);
     public static Error Unauthorized( StringTags                             details,  string?    instance, string? description = null, string? title = null, string? type = null ) => new(Status.Unauthorized, description, instance, details, type: title);
-    public static Error NoInternet( StringTags                               details = default )                                                                                                 => Disabled(details, title:  IErrorTitles.Current.NoInternet,     type: NO_INTERNET_TYPE);
-    public static Error WiFiDisabled( StringTags                             details = default )                                                                                                 => Disabled(details, title:  IErrorTitles.Current.WiFiIsDisabled, type: NO_INTERNET_WIFI_TYPE);
+    public static Error NoInternet( StringTags                               details = default )                                                                                                 => Disabled(details, title: IErrorTitles.Current.NoInternet,     type: NO_INTERNET_TYPE);
+    public static Error WiFiDisabled( StringTags                             details = default )                                                                                                 => Disabled(details, title: IErrorTitles.Current.WiFiIsDisabled, type: NO_INTERNET_WIFI_TYPE);
     public static Error ExpiredSubscription( StringTags                      details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PaymentRequired, description, instance, details, title, type);
     public static Error Subscription( StringTags                             details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PaymentRequired, description, instance, details, title, type);
     public static Error NoSubscription( StringTags                           details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PaymentRequired, description, instance, details, title, type);
     public static Error Failure( StringTags                                  details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PreconditionFailed, description, instance, details, title, type);
     public static Error Unexpected( StringTags                               details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.UnprocessableEntity, description, instance, details, title, type);
     public static Error Validation( StringTags                               details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.BadRequest, description, instance, details, title, type);
-    public static Error DeviceName( StringTags                               details = default )                                                                                                 => Validation(details, title:  IErrorTitles.Current.MustHaveValidDeviceName);
-    public static Error Host( StringTags                                     details = default )                                                                                                 => Validation(details, title:  IErrorTitles.Current.MustHaveValidIPHostName);
-    public static Error Password( StringTags                                 details = default )                                                                                                 => Validation(details, title:  IErrorTitles.Current.PasswordCannotBeEmpty);
-    public static Error Port( StringTags                                     details = default )                                                                                                 => Validation(details, title:  IErrorTitles.Current.GivenPortIsNotAValidPortNumberInRangeOf1To65535);
-    public static Error UserName( StringTags                                 details = default )                                                                                                 => Validation(details, title:  IErrorTitles.Current.UserNameCannotBeEmpty);
+    public static Error DeviceName( StringTags                               details = default )                                                                                                 => Validation(details, title: IErrorTitles.Current.MustHaveValidDeviceName);
+    public static Error Host( StringTags                                     details = default )                                                                                                 => Validation(details, title: IErrorTitles.Current.MustHaveValidIPHostName);
+    public static Error Password( StringTags                                 details = default )                                                                                                 => Validation(details, title: IErrorTitles.Current.PasswordCannotBeEmpty);
+    public static Error Port( StringTags                                     details = default )                                                                                                 => Validation(details, title: IErrorTitles.Current.GivenPortIsNotAValidPortNumberInRangeOf1To65535);
+    public static Error UserName( StringTags                                 details = default )                                                                                                 => Validation(details, title: IErrorTitles.Current.UserNameCannotBeEmpty);
     public static Error ServerIsUnavailable( StringTags                      details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PreconditionFailed, description, instance, details, title, type);
     public static Error ServerIsOutdated( StringTags                         details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PreconditionFailed, description, instance, details, title, type);
     public static Error ClientIsOutdated( StringTags                         details = default, string? instance = null, string? description = null, string? title = null, string? type = null ) => new(Status.PreconditionFailed, description, instance, details, title, type);

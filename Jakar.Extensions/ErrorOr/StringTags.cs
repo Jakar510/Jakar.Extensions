@@ -17,7 +17,9 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
     public static readonly StringTags Empty   = new();
     public readonly        Pair[]     Tags    = tags;
     public readonly        string[]   Entries = entries;
-    public                 bool       IsEmpty => Tags?.Length is null or <= 0 && Entries?.Length is null or <= 0;
+
+    
+    public bool IsEmpty { [MemberNotNullWhen(false, nameof(Tags))] [MemberNotNullWhen(false, nameof(Entries))] get => Tags?.Length is null or <= 0 && Entries?.Length is null or <= 0; }
 
 
     public StringTags() : this([], []) { }

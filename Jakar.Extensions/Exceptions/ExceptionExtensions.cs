@@ -1,4 +1,10 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
+using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static class ExceptionExtensions
@@ -74,36 +80,58 @@ public static class ExceptionExtensions
 
 
 
-    extension( Exception e )
+    extension( Exception self )
     {
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodClass()     => e.TargetSite?.MethodClass();
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodName()      => e.TargetSite?.MethodName();
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodSignature() => e.TargetSite?.MethodSignature();
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodClass()     => self.TargetSite?.MethodClass();
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodName()      => self.TargetSite?.MethodName();
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodSignature() => self.TargetSite?.MethodSignature();
 
 
         [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-        public JToken? GetData() => e.Data.ToJson();
+        public JToken GetData() => self.Data.ToJson();
 
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
         public void Details( out Dictionary<string, string?> dict )
         {
             dict = new Dictionary<string, string?>(10);
-            e.Details(dict);
+            self.Details(dict);
         }
 
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
         public void Details<TValue>( in TValue dict )
             where TValue : class, IDictionary<string, string?>
         {
-            dict[nameof(Type)] = e.GetType()
-                                  .FullName;
+            dict[nameof(Type)] = self.GetType()
+                                     .FullName;
 
-            dict[nameof(e.Source)]           = e.Source;
-            dict[nameof(e.Message)]          = e.Message;
-            dict[nameof(e.StackTrace)]       = e.StackTrace;
-            dict[nameof(Exception.HelpLink)] = e.HelpLink;
-            dict[nameof(MethodSignature)]    = e.MethodSignature();
-            dict[nameof(e.ToString)]         = e.ToString();
+            dict[nameof(self.Source)]        = self.Source;
+            dict[nameof(self.Message)]       = self.Message;
+            dict[nameof(self.StackTrace)]    = self.StackTrace;
+            dict[nameof(Exception.HelpLink)] = self.HelpLink;
+            dict[nameof(MethodSignature)]    = self.MethodSignature();
+            dict[nameof(self.ToString)]      = self.ToString();
+        }
+
+
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+        public StringTags GetTags()
+        {
+            Pair type = new(nameof(Type),
+                            self.GetType()
+                                .FullName);
+
+            Pair source          = new(nameof(self.Source), self.Source);
+            Pair message         = new(nameof(self.Message), self.Message);
+            Pair stackTrace      = new(nameof(self.StackTrace), self.StackTrace);
+            Pair methodSignature = new(nameof(MethodSignature), self.MethodSignature());
+
+            using PooledArray<Pair> array = self.Data.AsValueEnumerable<DictionaryEntry>()
+                                                .Select(static pair => new Pair(pair.Key.ToString() ?? EMPTY, pair.Value?.ToString()))
+                                                .ToArrayPool();
+
+            StringTags tags = new([type, message, source, stackTrace, methodSignature, ..array.Span], [self.ToString()]);
+
+            return tags;
         }
 
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
@@ -111,21 +139,21 @@ public static class ExceptionExtensions
         {
             dict = new Dictionary<string, object?>
                    {
-                       [nameof(Type)] = e.GetType()
-                                         .FullName,
-                       [nameof(Exception.HResult)]    = e.HResult,
-                       [nameof(Exception.HelpLink)]   = e.HelpLink,
-                       [nameof(Exception.Source)]     = e.Source,
-                       [nameof(Exception.Message)]    = e.Message,
-                       [nameof(Exception.Data)]       = e.GetData(),
-                       [nameof(Exception.StackTrace)] = e.StackTrace?.SplitAndTrimLines()
+                       [nameof(Type)] = self.GetType()
+                                            .FullName,
+                       [nameof(Exception.HResult)]    = self.HResult,
+                       [nameof(Exception.HelpLink)]   = self.HelpLink,
+                       [nameof(Exception.Source)]     = self.Source,
+                       [nameof(Exception.Message)]    = self.Message,
+                       [nameof(Exception.Data)]       = self.GetData(),
+                       [nameof(Exception.StackTrace)] = self.StackTrace?.SplitAndTrimLines()
                    };
 
 
-            if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
-            else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+            if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]            = self.MethodInfo(); }
+            else if ( self.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{self.MethodClass()}::{self.MethodSignature()}"; }
 
-            e.GetProperties(ref dict);
+            self.GetProperties(ref dict);
         }
     }
 

@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
+using System.Text.Encodings.Web;
+using static Jakar.Extensions.ValueLinkedList<T>;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -85,7 +90,7 @@ public sealed class WebResponse<TValue>
         errorMessage = GetError();
         return false;
     }
-    public bool TryGetValue( [NotNullWhen(true)] out TValue? payload, [NotNullWhen(false)] out OneOfErrors errorMessage )
+    public bool TryGetValue( [NotNullWhen(true)] out TValue? payload, out OneOfErrors errorMessage )
     {
         if ( IsSuccessStatusCode )
         {
@@ -100,23 +105,22 @@ public sealed class WebResponse<TValue>
     }
 
 
-    public Errors GetError() => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Error.Create(StatusCode);
-    private Errors GetError( string title )
+    public Errors GetError() => GetError(StatusCode.GetErrorTitle());
+    public Errors GetError( string? title )
     {
-        Exception? e = Exception?.Value;
-        if ( e is null ) { return new Error(StatusCode, ErrorMessage(), URL?.OriginalString, StringTags.Empty, type: title); }
+        if ( Error.TryCreate(this, title, out Error? error) ) { return error; }
 
-        Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors);
+
+        Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors, FromTags);
         return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);
 
 
-        static Errors FromString( WebResponse<TValue> response, string s )      => s;
-        static Errors FromNode( WebResponse<TValue>   response, JToken node )   => Error.Create(response.StatusCode, node.ToJson());
-        static Errors FromErrors( WebResponse<TValue> response, Errors errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
+        static Errors FromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
+        static Errors FromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
+        static Errors FromNode( WebResponse<TValue>   response, JToken     node )   => FromString(response, node.ToJson());
+        static Errors FromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
     }
-
-
-    public string ErrorMessage() => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
+    public string ErrorMessage() => StatusCode.GetErrorTitle();
 
 
     public void EnsureSuccessStatusCode()
