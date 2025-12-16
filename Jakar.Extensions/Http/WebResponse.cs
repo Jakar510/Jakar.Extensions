@@ -2,7 +2,6 @@
 // 08/15/2022  11:51 AM
 
 using System.Text.Encodings.Web;
-using static Jakar.Extensions.ValueLinkedList<T>;
 
 
 
@@ -19,7 +18,7 @@ public sealed class WebResponse<TValue>
     public readonly List<string>      Allow;
     public readonly List<string>      ContentEncoding;
     public readonly long?             ContentLength;
-    public readonly OneOfErrors       Errors;
+    public readonly ErrorResponse    Errors;
     public readonly Status            StatusCode;
     public readonly string?           ContentType;
     public readonly string?           Method;
@@ -31,8 +30,10 @@ public sealed class WebResponse<TValue>
     public readonly Uri?              URL;
 
 
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
-    public                                                         bool IsSuccessStatusCode { [MemberNotNullWhen(true, nameof(Payload))] get => Payload is not null && StatusCode < Status.BadRequest; }
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload => Payload is not null;
+
+
+    public bool IsSuccessStatusCode { [MemberNotNullWhen(true, nameof(Payload))] get => Payload is not null && StatusCode < Status.BadRequest; }
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this(response, default, null, error) { }
@@ -40,7 +41,7 @@ public sealed class WebResponse<TValue>
     public WebResponse( HttpResponseMessage response, TValue? payload, Exception? exception = null, string? error = null )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        Errors            = OneOfErrors.Parse(error ?? exception?.Message);
+        Errors            = ErrorResponse.Parse(error ?? exception?.Message);
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
@@ -90,12 +91,12 @@ public sealed class WebResponse<TValue>
         errorMessage = GetError();
         return false;
     }
-    public bool TryGetValue( [NotNullWhen(true)] out TValue? payload, out OneOfErrors errorMessage )
+    public bool TryGetValue( [NotNullWhen(true)] out TValue? payload, out ErrorResponse errorMessage )
     {
         if ( IsSuccessStatusCode )
         {
             payload      = Payload;
-            errorMessage = OneOfErrors.Empty;
+            errorMessage = ErrorResponse.Empty;
             return payload is not null;
         }
 

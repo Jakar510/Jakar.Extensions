@@ -5,10 +5,13 @@ namespace Jakar.Extensions;
 
 
 [method: JsonConstructor]
-public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable
+public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable, ISpanFormattable
 {
     public readonly string  Key   = key;
     public readonly string? Value = value;
+
+
+    public bool HasValue { [MemberNotNullWhen(true, nameof(Value))] get => !string.IsNullOrWhiteSpace(Value); }
 
 
     public static implicit operator KeyValuePair<string, string?>( Pair tag ) => new(tag.Key, tag.Value);
@@ -45,6 +48,18 @@ public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, ICo
     public static bool operator >( Pair   left, Pair  right ) => left.CompareTo(right) > 0;
     public static bool operator <=( Pair  left, Pair  right ) => left.CompareTo(right) <= 0;
     public static bool operator >=( Pair  left, Pair  right ) => left.CompareTo(right) >= 0;
+
+
+    public void Deconstruct( out string key, out string? value )
+    {
+        key   = Key;
+        value = Value;
+    }
+    public override string ToString() => $"{nameof(Key)}: {Key}, {nameof(Value)}: {Value}";
+    public string ToString( string? format, IFormatProvider? formatProvider ) => string.Equals("json", format, StringComparison.OrdinalIgnoreCase)
+                                                                                     ? this.ToJson()
+                                                                                     : ToString();
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => destination.TryWrite(provider, $"{nameof(Key)}: {Key}, {nameof(Value)}: {Value}", out charsWritten);
 }
 
 
@@ -57,12 +72,20 @@ public readonly struct Pair<TValue>( string key, TValue value ) : IEquatable<Pai
     public readonly TValue Value = value;
 
 
+    public bool HasValue { [MemberNotNullWhen(true, nameof(Value))] get => Value is not null; }
+
+
     public static implicit operator KeyValuePair<string, TValue>( Pair<TValue> tag ) => new(tag.Key, tag.Value);
     public static implicit operator (string Key, TValue Value)( Pair<TValue>   tag ) => new(tag.Key, tag.Value);
     public static implicit operator Pair<TValue>( KeyValuePair<string, TValue> tag ) => new(tag.Key, tag.Value);
     public static implicit operator Pair<TValue>( (string Key, TValue Value)   tag ) => new(tag.Key, tag.Value);
 
 
+    public void Deconstruct( out string key, out TValue value )
+    {
+        key   = Key;
+        value = Value;
+    }
     public int CompareTo( Pair<TValue> other )
     {
         int keyComparison = string.Compare(Key, other.Key, StringComparison.Ordinal);

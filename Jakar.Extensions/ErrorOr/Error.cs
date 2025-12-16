@@ -26,7 +26,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
 
     public Error() : base() { }
-    public Error( Status statusCode, string? description = null, string? instance = null, StringTags details = default, string? title = null, string? type = null ) : base()
+    public Error( Status statusCode, string? description = null, string? instance = null, in StringTags details = default, string? title = null, string? type = null ) : base()
     {
         Details     = details;
         StatusCode  = statusCode;
@@ -53,20 +53,17 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     public static Error Create( Status status, string? title = null, string? description = null, string? instance = null, StringTags details = default, string? type = null ) => new(status, description, instance, details, title, type);
 
 
-    public static Error Create( Exception e, StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), details, status, type);
-    public static Error Create( Exception e, string? title, string? instance, StringTags details = default, Status? status = null, string? type = null )
+    public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), in details, status, type);
+    public static Error Create( Exception e, string? title, string? instance, in StringTags details = default, Status? status = null, string? type = null )
     {
         string classType = e.GetType()
                             .Name;
 
-        StringTags tags = e.GetTags();
-
         return new Error(statusCode: status ?? Statuses.GetStatusFromException(e),
                          description: e.Message,
                          instance: instance,
-                         details: details.IsEmpty
-                                      ? tags
-                                      : new StringTags([..tags.Tags, ..details.Tags], [..tags.Entries, ..details.Entries]),
+                         details: e.GetTags()
+                                   .With(in details),
                          title: title,
                          type: type is null
                                    ? classType
@@ -78,7 +75,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
         if ( e is not null )
         {
-            error = Error.Create(e, title, response.URL?.OriginalString, StringTags.Empty, response.StatusCode);
+            error = Error.Create(e, title, response.URL?.OriginalString, in StringTags.Empty, response.StatusCode);
             return true;
         }
 

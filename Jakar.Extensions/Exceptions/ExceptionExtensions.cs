@@ -114,27 +114,6 @@ public static class ExceptionExtensions
 
 
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-        public StringTags GetTags()
-        {
-            Pair type = new(nameof(Type),
-                            self.GetType()
-                                .FullName);
-
-            Pair source          = new(nameof(self.Source), self.Source);
-            Pair message         = new(nameof(self.Message), self.Message);
-            Pair stackTrace      = new(nameof(self.StackTrace), self.StackTrace);
-            Pair methodSignature = new(nameof(MethodSignature), self.MethodSignature());
-
-            using PooledArray<Pair> array = self.Data.AsValueEnumerable<DictionaryEntry>()
-                                                .Select(static pair => new Pair(pair.Key.ToString() ?? EMPTY, pair.Value?.ToString()))
-                                                .ToArrayPool();
-
-            StringTags tags = new([type, message, source, stackTrace, methodSignature, ..array.Span], [self.ToString()]);
-
-            return tags;
-        }
-
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
         public void Details( out Dictionary<string, object?> dict, bool includeFullMethodInfo )
         {
             dict = new Dictionary<string, object?>
@@ -155,6 +134,26 @@ public static class ExceptionExtensions
 
             self.GetProperties(ref dict);
         }
+
+
+        public StringTags GetTags()
+        {
+            Pair type = new(nameof(Type),
+                            self.GetType()
+                                .FullName);
+
+            Pair source          = new(nameof(self.Source), self.Source);
+            Pair message         = new(nameof(self.Message), self.Message);
+            Pair stackTrace      = new(nameof(self.StackTrace), self.StackTrace);
+            Pair methodSignature = new(nameof(MethodSignature), self.MethodSignature());
+
+            using PooledArray<Pair> array = self.Data.AsValueEnumerable<DictionaryEntry>()
+                                                .Select(static pair => new Pair(pair.Key.ToString() ?? EMPTY, pair.Value?.ToString()))
+                                                .ToArrayPool();
+
+            StringTags tags = new([type, message, source, stackTrace, methodSignature, ..array.Span], [self.ToString()]);
+            return tags;
+        }
     }
 
 
@@ -173,6 +172,8 @@ public static class ExceptionExtensions
                 dictionary[key] = info.GetValue(e, null);
             }
         }
+    
+        
         [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
         public void GetProperties( ref JObject dictionary )
         {
