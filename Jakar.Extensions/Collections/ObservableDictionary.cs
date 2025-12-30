@@ -43,7 +43,8 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
 {
     protected internal readonly Dictionary<TKey, TValue> buffer = dictionary;
 
-
+    
+    public override        int  Capacity   => buffer.Capacity;
     public sealed override int  Count      => buffer.Count;
     public                 bool IsReadOnly => ( (IDictionary)buffer ).IsReadOnly;
 

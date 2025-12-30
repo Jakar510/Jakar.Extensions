@@ -44,7 +44,7 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="10.0.1" />
+    <PackageVersion Include="Jakar.Extensions" Version="10.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
@@ -94,20 +94,20 @@
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.11" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.11" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="10.0.11" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.20" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.20" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="10.0.20" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36726.2" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36812.1" />
     <PackageVersion Include="MimeKit" Version="4.14.0" />
     <PackageVersion Include="MudBlazor" Version="8.15.0" />
     <PackageVersion Include="MudBlazor.Markdown" Version="8.11.0" />
     <PackageVersion Include="MudBlazor.ThemeManager" Version="3.0.0" />
     <PackageVersion Include="NUnit" Version="4.4.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="6.0.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.0.1" />
     <PackageVersion Include="NaughtyStrings.Bogus" Version="3.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Nito.Collections.Deque" Version="1.2.1" />
@@ -134,7 +134,7 @@
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="8.4.0" />
+    <PackageVersion Include="Radzen.Blazor" Version="8.4.2" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -156,10 +156,10 @@
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageVersion Include="SerilogTracing" Version="2.3.1" />
     <PackageVersion Include="Sigil" Version="5.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.0.1" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.1" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.0.1" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.2.18" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.1.0" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="32.1.21" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
@@ -225,8 +225,8 @@
     <PackageVersion Include="ZLinq.DropInGenerator" Version="1.5.4" />
     <PackageVersion Include="ZLinq.FileSystem" Version="1.5.4" />
     <PackageVersion Include="ZXing.Net" Version="0.16.11" />
-    <PackageVersion Include="ZXing.Net.Maui" Version="0.7.0" />
-    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.7.0" />
+    <PackageVersion Include="ZXing.Net.Maui" Version="0.7.2" />
+    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.7.2" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="2.4.0" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0" />

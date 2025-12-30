@@ -70,12 +70,10 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public          int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
-    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count == 0; }
+    public override int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; } 
     bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
-    public bool          IsNotEmpty     { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count > 0; }
-    public bool          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
+    public          bool IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
     bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
     object? IList.this[ int                index ] { get => Get(index); set => Set(index, (TValue)value!); }
     public TValue this[ int                index ] { get => Get(index); set => Set(index, value); }

@@ -47,7 +47,8 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
 {
     protected internal readonly ConcurrentDictionary<TKey, TValue> buffer = dictionary;
 
-
+    
+    public override        int  Capacity   => buffer.Count;
     public sealed override int  Count      => buffer.Count;
     public                 bool IsReadOnly => ( (IDictionary)buffer ).IsReadOnly;
 
