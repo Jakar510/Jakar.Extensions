@@ -278,7 +278,7 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
         }
 
         Delete();
-        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
+        return Task.WhenAll(tasks.AsSpan());
     }
 
     /// <summary> Asynchronously deletes files. </summary>
@@ -299,7 +299,7 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             tasks.Add(dir.DeleteFilesAsync());
         }
 
-        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
+        return Task.WhenAll(tasks.AsSpan());
     }
 
     /// <summary> Asynchronously deletes subdirectories. </summary>
@@ -318,8 +318,8 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             tasks.Add(dir.DeleteSubFoldersAsync());
             dir.Delete();
         }
-
-        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
+        
+        return Task.WhenAll(tasks.AsSpan());
     }
 
 

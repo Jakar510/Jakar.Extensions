@@ -19,6 +19,9 @@ public static partial class Spans
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
+
+
+
     extension( MemoryStream stream )
     {
         [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
@@ -31,11 +34,13 @@ public static partial class Spans
 
 
     /// <summary> USE WITH CAUTION </summary>
-    [Pure] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ImmutableArray<T> AsImmutableArray<T>( this T[] list ) => ImmutableCollectionsMarshal.AsImmutableArray(list);
 
 
     [Pure] public static bool TryAsSegment<TValue>( this ReadOnlyMemory<TValue> value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
     [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
+
 
 
     extension<TValue>( IEnumerable<TValue> value )
@@ -46,10 +51,10 @@ public static partial class Spans
 
 
 
-    [Pure] public static Memory<byte>           ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<byte>   ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte> value ) => value.ToArray();
-    [Pure] public static Memory<char>           ToMemory( this scoped ref readonly         ReadOnlySpan<char> value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<char>   ToReadOnlyMemory( this scoped ref readonly Span<char>         value ) => value.ToArray();
+    [Pure] public static Memory<byte>         ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<byte> ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte> value ) => value.ToArray();
+    [Pure] public static Memory<char>         ToMemory( this scoped ref readonly         ReadOnlySpan<char> value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<char> ToReadOnlyMemory( this scoped ref readonly Span<char>         value ) => value.ToArray();
 
 
     [Pure] public static string? ConvertToString( this scoped ref readonly Memory<char> value ) => MemoryMarshal.TryGetString(value, out string? result, out _, out _)

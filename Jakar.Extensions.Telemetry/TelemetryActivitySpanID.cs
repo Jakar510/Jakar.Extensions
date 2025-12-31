@@ -73,7 +73,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
         }
 
         values.Reverse();
-        return Collate(CollectionsMarshal.AsSpan(values));
+        return Collate(values.AsSpan());
     }
     public static string Collate( IEnumerable<TelemetryActivityContext>         contexts ) => Collate(contexts.AsValueEnumerable().Select(static x => x.SpanID));
     public static string Collate( params ReadOnlySpan<TelemetryActivityContext> contexts ) => Collate(contexts.AsValueEnumerable().Select(static x => x.SpanID));

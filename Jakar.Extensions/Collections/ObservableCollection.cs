@@ -269,8 +269,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Sort(compare);
 
         Reset();
     }
@@ -278,8 +278,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Sort(compare);
 
         Reset();
     }
@@ -287,9 +287,9 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Slice(start, length)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Slice(start, length)
+              .Sort(compare);
 
         Reset();
     }
@@ -697,7 +697,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
-    public virtual ReadOnlySpan<TValue> AsSpan() => CollectionsMarshal.AsSpan(buffer);
+    public virtual ReadOnlySpan<TValue> AsSpan() => buffer.AsSpan();
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>

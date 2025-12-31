@@ -351,8 +351,8 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
                 Guard.IsInRange(list.Count + _length, 0, Capacity);
 
-                CollectionsMarshal.AsSpan(list)
-                                  .CopyTo(Next);
+                list.AsSpan()
+                    .CopyTo(Next);
 
                 _length += count;
                 return;

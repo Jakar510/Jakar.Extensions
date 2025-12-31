@@ -7,7 +7,7 @@ namespace Jakar.Extensions.Telemetry.Meters;
 
 public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDisposable
 {
-    private readonly TelemetrySource                                       __source      = source;
+    private readonly TelemetrySource                                    __source      = source;
     private readonly Dictionary<string, Dictionary<string, Instrument>> __instruments = new(DEFAULT_CAPACITY);
 
 
@@ -31,8 +31,8 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
 
 
     internal ValueEnumerable<Select<SelectMany<FromDictionary<string, Dictionary<string, Instrument>>, KeyValuePair<string, Dictionary<string, Instrument>>, Instrument>, Instrument, LogEventProperty>, LogEventProperty> Save() => __instruments.AsValueEnumerable()
-                                                                                                                                                                                                                                                       .SelectMany(static x => x.Value.Values)
-                                                                                                                                                                                                                                                       .Select(static x => x.Save());
+                                                                                                                                                                                                                                                  .SelectMany(static x => x.Value.Values)
+                                                                                                                                                                                                                                                  .Select(static x => x.Save());
 
 
     public Instrument<TValue> CreateMeter<TValue>( string type, string name )
@@ -239,7 +239,7 @@ public class TelemetryMeter<TValue> : IDisposable
 
         public             TValue                 CurrentValue { get => __current ??= _meter?.DefaultCurrentValue ?? TValue.Zero; [MemberNotNull(nameof(__current))] protected internal set => __current = value; }
         public required    MeterInstrumentInfo    Info         { get;                                                             init; }
-        public             Reading<TValue>?       LastValue    => Reading<TValue>.TryGetLastValue(CollectionsMarshal.AsSpan(Readings));
+        public             Reading<TValue>?       LastValue    => Reading<TValue>.TryGetLastValue(Readings.AsSpan());
         protected internal TelemetryMeter<TValue> Meter        { get => GetMeter();                                             init => _meter = value; }
         public             TValue                 Precision    { get => __precision ??= _meter?.DefaultPrecision ?? TValue.One; set => __precision = value; }
         public             List<Reading<TValue>>  Readings     { get;                                                           init; } = [];
