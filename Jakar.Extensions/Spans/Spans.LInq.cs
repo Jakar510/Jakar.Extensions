@@ -83,9 +83,9 @@ public static partial class Spans
         {
             ArrayBuffer<TValue> buffer = new(self.Length);
 
-            foreach ( ref readonly TValue value in values )
+            foreach ( ref readonly TValue x in self )
             {
-                if ( !value.IsOneOf(self) ) { buffer.Add(value); }
+                if ( !x.IsOneOf(values) ) { buffer.Add(x); }
             }
 
             return buffer;

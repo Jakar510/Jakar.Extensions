@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 // 12/6/2023  13:2
 
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -12,11 +13,10 @@ namespace Jakar.Extensions.Tests;
 
 [TestFixture]
 [TestOf(typeof(Spans))]
+[SuppressMessage("ReSharper", "InvokeAsExtensionMember")]
 public class Spans_Tests : Assert
 {
     private static bool IsDevisableByTwo<TValue>( TValue x )
-        where TValue : INumber<TValue> => x % ( TValue.One + TValue.One ) == TValue.Zero;
-    private static bool IsDevisableByTwo<TValue>( ref readonly TValue x )
         where TValue : INumber<TValue> => x % ( TValue.One + TValue.One ) == TValue.Zero;
 
 
@@ -217,7 +217,7 @@ public class Spans_Tests : Assert
     {
         ReadOnlySpan<double> valueSpan = values;
         double               results   = valueSpan.Max(double.MinValue);
-        this.AreEqual(values.Max(), results);
+        this.AreEqual(Enumerable.Max(values), results);
     }
 
 
@@ -226,7 +226,7 @@ public class Spans_Tests : Assert
     {
         ReadOnlySpan<double> valueSpan = values;
         double               results   = valueSpan.Min(double.MaxValue);
-        this.AreEqual(values.Min(), results);
+        this.AreEqual(Enumerable.Min(values), results);
     }
 
 
@@ -235,7 +235,7 @@ public class Spans_Tests : Assert
     {
         ReadOnlySpan<double> valueSpan = values;
         double               results   = valueSpan.Sum();
-        this.AreEqual(values.Sum(), results);
+        this.AreEqual(Enumerable.Sum(values), results);
     }
 
 
@@ -243,7 +243,7 @@ public class Spans_Tests : Assert
     {
         ReadOnlySpan<double> valueSpan = values;
         double               results   = valueSpan.SingleOrDefault(static ( ref readonly double x ) => IsDevisableByTwo(x));
-        this.AreEqual(values.First(IsDevisableByTwo), results);
+        this.AreEqual(Enumerable.First(values, IsDevisableByTwo), results);
     }
 
 
@@ -252,7 +252,7 @@ public class Spans_Tests : Assert
     {
         ReadOnlySpan<double> valueSpan = values;
         double               results   = valueSpan.FirstOrDefault(static ( ref readonly double x ) => IsDevisableByTwo(x));
-        this.AreEqual(values.FirstOrDefault(IsDevisableByTwo), results);
+        this.AreEqual(Enumerable.FirstOrDefault(values, IsDevisableByTwo), results);
     }
 
 
@@ -266,14 +266,14 @@ public class Spans_Tests : Assert
                   {
                       ReadOnlySpan<double> valueSpan = values;
                       double               results   = valueSpan.Single(static ( ref readonly double x ) => IsDevisableByTwo(x));
-                      this.AreEqual(values.Single(IsDevisableByTwo), results);
+                      this.AreEqual(Enumerable.Single(values, IsDevisableByTwo), results);
                   });
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
             double               results   = valueSpan.Single(static ( ref readonly double x ) => IsDevisableByTwo(x));
-            this.AreEqual(values.SingleOrDefault(IsDevisableByTwo), results);
+            this.AreEqual(Enumerable.SingleOrDefault(values, IsDevisableByTwo), results);
         }
     }
 
@@ -289,14 +289,14 @@ public class Spans_Tests : Assert
                   {
                       ReadOnlySpan<double> valueSpan = values;
                       double               results   = valueSpan.SingleOrDefault(static ( ref readonly double x ) => IsDevisableByTwo(x));
-                      this.AreEqual(values.SingleOrDefault(IsDevisableByTwo), results);
+                      this.AreEqual(Enumerable.SingleOrDefault(values, IsDevisableByTwo), results);
                   });
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
             double               results   = valueSpan.SingleOrDefault(static ( ref readonly double x ) => IsDevisableByTwo(x));
-            this.AreEqual(values.SingleOrDefault(IsDevisableByTwo), results);
+            this.AreEqual(Enumerable.SingleOrDefault(values, IsDevisableByTwo), results);
         }
     }
 

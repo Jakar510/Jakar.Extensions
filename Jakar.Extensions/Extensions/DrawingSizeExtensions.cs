@@ -1,4 +1,44 @@
-﻿namespace Jakar.Extensions;
+﻿using System;
+using System.Collections.Frozen;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using CommunityToolkit.Diagnostics;
+using Jakar.Extensions;
+using Newtonsoft.Json;
+using Jakar.Extensions.UserLong;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using Serilog.Context;
+using Serilog.Events;
+using ZLinq;
+using ZLinq.Linq;
+using static Jakar.Extensions.Validate;
+using static Jakar.Extensions.Constants;
+using static Jakar.Extensions.Constants.Jwt;
+using static Jakar.Extensions.Constants.Types;
+using static Jakar.Extensions.Constants.Files;
+using static Jakar.Extensions.Constants.Values;
+using static Jakar.Extensions.Constants.Numbers;
+using static Jakar.Extensions.Constants.Logging;
+using static Jakar.Extensions.Constants.Telemetry;
+using static Jakar.Extensions.Constants.Characters;
+using static Jakar.Extensions.Constants.ErrorTypes;
+using Debug = System.Diagnostics.Debug;
+using PureAttribute = System.Diagnostics.Contracts.PureAttribute;
+
+
+namespace Jakar.Extensions;
 
 
 public static class DrawingSizeExtensions

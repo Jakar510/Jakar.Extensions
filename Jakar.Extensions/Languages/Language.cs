@@ -35,19 +35,20 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
         Version          = version;
         DisplayName      = version.GetName();
     }
-    public Language( SupportedLanguage language ) : this(language.GetCultureInfo(CultureInfo.InvariantCulture), language) { }
+    internal Language( SupportedLanguage language ) : this(language.AsCultureInfo(CultureInfo.InvariantCulture), language) { }
 
 
-    public static implicit operator Language( CultureInfo        value ) => new(value);
-    public static implicit operator Language( SupportedLanguage  value ) => new(value);
-    public static implicit operator SupportedLanguage( Language  value ) => value.Version;
-    public static implicit operator SupportedLanguage?( Language value ) => value.Version;
-    public static implicit operator CultureInfo( Language        value ) => value.__culture;
+    public static implicit operator Language( CultureInfo         value ) => Create(value);
+    public static implicit operator Language( SupportedLanguage   value ) => Create(value);
+    public static implicit operator SupportedLanguage( Language   value ) => value.Version;
+    public static implicit operator SupportedLanguage?( Language? value ) => value?.Version;
+    public static implicit operator CultureInfo( Language         value ) => value.__culture;
 
 
-    public          CultureInfo GetCulture()                  => __culture;
-    public override string      ToString()                    => DisplayName;
-    private static  Language    Create( CultureInfo culture ) => new(culture);
+    public          CultureInfo GetCulture()                        => __culture;
+    public override string      ToString()                          => DisplayName;
+    private static  Language    Create( SupportedLanguage culture ) => new Language(culture.AsCultureInfo(CultureInfo.InvariantCulture));
+    private static  Language    Create( CultureInfo       culture ) => new Language(culture);
 
 
     public int CompareTo( object? value ) => value switch
