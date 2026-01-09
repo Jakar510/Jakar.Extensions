@@ -44,7 +44,7 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="10.1.1" />
+    <PackageVersion Include="Jakar.Extensions" Version="10.2.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
@@ -107,7 +107,7 @@
     <PackageVersion Include="MudBlazor.ThemeManager" Version="3.0.0" />
     <PackageVersion Include="NUnit" Version="4.4.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="6.0.1" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.1.0" />
     <PackageVersion Include="NaughtyStrings.Bogus" Version="3.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Nito.Collections.Deque" Version="1.2.1" />
@@ -134,7 +134,7 @@
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="8.4.2" />
+    <PackageVersion Include="Radzen.Blazor" Version="8.5.1" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -151,7 +151,7 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Http" Version="9.2.0" />
+    <PackageVersion Include="Serilog.Sinks.Http" Version="9.2.1" />
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageVersion Include="SerilogTracing" Version="2.3.1" />
@@ -159,7 +159,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.1.0" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="32.1.21" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="32.1.22" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
@@ -218,15 +218,15 @@
     <PackageVersion Include="UraniumUI.Validations.DataAnnotations" Version="2.14.0" />
     <PackageVersion Include="UraniumUI.WebComponents" Version="2.14.0" />
     <PackageVersion Include="ValueOf" Version="2.0.31" />
-    <PackageVersion Include="WifiManager.Maui" Version="9.0.6" />
+    <PackageVersion Include="WifiManager.Maui" Version="10.0.0" />
     <PackageVersion Include="Xam.Plugin.Media" Version="6.0.2" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.4.0" />
     <PackageVersion Include="ZLinq" Version="1.5.4" />
     <PackageVersion Include="ZLinq.DropInGenerator" Version="1.5.4" />
     <PackageVersion Include="ZLinq.FileSystem" Version="1.5.4" />
     <PackageVersion Include="ZXing.Net" Version="0.16.11" />
-    <PackageVersion Include="ZXing.Net.Maui" Version="0.7.2" />
-    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.7.2" />
+    <PackageVersion Include="ZXing.Net.Maui" Version="0.7.3" />
+    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.7.3" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="2.4.0" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0" />
