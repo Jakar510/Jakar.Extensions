@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-[DefaultValue(nameof(Empty)), Serializable, StructLayout(LayoutKind.Auto)]
+[DefaultValue(nameof(Empty))][Serializable][StructLayout(LayoutKind.Auto)]
 public readonly record struct Pair( string Key, string? Value ) : IEqualityOperators<Pair>, IComparisonOperators<Pair>
 {
     public static readonly Pair    Empty = new(string.Empty, string.Empty);
@@ -43,7 +43,7 @@ public readonly record struct Pair( string Key, string? Value ) : IEqualityOpera
 
 
 
-[DefaultValue(nameof(Empty)), Serializable, StructLayout(LayoutKind.Auto), SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible"), SuppressMessage("ReSharper", "ConvertToAutoPropertyWithPrivateSetter")]
+[DefaultValue(nameof(Empty))][Serializable][StructLayout(LayoutKind.Auto)][SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible")][SuppressMessage("ReSharper", "ConvertToAutoPropertyWithPrivateSetter")]
 public record struct Pairs( int Capacity ) : IEnumerable<Pair>, IValueEnumerable<Pairs.Enumerator, Pair>
 {
     public static readonly Pairs Empty = new(0);

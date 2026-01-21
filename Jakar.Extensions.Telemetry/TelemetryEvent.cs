@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-[Serializable, StructLayout(LayoutKind.Auto)]
+[Serializable][StructLayout(LayoutKind.Auto)]
 public readonly record struct TelemetryEvent( string EventID, in DateTimeOffset Timestamp, in Pairs Tags ) : IComparable<TelemetryEvent>, IComparable
 {
     public readonly Pairs          Tags      = Tags;

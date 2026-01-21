@@ -10,6 +10,7 @@ using ZLinq.Linq;
 namespace Jakar.Extensions;
 
 
+[StructLayout(LayoutKind.Auto)]
 [DefaultValue(nameof(Empty))]
 [method: MustDisposeResource]
 public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
@@ -19,7 +20,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
                                              ? ArrayPool<TValue>.Shared.Rent(capacity)
                                              : null;
     public readonly int Capacity = capacity;
-    internal        int length   = 0;
+    private         int length   = 0;
     private         int __index;
 
 
@@ -37,24 +38,15 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
         if ( self.__array is not null ) { ArrayPool<TValue>.Shared.Return(self.__array); }
     }
 
+
     public static implicit operator ReadOnlySpan<TValue>( ArrayBuffer<TValue> self ) => self.Values;
 
 
-    public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => new ReadOnlySpan<TValue>(__array, 0, length).GetEnumerator();
+    public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => Values.GetEnumerator();
 
 
-    public void Add( TValue value )
-    {
-        if ( __array is not null ) { __array[length++] = value; }
-
-        if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
-    }
-    public void Add( ref readonly TValue value )
-    {
-        if ( __array is not null ) { __array[length++] = value; }
-
-        if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
-    }
+    public void Add( TValue              value ) => Span[length++] = value;
+    public void Add( ref readonly TValue value ) => Span[length++] = value;
 
 
     public bool TryGetNonEnumeratedCount( out int count )
@@ -66,8 +58,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     {
         if ( __index < Length )
         {
-            current = Values[__index];
-            __index++;
+            current = Span[__index++];
             return true;
         }
 

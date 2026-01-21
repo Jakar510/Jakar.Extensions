@@ -38,6 +38,7 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     where TSelf : ObservableHashSet<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly HashSet<TValue> buffer = values;
+    public override             int             Capacity   => buffer.Capacity;
     public sealed override      int             Count      => buffer.Count;
     bool ICollection<TValue>.                   IsReadOnly => ( (ICollection<TValue>)buffer ).IsReadOnly;
 

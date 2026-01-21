@@ -15,7 +15,7 @@ public static class ArrayExtensions
                                                                                                                 _                                  => values.ToArray()
                                                                                                             };
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => CollectionsMarshal.AsSpan(list);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => list.AsSpan();
 
 
     [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")] [MethodImpl(MethodImplOptions.AggressiveInlining)]

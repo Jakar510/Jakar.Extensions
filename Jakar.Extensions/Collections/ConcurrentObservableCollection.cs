@@ -1,3 +1,7 @@
+using ZLinq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -290,10 +294,10 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     }
 
 
-    public override bool TryAdd( TValue value )
+    public override void Add( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalTryAdd(in value); }
+        using ( AcquireLock() ) { InternalAdd(in value); }
     }
     public override void Add( params ReadOnlySpan<TValue> values )
     {
@@ -304,6 +308,87 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { InternalAdd(values); }
+    }
+    public override void Add<TEnumerator>( ValueEnumerable<TEnumerator, TValue> values )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using ( AcquireLock() ) { InternalAdd(values); }
+    }
+
+
+    public override async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) ) { InternalAdd(values.Span); }
+    }
+    public override async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) ) { InternalAdd(values.AsSpan()); }
+    }
+    public override async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) ) { InternalAdd(values); }
+    }
+    public override async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) )
+        {
+            await foreach ( TValue value in values.WithCancellation(token)
+                                                  .ConfigureAwait(false) ) { InternalAdd(in value); }
+        }
+    }
+    public override async ValueTask AddAsync( TValue value, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) ) { InternalAdd(in value); }
+    }
+
+
+    public override bool TryAdd( TValue value )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using ( AcquireLock() ) { return InternalTryAdd(in value); }
+    }
+    public override async ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) ) { return InternalTryAdd(in value); }
+    }
+    public override async ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) )
+        {
+            foreach ( TValue value in values ) { InternalTryAdd(in value); }
+        }
+    }
+    public override async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( await AcquireLockAsync(token)
+                   .ConfigureAwait(false) )
+        {
+            await foreach ( TValue value in values.WithCancellation(token)
+                                                  .ConfigureAwait(false) ) { InternalTryAdd(in value); }
+        }
     }
 
 
@@ -339,68 +424,6 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
         {
             await foreach ( TValue value in values.WithCancellation(token)
                                                   .ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
-        }
-    }
-
-
-    public override async ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) ) { return InternalTryAdd(in value); }
-    }
-    public override async ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) )
-        {
-            foreach ( TValue value in values ) { InternalTryAdd(in value); }
-        }
-    }
-    public override async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) )
-        {
-            await foreach ( TValue value in values.WithCancellation(token)
-                                                  .ConfigureAwait(false) ) { InternalTryAdd(in value); }
-        }
-    }
-    public override async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) ) { InternalAdd(values.Span); }
-    }
-    public override async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) ) { InternalAdd(values.AsSpan()); }
-    }
-    public override async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) ) { InternalAdd(values); }
-    }
-    public override async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) )
-        {
-            await foreach ( TValue value in values.WithCancellation(token)
-                                                  .ConfigureAwait(false) ) { InternalAdd(in value); }
         }
     }
 
@@ -730,20 +753,6 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
 
         using ( await AcquireLockAsync(token)
                    .ConfigureAwait(false) ) { return InternalContains(in value); }
-    }
-
-
-    public override void Add( TValue value )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalAdd(in value); }
-    }
-    public override async ValueTask AddAsync( TValue value, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        using ( await AcquireLockAsync(token)
-                   .ConfigureAwait(false) ) { InternalAdd(in value); }
     }
 
 

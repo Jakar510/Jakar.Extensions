@@ -29,7 +29,7 @@ public static class ObservableObjects
 
     extension( string property )
     {
-        public PropertyChangedEventArgs  AsPropertyChangedEventArgs()  => PropertyChangedEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangedEventArgs(x));
-        public PropertyChangingEventArgs AsPropertyChangingEventArgs() => PropertyChangingEventArgsCache.GetOrAdd(Validate.ThrowIfNull(property), static x => new PropertyChangingEventArgs(x));
+        public PropertyChangedEventArgs  AsPropertyChangedEventArgs()  => PropertyChangedEventArgsCache.GetOrAdd(ThrowIfNull(property), static x => new PropertyChangedEventArgs(x));
+        public PropertyChangingEventArgs AsPropertyChangingEventArgs() => PropertyChangingEventArgsCache.GetOrAdd(ThrowIfNull(property), static x => new PropertyChangingEventArgs(x));
     }
 }

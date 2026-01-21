@@ -16,7 +16,6 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
     private           StatusCode?              __status;
     private           string?                  __statusDescription;
     internal          TelemetryActivity?       parent;
-    private           TimeSpan?                __duration;
 
 
     public static TelemetryActivity? Current { get; set; }
@@ -31,7 +30,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
     }
     public TelemetryActivityContext        Context           { get => context;                init => context = value; }
     public string                          DisplayName       { get => field ?? OperationName; set; }
-    public TimeSpan?                       Duration          { get => __duration;             init => __duration = value; }
+    public TimeSpan?                       Duration          { get;                           set; }
     public DateTimeOffset?                 EndTimeUtc        { get => __endTimeUtc;           init => __endTimeUtc = value; }
     public ValueLinkedList<TelemetryEvent> Events            { get;                           init; } = [];
     public bool                            IsStopped         { get => __isStopped;            init => __isStopped = value; }
@@ -81,7 +80,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
         if ( __startTimeUtc.HasValue )
         {
             __endTimeUtc ??= DateTimeOffset.UtcNow;
-            __duration   ??= __endTimeUtc.Value - __startTimeUtc.Value;
+            Duration   ??= __endTimeUtc.Value - __startTimeUtc.Value;
         }
 
         __isStopped = true;

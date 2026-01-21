@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Telemetry.Meters;
 
 
-public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposable
+public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource
 {
     public readonly Meters                  Meters;
     public readonly TelemetryActivitySource Source;
@@ -14,7 +14,7 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     public        TelemetryActivity RootActivity => field ??= GetActivity(Info.AppName);
 
 
-    public TelemetrySource( in AppInformation info ) : base(in info)
+    public TelemetrySource( AppInformation info ) : base(info)
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
 
@@ -88,7 +88,7 @@ public interface IActivityTracer
 
 
 
-[NotSerializable, StructLayout(LayoutKind.Auto)]
+[NotSerializable][StructLayout(LayoutKind.Auto)]
 public readonly struct TelemetrySpan : IDisposable, IActivityTracer
 {
     public const     string             ELAPSED_TIME  = nameof(ELAPSED_TIME);

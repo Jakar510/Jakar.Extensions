@@ -57,7 +57,7 @@ public interface IUserModel : IUserData<long>, IEscalateToUser, ICreatedByUser, 
 
 
 
-public interface IUserDetailsModel : IUserData, IUserDetailsModel<long>;
+public interface IUserDetailsModel : IUserModel, IUserDetailsModel<long>;
 
 
 
@@ -75,7 +75,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
     public static UserAddress Parse( string value, IFormatProvider? provider )
     {
-        Match match = Validate.Re.Address.Match(value);
+        Match match = Regexes.Address.Match(value);
         return new UserAddress(match);
     }
     public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress? result )
@@ -470,12 +470,12 @@ public sealed class UserLoginRequest( string userName, string password, UserMode
     [JsonIgnore] public override bool IsValid => this.IsValid();
 
 
-    public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserName, request.Password, data) { }
-    public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserName, request.Password, request.Data) { }
-    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) );
-    public override int  CompareTo( UserLoginRequest? other )                           => string.Compare(UserName, other?.Password, StringComparison.CurrentCultureIgnoreCase);
-    public override bool Equals( object?              other )                           => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
-    public override int  GetHashCode()                                                  => HashCode.Combine(UserName, Password);
+    public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserLogin, request.UserPassword, data) { }
+    public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
+    public override bool Equals( UserLoginRequest?    other ) => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserLogin, other.UserLogin, StringComparison.InvariantCulture) && string.Equals(UserPassword, other.UserPassword, StringComparison.InvariantCulture) );
+    public override int  CompareTo( UserLoginRequest? other ) => string.Compare(UserLogin, other?.UserPassword, StringComparison.CurrentCultureIgnoreCase);
+    public override bool Equals( object?              other ) => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
+    public override int  GetHashCode()                        => HashCode.Combine(UserLogin, UserPassword);
     public static   bool operator ==( UserLoginRequest? left, UserLoginRequest? right ) => EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator !=( UserLoginRequest? left, UserLoginRequest? right ) => !EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator >( UserLoginRequest   left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) > 0;

@@ -1,9 +1,6 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/10/2022  10:26 AM
 
-using JetBrains.Annotations;
-
-
 #pragma warning disable IDE0302 // Collection init can be simplified
 
 

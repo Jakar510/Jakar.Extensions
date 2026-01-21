@@ -19,11 +19,12 @@ public interface ITelemetrySource
     public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
 
 
-    public DeviceInformation? GetDeviceInformation();
+    public DeviceInformation? TryGetDeviceInformation();
 }
 
 
 
+// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
 public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<TelemetrySource>
 {
     /*
@@ -109,7 +110,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     }
 
 
-    public virtual DeviceInformation? GetDeviceInformation() => null;
+    public virtual DeviceInformation? TryGetDeviceInformation() => null;
 
 
     public int CompareTo( object? other ) => other is null

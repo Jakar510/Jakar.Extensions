@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 
 

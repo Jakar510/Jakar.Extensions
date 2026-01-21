@@ -27,11 +27,12 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    [JsonIgnore]                                                                      public override bool IsValid         => base.IsValid                         && IsValidPassword;
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password);
+    [JsonIgnore]                                                                          public override bool IsValid         => base.IsValid && IsUserLogin && IsValidPassword;
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserLogin))]                             public virtual  bool IsUserLogin     => !string.IsNullOrWhiteSpace(UserLogin);
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserPassword), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(UserPassword) && string.Equals(UserPassword, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(UserPassword);
 
 
-    [Required] [StringLength(PASSWORD)] public virtual string Password
+    [Required] [StringLength(PASSWORD)] public virtual string UserPassword
     {
         get => __userPassword;
         set
@@ -41,15 +42,15 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    [Required] [StringLength(USER_NAME)] public override string UserName
+    [Required] [StringLength(USER_NAME)] public virtual string UserLogin
     {
-        get => base.UserName;
+        get;
         set
         {
-            base.UserName = value;
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(IsValid));
         }
-    }
+    } = EMPTY;
 
 
     public AppVersion Version { get; set; } = AppVersion.Default;
@@ -64,7 +65,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     {
         TSelf user = new()
                      {
-                         Password        = password,
+                         UserPassword    = password,
                          ConfirmPassword = password,
                          UserName        = email,
                          Email           = email
@@ -77,7 +78,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     {
         TSelf user = new()
                      {
-                         Password        = password,
+                         UserPassword    = password,
                          ConfirmPassword = password,
                          UserName        = userName,
                          Email           = email
@@ -88,17 +89,17 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    public LoginRequest      GetLoginRequest()                         => new(UserName, Password);
-    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password, uri.ToString());
+    public LoginRequest      GetLoginRequest()                         => new(UserName, UserPassword);
+    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, UserPassword, uri.ToString());
 
 
     public virtual bool Validate( ICollection<string> errors )
     {
         if ( string.IsNullOrWhiteSpace(UserName) || !UserName.IsEmailAddress() ) { errors.Add("Must provide a valid email address"); }
 
-        if ( string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword) ) { errors.Add("Password must not be empty"); }
+        if ( string.IsNullOrWhiteSpace(UserPassword) || string.IsNullOrWhiteSpace(ConfirmPassword) ) { errors.Add("Password must not be empty"); }
 
-        if ( !string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) ) { errors.Add("Passwords be equal"); }
+        if ( !string.Equals(UserPassword, ConfirmPassword, StringComparison.Ordinal) ) { errors.Add("Passwords be equal"); }
 
         if ( !IsValidEmail ) { errors.Add("Invalid Email"); }
 

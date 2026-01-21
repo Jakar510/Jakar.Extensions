@@ -1,26 +1,57 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Linq;
+
+
+
+namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public static class Languages
 {
-    public static readonly FrozenSet<SupportedLanguage> All = Enum.GetValues<SupportedLanguage>()
-                                                                  .ToFrozenSet();
-    public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary(ToStringFast, SelectSelf);
-    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary(SelectSelf,   GetShortName);
-    public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary(GetShortName, SelectSelf);
-    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseNames      = All.ToFrozenDictionary(SelectSelf,   ToStringFast);
-    public static readonly FrozenDictionary<string, SupportedLanguage> Names             = All.ToFrozenDictionary(GetName,      SelectSelf);
+    public static readonly ImmutableArray<SupportedLanguage> All = Enum.GetValues<SupportedLanguage>()
+                                                                       .AsImmutableArray();
+    public static readonly FrozenDictionary<string, SupportedLanguage> FromStrings = CreateFromStrings();
+    public static readonly FrozenDictionary<SupportedLanguage, Language> Cache = Enum.GetValues<SupportedLanguage>()
+                                                                                     .ToFrozenDictionary(static x => x, static x => new Language(CultureInfo.GetCultureInfo(x.GetShortName())));
+    public static readonly FrozenDictionary<SupportedLanguage, CultureInfo> CultureCache = All.ToFrozenDictionary(static x => x, static x => CultureInfo.GetCultureInfo(x.GetShortName()));
+    public static readonly FrozenDictionary<CultureInfo, SupportedLanguage> Cultures = Enum.GetValues<SupportedLanguage>()
+                                                                                           .ToFrozenDictionary(static x => CultureInfo.GetCultureInfo(x.GetShortName()), static x => x);
 
 
-    private static TValue SelectSelf<TValue>( TValue v ) => v;
+    static FrozenDictionary<string, SupportedLanguage> CreateFromStrings()
+    {
+        Dictionary<string, SupportedLanguage> dictionary = new(StringComparer.OrdinalIgnoreCase);
+
+        foreach ( SupportedLanguage language in Enum.GetValues<SupportedLanguage>() )
+        {
+            string value = language.ToStringFast();
+            string two   = language.GetShortName();
+            string name  = language.GetName();
+
+            dictionary[value] = language;
+            dictionary[two]   = language;
+            dictionary[name]  = language;
+
+            CultureInfo culture = CultureInfo.GetCultureInfo(language.GetShortName());
+            dictionary[culture.Name]                           = language;
+            dictionary[culture.DisplayName]                    = language;
+            dictionary[culture.TwoLetterISOLanguageName]       = language;
+            dictionary[culture.ThreeLetterISOLanguageName]     = language;
+            dictionary[culture.ThreeLetterWindowsLanguageName] = language;
+            dictionary[culture.ToString()]                     = language;
+        }
+
+        return dictionary.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    }
+
 
 
     extension( SupportedLanguage language )
     {
-        public CultureInfo GetCultureInfo( CultureInfo defaultValue ) => language is SupportedLanguage.Unspecified || !All.Contains(language)
-                                                                             ? defaultValue
-                                                                             : new CultureInfo(language.GetShortName());
+        public CultureInfo AsCultureInfo()                           => language.AsCultureInfo(CultureInfo.InvariantCulture);
+        public CultureInfo AsCultureInfo( CultureInfo defaultValue ) => CultureCache.GetValueOrDefault(language, defaultValue);
+
+
         public string GetName() => language switch
                                    {
                                        SupportedLanguage.English     => "English",
@@ -37,9 +68,11 @@ public static class Languages
                                        SupportedLanguage.Dutch       => "Nederlands - Dutch",
                                        SupportedLanguage.Korean      => "한국어 - Korean",
                                        SupportedLanguage.Arabic      => "عربى - Arabic",
-                                       SupportedLanguage.Unspecified => nameof(SupportedLanguage.Unspecified),
+                                       SupportedLanguage.Unspecified => CultureInfo.InvariantCulture.ToString(),
                                        _                             => EMPTY
                                    };
+
+
         public string GetShortName() => language switch
                                         {
                                             SupportedLanguage.English     => "en",
@@ -56,9 +89,11 @@ public static class Languages
                                             SupportedLanguage.Dutch       => "nl",
                                             SupportedLanguage.Korean      => "ko",
                                             SupportedLanguage.Arabic      => "ar",
-                                            SupportedLanguage.Unspecified => EMPTY,
+                                            SupportedLanguage.Unspecified => CultureInfo.InvariantCulture.TwoLetterISOLanguageName,
                                             _                             => throw new OutOfRangeException(language)
                                         };
+
+
         public string ToStringFast() => language switch
                                         {
                                             SupportedLanguage.Unspecified => nameof(SupportedLanguage.Unspecified),
@@ -87,48 +122,30 @@ public static class Languages
 
     public static SupportedLanguage GetSupportedLanguage( this CultureInfo culture )
     {
-        string name = culture.DisplayName;
-        if ( string.IsNullOrEmpty(name) ) { return SupportedLanguage.Unspecified; }
+        if ( CultureInfo.InvariantCulture.Equals(culture) ) { return SupportedLanguage.Unspecified; }
 
-        foreach ( ( string key, SupportedLanguage value ) in Values )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
+        // ReSharper disable DuplicatedSequentialIfBodies
+        if ( FromStrings.TryGetValue(culture.ThreeLetterISOLanguageName, out var language) ) { return language; }
 
-        foreach ( ( string key, SupportedLanguage value ) in Names )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
+        if ( FromStrings.TryGetValue(culture.ThreeLetterWindowsLanguageName, out language) ) { return language; }
 
-        foreach ( ( string key, SupportedLanguage value ) in ShortNames )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
+        if ( FromStrings.TryGetValue(culture.TwoLetterISOLanguageName, out language) ) { return language; }
 
-        return SupportedLanguage.Unspecified;
+        if ( FromStrings.TryGetValue(culture.DisplayName, out language) ) { return language; }
+
+        if ( FromStrings.TryGetValue(culture.Name, out language) ) { return language; }
+
+        // ReSharper restore DuplicatedSequentialIfBodies
+        return FromStrings.GetValueOrDefault(culture.ToString(), SupportedLanguage.Unspecified);
     }
     public static SupportedLanguage GetSupportedLanguage( this IFormatProvider culture )
     {
         if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
 
         string? name = culture.ToString();
-        if ( string.IsNullOrEmpty(name) ) { return SupportedLanguage.Unspecified; }
 
-        foreach ( ( string key, SupportedLanguage value ) in Values )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
-
-        foreach ( ( string key, SupportedLanguage value ) in Names )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
-
-        foreach ( ( string key, SupportedLanguage value ) in ShortNames )
-        {
-            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
-        }
-
-        return SupportedLanguage.Unspecified;
+        return string.IsNullOrEmpty(name)
+                   ? SupportedLanguage.Unspecified
+                   : FromStrings.GetValueOrDefault(name, SupportedLanguage.Unspecified);
     }
 }

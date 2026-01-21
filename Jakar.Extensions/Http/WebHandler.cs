@@ -180,7 +180,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         JToken? result = await stream.FromJson(token)
                                      .ConfigureAwait(false);
 
-        return Validate.ThrowIfNull(result);
+        return ThrowIfNull(result);
     }
     public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
     {

@@ -40,8 +40,8 @@ public readonly ref struct ParamsArray<TValue>( IMemoryOwner<TValue> owner, int 
     {
         IMemoryOwner<TValue> owner = MemoryPool<TValue>.Shared.Rent(args.Count);
 
-        CollectionsMarshal.AsSpan(args)
-                          .CopyTo(owner.Memory.Span);
+        args.AsSpan()
+            .CopyTo(owner.Memory.Span);
 
         return new ParamsArray<TValue>(owner, args.Count);
     }

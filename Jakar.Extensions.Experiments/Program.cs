@@ -1,4 +1,7 @@
-﻿Console.WriteLine(DateTimeOffset.UtcNow.ToString());
+﻿using System.Globalization;
+
+
+Console.WriteLine(DateTimeOffset.UtcNow.ToString());
 
 // Console.WriteLine(SpanDuration.ToString(TimeSpan.FromHours(1.1243123), "End. Duration: "));
 
@@ -37,6 +40,7 @@ Console.WriteLine();
 */
 
 
+/*
 UserModel model = new();
 
 model.PropertyChanged  += OnPropertyChanged;
@@ -52,3 +56,10 @@ return;
 
 void OnPropertyChanged( object?  sender, PropertyChangedEventArgs  args ) => Console.WriteLine($"PropertyChanged: {args.PropertyName}");
 void OnPropertyChanging( object? sender, PropertyChangingEventArgs args ) => Console.WriteLine($"PropertyChanging: {args.PropertyName}");
+*/
+
+
+Language    language = SupportedLanguage.English;
+CultureInfo culture  = language;
+Console.WriteLine(language.DisplayName);
+Console.WriteLine(culture.DisplayName);

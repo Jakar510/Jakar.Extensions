@@ -17,7 +17,7 @@ public readonly record struct Email( string Value ) : IParsable<Email>, IFormatt
     public static   Email  Parse( string s, IFormatProvider? provider ) => new(s);
     public static bool TryParse( [NotNullWhen(true)] string? s, IFormatProvider? provider, out Email result )
     {
-        result = !string.IsNullOrWhiteSpace(s) && Validate.Re.Email.IsMatch(s)
+        result = !string.IsNullOrWhiteSpace(s) && Regexes.Email.IsMatch(s)
                      ? new Email(s)
                      : Empty;
 

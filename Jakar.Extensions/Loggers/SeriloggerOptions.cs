@@ -16,7 +16,8 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace Jakar.Extensions;
 
 
-public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposable, IAsyncDisposable, IOpenTelemetryActivityEnricher
+// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
+public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IAsyncDisposable, IOpenTelemetryActivityEnricher
 {
     public static readonly LoggingLevelSwitch LoggingLevel = new(LogEventLevel.Verbose);
     private                FilePaths?         __paths;
@@ -96,10 +97,18 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     }
     public virtual async ValueTask DisposeAsync()
     {
-        await Disposables.ClearAndDisposeAsync(ref __appDataDirectory).ConfigureAwait(false);
-        await Disposables.ClearAndDisposeAsync(ref __cacheDirectory).ConfigureAwait(false);
-        await Disposables.ClearAndDisposeAsync(ref __seqBuffer).ConfigureAwait(false);
-        await Disposables.ClearAndDisposeAsync(ref __paths).ConfigureAwait(false);
+        await Disposables.ClearAndDisposeAsync(ref __appDataDirectory)
+                         .ConfigureAwait(false);
+
+        await Disposables.ClearAndDisposeAsync(ref __cacheDirectory)
+                         .ConfigureAwait(false);
+
+        await Disposables.ClearAndDisposeAsync(ref __seqBuffer)
+                         .ConfigureAwait(false);
+
+        await Disposables.ClearAndDisposeAsync(ref __paths)
+                         .ConfigureAwait(false);
+
         GC.SuppressFinalize(this);
     }
 
@@ -122,6 +131,7 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     }
 
 
+    protected virtual OpenTelemetryActivityEnricher CreateEnricher( in TelemetrySource source ) => new(this, source);
     public virtual void ConfigureLogger( in LoggerConfiguration configuration, in LoggerMinimumLevelConfiguration minimumLevel, in LoggerSinkConfiguration sinkTo, in LoggerAuditSinkConfiguration auditTo, in LoggerEnrichmentConfiguration enrichment, in LoggerFilterConfiguration filter, in LoggerDestructuringConfiguration destructure, in TelemetrySource source )
     {
         minimumLevel.Verbose();
@@ -133,7 +143,7 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
         destructure.ToMaximumCollectionCount(99999);
 
         enrichment.FromLogContext();
-        OpenTelemetryActivityEnricher.Create(enrichment, this, source);
+        enrichment.With(CreateEnricher(in source));
 
         SinkToDebug(in sinkTo);
         SinkToFile(in sinkTo);

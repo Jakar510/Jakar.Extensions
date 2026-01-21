@@ -147,11 +147,15 @@ public static partial class AsyncLinq
             switch ( source )
             {
                 case List<TElement> list:
-                    ForEach(CollectionsMarshal.AsSpan(list), action);
+                    list.AsSpan()
+                        .ForEach(action);
+
                     return;
 
                 case TElement[] array:
-                    ForEach(array.AsSpan(), action);
+                    array.AsSpan()
+                         .ForEach(action);
+
                     return;
 
                 default:

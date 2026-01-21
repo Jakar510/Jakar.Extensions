@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.SignalR
 // 09/25/2025  10:19
 
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Extensions.SignalR.Chats;
 
 

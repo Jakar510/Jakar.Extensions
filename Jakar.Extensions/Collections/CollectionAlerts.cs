@@ -42,6 +42,9 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
     public abstract           int                              Count          { get; }
+    public abstract           int                              Capacity       { get; }
+    public                    bool                             IsEmpty        { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count <= 0; }
+    public                    bool                             IsNotEmpty     { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count > 0; }
     public                    FilterDelegate<TValue>?          OverrideFilter { get; set; }
 
 
@@ -62,7 +65,13 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     protected      void Moved( TValue[]                value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
     protected      void Moved( ref readonly    TValue  value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
     protected      void Replaced( ref readonly TValue? old,   ref readonly TValue value, int              index )    => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old,   index));
-    protected      void OnCountChanged() => OnPropertyChanged(nameof(Count));
+    protected      void OnCapacityChanged() => OnPropertyChanged(nameof(Capacity));
+    protected void OnCountChanged()
+    {
+        OnPropertyChanged(nameof(Count));
+        OnPropertyChanged(nameof(IsEmpty));
+        OnPropertyChanged(nameof(IsNotEmpty));
+    }
     protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
         CollectionChanged?.Invoke(this, e);

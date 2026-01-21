@@ -1,6 +1,11 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
+using System.Collections.Generic;
+using ZLinq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -65,12 +70,10 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public          int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
-    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count == 0; }
+    public override int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; } 
     bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
-    public bool          IsNotEmpty     { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count > 0; }
-    public bool          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
+    public          bool IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
     bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
     object? IList.this[ int                index ] { get => Get(index); set => Set(index, (TValue)value!); }
     public TValue this[ int                index ] { get => Get(index); set => Set(index, value); }
@@ -245,7 +248,12 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         buffer.AddRange(values);
         Reset();
     }
-
+    protected internal virtual void InternalAdd<TEnumerator>( ValueEnumerable<TEnumerator, TValue> values )
+        where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
+    {
+        using PooledArray<TValue> enumerator = values.ToArrayPool();
+        InternalAdd(enumerator.Span);
+    }
 
     protected internal virtual void InternalAddOrUpdate( ref readonly TValue value )
     {
@@ -261,8 +269,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Sort(compare);
 
         Reset();
     }
@@ -270,8 +278,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Sort(compare);
 
         Reset();
     }
@@ -279,9 +287,9 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        CollectionsMarshal.AsSpan(buffer)
-                          .Slice(start, length)
-                          .Sort(compare);
+        buffer.AsSpan()
+              .Slice(start, length)
+              .Sort(compare);
 
         Reset();
     }
@@ -481,20 +489,17 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    public virtual bool TryAdd( TValue                           value )            => InternalTryAdd(in value);
-    public virtual void Add( TValue                              value )            => InternalAdd(in value);
-    public virtual void Add( TValue                              value, int count ) => InternalAdd(in value, count);
-    public virtual void Add( params ReadOnlySpan<TValue>         values ) => InternalAdd(values);
-    public virtual void Add( IEnumerable<TValue>                 values ) => InternalAdd(values);
+    public virtual void Add( TValue                      value )            => InternalAdd(in value);
+    public virtual void Add( TValue                      value, int count ) => InternalAdd(in value, count);
+    public virtual void Add( params ReadOnlySpan<TValue> values ) => InternalAdd(values);
+    public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd(values);
+    public virtual void Add<TEnumerator>( ValueEnumerable<TEnumerator, TValue> values )
+        where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => InternalAdd(values);
     public virtual void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd(values.Span);
     public virtual void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd(values.AsSpan());
-    public virtual ValueTask AddAsync( TValue value, CancellationToken token = default )
-    {
-        InternalAdd(in value);
-        return ValueTask.CompletedTask;
-    }
 
 
+    public virtual bool            TryAdd( TValue      value )                                    => InternalTryAdd(in value);
     public virtual ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default ) => ValueTask.FromResult(InternalTryAdd(in value));
     public virtual ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
@@ -505,7 +510,16 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalTryAdd(in value); }
+
+        await foreach ( TValue value in values.WithCancellation(token)
+                                              .ConfigureAwait(false) ) { InternalTryAdd(in value); }
+    }
+
+
+    public virtual ValueTask AddAsync( TValue value, CancellationToken token = default )
+    {
+        InternalAdd(in value);
+        return ValueTask.CompletedTask;
     }
     public virtual ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
@@ -525,14 +539,18 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAdd(in value); }
+
+        await foreach ( TValue value in values.WithCancellation(token)
+                                              .ConfigureAwait(false) ) { InternalAdd(in value); }
     }
 
 
     public virtual async ValueTask AddOrUpdate( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
+
+        await foreach ( TValue value in values.WithCancellation(token)
+                                              .ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
     }
     public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate(in value);
     public virtual void AddOrUpdate( IEnumerable<TValue> values )
@@ -549,6 +567,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual void AddRange( TValue                      value, int count ) => InternalAdd(in value, count);
     public virtual void AddRange( params ReadOnlySpan<TValue> values )     => InternalAdd(values);
     public virtual void AddRange( IEnumerable<TValue>         enumerable ) => InternalAdd(enumerable);
+    public virtual void AddRange<TEnumerator>( ValueEnumerable<TEnumerator, TValue> values )
+        where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => InternalAdd(values);
 
 
     public virtual void CopyTo( TValue[] array )                                                                  => buffer.CopyTo(array);
@@ -579,7 +599,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values));
     public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
-        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalRemove(in value); }
+        await foreach ( TValue value in values.WithCancellation(token)
+                                              .ConfigureAwait(false) ) { InternalRemove(in value); }
     }
     public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.Span));
     public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.AsSpan()));
@@ -676,7 +697,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
-    public virtual ReadOnlySpan<TValue> AsSpan() => CollectionsMarshal.AsSpan(buffer);
+    public virtual ReadOnlySpan<TValue> AsSpan() => buffer.AsSpan();
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
