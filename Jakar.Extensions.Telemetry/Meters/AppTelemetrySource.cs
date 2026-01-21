@@ -88,7 +88,7 @@ public interface IActivityTracer
 
 
 
-[NotSerializable, StructLayout(LayoutKind.Auto)]
+[NotSerializable][StructLayout(LayoutKind.Auto)]
 public readonly struct TelemetrySpan : IDisposable, IActivityTracer
 {
     public const     string             ELAPSED_TIME  = nameof(ELAPSED_TIME);

@@ -131,7 +131,7 @@ public static class Strings
 
             return array;
         }
-      
+
         public string[] SplitAndTrimLines( string separator )
         {
             string[] array = value.Split(separator);
@@ -144,16 +144,16 @@ public static class Strings
 
             return array;
         }
-      
-        public string[] SplitLines( char   separator = '\n' ) => value.Split(separator);
-        
-        public string[] SplitLines( string separator )        => value.Split(separator);
-      
+
+        public string[] SplitLines( char separator = '\n' ) => value.Split(separator);
+
+        public string[] SplitLines( string separator ) => value.Split(separator);
+
         public Memory<byte> ToMemory( Encoding? encoding = null ) => value.ToByteArray(encoding ?? Encoding.Default)
                                                                           .AsMemory();
-      
-        public object               ConvertTo( Type             target )          => Convert.ChangeType(value, target);
-      
+
+        public object ConvertTo( Type target ) => Convert.ChangeType(value, target);
+
         public ReadOnlyMemory<byte> ToReadOnlyMemory( Encoding? encoding = null ) => value.ToMemory(encoding ?? Encoding.Default);
     }
 
@@ -162,12 +162,13 @@ public static class Strings
     public static SecureString ToSecureString( this ReadOnlySpan<byte> value, bool makeReadonly = true ) => Convert.ToBase64String(value)
                                                                                                                    .AsSpan()
                                                                                                                    .ToSecureString(makeReadonly);
-    
-    public static SecureString ToSecureString( this string               value, bool makeReadonly = true ) => ToSecureString(value.AsSpan(), makeReadonly);
-   public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
-   public static SecureString ToSecureString( this ReadOnlyMemory<char> value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
+
+    public static SecureString ToSecureString( this string value, bool makeReadonly = true ) => value.AsSpan()
+                                                                                                     .ToSecureString(makeReadonly);
+    public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
+    public static SecureString ToSecureString( this ReadOnlyMemory<char> value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this Span<char>           value, bool makeReadonly = true ) => ( (ReadOnlySpan<char>)value ).ToSecureString(makeReadonly);
-    
+
     public static unsafe SecureString ToSecureString( this ReadOnlySpan<char> value, bool makeReadonly = true )
     {
         fixed ( char* token = &value.GetPinnableReference() )
@@ -178,17 +179,25 @@ public static class Strings
             return secure;
         }
     }
-   
-    public static string GetValue( this SecureString value )
+    public static string GetValue( [NotNullIfNotNull(nameof(secure))] this SecureString? secure )
     {
-        IntPtr valuePtr = IntPtr.Zero;
+        if ( secure is null || secure.Length == 0 ) { return EMPTY; }
+
+        IntPtr  ptr = IntPtr.Zero;
+        string result;
 
         try
         {
-            valuePtr = Marshal.SecureStringToBSTR(value);
-            return Marshal.PtrToStringBSTR(valuePtr);
+            ptr    = Marshal.SecureStringToGlobalAllocUnicode(secure);
+            result = Marshal.PtrToStringUni(ptr)!;
         }
-        finally { Marshal.ZeroFreeBSTR(valuePtr); }
+        finally
+        {
+            if ( ptr != IntPtr.Zero ) { Marshal.ZeroFreeGlobalAllocUnicode(ptr); }
+        }
+
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+        return result ?? EMPTY;
     }
 
 
@@ -204,7 +213,7 @@ public static class Strings
         /// <param name="separator"> the <see cref="char"/> to split on </param>
         public SpanSplitEnumerator<char> SplitOn( char separator ) => str.AsSpan()
                                                                          .SplitOn(separator);
-       
+
         /// <summary>
         ///     <para>
         ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
@@ -231,8 +240,8 @@ public static class Strings
     extension<TValue>( Span<TValue> span )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        public SpanSplitEnumerator<TValue> SplitOn( TValue          separator )  => new(span, separator);
-        
+        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
+
         public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
     }
 
@@ -241,8 +250,8 @@ public static class Strings
     extension<TValue>( ReadOnlySpan<TValue> span )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        public SpanSplitEnumerator<TValue> SplitOn( TValue          separator )  => new(span, separator);
-       
+        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
+
         public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
     }
 

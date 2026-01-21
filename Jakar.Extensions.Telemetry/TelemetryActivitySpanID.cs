@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-[Serializable, StructLayout(LayoutKind.Auto)]
+[Serializable][StructLayout(LayoutKind.Auto)]
 public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpanID>
 {
     public const            int                     SIZE       = sizeof(ulong);

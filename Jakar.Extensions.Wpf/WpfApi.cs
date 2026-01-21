@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.Wpf;
+﻿using System.Collections.Generic;
+
+
+
+namespace Jakar.Extensions.Wpf;
 
 
 public static partial class WpfApi

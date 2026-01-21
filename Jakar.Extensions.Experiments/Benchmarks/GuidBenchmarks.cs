@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 04/25/2022  9:42 PM
 
-using JetBrains.Annotations;
-
-
-
 namespace Jakar.Extensions.Experiments.Benchmarks;
 #pragma warning disable CA1822
 /*

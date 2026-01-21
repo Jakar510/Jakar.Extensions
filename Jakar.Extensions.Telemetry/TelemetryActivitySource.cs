@@ -26,7 +26,7 @@ public sealed class TelemetryActivitySource( in AppInformation appContext ) : IV
                                                                               : null;
 
 
-    [JsonConstructor, SetsRequiredMembers]
+    [JsonConstructor][SetsRequiredMembers]
     public TelemetryActivitySource( AppInformation appContext, IEnumerable<TelemetryActivity> activities ) : this(appContext)
     {
         AppContext = appContext;

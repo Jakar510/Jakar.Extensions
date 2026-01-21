@@ -10,7 +10,7 @@ public interface ITelemetryActivityContext
 
 
 
-[Serializable, StructLayout(LayoutKind.Auto)]
+[Serializable][StructLayout(LayoutKind.Auto)]
 [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
 public readonly record struct TelemetryActivityContext( string OperationName, in TelemetryActivityTraceID TraceID, in TelemetryActivitySpanID SpanID ) : ITelemetryActivityContext
 {
@@ -23,7 +23,7 @@ public readonly record struct TelemetryActivityContext( string OperationName, in
     string ITelemetryActivityContext.               OperationName => OperationName;
 
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public        TelemetryActivityContext CreateChild( string operationName )                                                                   => new(operationName, in TraceID, TelemetryActivitySpanID.CreateRandom());
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryActivityContext Create( string      operationName )                                                                   => Create(operationName, TelemetryActivityTraceID.CreateRandom(), TelemetryActivitySpanID.CreateRandom());
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryActivityContext Create( string      operationName, TelemetryActivityTraceID traceID, TelemetryActivitySpanID spanID ) => new(operationName, traceID, spanID);
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public        TelemetryActivityContext CreateChild( string operationName )                                                                   => new(operationName, in TraceID, TelemetryActivitySpanID.CreateRandom());
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryActivityContext Create( string      operationName )                                                                   => Create(operationName, TelemetryActivityTraceID.CreateRandom(), TelemetryActivitySpanID.CreateRandom());
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static TelemetryActivityContext Create( string      operationName, TelemetryActivityTraceID traceID, TelemetryActivitySpanID spanID ) => new(operationName, traceID, spanID);
 }
