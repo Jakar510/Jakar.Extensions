@@ -265,12 +265,9 @@ public static class Json
     {
         public async ValueTask<JToken> FromJson( CancellationToken token = default )
         {
-            JsonLoadSettings loadSettings = LoadSettings;
-
-            // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            using StreamReader textReader = new(self, leaveOpen: true);
-
-            await using JsonTextReader reader = new(textReader) { CloseInput = false };
+            JsonLoadSettings           loadSettings = LoadSettings;
+            using StreamReader         textReader   = new(self, leaveOpen: true); // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
+            await using JsonTextReader reader       = new(textReader) { CloseInput = false };
 
             JToken jToken = await JToken.LoadAsync(reader, loadSettings, token)
                                         .ConfigureAwait(false);

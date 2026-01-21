@@ -177,7 +177,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await using Stream stream = await content.ReadAsStreamAsync(token)
                                                  .ConfigureAwait(false);
 
-        JToken? result = await stream.FromJson(token)
+        JToken result = await stream.FromJson(token)
                                      .ConfigureAwait(false);
 
         return ThrowIfNull(result);
