@@ -109,16 +109,16 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Delete( string relativePath, Stream                      value )   => Delete(relativePath,            new StreamContent(value));
     public WebHandler Delete( string relativePath, MultipartFormDataContent    content ) => Delete(relativePath,            (HttpContent)content);
     public WebHandler Delete( string relativePath, MultipartContent            content ) => Delete(relativePath,            (HttpContent)content);
-    public WebHandler Delete( string relativePath, string                      value )   => Delete(relativePath,            new StringContent(value.ToJson(), Encoding));
-    public WebHandler Delete( string relativePath, BaseClass                   value )   => Delete(relativePath,            value.ToJson());
-    public WebHandler Delete( string relativePath, IEnumerable<BaseClass>      value )   => Delete(relativePath,            value.ToJson());
+    public WebHandler Delete( string relativePath, string                      value )   => Delete(relativePath,            new StringContent(value, Encoding));
+    public WebHandler Delete( string relativePath, BaseClass                   value )   => Delete(relativePath,            new JsonContent(value.ToJson()));
+    public WebHandler Delete( string relativePath, IEnumerable<BaseClass>      value )   => Delete(relativePath,            new JsonContent(value.ToJson()));
     public WebHandler Delete( string relativePath, HttpContent                 value )   => Delete(CreateUrl(relativePath), value);
     public WebHandler Delete( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Delete, value);
     public WebHandler Delete( Uri    url ) => CreateHandler(url, HttpMethod.Delete);
     public WebHandler Delete<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Delete(relativePath, new JsonContent(value.ToJson()));
     public WebHandler Delete<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Delete(relativePath, new JsonContent(value.ToJson()));
 
 
     public WebHandler Get( Uri    url )          => CreateHandler(url, HttpMethod.Get);
@@ -131,16 +131,16 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Patch( string relativePath, Stream                      value )   => Patch(relativePath,            new StreamContent(value));
     public WebHandler Patch( string relativePath, MultipartFormDataContent    content ) => Patch(relativePath,            (HttpContent)content);
     public WebHandler Patch( string relativePath, MultipartContent            content ) => Patch(relativePath,            (HttpContent)content);
-    public WebHandler Patch( string relativePath, string                      value )   => Patch(relativePath,            new StringContent(value.ToJson(), Encoding));
-    public WebHandler Patch( string relativePath, BaseClass                   value )   => Patch(relativePath,            value.ToJson());
-    public WebHandler Patch( string relativePath, IEnumerable<BaseClass>      value )   => Patch(relativePath,            value.ToJson());
+    public WebHandler Patch( string relativePath, string                      value )   => Patch(relativePath,            new StringContent(value, Encoding));
+    public WebHandler Patch( string relativePath, BaseClass                   value )   => Patch(relativePath,            new JsonContent(value.ToJson()));
+    public WebHandler Patch( string relativePath, IEnumerable<BaseClass>      value )   => Patch(relativePath,            new JsonContent(value.ToJson()));
     public WebHandler Patch( string relativePath, HttpContent                 value )   => Patch(CreateUrl(relativePath), value);
     public WebHandler Patch( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Patch, value);
     public WebHandler Patch( Uri    url ) => CreateHandler(url, HttpMethod.Patch);
     public WebHandler Patch<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Patch(relativePath, new JsonContent(value.ToJson()));
     public WebHandler Patch<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Patch(relativePath, new JsonContent(value.ToJson()));
 
 
     public WebHandler Post( string relativePath, byte[]                      value )   => Post(relativePath,            new ByteArrayContent(value));
@@ -149,16 +149,16 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Post( string relativePath, Stream                      value )   => Post(relativePath,            new StreamContent(value));
     public WebHandler Post( string relativePath, MultipartFormDataContent    content ) => Post(relativePath,            (HttpContent)content);
     public WebHandler Post( string relativePath, MultipartContent            content ) => Post(relativePath,            (HttpContent)content);
-    public WebHandler Post( string relativePath, string                      value )   => Post(relativePath,            new StringContent(value.ToJson(), Encoding));
-    public WebHandler Post( string relativePath, BaseClass                   value )   => Post(relativePath,            value.ToJson());
-    public WebHandler Post( string relativePath, IEnumerable<BaseClass>      value )   => Post(relativePath,            value.ToJson());
+    public WebHandler Post( string relativePath, string                      value )   => Post(relativePath,            new StringContent(value, Encoding));
+    public WebHandler Post( string relativePath, BaseClass                   value )   => Post(relativePath,            new JsonContent(value.ToJson()));
+    public WebHandler Post( string relativePath, IEnumerable<BaseClass>      value )   => Post(relativePath,            new JsonContent(value.ToJson()));
     public WebHandler Post( string relativePath, HttpContent                 value )   => Post(CreateUrl(relativePath), value);
     public WebHandler Post( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Post, value);
     public WebHandler Post( Uri    url ) => CreateHandler(url, HttpMethod.Post);
     public WebHandler Post<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Post(relativePath, new JsonContent(value.ToJson()));
     public WebHandler Post<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Post(relativePath, new JsonContent(value.ToJson()));
 
 
     public WebHandler Put( string relativePath, byte[]                      value )   => Put(relativePath,            new ByteArrayContent(value));
@@ -167,14 +167,14 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Put( string relativePath, Stream                      value )   => Put(relativePath,            new StreamContent(value));
     public WebHandler Put( string relativePath, MultipartFormDataContent    content ) => Put(relativePath,            (HttpContent)content);
     public WebHandler Put( string relativePath, MultipartContent            content ) => Put(relativePath,            (HttpContent)content);
-    public WebHandler Put( string relativePath, string                      value )   => Put(relativePath,            new StringContent(value.ToJson(), Encoding));
-    public WebHandler Put( string relativePath, BaseClass                   value )   => Put(relativePath,            value.ToJson());
-    public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value )   => Put(relativePath,            value.ToJson());
+    public WebHandler Put( string relativePath, string                      value )   => Put(relativePath,            new StringContent(value, Encoding));
+    public WebHandler Put( string relativePath, BaseClass                   value )   => Put(relativePath,            new JsonContent(value.ToJson()));
+    public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value )   => Put(relativePath,            new JsonContent(value.ToJson()));
     public WebHandler Put( string relativePath, HttpContent                 value )   => Put(CreateUrl(relativePath), value);
     public WebHandler Put( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Put, value);
     public WebHandler Put( Uri    url ) => CreateHandler(url, HttpMethod.Put);
     public WebHandler Put<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Put(relativePath, new JsonContent(value.ToJson()));
     public WebHandler Put<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, value.ToJson());
+        where TValue : IJsonModel<TValue> => Put(relativePath, new JsonContent(value.ToJson()));
 }
