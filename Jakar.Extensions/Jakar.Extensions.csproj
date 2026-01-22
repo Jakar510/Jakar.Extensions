@@ -7,7 +7,7 @@
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>10.3.2</Version>
+		<Version>10.3.3</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>

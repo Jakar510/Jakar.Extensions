@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public interface IAppPreferences : IAsyncDisposable
 {
     bool ContainsKey( string key, string sharedName );
-    void Remove( string      key, string sharedName, string? alternateKey = null );
+    void Remove( string      key, string sharedName, params ReadOnlySpan<string> alternateKeys );
     void Clear( string       sharedName );
     void Clear();
 
@@ -20,10 +20,10 @@ public interface IAppPreferences : IAsyncDisposable
         where TValue : IParsable<TValue>, IFormattable;
 
 
-    TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? alternateKey = null )
+    TValue Get<TValue>( string key, TValue defaultValue, string sharedName, params ReadOnlySpan<string> alternateKeys )
         where TValue : IParsable<TValue>, IFormattable;
-    string Get( string key, string sharedName,   string defaultValue = EMPTY, string? alternateKey = null );
-    Uri    Get( string key, Uri    defaultValue, string sharedName,           string? alternateKey = null );
-    bool   Get( string key, bool   defaultValue, string sharedName,           string? alternateKey = null );
-    bool?  Get( string key, bool?  defaultValue, string sharedName,           string? alternateKey = null );
+    string Get( string key, string sharedName,   string defaultValue = EMPTY, params ReadOnlySpan<string> alternateKeys );
+    Uri    Get( string key, Uri    defaultValue, string sharedName,           params ReadOnlySpan<string> alternateKeys );
+    bool   Get( string key, bool   defaultValue, string sharedName,           params ReadOnlySpan<string> alternateKeys );
+    bool?  Get( string key, bool?  defaultValue, string sharedName,           params ReadOnlySpan<string> alternateKeys );
 }
