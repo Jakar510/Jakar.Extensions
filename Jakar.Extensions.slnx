@@ -23,8 +23,6 @@
   <Project Path="Jakar.Extensions.Experiments/Jakar.Extensions.Experiments.csproj" />
   <Project Path="Jakar.Extensions.Maui/Jakar.Extensions.Maui.csproj" />
   <Project Path="Jakar.Extensions.SignalR/Jakar.Extensions.SignalR.csproj" />
-  <Project Path="Jakar.Extensions.Telemetry.Server/Jakar.Extensions.Telemetry.Server.csproj" />
-  <Project Path="Jakar.Extensions.Telemetry/Jakar.Extensions.Telemetry.csproj" />
   <Project Path="Jakar.Extensions.Tests/Jakar.Extensions.Tests.csproj" />
   <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />
   <Project Path="Jakar.Extensions/Jakar.Extensions.csproj" />
