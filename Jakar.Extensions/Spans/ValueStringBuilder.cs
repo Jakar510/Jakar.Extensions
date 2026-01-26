@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     <para> Based on System.Text.ValueStringBuilder </para>
 /// </summary>
-public ref struct ValueStringBuilder : IDisposable
+public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 {
     private Buffer<char> __chars;
 
@@ -62,15 +62,6 @@ public ref struct ValueStringBuilder : IDisposable
         __chars[++Length] = terminate;
 
         return ref GetPinnableReference();
-    }
-
-
-    public override string ToString()
-    {
-        string result = Span.ToString();
-
-        Dispose();
-        return result;
     }
 
 
@@ -595,6 +586,29 @@ public ref struct ValueStringBuilder : IDisposable
 
 
     [DoesNotReturn] private static void ThrowFormatError() => throw new FormatException("Invalid Format String");
+
+
+    public string ToString( string? format, IFormatProvider? formatProvider ) => Values.ToString();
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+    {
+        ReadOnlySpan<char> values = Values;
+
+        if ( values.TryCopyTo(destination) )
+        {
+            charsWritten = values.Length;
+            return true;
+        }
+
+        charsWritten = 0;
+        return false;
+    }
+    public override string ToString()
+    {
+        string result = Span.ToString();
+
+        Dispose();
+        return result;
+    }
 }
 
 

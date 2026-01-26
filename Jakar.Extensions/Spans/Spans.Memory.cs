@@ -24,31 +24,87 @@ public static partial class Spans
 
     extension( MemoryStream stream )
     {
+        [Pure] public Span<byte>           AsSpan()           => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ReadOnlySpan<byte>   AsReadOnlySpan()   => new(stream.GetBuffer(), 0, (int)stream.Length);
         [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
         [Pure] public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(stream.GetBuffer(), 0, (int)stream.Length);
         [Pure] public ArraySegment<byte>   AsArraySegment()   => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public ReadOnlySpan<byte>   AsReadOnlySpan()   => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public Span<byte>           AsSpan()           => new(stream.GetBuffer(), 0, (int)stream.Length);
     }
 
 
 
     /// <summary> USE WITH CAUTION </summary>
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
     [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ImmutableArray<T> AsImmutableArray<T>( this T[] list ) => ImmutableCollectionsMarshal.AsImmutableArray(list);
 
-
-    [Pure] public static bool TryAsSegment<TValue>( this ReadOnlyMemory<TValue> value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
-    [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(value, out result);
-
+    /// <summary> USE WITH CAUTION </summary>
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
 
 
-    extension<TValue>( IEnumerable<TValue> value )
+
+    extension<T>( ReadOnlyMemory<T> self )
     {
-        [Pure] public Memory<TValue>         ToMemory()         => value as TValue[] ?? value.ToArray();
-        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => value as TValue[] ?? value.ToArray();
+        [Pure] public bool TryAsSegment( out ArraySegment<T> result ) => MemoryMarshal.TryGetArray(self, out result);
+
+        [Pure] public ImmutableArray<T> AsImmutableArray() => [..self.Span];
     }
 
+
+
+    extension<TValue>( Memory<TValue> self )
+    {
+        [Pure] public bool TryAsSegment( out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(self, out result);
+
+        [Pure] public ImmutableArray<TValue> AsImmutableArray() => [..self.Span];
+    }
+
+
+
+    /// <param name="self">The enumerable source.</param>
+    /// <typeparam name="TValue">The type of elements in the sequence.</typeparam>
+    extension<TValue>( IEnumerable<TValue> self )
+    {
+        [Pure] public Memory<TValue>         ToMemory()         => self as TValue[] ?? [..self];
+        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => self as TValue[] ?? [..self];
+
+
+        /// <summary>
+        /// Tries to divine the number of elements in a sequence without actually enumerating each element.
+        /// </summary>
+        /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
+        /// <returns><c>true</c> if the count could be determined; <c>false</c> otherwise.</returns>
+        public bool TryGetCount( out int count ) => ( (IEnumerable)self ).TryGetCount<TValue>(out count);
+    }
+
+
+
+    /// <summary>
+    /// Tries to divine the number of elements in a sequence without actually enumerating each element.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the sequence.</typeparam>
+    /// <param name="sequence">The enumerable source.</param>
+    /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
+    /// <returns><c>true</c> if the count could be determined; <c>false</c> otherwise.</returns>
+    public static bool TryGetCount<T>( this IEnumerable sequence, out int count )
+    {
+        switch ( sequence )
+        {
+            case ICollection collection:
+                count = collection.Count;
+                return true;
+
+            case ICollection<T> collectionOfT:
+                count = collectionOfT.Count;
+                return true;
+
+            case IReadOnlyCollection<T> readOnlyCollection:
+                count = readOnlyCollection.Count;
+                return true;
+
+            default:
+                count = 0;
+                return false;
+        }
+    }
 
 
     [Pure] public static Memory<byte>         ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();

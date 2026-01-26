@@ -64,7 +64,7 @@ public static class ErrorExtensions
         return sb.ToString();
     }
 
-    public static string GetMessage( this Error error ) => GetMessage(error.Title, in error.details);
+    public static string GetMessage( this Error error ) => error.Title.GetMessage(in error.details);
     public static string GetMessage( this string? title, ref readonly StringTags tags )
     {
         if ( tags.IsEmpty ) { return title ?? EMPTY; }
@@ -97,7 +97,7 @@ public static class ErrorExtensions
     public static Status GetStatus( this Error[]? errors, Status status )
     {
         ReadOnlySpan<Error> span = errors;
-        return GetStatus(in span, status);
+        return span.GetStatus(status);
     }
     public static Status GetStatus( this in ReadOnlySpan<Error> errors, Status minStatus )
     {
