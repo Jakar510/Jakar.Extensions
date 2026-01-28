@@ -26,11 +26,12 @@ public static partial class Types
     public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
 
 
-    extension( Type memberType )
+
+    extension( Type self )
     {
         private bool IsNullableHelper( in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
         {
-            if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType(memberType) is not null; }
+            if ( self.IsValueType ) { return Nullable.GetUnderlyingType(self) is not null; }
 
             CustomAttributeData? nullable = customAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE);
 
@@ -56,9 +57,9 @@ public static partial class Types
         }
         public bool TryGetUnderlyingType( [NotNullWhen(true)] out Type? result )
         {
-            if ( memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            if ( self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>) )
             {
-                foreach ( Type argument in memberType.GenericTypeArguments.AsSpan() )
+                foreach ( Type argument in self.GenericTypeArguments.AsSpan() )
                 {
                     result = argument;
                     return true;
@@ -70,15 +71,15 @@ public static partial class Types
         }
         public bool TryGetUnderlyingEnumType( [NotNullWhen(true)] out Type? result )
         {
-            if ( memberType.IsEnum )
+            if ( self.IsEnum )
             {
-                result = Enum.GetUnderlyingType(memberType);
+                result = Enum.GetUnderlyingType(self);
                 return true;
             }
 
-            if ( memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            if ( self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>) )
             {
-                foreach ( Type argument in memberType.GenericTypeArguments.AsSpan() )
+                foreach ( Type argument in self.GenericTypeArguments.AsSpan() )
                 {
                     if ( argument.TryGetUnderlyingEnumType(out result) ) { return true; }
                 }
