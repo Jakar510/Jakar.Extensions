@@ -2,6 +2,10 @@
 // 06/06/2022  2:20 PM
 
 
+using System.Buffers.Binary;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -33,37 +37,48 @@ public static class Hashes
 
 
 
+    public const int MaxStackBytes = 32 * 1024; // tune as needed
+
+
+
     extension( ref readonly ReadOnlySpan<string> values )
     {
         [Pure] public UInt128 Hash128( long seed = 0 )
         {
-            int                     length = values.Sum(static x => x.Length);
-            using ArrayBuffer<char> owner  = new(length);
-            Span<char>              span   = owner.Span;
+            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+            Encoding                 encoding  = Encoding.Default;
+            int                      offset    = 0;
 
-            foreach ( string value in values )
+            foreach ( ReadOnlySpan<char> span in values )
             {
-                value.CopyTo(span);
-                span = span[value.Length..];
+                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
+                encoding.GetBytes(span, bytes);
+                offset += span.Length;
+                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
             }
 
-            ReadOnlySpan<char> result = owner.Span[..length];
-            return result.Hash128(seed);
+            return XxHash128.HashToUInt128(buffer, seed);
         }
+
         [Pure] public ulong Hash( long seed = 0 )
         {
-            int                     length = values.Sum(static x => x.Length);
-            using ArrayBuffer<char> owner  = new(length);
-            Span<char>              span   = owner.Span;
+            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+            Encoding                 encoding  = Encoding.Default;
+            int                      offset    = 0;
 
-            foreach ( string value in values )
+            foreach ( ReadOnlySpan<char> span in values )
             {
-                value.CopyTo(span);
-                span = span[value.Length..];
+                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
+                encoding.GetBytes(span, bytes);
+                offset += span.Length;
+                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
             }
 
-            ReadOnlySpan<char> result = owner.Values[..length];
-            return result.Hash(seed);
+            return XxHash64.HashToUInt64(buffer, seed);
         }
     }
 
@@ -74,39 +89,40 @@ public static class Hashes
     {
         [Pure] public unsafe UInt128 Hash128( long seed = 0 )
         {
-            int                     size   = sizeof(TValue);
-            int                     length = size * value.Length;
-            using ArrayBuffer<byte> owner  = new(length);
-            Span<byte>              span   = owner.Span;
+            if ( value.IsEmpty ) { return UInt128.Zero; }
+
+            int                      size      = sizeof(TValue);
+            int                      byteCount = value.Length * size;
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                int        start   = i * size;
-                Range      range   = new(start, start + size);
-                Span<byte> section = span[range];
-                Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(section), value[i]);
+                Span<byte> span = buffer.Slice(i * size, size);
+                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
+                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
             }
 
-            ReadOnlySpan<byte> result = owner.Span[..length];
-            return XxHash128.HashToUInt128(result, seed);
+            return XxHash128.HashToUInt128(buffer, seed);
         }
+
         [Pure] public unsafe ulong Hash( long seed = 0 )
         {
-            int                     size   = sizeof(TValue);
-            int                     length = size * value.Length;
-            using ArrayBuffer<byte> owner  = new(length);
-            Span<byte>              span   = owner.Span;
+            if ( value.IsEmpty ) { return 0; }
+
+            int                      size      = sizeof(TValue);
+            int                      byteCount = value.Length * size;
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                int        start   = i * size;
-                Range      range   = new(start, start + size);
-                Span<byte> section = span[range];
-                Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(section), value[i]);
+                Span<byte> span = buffer.Slice(i * size, size);
+                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
+                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
             }
 
-            ReadOnlySpan<byte> result = owner.Span[..length];
-            return XxHash64.HashToUInt64(result, seed);
+            return XxHash64.HashToUInt64(buffer, seed);
         }
     }
 
