@@ -115,7 +115,7 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
     public TSelf With( params ReadOnlySpan<TGroupModel> values );
     public TSelf With( IEnumerable<TRoleModel>          values );
     public TSelf With( params ReadOnlySpan<TRoleModel>  values );
-    public TSelf With( JObject?                      data );
+    public TSelf With( JObject?                         data );
     public TSelf With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 
@@ -139,35 +139,4 @@ public interface ICreateUserModel<TSelf, TID> : IUserData<TID>, IJsonModel<TSelf
 public interface IIsVendor
 {
     public bool IsVendor { get; set; }
-}
-
-
-
-public interface IUserDetailsModel<TID> : IUserData<TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public int?            BadLogins              { get; set; }
-    public DateTimeOffset  DateCreated            { get; }
-    public bool            IsDisabled             { get; set; }
-    public bool            IsEmailConfirmed       { get; set; }
-    public bool            IsLocked               { get; set; }
-    public bool            IsPhoneNumberConfirmed { get; set; }
-    public bool            IsTwoFactorEnabled     { get; set; }
-    public DateTimeOffset? LastBadAttempt         { get; set; }
-    public DateTimeOffset? LastLogin              { get; set; }
-    public DateTimeOffset? LockDate               { get; set; }
-}
-
-
-
-public interface IUserRecord<TID> : IUserDetailsModel<TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    /// <summary> A random value that must change whenever a user is persisted to the store </summary>
-    public string ConcurrencyStamp { get; set; }
-
-    public bool            IsActive       { get; set; }
-    public DateTimeOffset? LastModified   { get; set; }
-    public string          PasswordHash   { get; set; }
-    public TID?            SubscriptionID { get; set; }
 }

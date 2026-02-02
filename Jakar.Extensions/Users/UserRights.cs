@@ -40,11 +40,11 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
         using Permissions<TEnum> value = Permissions<TEnum>.Create(null, rights);
         return new UserRights(value.ToString());
     }
-    public static UserRights Create<TEnum>( scoped Permissions<TEnum> rights )
+    public static UserRights Create<TEnum>( Permissions<TEnum> rights )
         where TEnum : unmanaged, Enum => new(rights.ToString());
 
 
-    public virtual void SetRights<TEnum>( scoped Permissions<TEnum> permissions )
+    public virtual void SetRights<TEnum>( Permissions<TEnum> permissions )
         where TEnum : unmanaged, Enum => Value = permissions.ToString();
     public void SetRights<TEnum>( params ReadOnlySpan<TEnum> values )
         where TEnum : unmanaged, Enum

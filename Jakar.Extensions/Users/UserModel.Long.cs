@@ -56,8 +56,7 @@ public interface IEscalateToUser : IEscalateToUser<long>;
 public interface IUserModel : IUserData<long>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
 
 
-
-public interface IUserDetailsModel : IUserModel, IUserDetailsModel<long>;
+ 
 
 
 
