@@ -103,6 +103,39 @@ public static partial class Types
 
 
 
+    extension( MemberInfo self )
+    {
+        public NullabilityInfo GetNullabilityInfo()
+        {
+            NullabilityInfoContext context = new();
+
+            return self switch
+                   {
+                       FieldInfo fieldInfo       => context.Create(fieldInfo),
+                       PropertyInfo propertyInfo => context.Create(propertyInfo),
+                       EventInfo eventInfo       => context.Create(eventInfo),
+                       _                         => throw new InvalidOperationException($"MemberInfo type {self.MemberType} is not supported.")
+                   };
+        }
+        public bool IsNullableType()
+        {
+            Type? type = self switch
+                         {
+                             FieldInfo fieldInfo       => fieldInfo.FieldType,
+                             PropertyInfo propertyInfo => propertyInfo.PropertyType,
+                             EventInfo eventInfo       => eventInfo.EventHandlerType,
+                             _                         => throw new InvalidOperationException($"MemberInfo type {self.MemberType} is not supported.")
+                         };
+
+            return type?.IsNullableType() is true        ||
+                   type?.IsBuiltInNullableType() is true ||
+                   self.GetNullabilityInfo()
+                       .ReadState is NullabilityState.NotNull;
+        }
+    }
+
+
+
     [RequiresDynamicCode("The native code for this instantiation might not be available at runtime.")] [RequiresUnreferencedCode("If some of the generic arguments are annotated (either with DynamicallyAccessedMembersAttribute, or generic constraints), trimming can't validate that the requirements of those annotations are met.")]
     public static object? Construct( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] this Type target, params Type[] args )
     {
