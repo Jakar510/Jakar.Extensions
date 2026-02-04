@@ -6,17 +6,19 @@ public static partial class Types
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+
     extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type )
     {
         public bool IsDictionary() => type.HasInterface<IDictionary>() || type.HasInterface(typeof(IDictionary<,>));
+
         public bool IsDictionary( [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType, [NotNullWhen(true)] out bool? isKeyBuiltInType, [NotNullWhen(true)] out bool? isValueBuiltInType )
         {
-            if ( type.IsDictionary(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsDictionary(out ReadOnlySpan<Type> arguments) )
             {
-                keyType            = itemTypes[0];
-                valueType          = itemTypes[1];
-                isKeyBuiltInType   = keyType.IsBuiltInType();
-                isValueBuiltInType = valueType.IsBuiltInType();
+                keyType            = arguments[0];
+                valueType          = arguments[1];
+                isKeyBuiltInType   = keyType.IsAnyBuiltInType();
+                isValueBuiltInType = valueType.IsAnyBuiltInType();
                 return true;
             }
 
@@ -28,10 +30,10 @@ public static partial class Types
         }
         public bool IsDictionary( [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType )
         {
-            if ( type.IsDictionary(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsDictionary(out ReadOnlySpan<Type> arguments) )
             {
-                keyType   = itemTypes[0];
-                valueType = itemTypes[1];
+                keyType   = arguments[0];
+                valueType = arguments[1];
                 return true;
             }
 
@@ -39,11 +41,11 @@ public static partial class Types
             keyType   = null;
             return false;
         }
-        public bool IsDictionary( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+        public bool IsDictionary( out ReadOnlySpan<Type> arguments )
         {
             if ( type.IsGenericType && type.IsDictionary() )
             {
-                itemTypes = type.GetGenericArguments();
+                arguments = type.GetGenericArguments();
                 return true;
             }
 
@@ -51,34 +53,34 @@ public static partial class Types
             {
                 if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
             }
 
-            itemTypes = null;
+            arguments = null;
             return false;
         }
     }
 
 
 
-    extension( Type   type )
+    extension( Type self )
     {
-        public bool IsDictionaryEntry() => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(DictionaryEntry);
-        public bool IsKeyValuePair()    => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
+        public bool IsDictionaryEntry() => self == typeof(DictionaryEntry);
+        public bool IsKeyValuePair()    => self.IsGenericType && self.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
     }
 
 
 
-    extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type classType )
+    extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type self )
     {
         public bool IsKeyValuePair( [NotNullWhen(true)] out Type? keyType, [NotNullWhen(true)] out Type? valueType )
         {
-            if ( classType.IsKeyValuePair(out IReadOnlyList<Type>? itemTypes) )
+            if ( self.IsKeyValuePair(out ReadOnlySpan<Type> arguments) )
             {
-                keyType   = itemTypes[0];
-                valueType = itemTypes[1];
+                keyType   = arguments[0];
+                valueType = arguments[1];
                 return true;
             }
 
@@ -86,24 +88,24 @@ public static partial class Types
             keyType   = null;
             return false;
         }
-        public bool IsKeyValuePair( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+        public bool IsKeyValuePair( out ReadOnlySpan<Type> arguments )
         {
-            if ( classType.IsKeyValuePair() )
+            if ( self.IsKeyValuePair() )
             {
-                itemTypes = classType.GetGenericArguments();
+                arguments = self.GetGenericArguments();
                 return true;
             }
 
-            foreach ( Type interfaceType in classType.GetInterfaces() )
+            foreach ( Type interfaceType in self.GetInterfaces() )
             {
                 if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
             }
 
-            itemTypes = null;
+            arguments = null;
             return false;
         }
     }

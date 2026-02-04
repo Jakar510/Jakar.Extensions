@@ -6,12 +6,13 @@ public static partial class Types
     extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type )
     {
         public bool IsSet() => type.HasInterface(typeof(ISet<>));
+
         public bool IsSet( [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
         {
-            if ( type.IsSet(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsSet(out ReadOnlySpan<Type> arguments) )
             {
-                itemType      = itemTypes[0];
-                isBuiltInType = itemType.IsBuiltInType();
+                itemType      = arguments[0];
+                isBuiltInType = itemType.IsAnyBuiltInType();
                 return true;
             }
 
@@ -19,22 +20,24 @@ public static partial class Types
             itemType      = null;
             return false;
         }
+
         public bool IsSet( [NotNullWhen(true)] out Type? itemType )
         {
-            if ( type.IsSet(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsSet(out ReadOnlySpan<Type> arguments) )
             {
-                itemType = itemTypes[0];
+                itemType = arguments[0];
                 return true;
             }
 
             itemType = null;
             return false;
         }
-        public bool IsSet( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+
+        public bool IsSet( out ReadOnlySpan<Type> arguments )
         {
             if ( type.IsGenericType && type.IsSet() )
             {
-                itemTypes = type.GetGenericArguments();
+                arguments = type.GetGenericArguments();
                 return true;
             }
 
@@ -42,18 +45,18 @@ public static partial class Types
             {
                 if ( interfaceType == typeof(ISet<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
 
                 if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISet<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
             }
 
-            itemTypes = null;
+            arguments = null;
             return false;
         }
     }

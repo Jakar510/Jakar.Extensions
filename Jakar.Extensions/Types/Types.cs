@@ -7,6 +7,82 @@ namespace Jakar.Extensions;
 
 public static partial class Types
 {
+    public static readonly Type NullableType = typeof(Nullable<>);
+
+
+    public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper(property.DeclaringType, property.CustomAttributes);
+    public static bool IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper(field.DeclaringType, field.CustomAttributes);
+    public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
+
+
+
+    extension( Type self )
+    {
+        private bool IsNullableHelper( in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
+        {
+            if ( self.IsValueType ) { return Nullable.GetUnderlyingType(self) is not null; }
+
+            CustomAttributeData? nullable = customAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE);
+
+            if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
+            {
+                CustomAttributeTypedArgument attributeArgument = nullable.ConstructorArguments[0];
+
+                if ( attributeArgument.ArgumentType == typeof(byte[]) )
+                {
+                    ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
+                    if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
+                }
+                else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }
+            }
+
+            for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
+            {
+                CustomAttributeData? context = type.CustomAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE_CONTEXT);
+                if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
+            }
+
+            return false; // Couldn't find a suitable attribute
+        }
+
+        public bool TryGetUnderlyingType( [NotNullWhen(true)] out Type? result )
+        {
+            if ( self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            {
+                foreach ( Type argument in self.GenericTypeArguments.AsSpan() )
+                {
+                    result = argument;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
+        public bool TryGetUnderlyingEnumType( [NotNullWhen(true)] out Type? result )
+        {
+            if ( self.IsEnum )
+            {
+                result = Enum.GetUnderlyingType(self);
+                return true;
+            }
+
+            if ( self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            {
+                foreach ( Type argument in self.GenericTypeArguments.AsSpan() )
+                {
+                    if ( argument.TryGetUnderlyingEnumType(out result) ) { return true; }
+                }
+            }
+
+            result = null;
+            return false;
+        }
+    }
+
+
+
     extension( PropertyInfo propertyInfo )
     {
         public bool IsInitOnly() => propertyInfo.IsInitOnly(typeof(IsExternalInit));
@@ -117,6 +193,7 @@ public static partial class Types
                        _                         => throw new InvalidOperationException($"MemberInfo type {self.MemberType} is not supported.")
                    };
         }
+
         public bool IsNullableType()
         {
             Type? type = self switch

@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static class Strings
@@ -16,7 +20,9 @@ public static class Strings
     extension( string source )
     {
         public bool ContainsAbout( string search ) => source.Contains(search, StringComparison.OrdinalIgnoreCase);
+
         public bool ContainsExact( string search ) => source.Contains(search, StringComparison.Ordinal);
+
         /// <summary>
         ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
         ///     <para>
@@ -102,8 +108,9 @@ public static class Strings
 
     extension( string value )
     {
-        public                       byte[]       ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
-        [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding  encoding )        => AsSpanBytes(value.AsSpan(), encoding);
+        public byte[] ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
+
+        [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding encoding ) => AsSpanBytes(value.AsSpan(), encoding);
     }
 
 
@@ -162,7 +169,6 @@ public static class Strings
     public static SecureString ToSecureString( this ReadOnlySpan<byte> value, bool makeReadonly = true ) => Convert.ToBase64String(value)
                                                                                                                    .AsSpan()
                                                                                                                    .ToSecureString(makeReadonly);
-
     public static SecureString ToSecureString( this string value, bool makeReadonly = true ) => value.AsSpan()
                                                                                                      .ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
@@ -183,7 +189,7 @@ public static class Strings
     {
         if ( secure is null || secure.Length == 0 ) { return EMPTY; }
 
-        IntPtr  ptr = IntPtr.Zero;
+        IntPtr ptr = IntPtr.Zero;
         string result;
 
         try
@@ -265,10 +271,55 @@ public static class Strings
 
 
 
+    extension( StringBuilder self )
+    {
+        public StringBuilder AppendJoin<TEnumerator>( char separator, ValueEnumerable<TEnumerator, string> enumerable )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
+        {
+            using PooledArray<string> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Span);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator>( string separator, ValueEnumerable<TEnumerator, string> enumerable )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
+        {
+            using PooledArray<string> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Span);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( char separator, ValueEnumerable<TEnumerator, TValue> enumerable )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
+        {
+            using PooledArray<TValue> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Array);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( string separator, ValueEnumerable<TEnumerator, TValue> enumerable )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
+        {
+            using PooledArray<TValue> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Array);
+        }
+    }
+
+
+
     extension( string self )
     {
-        public string RemoveAll( string old ) => self.Replace(old,           EMPTY, StringComparison.Ordinal);
-        public string RemoveAll( char   old ) => self.Replace(old.Repeat(1), EMPTY);
+        public StringBuilder AppendJoin<TEnumerator>( ValueEnumerable<TEnumerator, string> enumerable, string? before = "( ", string? after = " )" )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct => new StringBuilder().Append(before)
+                                                                                                          .AppendJoin(self, enumerable)
+                                                                                                          .Append(after);
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( ValueEnumerable<TEnumerator, TValue> enumerable, string? before = "( ", string? after = " )" )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => new StringBuilder().Append(before)
+                                                                                                          .AppendJoin(self, enumerable)
+                                                                                                          .Append(after);
+
+
+        public string RemoveAll( string old ) => self.Replace(old, EMPTY, StringComparison.Ordinal);
+
+        public string RemoveAll( char old ) => self.Replace(old.Repeat(1), EMPTY);
     }
 
 
@@ -296,13 +347,18 @@ public static class Strings
         /// </returns>
         public string Repeat( int count ) => new StringBuilder(self.Length * count).Insert(0, self, count)
                                                                                    .ToString();
+
         public string ReplaceAll( string old, string newString ) => self.Replace(old, newString, StringComparison.Ordinal);
-        public string ReplaceAll( char   old, char   newString ) => self.Replace(old, newString);
+
+        public string ReplaceAll( char old, char newString ) => self.Replace(old, newString);
+
         public string ToScreamingCase() => self.ToSnakeCase()
                                                .ToUpper()
                                                .Replace("__", "_");
+
         /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
         public string ToSnakeCase() => self.ToSnakeCase(CultureInfo.InvariantCulture);
+
         /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
         public string ToSnakeCase( CultureInfo cultureInfo ) => ToSnakeCase(self.AsSpan(), cultureInfo);
     }
@@ -383,6 +439,7 @@ public static class Strings
         /// <returns> </returns>
         public string Wrapper( char c, int padding ) => self.PadLeft(padding, c)
                                                             .PadRight(padding, c);
+
         public TResult ConvertTo<TResult>()
             where TResult : IConvertible => (TResult)self.ConvertTo(typeof(TResult));
     }

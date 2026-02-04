@@ -8,9 +8,9 @@ public static partial class Types
         public bool IsList() => type.HasInterface<IList>() || type.HasInterface(typeof(IList<>));
         public bool IsList( [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
         {
-            if ( type.IsList(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsList(out ReadOnlySpan<Type> arguments) )
             {
-                itemType      = itemTypes[0];
+                itemType      = arguments[0];
                 isBuiltInType = itemType.IsBuiltInType();
                 return true;
             }
@@ -21,20 +21,20 @@ public static partial class Types
         }
         public bool IsList( [NotNullWhen(true)] out Type? itemType )
         {
-            if ( type.IsList(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsList(out ReadOnlySpan<Type> arguments) )
             {
-                itemType = itemTypes[0];
+                itemType = arguments[0];
                 return true;
             }
 
             itemType = null;
             return false;
         }
-        public bool IsList( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+        public bool IsList( [NotNullWhen(true)] out ReadOnlySpan<Type> arguments )
         {
             if ( type.IsGenericType && type.IsList() )
             {
-                itemTypes = type.GetGenericArguments();
+                arguments = type.GetGenericArguments();
                 return true;
             }
 
@@ -44,18 +44,18 @@ public static partial class Types
 
                 if ( interfaceType == typeof(IList<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
 
                 if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IList<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
             }
 
-            itemTypes = null;
+            arguments = null;
             return false;
         }
     }

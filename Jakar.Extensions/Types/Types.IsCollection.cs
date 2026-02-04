@@ -6,12 +6,13 @@ public static partial class Types
     extension( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type )
     {
         public bool IsCollection() => type.HasInterface<ICollection>() || type.HasInterface(typeof(ICollection<>));
+
         public bool IsCollection( [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
         {
-            if ( type.IsCollection(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsCollection(out ReadOnlySpan<Type> arguments) )
             {
-                itemType      = itemTypes[0];
-                isBuiltInType = itemType.IsBuiltInType();
+                itemType      = arguments[0];
+                isBuiltInType = itemType.IsAnyBuiltInType();
                 return true;
             }
 
@@ -19,22 +20,24 @@ public static partial class Types
             itemType      = null;
             return false;
         }
+
         public bool IsCollection( [NotNullWhen(true)] out Type? itemType )
         {
-            if ( type.IsCollection(out IReadOnlyList<Type>? itemTypes) )
+            if ( type.IsCollection(out ReadOnlySpan<Type> arguments) )
             {
-                itemType = itemTypes[0];
+                itemType = arguments[0];
                 return true;
             }
 
             itemType = null;
             return false;
         }
-        public bool IsCollection( [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
+
+        public bool IsCollection( out ReadOnlySpan<Type> arguments )
         {
             if ( type.IsGenericType && type.IsCollection() )
             {
-                itemTypes = type.GetGenericArguments();
+                arguments = type.GetGenericArguments();
                 return true;
             }
 
@@ -44,18 +47,18 @@ public static partial class Types
 
                 if ( interfaceType == typeof(ICollection<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
 
                 if ( interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ICollection<>) )
                 {
-                    itemTypes = interfaceType.GetGenericArguments();
+                    arguments = interfaceType.GetGenericArguments();
                     return true;
                 }
             }
 
-            itemTypes = null;
+            arguments = null;
             return false;
         }
     }

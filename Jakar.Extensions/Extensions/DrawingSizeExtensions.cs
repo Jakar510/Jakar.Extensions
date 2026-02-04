@@ -24,16 +24,7 @@ using Serilog.Events;
 using ZLinq;
 using ZLinq.Linq;
 using static Jakar.Extensions.Validate;
-using static Jakar.Extensions.Constants;
-using static Jakar.Extensions.Constants.Jwt;
-using static Jakar.Extensions.Constants.Types;
-using static Jakar.Extensions.Constants.Files;
-using static Jakar.Extensions.Constants.Values;
-using static Jakar.Extensions.Constants.Numbers;
-using static Jakar.Extensions.Constants.Logging;
-using static Jakar.Extensions.Constants.Telemetry;
-using static Jakar.Extensions.Constants.Characters;
-using static Jakar.Extensions.Constants.ErrorTypes;
+using static Jakar.Extensions.Constants; 
 using Debug = System.Diagnostics.Debug;
 using PureAttribute = System.Diagnostics.Contracts.PureAttribute;
 
