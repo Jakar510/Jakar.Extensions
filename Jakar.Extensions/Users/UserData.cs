@@ -2,7 +2,6 @@
 // 4/1/2024  22:4
 
 using System.Security.Claims;
-using OpenTelemetry.Resources;
 
 
 
@@ -16,7 +15,8 @@ public static class UserData
     public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.Group           | ClaimType.Role;
 
 
-    public static Claim[] GetClaims( this IUserData model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
+    public static Claim[] GetClaims<TUser>( this TUser model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
+        where TUser : IUserData, IUserDetails
     {
         using IMemoryOwner<Claim> claims = MemoryPool<Claim>.Shared.Rent(20);
         int                       size   = 0;
@@ -43,11 +43,14 @@ public static class UserData
 
         if ( HasFlag(types, ClaimType.MobilePhone) ) { span[size++] = ClaimType.MobilePhone.ToClaim(model.PhoneNumber, issuer); }
 
-        if ( HasFlag(types, ClaimType.WebSite) ) { span[size++] = ClaimType.WebSite.ToClaim(model.Website, issuer); }
+        if ( HasFlag(types, ClaimType.WebSite) ) { span[size] = ClaimType.WebSite.ToClaim(model.Website, issuer); }
 
         return [.. span];
     }
-    public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
+
+
+    public static Claim[] GetClaims<TUser, TID, TAddress, TGroupModel, TRoleModel>( this TUser model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
+        where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>, IUserDetails
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
         where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
         where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>

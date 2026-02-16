@@ -56,9 +56,6 @@ public interface IEscalateToUser : IEscalateToUser<Guid>;
 public interface IUserModel : IUserData<Guid>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
 
 
- 
-
-
 
 [Serializable]
 public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>, IAddress, IEqualComparable<UserAddress>
@@ -329,7 +326,7 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static UserModel Create( IUserData<Guid> model ) => new(model);
+    public static          UserModel Create( IUserData<Guid> model ) => new(model);
     public static UserModel Create( IUserData<Guid> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
                                                                                                                                                                 .With(addresses)
                                                                                                                                                                 .With(groups)
@@ -473,10 +470,10 @@ public sealed class UserLoginRequest( string userName, string password, UserMode
 
     public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserLogin, request.UserPassword, data) { }
     public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
-    public override bool Equals( UserLoginRequest?    other ) => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserLogin, other.UserLogin, StringComparison.InvariantCulture) && string.Equals(UserPassword, other.UserPassword, StringComparison.InvariantCulture) );
-    public override int  CompareTo( UserLoginRequest? other ) => string.Compare(UserLogin, other?.UserPassword, StringComparison.CurrentCultureIgnoreCase);
-    public override bool Equals( object?              other ) => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
-    public override int  GetHashCode()                        => HashCode.Combine(UserLogin, UserPassword);
+    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserLogin, other.UserLogin, StringComparison.InvariantCulture) && string.Equals(UserPassword, other.UserPassword, StringComparison.InvariantCulture) );
+    public override int  CompareTo( UserLoginRequest? other )                           => string.Compare(UserLogin, other?.UserPassword, StringComparison.CurrentCultureIgnoreCase);
+    public override bool Equals( object?              other )                           => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
+    public override int  GetHashCode()                                                  => HashCode.Combine(UserLogin, UserPassword);
     public static   bool operator ==( UserLoginRequest? left, UserLoginRequest? right ) => EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator !=( UserLoginRequest? left, UserLoginRequest? right ) => !EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator >( UserLoginRequest   left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) > 0;

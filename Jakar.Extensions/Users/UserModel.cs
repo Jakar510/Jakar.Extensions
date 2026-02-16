@@ -5,33 +5,35 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : BaseClass<TSelf>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
+public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : BaseClass<TSelf>, IUserData<TID, TAddress, TGroupModel, TRoleModel>, IUserDetails
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    private   string                         __company     = EMPTY;
-    private   string                         __department  = EMPTY;
-    private   string                         __email       = EMPTY;
-    private   string                         __ext         = EMPTY;
-    private   string                         __firstName   = EMPTY;
-    private   string                         __gender      = EMPTY;
-    private   string                         __lastName    = EMPTY;
-    private   string                         __phoneNumber = EMPTY;
-    private   string                         __title       = EMPTY;
-    private   string                         __userName    = EMPTY;
-    private   string                         __website     = EMPTY;
-    protected string?                        _description;
-    protected string?                        _fullName;
-    private   SupportedLanguage              __preferredLanguage = SupportedLanguage.English;
-    protected TID                            _id;
-    private   TID?                           __createdBy;
-    private   TID?                           __escalateTo;
-    private   TID?                           __imageID;
-    private   UserRights                     __rights = new();
-    public    ObservableCollection<TAddress> Addresses { get; init; } = [];
+    private   string            __company     = EMPTY;
+    private   string            __department  = EMPTY;
+    private   string            __email       = EMPTY;
+    private   string            __ext         = EMPTY;
+    private   string            __firstName   = EMPTY;
+    private   string            __gender      = EMPTY;
+    private   string            __lastName    = EMPTY;
+    private   string            __phoneNumber = EMPTY;
+    private   string            __title       = EMPTY;
+    private   string            __userName    = EMPTY;
+    private   string            __website     = EMPTY;
+    protected string?           _description;
+    protected string?           _fullName;
+    private   SupportedLanguage __preferredLanguage = SupportedLanguage.English;
+    protected TID               _id;
+    private   TID?              __createdBy;
+    private   TID?              __escalateTo;
+    private   TID?              __imageID;
+    private   UserRights        __rights = new();
+
+
+    public ObservableCollection<TAddress> Addresses { get; init; } = [];
 
     [StringLength(COMPANY)] public string Company
     {
@@ -59,10 +61,10 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [StringLength(               DESCRIPTION)] public string Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
-    public                                            TID?   EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
-    [StringLength(PHONE_EXT)] public                  string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string  Email       { get => __email;                           set => SetProperty(ref __email,      value); }
+    public                                            TID?    EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
+    [StringLength(PHONE_EXT)] public                  string  Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
 
     [Required] [StringLength(2000)] public string FirstName
     {
@@ -136,9 +138,9 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     protected UserModel() : base() { }
     protected UserModel( IUserData<TID> value ) : base()
     {
-        ID = value.ID;
+        ID     = value.ID;
+        UserID = value.UserID;
         With(value);
-        if ( value is IUserData<Guid> data ) { UserID = data.ID; }
     }
     protected UserModel( string firstName, string lastName )
     {
@@ -147,8 +149,8 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
 
-    public virtual string GetFullName()    => IUserData.GetFullName(this);
-    public virtual string GetDescription() => IUserData.GetDescription(this);
+    public virtual string GetFullName()    => IUserDetails.GetFullName(this);
+    public virtual string GetDescription() => IUserDetails.GetDescription(this);
 
 
     public TSelf With( IEnumerable<TAddress> addresses )
@@ -183,23 +185,37 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
 
-    void IUserData<TID>.With( IUserData<TID> value ) => With(value);
-    public TSelf With<TValue>( TValue value )
-        where TValue : IUserData<TID>
+    public static TSelf Create<TValue>( TValue value )
+        where TValue : IUserData<TID>, IUserDetails
     {
+        TSelf self = TSelf.Create(value);
+        return self.With(value);
+    }
+    public TSelf With<TValue>( TValue value )
+        where TValue : IUserData<TID>, IUserDetails
+    {
+        FirstName   = value.FirstName;
+        LastName    = value.LastName;
+        FullName    = value.FullName;
+        Description = value.Description;
+        Website     = value.Website;
+        Email       = value.Email;
+        PhoneNumber = value.PhoneNumber;
+        Ext         = value.Ext;
+        Title       = value.Title;
+        Department  = value.Department;
+        Company     = value.Company;
+        return With((IUserData<TID>)value);
+    }
+    public TSelf With( IUserData<TID> value )
+    {
+        UserName          = value.UserName;
+        Rights            = value.Rights;
         CreatedBy         = value.CreatedBy;
         EscalateTo        = value.EscalateTo;
-        FirstName         = value.FirstName;
-        LastName          = value.LastName;
-        FullName          = value.FullName;
-        Description       = value.Description;
-        Website           = value.Website;
-        Email             = value.Email;
-        PhoneNumber       = value.PhoneNumber;
-        Ext               = value.Ext;
-        Title             = value.Title;
-        Department        = value.Department;
-        Company           = value.Company;
+        ImageID           = value.ImageID;
+        CreatedBy         = value.CreatedBy;
+        EscalateTo        = value.EscalateTo;
         PreferredLanguage = value.PreferredLanguage;
         Rights            = value.Rights;
         return With(value.AdditionalData);

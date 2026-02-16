@@ -51,7 +51,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public SessionToken CreateToken<TRequest, TUser, TID>( TUser user, TRequest request, string authenticationType )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
         where TRequest : ISessionID<TID>
-        where TUser : IUserData
+        where TUser : IUserData, IUserDetails
     {
         ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
 
@@ -66,9 +66,9 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
     public SessionToken CreateToken<TRequest, TUser>( in TUser user, in TRequest request, in ClaimsIdentity identity )
         where TRequest : ISessionID<long>
-        where TUser : IUserData => CreateToken(user, request.DeviceID, request.SessionID.AsGuid(), identity);
+        where TUser : IUserData, IUserDetails => CreateToken(user, request.DeviceID, request.SessionID.AsGuid(), identity);
     public SessionToken CreateToken<TUser>( in TUser user, in string deviceID, in Guid sessionID, in ClaimsIdentity identity )
-        where TUser : IUserData
+        where TUser : IUserData, IUserDetails
     {
         DateTimeOffset now            = DateTimeOffset.UtcNow;
         DateTimeOffset notBefore      = now - TimeSpan.FromMinutes(2);

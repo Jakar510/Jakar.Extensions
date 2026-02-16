@@ -401,7 +401,7 @@ public static class Json
 
 public interface IJsonModel
 {
-    [Newtonsoft.Json.JsonExtensionData] public JObject? AdditionalData { get; set; }
+    [JsonExtensionData] public JObject? AdditionalData { get; set; }
 }
 
 
