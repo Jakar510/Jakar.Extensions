@@ -105,11 +105,7 @@ public static class UniqueIDs
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsValidID()    => value.HasValue && value.Value.IsValidID();
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsNotValidID() => value.HasValue && value.Value.IsValidID();
     }
-#if NET9_0_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsNotValidID( this Guid value ) => Guid.Empty.Equals(value) || Guid.AllBitsSet.Equals(value);
-#else
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid value ) => Guid.Empty.Equals( value );
-#endif
 
     extension( Guid? value )
     {
