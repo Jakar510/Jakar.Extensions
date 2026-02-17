@@ -14,19 +14,18 @@ namespace Jakar.Extensions;
 
 public sealed class JwtParser( SigningCredentials credentials, TokenValidationParameters parameters, string appName, string issuer, AppVersion version )
 {
-    private static readonly ConcurrentDictionary<string, JwtParser> __parsers     = new(StringComparer.Ordinal);
-    private readonly        AppVersion                              __version     = version;
-    private readonly        JsonWebTokenHandler                     __handler     = new();
-    private readonly        SigningCredentials                      __credentials = credentials;
-    private readonly        string                                  __appName     = appName;
-    private readonly        string                                  __issuer      = issuer;
-    private readonly        TokenValidationParameters               __parameters  = parameters;
+    private static readonly ConcurrentDictionary<string, JwtParser> __parsers = new(StringComparer.Ordinal);
+    private readonly        JsonWebTokenHandler                     __handler = new();
 
 
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
-        if ( !__parsers.TryGetValue(authenticationType, out JwtParser? parser) ) { __parsers[authenticationType] = parser = await CreateAsync<TApp>(settings, authenticationType).ConfigureAwait(false); }
+        if ( !__parsers.TryGetValue(authenticationType, out JwtParser? parser) )
+        {
+            __parsers[authenticationType] = parser = await CreateAsync<TApp>(settings, authenticationType)
+                                                        .ConfigureAwait(false);
+        }
 
         return parser;
     }
@@ -35,8 +34,11 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public static async ValueTask<JwtParser> CreateAsync<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
-        SigningCredentials        credentials = await settings.Configuration.GetSigningCredentials().ConfigureAwait(false);
-        TokenValidationParameters parameters  = await settings.GetTokenValidationParameters(authenticationType).ConfigureAwait(false);
+        SigningCredentials credentials = await settings.Configuration.GetSigningCredentials()
+                                                       .ConfigureAwait(false);
+
+        TokenValidationParameters parameters = await settings.GetTokenValidationParameters(authenticationType)
+                                                             .ConfigureAwait(false);
 
         return new JwtParser(credentials, parameters, settings.AppName, TApp.AppName, settings.Version);
     }
@@ -85,23 +87,23 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
                    DeviceID     = deviceID,
                    SessionID    = sessionID,
                    FullName     = user.FullName,
-                   Version      = __version
+                   Version      = version
                };
     }
     public string CreateToken( ref readonly DateTimeOffset expires, ref readonly DateTimeOffset notBefore, in ClaimsIdentity identity ) =>
         __handler.CreateToken(new SecurityTokenDescriptor
                               {
-                                  Audience           = __appName,
-                                  Issuer             = __issuer,
+                                  Audience           = appName,
+                                  Issuer             = issuer,
                                   Subject            = identity,
                                   Expires            = expires.LocalDateTime,
                                   NotBefore          = notBefore.LocalDateTime,
-                                  SigningCredentials = __credentials
+                                  SigningCredentials = credentials
                               });
 
 
-    public Task<TokenValidationResult> ValidateTokenAsync( string       jwt ) => __handler.ValidateTokenAsync(jwt, __parameters);
-    public Task<TokenValidationResult> ValidateTokenAsync( JsonWebToken jwt ) => __handler.ValidateTokenAsync(jwt, __parameters);
+    public Task<TokenValidationResult> ValidateTokenAsync( string       jwt ) => __handler.ValidateTokenAsync(jwt, parameters);
+    public Task<TokenValidationResult> ValidateTokenAsync( JsonWebToken jwt ) => __handler.ValidateTokenAsync(jwt, parameters);
 }
 
 
@@ -121,7 +123,8 @@ public static class JwtParserExtensions
 
                 return file.Exists
                            ? await file.ReadAsync()
-                                       .AsBytes(token).ConfigureAwait(false)
+                                       .AsBytes(token)
+                                       .ConfigureAwait(false)
                            : throw new FileNotFoundException(file.FullPath);
             }
 
@@ -131,22 +134,31 @@ public static class JwtParserExtensions
                        ? Encoding.UTF8.GetBytes(value)
                        : throw new KeyNotFoundException($"Keys not found: [ {nameof(jwt)}: {jwt}, {nameof(fileKey)}: {fileKey} ]");
         }
-        public async ValueTask<SigningCredentials>   GetSigningCredentials( string   algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt     = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey).ConfigureAwait(false), algorithm);
-        public async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( string jwt       = JWT,                                    string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey).ConfigureAwait(false));
+        public async ValueTask<SigningCredentials> GetSigningCredentials( string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey(jwt, fileKey)
+                                                                                                                                                                                                            .ConfigureAwait(false),
+                                                                                                                                                                                         algorithm);
+        public async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey(jwt, fileKey)
+                                                                                                                                                     .ConfigureAwait(false));
     }
 
 
 
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IWebAppSettings settings, string authenticationType, string? audience = null, string? issuer = null, string jwt = JWT, string fileKey = JWT_KEY, TimeSpan? clockSkew = null )
     {
-        IConfiguration       configuration = settings.Configuration;
-        SymmetricSecurityKey key           = await configuration.GetSymmetricSecurityKey(jwt, fileKey).ConfigureAwait(false);
-        return await configuration.GetTokenValidationParameters(authenticationType, key, audience, issuer, clockSkew).ConfigureAwait(false);
+        IConfiguration configuration = settings.Configuration;
+
+        SymmetricSecurityKey key = await configuration.GetSymmetricSecurityKey(jwt, fileKey)
+                                                      .ConfigureAwait(false);
+
+        return await configuration.GetTokenValidationParameters(authenticationType, key, audience, issuer, clockSkew)
+                                  .ConfigureAwait(false);
     }
 
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IConfiguration configuration, string authenticationType, SymmetricSecurityKey? key = null, string? audience = null, string? issuer = null, TimeSpan? clockSkew = null )
     {
-        key      ??= await configuration.GetSymmetricSecurityKey().ConfigureAwait(false);
+        key ??= await configuration.GetSymmetricSecurityKey()
+                                   .ConfigureAwait(false);
+
         issuer   ??= configuration[VALID_ISSUER]   ?? throw new KeyNotFoundException();
         audience ??= configuration[VALID_AUDIENCE] ?? throw new KeyNotFoundException();
         return key.GetTokenValidationParameters(authenticationType, issuer, audience, clockSkew);

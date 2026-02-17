@@ -44,7 +44,7 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="10.5.0" />
+    <PackageVersion Include="Jakar.Extensions" Version="10.6.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
@@ -134,7 +134,7 @@
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="9.0.4" />
+    <PackageVersion Include="Radzen.Blazor" Version="9.0.5" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -159,7 +159,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.1.3" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="32.2.4" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="32.2.5" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
