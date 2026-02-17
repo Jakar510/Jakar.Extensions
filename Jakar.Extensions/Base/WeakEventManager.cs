@@ -5,12 +5,13 @@ namespace Jakar.Extensions;
 
 
 /// <summary> Weak event manager that allows for garbage collection when the EventHandler is still subscribed </summary>
+[Experimental(nameof(WeakEventManager))]
 public sealed class WeakEventManager : IDisposable
 {
     private readonly ConcurrentDictionary<string, List<WeakReference<Delegate>>> _eventHandlers = new();
 
 
-    private List<WeakReference<Delegate>> this[ string eventName ] => _eventHandlers.GetOrAdd(eventName, static x => new List<WeakReference<Delegate>>(16));
+    internal List<WeakReference<Delegate>> this[ string eventName ] => _eventHandlers.GetOrAdd(eventName, static x => new List<WeakReference<Delegate>>(16));
     public void Dispose() => _eventHandlers.Clear();
 
 
@@ -219,6 +220,7 @@ public sealed class WeakEventManager : IDisposable
 
 
 
+[Experimental(nameof(WeakEventManagerAlternate))]
 public sealed class WeakEventManagerAlternate
 {
     private readonly Dictionary<string, List<Subscription>> __eventHandlers = new(StringComparer.Ordinal);
@@ -273,7 +275,7 @@ public sealed class WeakEventManagerAlternate
             return;
         }
 
-        targets.Add(new Subscription(new WeakReference(handlerTarget), methodInfo));
+        targets.Add(new Subscription(handlerTarget, methodInfo));
     }
     private void RemoveEventHandler( string eventName, object? handlerTarget, MemberInfo methodInfo )
     {
@@ -307,10 +309,12 @@ public sealed class WeakEventManagerAlternate
 
         if ( __eventHandlers.TryGetValue(eventName, out List<Subscription>? target) )
         {
+            ReadOnlySpan<Subscription> span = target.AsSpan();
+
             for ( int i = 0; i < target.Count; i++ )
             {
-                Subscription subscription = target[i];
-                bool         isStatic     = subscription.Subscriber is null;
+                ref readonly Subscription subscription = ref span[i];
+                bool                      isStatic     = subscription.Subscriber is null;
 
                 if ( isStatic )
                 {
@@ -330,18 +334,10 @@ public sealed class WeakEventManagerAlternate
                 else { toRaise.Add(( subscriber, subscription.Handler )); }
             }
 
-            for ( int i = 0; i < toRemove.Count; i++ )
-            {
-                Subscription subscription = toRemove[i];
-                target.Remove(subscription);
-            }
+            foreach ( ref readonly Subscription subscription in toRemove.AsSpan() ) { target.Remove(subscription); }
         }
 
-        for ( int i = 0; i < toRaise.Count; i++ )
-        {
-            ( object? subscriber, MethodInfo handler ) = toRaise[i];
-            handler.Invoke(subscriber, [sender, args]);
-        }
+        foreach ( ( object? subscriber, MethodInfo handler ) in toRaise.AsSpan() ) { handler.Invoke(subscriber, [sender, args]); }
     }
 
 
@@ -350,6 +346,7 @@ public sealed class WeakEventManagerAlternate
     {
         public readonly WeakReference? Subscriber = subscriber;
         public readonly MethodInfo     Handler    = handler ?? throw new ArgumentNullException(nameof(handler));
+        public Subscription( object? handlerTarget, MethodInfo methodInfo ) : this(new WeakReference(handlerTarget), methodInfo) { }
 
         public          bool Equals( Subscription other ) => Subscriber == other.Subscriber && Handler == other.Handler;
         public override bool Equals( object?      obj )   => obj is Subscription other      && Equals(other);

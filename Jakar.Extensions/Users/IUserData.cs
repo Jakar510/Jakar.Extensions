@@ -15,17 +15,17 @@ public interface IUserID
 public interface IUserDetails
 {
     public                string? Description { get; set; }
-    [EmailAddress] public string  Email       { get; set; }
-    public                string  Ext         { get; set; }
-    [Required] public     string  FirstName   { get; set; }
-    public                string  FullName    { get; set; }
-    public                string  Gender      { get; set; }
-    [Required] public     string  LastName    { get; set; }
-    [Phone]    public     string  PhoneNumber { get; set; }
-    public                string  Company     { get; set; }
-    public                string  Department  { get; set; }
-    public                string  Title       { get; set; }
-    [Url] public          string  Website     { get; set; }
+    [EmailAddress] public string? Email       { get; set; }
+    public                string? Ext         { get; set; }
+    [Required] public     string? FirstName   { get; set; }
+    public                string? FullName    { get; set; }
+    public                string? Gender      { get; set; }
+    [Required] public     string? LastName    { get; set; }
+    [Phone]    public     string? PhoneNumber { get; set; }
+    public                string? Company     { get; set; }
+    public                string? Department  { get; set; }
+    public                string? Title       { get; set; }
+    [Url] public          string? Website     { get; set; }
 
 
     public static string GetFullName( IUserDetails data ) => $"{data.FirstName} {data.LastName}".Trim();

@@ -12,17 +12,17 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    private   string            __company     = EMPTY;
-    private   string            __department  = EMPTY;
-    private   string            __email       = EMPTY;
-    private   string            __ext         = EMPTY;
-    private   string            __firstName   = EMPTY;
-    private   string            __gender      = EMPTY;
-    private   string            __lastName    = EMPTY;
-    private   string            __phoneNumber = EMPTY;
-    private   string            __title       = EMPTY;
+    private   string?           __company     = EMPTY;
+    private   string?           __department  = EMPTY;
+    private   string?           __email       = EMPTY;
+    private   string?           __ext         = EMPTY;
+    private   string?           __firstName   = EMPTY;
+    private   string?           __gender      = EMPTY;
+    private   string?           __lastName    = EMPTY;
+    private   string?           __phoneNumber = EMPTY;
+    private   string?           __title       = EMPTY;
     private   string            __userName    = EMPTY;
-    private   string            __website     = EMPTY;
+    private   string?           __website     = EMPTY;
     protected string?           _description;
     protected string?           _fullName;
     private   SupportedLanguage __preferredLanguage = SupportedLanguage.English;
@@ -35,7 +35,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     public ObservableCollection<TAddress> Addresses { get; init; } = [];
 
-    [StringLength(COMPANY)] public string Company
+    [StringLength(COMPANY)] public string? Company
     {
         get => __company;
         set
@@ -49,7 +49,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     public TID? CreatedBy { get => __createdBy; set => SetProperty(ref __createdBy, value); }
 
-    [StringLength(DEPARTMENT)] public string Department
+    [StringLength(DEPARTMENT)] public string? Department
     {
         get => __department;
         set
@@ -62,11 +62,11 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string  Email       { get => __email;                           set => SetProperty(ref __email,      value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => __email;                           set => SetProperty(ref __email,      value); }
     public                                            TID?    EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
-    [StringLength(PHONE_EXT)] public                  string  Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [StringLength(PHONE_EXT)] public                  string? Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
 
-    [Required] [StringLength(2000)] public string FirstName
+    [Required] [StringLength(2000)] public string? FirstName
     {
         get => __firstName;
         set
@@ -78,8 +78,8 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [StringLength(FULL_NAME)] public string                            FullName { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public string                            Gender   { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    [StringLength(FULL_NAME)] public string?                           FullName { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
+    [StringLength(GENDER)]    public string?                           Gender   { get => __gender;                    set => SetProperty(ref __gender,  value); }
     public                           ObservableCollection<TGroupModel> Groups   { get;                                init; } = [];
 
 
@@ -92,7 +92,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     [JsonIgnore] public virtual bool IsValidUserName    => !string.IsNullOrWhiteSpace(UserName);
     [JsonIgnore] public virtual bool IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
 
-    [Required] [StringLength(2000)] public string LastName
+    [Required] [StringLength(2000)] public string? LastName
     {
         get => __lastName;
         set
@@ -104,13 +104,13 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [Phone] [StringLength(PHONE)]             public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
+    [Phone] [StringLength(PHONE)]             public string?                          PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
     [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => __preferredLanguage; set => SetProperty(ref __preferredLanguage, value); }
     [StringLength(RIGHTS)]                    public UserRights                       Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
     public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
     public                                           DateTimeOffset?                  SubscriptionExpires { get;                        init; }
 
-    [StringLength(TITLE)] public string Title
+    [StringLength(TITLE)] public string? Title
     {
         get => __title;
         set
@@ -132,7 +132,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [Url] [StringLength(WEBSITE)] public string Website { get => __website; set => SetProperty(ref __website, value); }
+    [Url] [StringLength(WEBSITE)] public string? Website { get => __website; set => SetProperty(ref __website, value); }
 
 
     protected UserModel() : base() { }
