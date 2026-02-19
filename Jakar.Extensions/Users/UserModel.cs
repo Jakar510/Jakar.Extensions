@@ -208,14 +208,11 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     public TSelf With( IUserData<TID> value )
     {
         UserName          = value.UserName;
-        Rights            = value.Rights;
-        CreatedBy         = value.CreatedBy;
-        EscalateTo        = value.EscalateTo;
         ImageID           = value.ImageID;
         CreatedBy         = value.CreatedBy;
         EscalateTo        = value.EscalateTo;
         PreferredLanguage = value.PreferredLanguage;
-        Rights            = value.Rights;
+        Rights            = value.Rights.Value;
         return With(value.AdditionalData);
     }
     public TSelf With( JObject? data )

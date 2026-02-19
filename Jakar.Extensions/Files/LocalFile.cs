@@ -4,12 +4,15 @@
 #pragma warning disable CS1584
 
 
+using Microsoft.Extensions.FileProviders;
+
+
 
 namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     [JsonIgnore] public readonly FileInfo Info         = info;
@@ -22,11 +25,15 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public string?          DirectoryName   => Info.DirectoryName;
     public bool             DoesNotExist    => !Exists;
     public bool             Exists          => Info.Exists;
+    public long             Length          => Info.Length;
+    public string?          PhysicalPath    => FullPath;
     public string           Extension       => Info.Extension;
     bool TempFile.ITempFile.IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
     public DateTimeOffset   LastAccess      => Info.LastAccessTime;
     public MimeType         Mime            => Extension.FromExtension();
     public string           Name            => Info.Name;
+    public DateTimeOffset   LastModified    => Info.LastWriteTimeUtc;
+    public bool             IsDirectory     => false;
 
     [JsonIgnore] public LocalDirectory? Parent
     {
@@ -196,7 +203,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public FileStream Create() => Info.Create();
+    Stream IFileInfo. CreateReadStream() => OpenRead();
+    public FileStream Create()           => Info.Create();
 
     /// <summary>
     ///     <para>
@@ -273,147 +281,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
 
     public IAsyncReadHandler ReadAsync() => this;
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="string"/>.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>	'
-    // /// <returns><see cref="string"/></returns>
-    // public string ReadAsString()
-    // {
-    //     using var stream = new StreamReader(OpenRead(), _encoding);
-    //     return stream.ReadToEnd();
-    // }
-    //
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="string"/>, asynchronously.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="string"/></returns>
-    // public async ValueTask<string> ReadAsStringAsync()
-    // {
-    //     using var stream = new StreamReader(OpenRead(), _encoding);
-    //     return await stream.ReadToEndAsync();
-    // }
-    //
-    //
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="string"/>.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="string"/></returns>
-    // public TValue Read<TValue>()
-    // {
-    //     string content = ReadAsString();
-    //     return content.FromJson<TValue>();
-    //
-    //     /// <summary>
-    //     /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
-    //     /// </summary>
-    //     /// <typeparam name="TValue"></typeparam>
-    //     /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    //     /// <exception cref="FileNotFoundException">if file is not found</exception>
-    //     /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
-    //     /// <returns><typeparamref name="TValue"/></returns>
-    // }
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
-    // /// </summary>
-    // /// <typeparam name="TValue"></typeparam>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
-    // /// <returns><typeparamref name="TValue"/></returns>
-    // public async ValueTask<TValue> ReadAsync<TValue>()
-    // {
-    //     string content = await ReadAsStringAsync();
-    //     return content.FromJson<TValue>();
-    // }
-    //
-    //
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/>.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="ReadOnlySpan{byte}"/></returns>
-    // public ReadOnlySpan<char> ReadAsSpan()
-    // {
-    //     using var stream = new StreamReader(OpenRead(), _encoding);
-    //     return stream.ReadToEnd();
-    // }
-    //
-    //
-    // /// <summary>
-    // /// Reads the contents of the file as a byte array.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="byte[]"/></returns>
-    // public byte[] ReadAsBytes()
-    // {
-    //     using FileStream file   = OpenRead();
-    //     using var        stream = new MemoryStream();
-    //     file.CopyTo(stream);
-    //     return stream.GetBuffer();
-    // }
-    // /// <summary>
-    // /// Reads the contents of the file as a byte array.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="byte[]"/></returns>
-    // public async ValueTask<byte[]> ReadAsBytesAsync( CancellationToken token  = default )
-    // {
-    //     await using FileStream file   = OpenRead();
-    //     await using var        stream = new MemoryStream();
-    //     await file.CopyToAsync(stream, token);
-    //     return stream.GetBuffer();
-    // }
-    //
-    //
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>.
-    // /// </summary>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
-    // public ReadOnlyMemory<byte> ReadAsMemory()
-    // {
-    //     ReadOnlyMemory<byte> results = ReadAsBytes();
-    //     return results;
-    // }
-    // /// <summary>
-    // /// Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/>, asynchronously.
-    // /// </summary>
-    // /// <param name="token"></param>
-    // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
-    // /// <exception cref="FileNotFoundException">if file is not found</exception>
-    // /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
-    // public async ValueTask<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token  = default )
-    // {
-    //     ReadOnlyMemory<byte> results = await ReadAsBytesAsync(token);
-    //     return results;
-    // }
-    // public async ValueTask<MemoryStream> ReadAsStreamAsync( CancellationToken token  = default )
-    // {
-    //     await using FileStream file   = OpenRead();
-    //     var                    stream = new MemoryStream();
-    //     await file.CopyToAsync(stream, token);
-    //     return stream;
-    // }
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    public IReadHandler Read() => this;
+    public IReadHandler      Read()      => this;
 
 
     /// <summary> Changes the extension of the file. </summary>
@@ -503,11 +371,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream zipToOpen     = File.Create(FullPath);
-        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
+        await using ZipArchive archive       = new(zipToOpen, ZipArchiveMode.Update);
 
-        for ( int i = 0; i < files.Length; i++ )
+        foreach ( LocalFile file in files )
         {
-            LocalFile       file  = files[i];
             ZipArchiveEntry entry = archive.CreateEntry(file.FullPath);
 
             await using Stream stream = await entry.OpenAsync(token)
@@ -521,6 +388,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
                         .ConfigureAwait(false);
         }
 
+        Info.Refresh();
         return this;
     }
     public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token = default ) => ZipAsync(files.Select(static x => new LocalFile(x)), token);
@@ -545,6 +413,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
                         .ConfigureAwait(false);
         }
 
+        Info.Refresh();
         return this;
     }
 
@@ -572,11 +441,19 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
     /// <summary> Moves this file to the new <paramref name="path"/> </summary>
     /// <param name="path"> </param>
-    public void Move( string path ) => Info.MoveTo(path);
+    public void Move( string path )
+    {
+        Info.MoveTo(path);
+        Info.Refresh();
+    }
 
     /// <summary> Moves this file to the new <paramref name="file"/> location </summary>
     /// <param name="file"> </param>
-    public void Move( LocalFile file ) => Info.MoveTo(file.FullPath);
+    public void Move( LocalFile file )
+    {
+        Info.MoveTo(file.FullPath);
+        Info.Refresh();
+    }
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -621,6 +498,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using FileStream    stream        = Create();
         using StreamWriter  writer        = new(stream, FileEncoding);
         writer.Write(payload);
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -638,6 +516,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
         stream.Write(payload, 0, payload.Length);
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -655,6 +534,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         using FileStream stream = Create();
         stream.Write(payload);
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -673,6 +553,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
         stream.Write(payload);
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -703,6 +584,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using FileStream    stream        = Create();
         using StreamWriter  writer        = new(stream, FileEncoding);
         writer.Write(payload);
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -720,7 +602,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using MemoryStream  memory        = new((int)payload.Length);
         payload.CopyTo(memory);
-        ReadOnlySpan<byte> data = memory.GetBuffer();
+        ReadOnlySpan<byte> data = new(memory.GetBuffer(), 0, (int)memory.Length);
         Write(data);
     }
 
@@ -770,6 +652,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         await writer.WriteAsync(owner.Memory, token)
                     .ConfigureAwait(false);
+
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -790,6 +674,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         await stream.WriteAsync(payload, token)
                     .ConfigureAwait(false);
+
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -810,6 +696,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         await stream.WriteAsync(payload, token)
                     .ConfigureAwait(false);
+
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -829,6 +717,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         await writer.WriteAsync(payload, token)
                     .ConfigureAwait(false);
+
+        Info.Refresh();
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -849,6 +739,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         await payload.CopyToAsync(stream, token)
                      .ConfigureAwait(false);
+
+        Info.Refresh();
     }
 
 

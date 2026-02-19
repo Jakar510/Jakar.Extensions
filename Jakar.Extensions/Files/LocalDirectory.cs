@@ -1,4 +1,6 @@
-﻿using ZLinq;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+using ZLinq;
 using ZLinq.Linq;
 using ZLinq.Traversables;
 
@@ -8,7 +10,8 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
+[JsonObject]
+public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
@@ -16,17 +19,26 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);              set => Environment.CurrentDirectory = value.FullPath; }
-    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public              bool            DoesNotExist      => !Exists;
-    public              bool            Exists            => Info.Exists;
-    [JsonIgnore] public DirectoryInfo   Info              => _info;
-    bool TempFile.ITempFile.            IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
-    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              string          Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
-    public              string          Root              => Directory.GetDirectoryRoot(FullPath);
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
+    public DateTime CreationTimeUtc { get => Directory.GetCreationTimeUtc(FullPath);          set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public bool     DoesNotExist    => !Exists;
+    public bool     Exists          => Info.Exists;
+    [JsonIgnore] public DirectoryInfo Info
+    {
+        get
+        {
+            _info.Refresh();
+            return _info;
+        }
+    }
+    bool TempFile.ITempFile.                        IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    public              DateTime                    LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              DateTime                    LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              string                      Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory?             Parent            => GetParent();
+    public              string                      Root              => Directory.GetDirectoryRoot(FullPath);
+    public              IEnumerable<LocalFile>      Files             { [Pure] get => GetFiles(); }
+    public              IEnumerable<LocalDirectory> SubFolders        { [Pure] get => GetSubFolders(); }
 
 
     public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
@@ -53,7 +65,8 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
         GC.SuppressFinalize(this);
         if ( DoesNotExist || !this.IsTempFile() ) { return; }
 
-        await DeleteAllRecursivelyAsync().ConfigureAwait(false);
+        await DeleteAllRecursivelyAsync()
+           .ConfigureAwait(false);
     }
 
 
@@ -130,38 +143,27 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public LocalDirectory[] GetSubFolders() => Info.EnumerateDirectories()
-                                                   .Select(Create)
-                                                   .ToArray()
-                                                   .ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern ) => Info.EnumerateDirectories(searchPattern)
-                                                                         .Select(Create)
-                                                                         .ToArray()
-                                                                         .ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern, SearchOption searchOption ) => Info.EnumerateDirectories(searchPattern, searchOption)
-                                                                                                    .Select(Create)
-                                                                                                    .ToArray()
-                                                                                                    .ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions)
-                                                                                                                .Select(Create)
-                                                                                                                .ToArray();
+    public IEnumerable<LocalDirectory> GetSubFolders() => Info.EnumerateDirectories()
+                                                              .Select(Create);
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern ) => Info.EnumerateDirectories(searchPattern)
+                                                                                    .Select(Create);
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, SearchOption searchOption ) => Info.EnumerateDirectories(searchPattern, searchOption)
+                                                                                                               .Select(Create);
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions)
+                                                                                                                           .Select(Create);
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public LocalFile[] GetFiles() => Info.EnumerateFiles()
-                                         .Select(LocalFile.Create)
-                                         .ToArray();
-    public LocalFile[] GetFiles( string searchPattern ) => Info.EnumerateFiles(searchPattern)
-                                                               .Select(LocalFile.Create)
-                                                               .ToArray();
-    public LocalFile[] GetFiles( string searchPattern, SearchOption searchOption ) => Info.EnumerateFiles(searchPattern, searchOption)
-                                                                                          .Select(LocalFile.Create)
-                                                                                          .ToArray();
-    public LocalFile[] GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions)
-                                                                                                      .Select(LocalFile.Create)
-                                                                                                      .ToArray();
+    public IEnumerable<LocalFile> GetFiles() => Info.EnumerateFiles()
+                                                    .Select(LocalFile.Create);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern ) => Info.EnumerateFiles(searchPattern)
+                                                                          .Select(LocalFile.Create);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption searchOption ) => Info.EnumerateFiles(searchPattern, searchOption)
+                                                                                                     .Select(LocalFile.Create);
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions)
+                                                                                                                 .Select(LocalFile.Create);
 
 
     public ValueEnumerable<Select<Descendants<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>> Descendants() => Info.Descendants()
@@ -251,75 +253,21 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     public string Combine( params ReadOnlySpan<string> subPaths ) => Info.Combine(subPaths);
 
 
-    public sealed override string ToString() => FullPath;
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-    /// <summary> Asynchronously deletes subdirectories and files. </summary>
-    /// <exception cref="UnauthorizedAccessException"> </exception>
-    /// <exception cref="DirectoryNotFoundException"> </exception>
-    /// <exception cref="FileNotFoundException"> </exception>
-    /// <exception cref="IOException"> </exception>
-    /// <exception cref="SecurityException"> </exception>
-    public Task DeleteAllRecursivelyAsync()
+
+    /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
+    /// <param name="output"> file path to write the zip to </param>
+    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
+    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
+    /// <summary> </summary>
+    /// <param name="output"> file path to write the zip to </param>
+    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
+    /// <param name="encoding"> The encoding used for the file names </param>
+    public void Zip( in LocalFile output, Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        List<Task>          tasks         = new(64);
-
-        foreach ( LocalDirectory dir in GetSubFolders() )
-        {
-            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
-
-            tasks.Add(dir.DeleteAllRecursivelyAsync());
-        }
-
-        foreach ( LocalDirectory dir in GetSubFolders() )
-        {
-            tasks.Add(dir.DeleteAllRecursivelyAsync());
-            dir.Delete();
-        }
-
-        Delete();
-        return Task.WhenAll(tasks.AsSpan());
-    }
-
-    /// <summary> Asynchronously deletes files. </summary>
-    /// <exception cref="UnauthorizedAccessException"> </exception>
-    /// <exception cref="DirectoryNotFoundException"> </exception>
-    /// <exception cref="FileNotFoundException"> </exception>
-    /// <exception cref="IOException"> </exception>
-    /// <exception cref="SecurityException"> </exception>
-    public Task DeleteFilesAsync()
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        List<Task>          tasks         = new(DEFAULT_CAPACITY);
-
-        foreach ( LocalDirectory dir in GetSubFolders() )
-        {
-            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
-
-            tasks.Add(dir.DeleteFilesAsync());
-        }
-
-        return Task.WhenAll(tasks.AsSpan());
-    }
-
-    /// <summary> Asynchronously deletes subdirectories. </summary>
-    /// <exception cref="UnauthorizedAccessException"> </exception>
-    /// <exception cref="DirectoryNotFoundException"> </exception>
-    /// <exception cref="FileNotFoundException"> </exception>
-    /// <exception cref="IOException"> </exception>
-    /// <exception cref="SecurityException"> </exception>
-    public Task DeleteSubFoldersAsync()
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        List<Task>          tasks         = new(DEFAULT_CAPACITY);
-
-        foreach ( LocalDirectory dir in GetSubFolders() )
-        {
-            tasks.Add(dir.DeleteSubFoldersAsync());
-            dir.Delete();
-        }
-        
-        return Task.WhenAll(tasks.AsSpan());
+        ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
     }
 
 
@@ -335,9 +283,11 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             using MemoryStream data = await file.ReadAsync()
-                                                .AsStream(token).ConfigureAwait(false);
+                                                .AsStream(token)
+                                                .ConfigureAwait(false);
 
-            await data.CopyToAsync(stream, token).ConfigureAwait(false);
+            await data.CopyToAsync(stream, token)
+                      .ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -354,9 +304,11 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token).ConfigureAwait(false);
+                                                  .AsMemory(token)
+                                                  .ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token).ConfigureAwait(false);
+            await stream.WriteAsync(data, token)
+                        .ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -373,9 +325,11 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token).ConfigureAwait(false);
+                                                  .AsMemory(token)
+                                                  .ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token).ConfigureAwait(false);
+            await stream.WriteAsync(data, token)
+                        .ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -392,9 +346,11 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
             await using Stream stream = entry.Open();
 
             ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token).ConfigureAwait(false);
+                                                  .AsMemory(token)
+                                                  .ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token).ConfigureAwait(false);
+            await stream.WriteAsync(data, token)
+                        .ConfigureAwait(false);
         }
 
         return zipFilePath;
@@ -411,7 +367,6 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     /// <exception cref="SecurityException"> </exception>
     public void Delete() => Info.Delete();
 
-
     /// <summary> Deletes subdirectories and files. This occurs on another thread in Windows, and is not blocking. </summary>
     /// <param name="recursive"> </param>
     /// <exception cref="UnauthorizedAccessException"> </exception>
@@ -419,7 +374,6 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
     public void Delete( bool recursive ) => Info.Delete(recursive);
-
 
     /// <summary> Deletes subdirectories and files. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
@@ -429,22 +383,18 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     /// <exception cref="SecurityException"> </exception>
     public void DeleteAllRecursively()
     {
-        foreach ( LocalDirectory dir in GetSubFolders() )
+        foreach ( LocalDirectory dir in SubFolders )
         {
-            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
+            foreach ( LocalFile file in dir.Files ) { file.Delete(); }
 
-            dir.DeleteAllRecursively();
-        }
-
-        foreach ( LocalDirectory dir in GetSubFolders() )
-        {
             dir.DeleteAllRecursively();
             dir.Delete();
         }
 
+        foreach ( LocalFile file in Files ) { file.Delete(); }
+
         Delete();
     }
-
 
     /// <summary> Deletes sub-directories. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
@@ -454,16 +404,15 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
     /// <exception cref="SecurityException"> </exception>
     public void DeleteFiles()
     {
-        foreach ( LocalDirectory dir in GetSubFolders() )
+        foreach ( LocalDirectory dir in SubFolders )
         {
-            foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
+            foreach ( LocalFile file in dir.Files ) { file.Delete(); }
 
-            dir.DeleteFiles();
+            dir.DeleteAllRecursively();
         }
 
-        foreach ( LocalFile file in GetFiles() ) { file.Delete(); }
+        foreach ( LocalFile file in Files ) { file.Delete(); }
     }
-
 
     /// <summary> Deletes sub-directories. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
@@ -480,20 +429,49 @@ public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAs
         }
     }
 
+    /// <summary> Asynchronously deletes subdirectories and files. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    public Task DeleteAllRecursivelyAsync() => Task.Run(DeleteAllRecursively);
 
-    /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
-    /// <param name="output"> file path to write the zip to </param>
-    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
-    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
-    /// <summary> </summary>
-    /// <param name="output"> file path to write the zip to </param>
-    /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
-    /// <param name="encoding"> The encoding used for the file names </param>
-    public void Zip( in LocalFile output, Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
+    /// <summary> Asynchronously deletes files. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    public Task DeleteFilesAsync() => Task.Run(DeleteFiles);
+
+    /// <summary> Asynchronously deletes subdirectories. </summary>
+    /// <exception cref="UnauthorizedAccessException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="FileNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    public Task DeleteSubFoldersAsync() => Task.Run(DeleteSubFolders);
+
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public sealed override string    ToString()                             => FullPath;
+    IFileInfo IFileProvider.         GetFileInfo( string          subpath ) => Join(subpath);
+    IDirectoryContents IFileProvider.GetDirectoryContents( string subpath ) => this;
+    IChangeToken IFileProvider.      Watch( string                filter )  => NullChangeToken.Singleton;
+    public IEnumerator<LocalFile> GetEnumerator()
     {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( LocalFile file in GetFiles() ) { yield return file; }
     }
+    IEnumerator<IFileInfo> IEnumerable<IFileInfo>.GetEnumerator()
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( LocalFile file in GetFiles() ) { yield return file; }
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
     public override int CompareTo( LocalDirectory? other )
