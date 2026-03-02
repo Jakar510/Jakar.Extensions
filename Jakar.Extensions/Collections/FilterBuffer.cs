@@ -29,8 +29,20 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     public readonly Span<TValue>         Span   => new(__array, 0, Capacity);
     public readonly ReadOnlySpan<TValue> Values => Span[..length];
 
+    public readonly ArraySegment<TValue> Array => __array is not null
+                                                      ? new ArraySegment<TValue>(__array, 0, length)
+                                                      : ArraySegment<TValue>.Empty;
+
 
     public ArrayBuffer() : this(0) { }
+    public ArrayBuffer( IEnumerable<TValue> span, int count ) : this(count)
+    {
+        foreach ( TValue value in span ) { Add(value); }
+    }
+    public ArrayBuffer( params ReadOnlySpan<TValue> span ) : this(span.Length)
+    {
+        foreach ( TValue value in span ) { Add(value); }
+    }
     public void Dispose()
     {
         ArrayBuffer<TValue> self = this;
@@ -39,7 +51,21 @@ public struct ArrayBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     }
 
 
-    public static implicit operator ReadOnlySpan<TValue>( ArrayBuffer<TValue> self ) => self.Values;
+    public static implicit operator ReadOnlySpan<TValue>( ArrayBuffer<TValue>   self ) => self.Values;
+    public static implicit operator ArrayBuffer<TValue>( Memory<TValue>         self ) => new(self.Span);
+    public static implicit operator ArrayBuffer<TValue>( ReadOnlyMemory<TValue> self ) => new(self.Span);
+    public static implicit operator ArrayBuffer<TValue>( PooledArray<TValue>    self ) => new(self.Span);
+    public static implicit operator ArrayBuffer<TValue>( ImmutableArray<TValue> self ) => new(self.AsSpan());
+    public static implicit operator ArrayBuffer<TValue>( List<TValue>           self ) => new(self.AsSpan());
+    public static ArrayBuffer<TValue> Create( IEnumerable<TValue> self )
+    {
+        return self switch
+               {
+                   IReadOnlyCollection<TValue> readOnlyCollection => new ArrayBuffer<TValue>(self, readOnlyCollection.Count),
+                   ICollection<TValue> readOnlyCollection         => new ArrayBuffer<TValue>(self, readOnlyCollection.Count),
+                   _                                              => self.ToList()
+               };
+    }
 
 
     public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => Values.GetEnumerator();
