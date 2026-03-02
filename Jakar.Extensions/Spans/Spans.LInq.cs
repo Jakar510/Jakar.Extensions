@@ -3,7 +3,6 @@
 
 using ZLinq;
 using ZLinq.Linq;
-using static Jakar.Extensions.Constants;
 
 
 
@@ -25,6 +24,14 @@ public static partial class Spans
         first.CopyTo(result[..size]);
         last.CopyTo(result[size..]);
         return buffer;
+    }
+
+
+    [Pure] public static int Count<TValue>( this scoped in Span<TValue> self, TValue value )
+        where TValue : IEquatable<TValue>
+    {
+        ReadOnlySpan<TValue> span = self;
+        return span.Count(value);
     }
 
 
@@ -56,8 +63,7 @@ public static partial class Spans
 
             while ( sourceIndex < self.Length )
             {
-                if ( self[sourceIndex..]
-                   .StartsWith(oldValue) )
+                if ( self[sourceIndex..].StartsWith(oldValue) )
                 {
                     // buffer = buffer.EnsureCapacity(newValue.Length);
                     buffer.Add(newValue);
@@ -227,12 +233,10 @@ public static partial class Spans
         }
 
         [Pure] public ValueEnumerable<Select<FromSpan<TValue>, TValue, TNext>, TNext> Select<TNext>( Func<TValue, TNext> func )
-            where TNext : IEquatable<TNext> => self.AsValueEnumerable()
-                                                   .Select(func);
-        
+            where TNext : IEquatable<TNext> => self.AsValueEnumerable().Select(func);
 
-        [Pure] public bool All( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                     .All(selector);
+
+        [Pure] public bool All( Func<TValue, bool> selector ) => self.AsValueEnumerable().All(selector);
 
         [Pure] public bool All( RefCheck<TValue> selector )
         {
@@ -265,11 +269,9 @@ public static partial class Spans
         }
 
 
-        [Pure] public TValue First( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                         .First(selector);
+        [Pure] public TValue First( Func<TValue, bool> selector ) => self.AsValueEnumerable().First(selector);
 
-        [Pure] public TValue? FirstOrDefault( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                                   .FirstOrDefault(selector);
+        [Pure] public TValue? FirstOrDefault( Func<TValue, bool> selector ) => self.AsValueEnumerable().FirstOrDefault(selector);
 
         [Pure] public TValue First( RefCheck<TValue> selector )
         {
@@ -302,20 +304,9 @@ public static partial class Spans
             return default;
         }
 
-        [Pure] public TValue Single( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                          .Single(selector);
+        [Pure] public TValue Single( Func<TValue, bool> selector ) => self.AsValueEnumerable().Single(selector);
 
-        [Pure] public TValue? SingleOrDefault( Func<TValue, bool> selector ) => self.AsValueEnumerable()
-                                                                                    .SingleOrDefault(selector);
-    }
-
-
-
-    [Pure] public static int Count<TValue>( this scoped in Span<TValue> self, TValue value )
-        where TValue : IEquatable<TValue>
-    {
-        ReadOnlySpan<TValue> span = self;
-        return span.Count(value);
+        [Pure] public TValue? SingleOrDefault( Func<TValue, bool> selector ) => self.AsValueEnumerable().SingleOrDefault(selector);
     }
 
 

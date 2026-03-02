@@ -9,8 +9,7 @@ public static partial class AsyncLinq
         {
             while ( token.ShouldContinue() ) { yield return items[random.Next(items.Count)]; }
         }
-        public IEnumerable<TElement> Random( Random random, int count, CancellationToken token = default ) => items.Random(random, token)
-                                                                                                                   .Take(count);
+        public IEnumerable<TElement> Random( Random random, int count, CancellationToken token = default ) => items.Random(random, token).Take(count);
     }
 
 
@@ -21,9 +20,7 @@ public static partial class AsyncLinq
         {
             while ( token.ShouldContinue() ) { yield return dict.ElementAt(random.Next(dict.Count)); }
         }
-        public IEnumerable<TElement> RandomValues( Random random, CancellationToken token = default ) => dict.Random(random, token)
-                                                                                                             .Select(pair => pair.Value);
-        public IEnumerable<TKey> RandomKeys( Random random, CancellationToken token = default ) => dict.Random(random, token)
-                                                                                                       .Select(pair => pair.Key);
+        public IEnumerable<TElement> RandomValues( Random random, CancellationToken token = default ) => dict.Random(random, token).Select(pair => pair.Value);
+        public IEnumerable<TKey>     RandomKeys( Random   random, CancellationToken token = default ) => dict.Random(random, token).Select(pair => pair.Key);
     }
 }

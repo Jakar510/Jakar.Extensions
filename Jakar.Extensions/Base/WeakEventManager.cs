@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+/*
 /// <summary> Weak event manager that allows for garbage collection when the EventHandler is still subscribed </summary>
 [Experimental(nameof(WeakEventManager))]
 public sealed class WeakEventManager : IDisposable
@@ -103,38 +104,32 @@ public sealed class WeakEventManager : IDisposable
                 return;
 
             case Func<TEventArgs, Task> handler:
-                handler(args)
-                   .CallSynchronously();
+                handler(args).CallSynchronously();
 
                 return;
 
             case Func<TEventArgs, ValueTask> handler:
-                handler(args)
-                   .CallSynchronously();
+                handler(args).CallSynchronously();
 
                 return;
 
             case Func<object?, TEventArgs, Task> handler:
-                handler(sender, args)
-                   .CallSynchronously();
+                handler(sender, args).CallSynchronously();
 
                 return;
 
             case Func<object?, TEventArgs, ValueTask> handler:
-                handler(sender, args)
-                   .CallSynchronously();
+                handler(sender, args).CallSynchronously();
 
                 return;
 
             case Func<TSender?, TEventArgs, Task> handler:
-                handler(sender, args)
-                   .CallSynchronously();
+                handler(sender, args).CallSynchronously();
 
                 return;
 
             case Func<TSender?, TEventArgs, ValueTask> handler:
-                handler(sender, args)
-                   .CallSynchronously();
+                handler(sender, args).CallSynchronously();
 
                 return;
 
@@ -353,3 +348,4 @@ public sealed class WeakEventManagerAlternate
         public override int  GetHashCode()                => Subscriber?.GetHashCode() ?? 0 ^ Handler.GetHashCode();
     }
 }
+*/

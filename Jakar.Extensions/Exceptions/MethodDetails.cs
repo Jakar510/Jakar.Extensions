@@ -6,24 +6,24 @@ namespace Jakar.Extensions;
 
 
 public sealed class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<MethodDetails>, IJsonModel<MethodDetails>
-{ 
-    public        MethodAttributes              Attributes          { get; init; }
-    public        string?                       DeclaringType       { get; init; }
-    public        bool                          IsAbstract          { get; init; }
-    public        bool                          IsAssembly          { get; init; }
-    public        bool                          IsConstructor       { get; init; }
-    public        bool                          IsFamily            { get; init; }
-    public        bool                          IsFamilyAndAssembly { get; init; }
-    public        bool                          IsFamilyOrAssembly  { get; init; }
-    public        bool                          IsFinal             { get; init; }
-    public        bool                          IsPrivate           { get; init; }
-    public        bool                          IsPublic            { get; init; }
-    public        bool                          IsSpecialName       { get; init; }
-    public        bool                          IsStatic            { get; init; }
-    public        bool                          IsVirtual           { get; init; }
-    public        string                        Name                { get; init; } = EMPTY;
-    public        ParameterDetails[]            Parameters          { get; init; } = [];
-    public        string                        Signature           { get; init; } = EMPTY;
+{
+    public MethodAttributes   Attributes          { get; init; }
+    public string?            DeclaringType       { get; init; }
+    public bool               IsAbstract          { get; init; }
+    public bool               IsAssembly          { get; init; }
+    public bool               IsConstructor       { get; init; }
+    public bool               IsFamily            { get; init; }
+    public bool               IsFamilyAndAssembly { get; init; }
+    public bool               IsFamilyOrAssembly  { get; init; }
+    public bool               IsFinal             { get; init; }
+    public bool               IsPrivate           { get; init; }
+    public bool               IsPublic            { get; init; }
+    public bool               IsSpecialName       { get; init; }
+    public bool               IsStatic            { get; init; }
+    public bool               IsVirtual           { get; init; }
+    public string             Name                { get; init; } = EMPTY;
+    public ParameterDetails[] Parameters          { get; init; } = [];
+    public string             Signature           { get; init; } = EMPTY;
 
 
     public MethodDetails() { }

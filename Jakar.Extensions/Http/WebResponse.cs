@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using System.Text.Encodings.Web;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -14,11 +10,11 @@ public sealed class WebResponse<TValue>
 {
     public readonly DateTimeOffset?   Expires;
     public readonly DateTimeOffset?   LastModified;
+    public readonly ErrorResponse     Errors;
     public readonly ExceptionDetails? Exception;
     public readonly List<string>      Allow;
     public readonly List<string>      ContentEncoding;
     public readonly long?             ContentLength;
-    public readonly ErrorResponse    Errors;
     public readonly Status            StatusCode;
     public readonly string?           ContentType;
     public readonly string?           Method;
@@ -119,7 +115,7 @@ public sealed class WebResponse<TValue>
         static Errors FromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
         static Errors FromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
         static Errors FromNode( WebResponse<TValue>   response, JToken     node )   => FromString(response, node.ToJson());
-        static Errors FromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Extensions.Error.Create(response.StatusCode), ..errors.Details]);
+        static Errors FromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Error.Create(response.StatusCode), ..errors.Details]);
     }
     public string ErrorMessage() => StatusCode.GetErrorTitle();
 
@@ -142,14 +138,9 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode )
-            {
-                return await Create(response, token)
-                          .ConfigureAwait(false);
-            }
+            if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
 
-            TValue result = await func(response, token)
-                               .ConfigureAwait(false);
+            TValue result = await func(response, token).ConfigureAwait(false);
 
             return new WebResponse<TValue>(response, result);
         }
@@ -157,8 +148,7 @@ public sealed class WebResponse<TValue>
         {
             telemetrySpan.AddException(e);
 
-            return await Create(response, e, token)
-                      .ConfigureAwait(false);
+            return await Create(response, e, token).ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, CancellationToken token )
@@ -167,14 +157,9 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( !response.IsSuccessStatusCode )
-            {
-                return await Create(response, token)
-                          .ConfigureAwait(false);
-            }
+            if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
 
-            TValue result = await func(response, arg, token)
-                               .ConfigureAwait(false);
+            TValue result = await func(response, arg, token).ConfigureAwait(false);
 
             return new WebResponse<TValue>(response, result);
         }
@@ -182,8 +167,7 @@ public sealed class WebResponse<TValue>
         {
             telemetrySpan.AddException(e);
 
-            return await Create(response, e, token)
-                      .ConfigureAwait(false);
+            return await Create(response, e, token).ConfigureAwait(false);
         }
     }
 
@@ -198,24 +182,15 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode )
-                {
-                    return await Create(response, token)
-                              .ConfigureAwait(false);
-                }
+                if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
 
-                TValue result = await func(response, token)
-                                   .ConfigureAwait(false);
+                TValue result = await func(response, token).ConfigureAwait(false);
 
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
-            {
-                await policy.IncrementAndWait(ref count, token)
-                            .ConfigureAwait(false);
-            }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token).ConfigureAwait(false); }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
@@ -223,8 +198,7 @@ public sealed class WebResponse<TValue>
         {
             telemetrySpan.AddException(e);
 
-            return await Create(response, e, token)
-                      .ConfigureAwait(false);
+            return await Create(response, e, token).ConfigureAwait(false);
         }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
@@ -237,24 +211,15 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( !response.IsSuccessStatusCode )
-                {
-                    return await Create(response, token)
-                              .ConfigureAwait(false);
-                }
+                if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
 
-                TValue result = await func(response, arg, token)
-                                   .ConfigureAwait(false);
+                TValue result = await func(response, arg, token).ConfigureAwait(false);
 
                 return new WebResponse<TValue>(response, result);
             }
             catch ( HttpRequestException e ) { exceptions.Add(e); }
 
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) )
-            {
-                await policy.IncrementAndWait(ref count, token)
-                            .ConfigureAwait(false);
-            }
+            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token).ConfigureAwait(false); }
         }
 
         try { throw new AggregateException(exceptions.ToArray()); }
@@ -262,8 +227,7 @@ public sealed class WebResponse<TValue>
         {
             telemetrySpan.AddException(e);
 
-            return await Create(response, e, token)
-                      .ConfigureAwait(false);
+            return await Create(response, e, token).ConfigureAwait(false);
         }
     }
 
@@ -272,8 +236,7 @@ public sealed class WebResponse<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
-                                                   .ConfigureAwait(false);
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
         string error;
 
@@ -283,8 +246,7 @@ public sealed class WebResponse<TValue>
         {
             using StreamReader reader = new(stream);
 
-            string errorMessage = await reader.ReadToEndAsync(token)
-                                              .ConfigureAwait(false);
+            string errorMessage = await reader.ReadToEndAsync(token).ConfigureAwait(false);
 
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, errorMessage); }
 
@@ -297,8 +259,7 @@ public sealed class WebResponse<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(token)
-                                                   .ConfigureAwait(false);
+        await using Stream? stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
         string error;
 
@@ -308,8 +269,7 @@ public sealed class WebResponse<TValue>
         {
             using StreamReader reader = new(stream);
 
-            string errorMessage = await reader.ReadToEndAsync(token)
-                                              .ConfigureAwait(false);
+            string errorMessage = await reader.ReadToEndAsync(token).ConfigureAwait(false);
 
             if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, e, errorMessage); }
 

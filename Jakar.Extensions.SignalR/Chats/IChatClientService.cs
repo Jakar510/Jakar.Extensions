@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.SignalR.Chats;
 
 
-public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyChanged
+public interface IChatClientService : IHostedService, IChatHub
 {
     public const string PATH = "/Chat/hub";
     public       long   UnreadChats { get; }
@@ -38,8 +38,7 @@ public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyC
     public event Func<string?, Task>? Reconnected;
 
     public event EventHandler<HubEvent>? OnEvent;
-
-    public event Action? OnMessageReceived;
+    public event EventHandler<ChatUser>? OnUserChanged;
 
     public void SendEvent( HubEvent value );
 }

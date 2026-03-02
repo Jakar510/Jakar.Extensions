@@ -9,8 +9,8 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
 {
     private const    int                                START_INDEX  = 0;
     private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          ArrayBuffer<TValue>?               __owner;
     private          bool                               __isDisposed;
-    private          ArrayBuffer<TValue>?              __owner;
     private          int                                __index = START_INDEX;
 
 

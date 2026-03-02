@@ -1,7 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using System.Collections.Generic;
 using ZLinq;
 
 
@@ -70,11 +69,11 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public override int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
-    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; } 
-    bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
-    public          bool IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
-    bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
+    public override int Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
+    bool IList.         IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
+    public bool         IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
+    bool ICollection.   IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
     object? IList.this[ int                index ] { get => Get(index); set => Set(index, (TValue)value!); }
     public TValue this[ int                index ] { get => Get(index); set => Set(index, value); }
     TValue IReadOnlyList<TValue>.this[ int index ] => Get(index);
@@ -152,7 +151,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal virtual void InternalRemove( int start, int count )
     {
         ThrowIfReadOnly();
-        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start,         buffer);
         Guard.IsInRangeFor(start + count, buffer, nameof(count));
 
         for ( int x = start; x < start + count; x++ )
@@ -176,7 +175,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal virtual int InternalRemove( RefCheck<TValue> match )
     {
         ThrowIfReadOnly();
-        ReadOnlySpan<TValue> span  = AsSpan();
+        ReadOnlySpan<TValue> span  = buffer.AsSpan();
         int                  count = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
@@ -269,8 +268,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        buffer.AsSpan()
-              .Sort(compare);
+        buffer.AsSpan().Sort(compare);
 
         Reset();
     }
@@ -278,8 +276,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        buffer.AsSpan()
-              .Sort(compare);
+        buffer.AsSpan().Sort(compare);
 
         Reset();
     }
@@ -287,9 +284,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         ThrowIfReadOnly();
 
-        buffer.AsSpan()
-              .Slice(start, length)
-              .Sort(compare);
+        buffer.AsSpan().Slice(start, length).Sort(compare);
 
         Reset();
     }
@@ -336,7 +331,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal virtual void InternalReverse( int start, int length )
     {
         ThrowIfReadOnly();
-        Guard.IsInRangeFor(start,          buffer, nameof(start));
+        Guard.IsInRangeFor(start,          buffer);
         Guard.IsInRangeFor(start + length, buffer, nameof(length));
         buffer.Reverse(start, length);
         Reset();
@@ -351,7 +346,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     protected internal virtual TValue InternalGet( int index )
     {
-        Guard.IsInRangeFor(index, buffer, nameof(index));
+        Guard.IsInRangeFor(index, buffer);
         TValue result = buffer[index];
         return result;
     }
@@ -363,7 +358,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
                           ? buffer[index]
                           : default;
 
-        Guard.IsInRangeFor(index, buffer, nameof(index));
+        Guard.IsInRangeFor(index, buffer);
         buffer[index] = value;
         Replaced(in old, in value, index);
     }
@@ -378,14 +373,14 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     public virtual int FindIndex( RefCheck<TValue> match, int start = 0 )
     {
-        Guard.IsInRangeFor(start, buffer, nameof(start));
+        Guard.IsInRangeFor(start, buffer);
         return FindIndex(match, start, Count - 1);
     }
     public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
-        Guard.IsInRangeFor(start,        buffer, nameof(start));
-        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
-        ReadOnlySpan<TValue> span = AsSpan();
+        Guard.IsInRangeFor(start,        buffer);
+        Guard.IsInRangeFor(endInclusive, buffer);
+        ReadOnlySpan<TValue> span = buffer.AsSpan();
 
         for ( int i = start; i < endInclusive; i++ )
         {
@@ -398,14 +393,14 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 )
     {
-        Guard.IsInRangeFor(start, buffer, nameof(start));
+        Guard.IsInRangeFor(start, buffer);
         return FindLastIndex(match, Count - 1, start);
     }
     public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
-        Guard.IsInRangeFor(start,        buffer, nameof(start));
-        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
-        ReadOnlySpan<TValue> span = AsSpan();
+        Guard.IsInRangeFor(start,        buffer);
+        Guard.IsInRangeFor(endInclusive, buffer);
+        ReadOnlySpan<TValue> span = buffer.AsSpan();
 
         for ( int i = start; i < endInclusive; i-- )
         {
@@ -419,12 +414,12 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual int IndexOf( TValue value ) => buffer.IndexOf(value);
     public virtual int IndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor(start, buffer, nameof(start));
+        Guard.IsInRangeFor(start, buffer);
         return buffer.IndexOf(value, start);
     }
     public virtual int IndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start,         buffer);
         Guard.IsInRangeFor(start + count, buffer, nameof(count));
         return buffer.IndexOf(value, start, count);
     }
@@ -433,12 +428,12 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual int LastIndexOf( TValue value ) => buffer.LastIndexOf(value);
     public virtual int LastIndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor(start, buffer, nameof(start));
+        Guard.IsInRangeFor(start, buffer);
         return buffer.LastIndexOf(value, start);
     }
     public virtual int LastIndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start,         buffer);
         Guard.IsInRangeFor(start + count, buffer, nameof(count));
         return buffer.LastIndexOf(value, start, count);
     }
@@ -446,7 +441,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     public virtual int FindCount( RefCheck<TValue> match )
     {
-        ReadOnlySpan<TValue> span = AsSpan();
+        ReadOnlySpan<TValue> span = buffer.AsSpan();
         return span.Count(match);
     }
     public virtual TValue? Find( RefCheck<TValue> match )            => Find(match, 0);
@@ -454,8 +449,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual TValue? Find( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo(start, endInclusive);
-        Guard.IsInRangeFor(start,        buffer, nameof(start));
-        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        Guard.IsInRangeFor(start,        buffer);
+        Guard.IsInRangeFor(endInclusive, buffer);
         ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
         return span.FirstOrDefault(match);
     }
@@ -464,8 +459,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual TValue? FindLast( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo(start, endInclusive);
-        Guard.IsInRangeFor(start,        buffer, nameof(start));
-        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        Guard.IsInRangeFor(start,        buffer);
+        Guard.IsInRangeFor(endInclusive, buffer);
 
         ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
         return span.LastOrDefault(match);
@@ -475,8 +470,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual TValue[] FindAll( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo(start, endInclusive);
-        Guard.IsInRangeFor(start,        buffer, nameof(start));
-        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        Guard.IsInRangeFor(start,        buffer);
+        Guard.IsInRangeFor(endInclusive, buffer);
         List<TValue>         list = new(Count);
         ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
 
@@ -511,8 +506,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await foreach ( TValue value in values.WithCancellation(token)
-                                              .ConfigureAwait(false) ) { InternalTryAdd(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalTryAdd(in value); }
     }
 
 
@@ -540,8 +534,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await foreach ( TValue value in values.WithCancellation(token)
-                                              .ConfigureAwait(false) ) { InternalAdd(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAdd(in value); }
     }
 
 
@@ -549,8 +542,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await foreach ( TValue value in values.WithCancellation(token)
-                                              .ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalAddOrUpdate(in value); }
     }
     public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate(in value);
     public virtual void AddOrUpdate( IEnumerable<TValue> values )
@@ -599,8 +591,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values));
     public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
-        await foreach ( TValue value in values.WithCancellation(token)
-                                              .ConfigureAwait(false) ) { InternalRemove(in value); }
+        await foreach ( TValue value in values.WithCancellation(token).ConfigureAwait(false) ) { InternalRemove(in value); }
     }
     public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.Span));
     public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) => ValueTask.FromResult(InternalRemove(values.AsSpan()));
@@ -667,7 +658,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual bool Contains( TValue value ) => InternalContains(in value);
     public virtual bool Contains( params ReadOnlySpan<TValue> values )
     {
-        ReadOnlySpan<TValue> span = AsSpan();
+        ReadOnlySpan<TValue> span = buffer.AsSpan();
         return span.ContainsAny(values);
     }
     public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) => ValueTask.FromResult(InternalContains(in value));
@@ -683,7 +674,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     [Pure] [MustDisposeResource] protected internal override ArrayBuffer<TValue> FilteredValues()
     {
-        ReadOnlySpan<TValue>   span   = AsSpan();
+        ReadOnlySpan<TValue>   span   = buffer.AsSpan();
         ArrayBuffer<TValue>    values = new(span.Length);
         FilterDelegate<TValue> filter = GetFilter();
 
@@ -697,12 +688,11 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
-    public virtual ReadOnlySpan<TValue> AsSpan() => buffer.AsSpan();
+    [UseWithCaution] public virtual ReadOnlySpan<TValue> AsSpan() => buffer.AsSpan();
 
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
-    public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => AsSpan()
-       .Slice(start, length);
+    [UseWithCaution] public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => buffer.AsSpan().Slice(start, length);
 
 
     public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity(buffer.Count + capacity);

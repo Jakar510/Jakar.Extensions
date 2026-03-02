@@ -2,15 +2,12 @@
 // 06/06/2022  2:20 PM
 
 
-using System.Buffers.Binary;
-
-
-
 namespace Jakar.Extensions;
 
 
 public static class Hashes
 {
+    public const int MaxStackBytes = 32 * 1024; // tune as needed
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static int GetHash<TValue>( this IEnumerable<TValue> values )
     {
         HashCode hash = new();
@@ -18,114 +15,6 @@ public static class Hashes
 
         return hash.ToHashCode();
     }
-
-
-
-    extension( string value )
-    {
-        [Pure] public UInt128 Hash128( long seed = 0 )
-        {
-            ReadOnlySpan<char> result = value;
-            return result.Hash128(seed);
-        }
-        [Pure] public ulong Hash( long seed = 0 )
-        {
-            ReadOnlySpan<char> result = value;
-            return result.Hash(seed);
-        }
-    }
-
-
-
-    public const int MaxStackBytes = 32 * 1024; // tune as needed
-
-
-
-    extension( ref readonly ReadOnlySpan<string> values )
-    {
-        [Pure] public UInt128 Hash128( long seed = 0 )
-        {
-            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
-            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
-            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
-            Encoding                 encoding  = Encoding.Default;
-            int                      offset    = 0;
-
-            foreach ( ReadOnlySpan<char> span in values )
-            {
-                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
-                encoding.GetBytes(span, bytes);
-                offset += span.Length;
-                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
-            }
-
-            return XxHash128.HashToUInt128(buffer, seed);
-        }
-
-        [Pure] public ulong Hash( long seed = 0 )
-        {
-            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
-            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
-            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
-            Encoding                 encoding  = Encoding.Default;
-            int                      offset    = 0;
-
-            foreach ( ReadOnlySpan<char> span in values )
-            {
-                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
-                encoding.GetBytes(span, bytes);
-                offset += span.Length;
-                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
-            }
-
-            return XxHash64.HashToUInt64(buffer, seed);
-        }
-    }
-
-
-
-    extension<TValue>( ref readonly ReadOnlySpan<TValue> value )
-        where TValue : unmanaged
-    {
-        [Pure] public unsafe UInt128 Hash128( long seed = 0 )
-        {
-            if ( value.IsEmpty ) { return UInt128.Zero; }
-
-            int                      size      = sizeof(TValue);
-            int                      byteCount = value.Length * size;
-            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
-            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
-
-            for ( int i = 0; i < value.Length; i++ )
-            {
-                Span<byte> span = buffer.Slice(i * size, size);
-                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
-                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
-            }
-
-            return XxHash128.HashToUInt128(buffer, seed);
-        }
-
-        [Pure] public unsafe ulong Hash( long seed = 0 )
-        {
-            if ( value.IsEmpty ) { return 0; }
-
-            int                      size      = sizeof(TValue);
-            int                      byteCount = value.Length * size;
-            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
-            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
-
-            for ( int i = 0; i < value.Length; i++ )
-            {
-                Span<byte> span = buffer.Slice(i * size, size);
-                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
-                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
-            }
-
-            return XxHash64.HashToUInt64(buffer, seed);
-        }
-    }
-
 
 
     /*
@@ -589,9 +478,9 @@ public static class Hashes
 
     public static string GetHash( this OneOf<byte[], string> data )
     {
-        if ( data.IsT0 ) { return GetHash(data.AsT0); }
+        if ( data.IsT0 ) { return data.AsT0.GetHash(); }
 
-        if ( data.IsT1 ) { return GetHash(data.AsT1); }
+        if ( data.IsT1 ) { return data.AsT1.GetHash(); }
 
         throw new InvalidOperationException("Invalid data type");
     }
@@ -603,9 +492,9 @@ public static class Hashes
             return span.GetHash();
         }
 
-        if ( data.IsT1 ) { return GetHash(data.AsT1); }
+        if ( data.IsT1 ) { return data.AsT1.GetHash(); }
 
-        if ( data.IsT2 ) { return GetHash(data.AsT2); }
+        if ( data.IsT2 ) { return data.AsT2.GetHash(); }
 
         throw new InvalidOperationException("Invalid data type");
     }
@@ -645,22 +534,6 @@ public static class Hashes
         encoding.GetBytes(data, span);
         return span.ToArray();
     }
-
-
-
-    extension( HashAlgorithm hasher )
-    {
-        public string Hash( Encoding? encoding, params ReadOnlySpan<char> data ) => hasher.Hash(data.ToBytes(encoding));
-        public string Hash( params ReadOnlySpan<byte> data )
-        {
-            using ArrayBuffer<byte> owner = new(HASH);
-            Span<byte>              span  = owner.Span;
-            if ( !hasher.TryComputeHash(data, span, out int bytesWritten) ) { throw new InvalidOperationException($"{hasher.GetType().Name}.{nameof(hasher.TryComputeHash)} failed"); }
-
-            return Convert.ToHexString(span[..bytesWritten]);
-        }
-    }
-
 
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
@@ -767,15 +640,143 @@ public static class Hashes
     {
         await using MemoryStream stream = new();
 
-        await stream.WriteAsync(data)
-                    .ConfigureAwait(false);
+        await stream.WriteAsync(data).ConfigureAwait(false);
 
         stream.Seek(0, SeekOrigin.Begin);
 
-        byte[] hash = await hasher.ComputeHashAsync(stream)
-                                  .ConfigureAwait(false);
+        byte[] hash = await hasher.ComputeHashAsync(stream).ConfigureAwait(false);
 
         return BitConverter.ToString(hash);
+    }
+
+
+    public static UInt128 Hash( this ref readonly ReadOnlySpan<char> data, Encoding encoding )
+    {
+        int                     length = ( encoding.GetByteCount(data) );
+        using ArrayBuffer<byte> owner  = new(length);
+        Span<byte>              span   = owner.Span;
+        int                     size   = encoding.GetBytes(data, span);
+        ReadOnlySpan<byte>      result = span[..size];
+        return result.Hash();
+    }
+    public static UInt128 Hash( this ref readonly ReadOnlySpan<byte> data ) => XxHash128.HashToUInt128(data);
+
+
+
+    extension( string value )
+    {
+        [Pure] public UInt128 Hash128( long seed = 0 )
+        {
+            ReadOnlySpan<char> result = value;
+            return result.Hash128(seed);
+        }
+        [Pure] public ulong Hash( long seed = 0 )
+        {
+            ReadOnlySpan<char> result = value;
+            return result.Hash(seed);
+        }
+    }
+
+
+
+    extension( ref readonly ReadOnlySpan<string> values )
+    {
+        [Pure] public UInt128 Hash128( long seed = 0 )
+        {
+            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+            Encoding                 encoding  = Encoding.Default;
+            int                      offset    = 0;
+
+            foreach ( ReadOnlySpan<char> span in values )
+            {
+                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
+                encoding.GetBytes(span, bytes);
+                offset += span.Length;
+                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
+            }
+
+            return XxHash128.HashToUInt128(buffer, seed);
+        }
+
+        [Pure] public ulong Hash( long seed = 0 )
+        {
+            int                      byteCount = values.Sum(static x => x.Length) * sizeof(char);
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+            Encoding                 encoding  = Encoding.Default;
+            int                      offset    = 0;
+
+            foreach ( ReadOnlySpan<char> span in values )
+            {
+                Span<byte> bytes = buffer.Slice(offset, encoding.GetByteCount(span));
+                encoding.GetBytes(span, bytes);
+                offset += span.Length;
+                if ( !BitConverter.IsLittleEndian ) { bytes.Reverse(); } // Normalize endianness if needed
+            }
+
+            return XxHash64.HashToUInt64(buffer, seed);
+        }
+    }
+
+
+
+    extension<TValue>( ref readonly ReadOnlySpan<TValue> value )
+        where TValue : unmanaged
+    {
+        [Pure] public unsafe UInt128 Hash128( long seed = 0 )
+        {
+            if ( value.IsEmpty ) { return UInt128.Zero; }
+
+            int                      size      = sizeof(TValue);
+            int                      byteCount = value.Length * size;
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                Span<byte> span = buffer.Slice(i * size, size);
+                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
+                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
+            }
+
+            return XxHash128.HashToUInt128(buffer, seed);
+        }
+
+        [Pure] public unsafe ulong Hash( long seed = 0 )
+        {
+            if ( value.IsEmpty ) { return 0; }
+
+            int                      size      = sizeof(TValue);
+            int                      byteCount = value.Length * size;
+            using IMemoryOwner<byte> owner     = MemoryPool<byte>.Shared.Rent(byteCount);
+            Span<byte>               buffer    = owner.Memory.Span[..byteCount];
+
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                Span<byte> span = buffer.Slice(i * size, size);
+                MemoryMarshal.Write(span, in value[i]);                 // Write native representation
+                if ( !BitConverter.IsLittleEndian ) { span.Reverse(); } // Normalize endianness if needed
+            }
+
+            return XxHash64.HashToUInt64(buffer, seed);
+        }
+    }
+
+
+
+    extension( HashAlgorithm hasher )
+    {
+        public string Hash( Encoding? encoding, params ReadOnlySpan<char> data ) => hasher.Hash(data.ToBytes(encoding));
+        public string Hash( params ReadOnlySpan<byte> data )
+        {
+            using ArrayBuffer<byte> owner = new(HASH);
+            Span<byte>              span  = owner.Span;
+            if ( !hasher.TryComputeHash(data, span, out int bytesWritten) ) { throw new InvalidOperationException($"{hasher.GetType().Name}.{nameof(hasher.TryComputeHash)} failed"); }
+
+            return Convert.ToHexString(span[..bytesWritten]);
+        }
     }
 
 
@@ -787,40 +788,35 @@ public static class Hashes
         {
             using MD5 hasher = MD5.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
         public async ValueTask<string> HashAsync_SHA1()
         {
             using SHA1 hasher = SHA1.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
         public async ValueTask<string> HashAsync_SHA256()
         {
             using SHA256 hasher = SHA256.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
         public async ValueTask<string> HashAsync_SHA384()
         {
             using SHA384 hasher = SHA384.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
         public async ValueTask<string> HashAsync_SHA512()
         {
             using SHA512 hasher = SHA512.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
     }
 
@@ -833,47 +829,41 @@ public static class Hashes
         {
             using MD5 hasher = MD5.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
         public async ValueTask<string> HashAsync_SHA1()
         {
             using SHA1 hasher = SHA1.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
         public async ValueTask<string> HashAsync_SHA256()
         {
             using SHA256 hasher = SHA256.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
         public async ValueTask<string> HashAsync_SHA384()
         {
             using SHA384 hasher = SHA384.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
         public async ValueTask<string> HashAsync_SHA512()
         {
             using SHA512 hasher = SHA512.Create();
 
-            return await hasher.HashAsync(data)
-                               .ConfigureAwait(false);
+            return await hasher.HashAsync(data).ConfigureAwait(false);
         }
         public async ValueTask<string> HashAsync( HashAlgorithm hasher )
         {
             await using MemoryStream stream = new(data);
 
-            byte[] hash = await hasher.ComputeHashAsync(stream)
-                                      .ConfigureAwait(false);
+            byte[] hash = await hasher.ComputeHashAsync(stream).ConfigureAwait(false);
 
             return BitConverter.ToString(hash);
         }
@@ -904,17 +894,4 @@ public static class Hashes
             }
         }
     }
-
-
-
-    public static UInt128 Hash( this ref readonly ReadOnlySpan<char> data, Encoding encoding )
-    {
-        int                     length = ( encoding.GetByteCount(data) );
-        using ArrayBuffer<byte> owner  = new(length);
-        Span<byte>              span   = owner.Span;
-        int                     size   = encoding.GetBytes(data, span);
-        ReadOnlySpan<byte>      result = span[..size];
-        return result.Hash();
-    }
-    public static UInt128 Hash( this ref readonly ReadOnlySpan<byte> data ) => XxHash128.HashToUInt128(data);
 }

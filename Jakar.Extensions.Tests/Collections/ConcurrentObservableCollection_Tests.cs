@@ -50,9 +50,7 @@ public class ConcurrentObservableCollection_Tests : Assert
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 100));
 
-        this.AreEqual(1,
-                      collection.FindAll(match)
-                                .Length);
+        this.AreEqual(1, collection.FindAll(match).Length);
 
         this.AreEqual(value, collection.FindAll(match)[0]);
         return;
@@ -104,10 +102,7 @@ public class ConcurrentObservableCollection_Tests : Assert
 
     [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array = new([
-                                            ..Enumerable.Range(0, 100)
-                                                        .Select(static x => Random.Shared.Next(1000))
-                                        ]);
+        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
@@ -123,10 +118,7 @@ public class ConcurrentObservableCollection_Tests : Assert
 
     [Test] public async Task SortAsync()
     {
-        ReadOnlyMemory<int> array = new([
-                                            ..Enumerable.Range(0, 100)
-                                                        .Select(static x => Random.Shared.Next(1000))
-                                        ]);
+        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 

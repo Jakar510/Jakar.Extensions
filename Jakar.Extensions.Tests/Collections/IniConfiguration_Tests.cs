@@ -34,16 +34,13 @@ public class IniConfig_Tests : Assert
         IniConfig.Section server = ini[SERVER];
         server[APP_NAME] = nameof(ServicePoint);
 
-        server[nameof(Uri.Port)] = GetRandomPort()
-           .ToString();
+        server[nameof(Uri.Port)] = GetRandomPort().ToString();
 
         server[nameof(IPAddress)] = GetRandomIpAddress();
 
-        ini[nameof(Random)]
-           .Add(nameof(Random.Next), Random.Shared.Next());
+        ini[nameof(Random)].Add(nameof(Random.Next), Random.Shared.Next());
 
-        ini[nameof(IniConfig_Tests)]
-           .Add(nameof(Random.Next), Random.Shared.Next());
+        ini[nameof(IniConfig_Tests)].Add(nameof(Random.Next), Random.Shared.Next());
 
         return ini;
     }

@@ -3,18 +3,18 @@
 
 public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
-    [JsonIgnore] public readonly Exception?                       Value; 
-    public                       JToken?                        Data            { get; init; }
-    public                       string?                          HelpLink        { get; init; }
-    public                       int                              HResult         { get; init; }
-    public                       ExceptionDetails?                Inner           { get; init; }
-    public                       string                           Message         { get; init; } = EMPTY;
-    public                       string?                          MethodSignature { get; init; }
-    public                       string?                          Source          { get; init; }
-    public                       string[]                         StackTrace      { get; init; } = [];
-    public                       string                           Str             { get; init; } = EMPTY;
-    public                       MethodDetails?                   TargetSite      { get; init; }
-    public                       string?                          Type            { get; init; }
+    [JsonIgnore] public readonly Exception?        Value;
+    public                       JToken?           Data            { get; init; }
+    public                       string?           HelpLink        { get; init; }
+    public                       int               HResult         { get; init; }
+    public                       ExceptionDetails? Inner           { get; init; }
+    public                       string            Message         { get; init; } = EMPTY;
+    public                       string?           MethodSignature { get; init; }
+    public                       string?           Source          { get; init; }
+    public                       string[]          StackTrace      { get; init; } = [];
+    public                       string            Str             { get; init; } = EMPTY;
+    public                       MethodDetails?    TargetSite      { get; init; }
+    public                       string?           Type            { get; init; }
 
 
     public ExceptionDetails() { }
@@ -27,14 +27,12 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
         Message = exception.Message;
         HResult = exception.HResult;
 
-        Type = exception.GetType()
-                        .FullName;
+        Type = exception.GetType().FullName;
 
         HelpLink = exception.HelpLink;
         Source   = exception.Source;
 
-        StackTrace = exception.StackTrace?.SplitAndTrimLines()
-                              .ToArray() ?? [];
+        StackTrace = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
 
         MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}";
         Data            = exception.GetData();

@@ -1,30 +1,79 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/29/2023  1:49 PM
 
-using Jakar.Extensions.UserGuid;
-using Jakar.Extensions.UserLong;
-using ZXing.Aztec.Internal;
-
-
-
 namespace Jakar.Extensions;
 
 
 public static class Json
 {
-    public const  string                 TrimWarning = "Newtonsoft.Json relies on reflection over types that may be removed when trimming.";
     public const  string                 AotWarning  = "Newtonsoft.Json relies on dynamically creating types that may not be available with Ahead of Time compilation.";
-    public static JsonSerializerSettings Settings     { get; set; } = new();
+    public const  string                 TrimWarning = "Newtonsoft.Json relies on reflection over types that may be removed when trimming.";
     public static JsonLoadSettings       LoadSettings { get; set; } = new();
+    public static JsonSerializerSettings Settings     { get; set; } = new();
+
+
+    public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey(key) ?? false;
+    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData().ContainsKey(key);
+
+
+    public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()[key];
+
+
+    public static JToken? ToToken<TValue>( [NotNullIfNotNull(nameof(value))] this TValue? value )
+    {
+        JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
+        using JTokenWriter jsonWriter     = new();
+
+        jsonSerializer.Serialize(jsonWriter, value);
+        JToken element = jsonWriter.Token!;
+        return element;
+    }
+
+
+    public static void SetAdditionalData( this IJsonStringModel model, JObject? data ) => model.AdditionalData = data?.ToJson();
+
+
+    public static string ToJson( this         JToken value ) => value.ToString(Formatting.Indented);
+    public static string ToJson<TValue>( this TValue value ) => JsonConvert.SerializeObject(value, Formatting.Indented);
+
+
+    /// <summary> Asynchronously load and return JToken values from a stream containing a JSON array. The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
+    private static async IAsyncEnumerable<JToken> LoadAsyncEnumerable( this JsonTextReader reader, JsonLoadSettings loadSettings, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        ( await reader.MoveToContentAndAssertAsync(token).ConfigureAwait(false) ).AssertTokenType(JsonToken.StartArray);
+
+        token.ThrowIfCancellationRequested();
+
+        while ( ( await reader.ReadToContentAndAssert(token).ConfigureAwait(false) ).TokenType != JsonToken.EndArray )
+        {
+            token.ThrowIfCancellationRequested();
+
+            yield return await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
+        }
+
+        token.ThrowIfCancellationRequested();
+    }
+
+
+    public static string ToJson<TValue>( this scoped in ReadOnlySpan<TValue> values )
+
+    {
+        TValue[] array = ArrayPool<TValue>.Shared.Rent(values.Length);
+
+        try
+        {
+            values.CopyTo(array);
+            return array.ToJson();
+        }
+        finally { ArrayPool<TValue>.Shared.Return(array); }
+    }
 
 
 
     extension( PropertyInfo self )
     {
-        public bool GetJsonIsRequired() => self.GetCustomAttribute<JsonRequiredAttribute>() is not null;
-        public string GetJsonKey() => self.GetCustomAttribute<JsonPropertyAttribute>()
-                                         ?.PropertyName ??
-                                      self.Name;
+        public bool   GetJsonIsRequired() => self.GetCustomAttribute<JsonRequiredAttribute>() is not null;
+        public string GetJsonKey()        => self.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? self.Name;
     }
 
 
@@ -81,12 +130,6 @@ public static class Json
 
 
 
-    public static bool Contains( this IJsonModel self, string key ) => self.AdditionalData?.ContainsKey(key) ?? false;
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()
-                                                                                 .ContainsKey(key);
-
-
-
     extension( IJsonModel self )
     {
         public bool Remove( string key )
@@ -129,13 +172,9 @@ public static class Json
 
     extension( IJsonModel model )
     {
-        public JObject GetAdditionalData() => model.AdditionalData ??= new();
+        public JObject GetAdditionalData() => model.AdditionalData ??= new JObject();
         public JToken? Get( string key )   => model.AdditionalData?[key];
     }
-
-
-
-    public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()[key];
 
 
 
@@ -242,25 +281,6 @@ public static class Json
 
 
 
-    public static JToken? ToToken<TValue>( [NotNullIfNotNull(nameof(value))] this TValue? value )
-    {
-        JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
-        using JTokenWriter jsonWriter     = new();
-
-        jsonSerializer.Serialize(jsonWriter, value);
-        JToken element = jsonWriter.Token!;
-        return element;
-    }
-
-
-    public static void SetAdditionalData( this IJsonStringModel model, JObject? data ) => model.AdditionalData = data?.ToJson();
-
-
-    public static string ToJson( this         JToken value ) => value.ToString(Formatting.Indented);
-    public static string ToJson<TValue>( this TValue value ) => JsonConvert.SerializeObject(value, Formatting.Indented);
-
-
-
     extension( Stream self )
     {
         public async ValueTask<JToken> FromJson( CancellationToken token = default )
@@ -269,8 +289,7 @@ public static class Json
             using StreamReader         textReader   = new(self, leaveOpen: true); // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
             await using JsonTextReader reader       = new(textReader) { CloseInput = false };
 
-            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token)
-                                        .ConfigureAwait(false);
+            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
 
             return jToken;
         }
@@ -284,8 +303,7 @@ public static class Json
             using StreamReader         textReader = new(self, leaveOpen: true);
             await using JsonTextReader reader     = new(textReader) { CloseInput = false };
 
-            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token)
-                                        .ConfigureAwait(false);
+            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
 
             return ThrowIfNull(jToken.ToObject<T>(serializer));
         }
@@ -302,8 +320,7 @@ public static class Json
 
             await using ( JsonTextReader reader = new(textReader) { CloseInput = false } )
             {
-                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token)
-                                                       .ConfigureAwait(false) ) { yield return jToken.ToObject<T>(serializer); }
+                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken.ToObject<T>(serializer); }
             }
         }
 
@@ -317,33 +334,9 @@ public static class Json
 
             await using ( JsonTextReader reader = new(textReader) { CloseInput = false } )
             {
-                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token)
-                                                       .ConfigureAwait(false) ) { yield return jToken; }
+                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken; }
             }
         }
-    }
-
-
-
-    /// <summary> Asynchronously load and return JToken values from a stream containing a JSON array. The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
-    private static async IAsyncEnumerable<JToken> LoadAsyncEnumerable( this JsonTextReader reader, JsonLoadSettings loadSettings, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        ( await reader.MoveToContentAndAssertAsync(token)
-                      .ConfigureAwait(false) ).AssertTokenType(JsonToken.StartArray);
-
-        token.ThrowIfCancellationRequested();
-
-        while ( ( await reader.ReadToContentAndAssert(token)
-                              .ConfigureAwait(false) ).TokenType !=
-                JsonToken.EndArray )
-        {
-            token.ThrowIfCancellationRequested();
-
-            yield return await JToken.LoadAsync(reader, loadSettings, token)
-                                     .ConfigureAwait(false);
-        }
-
-        token.ThrowIfCancellationRequested();
     }
 
 
@@ -355,45 +348,29 @@ public static class Json
                                                                         : throw new JsonSerializationException($"Unexpected token {self.TokenType}, expected {tokenType}");
 
         public async ValueTask<JsonReader> ReadToContentAndAssert( CancellationToken token = default ) =>
-            await ( await self.ReadAndAssertAsync(token)
-                              .ConfigureAwait(false) ).MoveToContentAndAssertAsync(token)
-                                                      .ConfigureAwait(false);
+            await ( await self.ReadAndAssertAsync(token).ConfigureAwait(false) ).MoveToContentAndAssertAsync(token).ConfigureAwait(false);
 
 
         public async ValueTask<JsonReader> MoveToContentAndAssertAsync( CancellationToken token = default )
         {
             if ( self.TokenType is JsonToken.None ) // Skip past beginning of stream.
-                await self.ReadAndAssertAsync(token)
-                          .ConfigureAwait(false);
+            {
+                await self.ReadAndAssertAsync(token).ConfigureAwait(false);
+            }
 
             while ( self.TokenType is JsonToken.Comment ) // Skip past comments.
-                await self.ReadAndAssertAsync(token)
-                          .ConfigureAwait(false);
+            {
+                await self.ReadAndAssertAsync(token).ConfigureAwait(false);
+            }
 
             return self;
         }
         public async ValueTask<JsonReader> ReadAndAssertAsync( CancellationToken token = default )
         {
-            if ( !await self.ReadAsync(token)
-                            .ConfigureAwait(false) ) { throw new JsonReaderException("Unexpected end of JSON stream."); }
+            if ( !await self.ReadAsync(token).ConfigureAwait(false) ) { throw new JsonReaderException("Unexpected end of JSON stream."); }
 
             return self;
         }
-    }
-
-
-
-    public static string ToJson<TValue>( this scoped in ReadOnlySpan<TValue> values )
-
-    {
-        TValue[] array = ArrayPool<TValue>.Shared.Rent(values.Length);
-
-        try
-        {
-            values.CopyTo(array);
-            return array.ToJson();
-        }
-        finally { ArrayPool<TValue>.Shared.Return(array); }
     }
 }
 

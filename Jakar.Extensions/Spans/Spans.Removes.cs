@@ -6,29 +6,6 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> source )
-        where TValue : unmanaged, IEquatable<TValue>
-    {
-        public ReadOnlySpan<TValue> RemoveAll( TValue c )
-        {
-            Span<TValue> result = stackalloc TValue[source.Length];
-            RemoveAll(in source, in c, in result, out int length);
-
-            return result[..length]
-               .ToArray();
-        }
-        public ReadOnlySpan<TValue> RemoveAll( params ReadOnlySpan<TValue> removed )
-        {
-            Span<TValue>         result = stackalloc TValue[source.Length];
-            RemoveAll(in source, in removed, in result, out int length);
-
-            return result[..length]
-               .ToArray();
-        }
-    }
-
-
-
     public static Span<TValue> RemoveAll<TValue>( this scoped ref readonly Span<TValue> source, params ReadOnlySpan<TValue> removed )
         where TValue : unmanaged, IEquatable<TValue>
     {
@@ -37,8 +14,7 @@ public static partial class Spans
         ReadOnlySpan<TValue>      span   = source;
         RemoveAll(in span, in removed, in result, out int length);
 
-        return result[..length]
-           .ToArray();
+        return result[..length].ToArray();
     }
 
 
@@ -50,8 +26,7 @@ public static partial class Spans
 
         for ( int i = 0; i < source.Length; i++ )
         {
-            if ( source[i]
-               .Equals(value) )
+            if ( source[i].Equals(value) )
             {
                 offset++;
                 continue;
@@ -76,8 +51,7 @@ public static partial class Spans
 
             foreach ( TValue item in removed )
             {
-                if ( !source[i]
-                        .Equals(item) ) { continue; }
+                if ( !source[i].Equals(item) ) { continue; }
 
                 offset++;
                 skip = true;
@@ -143,5 +117,26 @@ public static partial class Spans
 
         source.CopyTo(result);
         length = source.Length;
+    }
+
+
+
+    extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> source )
+        where TValue : unmanaged, IEquatable<TValue>
+    {
+        public ReadOnlySpan<TValue> RemoveAll( TValue c )
+        {
+            Span<TValue> result = stackalloc TValue[source.Length];
+            RemoveAll(in source, in c, in result, out int length);
+
+            return result[..length].ToArray();
+        }
+        public ReadOnlySpan<TValue> RemoveAll( params ReadOnlySpan<TValue> removed )
+        {
+            Span<TValue> result = stackalloc TValue[source.Length];
+            RemoveAll(in source, in removed, in result, out int length);
+
+            return result[..length].ToArray();
+        }
     }
 }

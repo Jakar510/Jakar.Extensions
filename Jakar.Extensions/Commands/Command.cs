@@ -3,9 +3,9 @@
 
 public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, bool>? canExecute = null ) : BaseClass, ICommand
 {
-    protected          bool?                    _canExecuteValue;
-    protected readonly Func<TValue?, bool>?     _canExecute = canExecute;
     protected readonly Executable               _execute    = execute;
+    protected readonly Func<TValue?, bool>?     _canExecute = canExecute;
+    protected          bool?                    _canExecuteValue;
     protected          CancellationTokenSource? _source;
 
 
@@ -41,7 +41,8 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
         {
             await Execute(parameter is TValue value
                               ? value
-                              : default).ConfigureAwait(false);
+                              : default)
+               .ConfigureAwait(false);
         }
         catch ( Exception e ) { SelfLogger.WriteLine("'{Error}' \n {StackTrace}", e.Message, e.ToString()); }
     }

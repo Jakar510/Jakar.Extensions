@@ -201,16 +201,14 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeTypeNames.Application.JSON));
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeTypeNames.Text.PLAIN));
 
-        await SetBlockedPasswords(client, uri, token)
-           .ConfigureAwait(false);
+        await SetBlockedPasswords(client, uri, token).ConfigureAwait(false);
     }
 
     public async ValueTask SetBlockedPasswords( HttpClient client, Uri uri, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string content = await client.GetStringAsync(uri, token)
-                                     .ConfigureAwait(false);
+        string content = await client.GetStringAsync(uri, token).ConfigureAwait(false);
 
         SetBlockedPasswords(content);
     }
@@ -219,8 +217,6 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        SetBlockedPasswords(await file.ReadAsync()
-                                      .AsString(token)
-                                      .ConfigureAwait(false));
+        SetBlockedPasswords(await file.ReadAsync().AsString(token).ConfigureAwait(false));
     }
 }

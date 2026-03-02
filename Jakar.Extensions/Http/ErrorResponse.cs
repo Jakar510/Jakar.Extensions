@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/23/2025  16:34
 
-using ZXing.Aztec.Internal;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -23,7 +19,7 @@ public readonly struct ErrorResponse( string? text ) : IParsable<ErrorResponse>,
     public static implicit operator ErrorResponse( string     input ) => From(input);
     public static implicit operator ErrorResponse( Errors     input ) => From(input);
     public static implicit operator ErrorResponse( StringTags input ) => From(input);
-    public static implicit operator ErrorResponse( Exception  input ) => Extensions.Errors.Create(input);
+    public static implicit operator ErrorResponse( Exception  input ) => Errors.Create(input);
 
 
     public static ErrorResponse From( string     input ) => new(input);
@@ -65,7 +61,10 @@ public readonly struct ErrorResponse( string? text ) : IParsable<ErrorResponse>,
         if ( AsErrors(out Errors? errors)      && f2 is not null ) { f2(errors); }
         else if ( AsTags(out StringTags? tags) && f3 is not null ) { f3(tags.Value); }
         else if ( AsJson(out JToken? jToken)   && f0 is not null ) { f0(jToken); }
-        else if ( f1 is not null ) { f1(Text); }
+        else
+        {
+            f1?.Invoke(Text);
+        }
     }
 
 
@@ -103,54 +102,28 @@ public readonly struct ErrorResponse( string? text ) : IParsable<ErrorResponse>,
     {
         if ( !HasValue ) { return default; }
 
-        if ( AsErrors(out Errors? errors) && f2 is not null )
-        {
-            return await f2(errors)
-                      .ConfigureAwait(false);
-        }
+        if ( AsErrors(out Errors? errors) && f2 is not null ) { return await f2(errors).ConfigureAwait(false); }
 
-        if ( AsTags(out StringTags? tags) && f3 is not null )
-        {
-            return await f3(tags.Value)
-                      .ConfigureAwait(false);
-        }
+        if ( AsTags(out StringTags? tags) && f3 is not null ) { return await f3(tags.Value).ConfigureAwait(false); }
 
-        if ( AsJson(out JToken? jToken) && f0 is not null )
-        {
-            return await f0(jToken)
-                      .ConfigureAwait(false);
-        }
+        if ( AsJson(out JToken? jToken) && f0 is not null ) { return await f0(jToken).ConfigureAwait(false); }
 
         return f1 is not null
-                   ? await f1(Text)
-                        .ConfigureAwait(false)
+                   ? await f1(Text).ConfigureAwait(false)
                    : default;
     }
     public async ValueTask<TValue?> MatchAsync<TValue>( Func<JToken, CancellationToken, ValueTask<TValue>>? f0, Func<string, CancellationToken, ValueTask<TValue>>? f1, Func<Errors, CancellationToken, ValueTask<TValue>>? f2, Func<StringTags, CancellationToken, ValueTask<TValue>>? f3, CancellationToken token )
     {
         if ( !HasValue ) { return default; }
 
-        if ( AsErrors(out Errors? errors) && f2 is not null )
-        {
-            return await f2(errors, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsErrors(out Errors? errors) && f2 is not null ) { return await f2(errors, token).ConfigureAwait(false); }
 
-        if ( AsTags(out StringTags? tags) && f3 is not null )
-        {
-            return await f3(tags.Value, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsTags(out StringTags? tags) && f3 is not null ) { return await f3(tags.Value, token).ConfigureAwait(false); }
 
-        if ( AsJson(out JToken? jToken) && f0 is not null )
-        {
-            return await f0(jToken, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsJson(out JToken? jToken) && f0 is not null ) { return await f0(jToken, token).ConfigureAwait(false); }
 
         return f1 is not null
-                   ? await f1(Text, token)
-                        .ConfigureAwait(false)
+                   ? await f1(Text, token).ConfigureAwait(false)
                    : default;
     }
 
@@ -159,54 +132,28 @@ public readonly struct ErrorResponse( string? text ) : IParsable<ErrorResponse>,
     {
         if ( !HasValue ) { return default; }
 
-        if ( AsErrors(out Errors? errors) && f2 is not null )
-        {
-            return await f2(arg, errors)
-                      .ConfigureAwait(false);
-        }
+        if ( AsErrors(out Errors? errors) && f2 is not null ) { return await f2(arg, errors).ConfigureAwait(false); }
 
-        if ( AsTags(out StringTags? tags) && f3 is not null )
-        {
-            return await f3(arg, tags.Value)
-                      .ConfigureAwait(false);
-        }
+        if ( AsTags(out StringTags? tags) && f3 is not null ) { return await f3(arg, tags.Value).ConfigureAwait(false); }
 
-        if ( AsJson(out JToken? jToken) && f0 is not null )
-        {
-            return await f0(arg, jToken)
-                      .ConfigureAwait(false);
-        }
+        if ( AsJson(out JToken? jToken) && f0 is not null ) { return await f0(arg, jToken).ConfigureAwait(false); }
 
         return f1 is not null
-                   ? await f1(arg, Text)
-                        .ConfigureAwait(false)
+                   ? await f1(arg, Text).ConfigureAwait(false)
                    : default;
     }
     public async ValueTask<TValue?> MatchAsync<TArg, TValue>( TArg arg, Func<TArg, JToken, CancellationToken, ValueTask<TValue>>? f0, Func<TArg, string, CancellationToken, ValueTask<TValue>>? f1, Func<TArg, Errors, CancellationToken, ValueTask<TValue>>? f2, Func<TArg, StringTags, CancellationToken, ValueTask<TValue>>? f3, CancellationToken token )
     {
         if ( !HasValue ) { return default; }
 
-        if ( AsErrors(out Errors? errors) && f2 is not null )
-        {
-            return await f2(arg, errors, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsErrors(out Errors? errors) && f2 is not null ) { return await f2(arg, errors, token).ConfigureAwait(false); }
 
-        if ( AsTags(out StringTags? tags) && f3 is not null )
-        {
-            return await f3(arg, tags.Value, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsTags(out StringTags? tags) && f3 is not null ) { return await f3(arg, tags.Value, token).ConfigureAwait(false); }
 
-        if ( AsJson(out JToken? jToken) && f0 is not null )
-        {
-            return await f0(arg, jToken, token)
-                      .ConfigureAwait(false);
-        }
+        if ( AsJson(out JToken? jToken) && f0 is not null ) { return await f0(arg, jToken, token).ConfigureAwait(false); }
 
         return f1 is not null
-                   ? await f1(arg, Text, token)
-                        .ConfigureAwait(false)
+                   ? await f1(arg, Text, token).ConfigureAwait(false)
                    : default;
     }
 

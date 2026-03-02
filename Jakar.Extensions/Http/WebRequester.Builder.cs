@@ -391,10 +391,7 @@ public partial class WebRequester
         {
             private readonly OneOf<Uri, Func<Uri>, Func<IHostInfo>> __hostInfo = hostInfo;
 
-            public Uri HostInfo => __hostInfo.Match(static x => x,
-                                                    static x => x(),
-                                                    static x => x()
-                                                       .HostInfo);
+            public Uri HostInfo => __hostInfo.Match(static x => x, static x => x(), static x => x().HostInfo);
         }
     }
 }

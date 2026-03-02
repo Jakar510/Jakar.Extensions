@@ -102,14 +102,12 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         string fileName  = $"{name}.{extension}";
         return directory.Join(fileName);
     }
-    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token)
-                                                                                              .ConfigureAwait(false);
+    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token).ConfigureAwait(false);
     public async Task WriteToAsync( LocalFile file, CancellationToken token )
     {
         await using FileStream stream = file.OpenWrite(FileMode.OpenOrCreate);
 
-        await WriteToAsync(stream, token)
-           .ConfigureAwait(false);
+        await WriteToAsync(stream, token).ConfigureAwait(false);
     }
     public async Task WriteToAsync( Stream stream, CancellationToken token )
     {
@@ -124,16 +122,14 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         {
             await using StreamWriter writer = new(stream);
 
-            await writer.WriteAsync(data.AsT1)
-                        .ConfigureAwait(false);
+            await writer.WriteAsync(data.AsT1).ConfigureAwait(false);
 
             return;
         }
 
         ReadOnlyMemory<byte> payload = data.AsT0;
 
-        await stream.WriteAsync(payload, token)
-                    .ConfigureAwait(false);
+        await stream.WriteAsync(payload, token).ConfigureAwait(false);
     }
     public void WriteTo( Stream stream )
     {
@@ -164,14 +160,12 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
                                                   : Payload.TryGetData();
 
 
-    public static TSelf Create( IFileData<TID, TFileMetaData> data )                         => Create(data, data.MetaData);
-    public static TSelf Create( IFileData<TID>                data, TFileMetaData metaData ) => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
-    public static TSelf Create( TFileMetaData metaData, MemoryStream stream ) => Create(metaData,
-                                                                                        stream.AsReadOnlyMemory()
-                                                                                              .Span);
-    public static TSelf Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
-    public static TSelf Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
-    public static TSelf Create( TFileMetaData metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
+    public static TSelf Create( IFileData<TID, TFileMetaData> data )                                                                           => Create(data, data.MetaData);
+    public static TSelf Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
+    public static TSelf Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create(metaData, stream.AsReadOnlyMemory().Span);
+    public static TSelf Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
+    public static TSelf Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
+    public static TSelf Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
 
 
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
@@ -184,9 +178,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        ReadOnlyMemory<byte> content = await file.ReadAsync()
-                                                 .AsMemory(token)
-                                                 .ConfigureAwait(false);
+        ReadOnlyMemory<byte> content = await file.ReadAsync().AsMemory(token).ConfigureAwait(false);
 
         return Create(TFileMetaData.Create(file), content.Span);
     }
@@ -195,8 +187,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek(0, SeekOrigin.Begin);
 
-        using MemoryStream memory = await stream.ToMemoryStream()
-                                                .ConfigureAwait(false);
+        using MemoryStream memory = await stream.ToMemoryStream().ConfigureAwait(false);
 
         return Create(metaData, memory);
     }

@@ -142,8 +142,7 @@ public class Spans_Tests : Assert
 
     [Test] [TestCase(1)] [TestCase(2)] public void Create( int expected )
     {
-        int results = Spans.CreateSpan<int>(expected)
-                           .Length;
+        int results = Spans.CreateSpan<int>(expected).Length;
 
         this.AreEqual(expected, results);
     }
@@ -158,8 +157,7 @@ public class Spans_Tests : Assert
         {
             case 1:
             {
-                int results = Spans.Create(1)
-                                   .Length;
+                int results = Spans.Create(1).Length;
 
                 this.AreEqual(length, results);
                 return;
@@ -167,8 +165,7 @@ public class Spans_Tests : Assert
 
             case 2:
             {
-                int results = Spans.Create(1, 2)
-                                   .Length;
+                int results = Spans.Create(1, 2).Length;
 
                 this.AreEqual(length, results);
                 return;
@@ -176,8 +173,7 @@ public class Spans_Tests : Assert
 
             case 3:
             {
-                int results = Spans.Create(1, 2, 3)
-                                   .Length;
+                int results = Spans.Create(1, 2, 3).Length;
 
                 this.AreEqual(length, results);
                 return;
@@ -185,8 +181,7 @@ public class Spans_Tests : Assert
 
             case 4:
             {
-                int results = Spans.Create(1, 2, 3, 4)
-                                   .Length;
+                int results = Spans.Create(1, 2, 3, 4).Length;
 
                 this.AreEqual(length, results);
                 return;
@@ -194,8 +189,7 @@ public class Spans_Tests : Assert
 
             case 5:
             {
-                int results = Spans.Create(1, 2, 3, 4, 5)
-                                   .Length;
+                int results = Spans.Create(1, 2, 3, 4, 5).Length;
 
                 this.AreEqual(length, results);
                 return;

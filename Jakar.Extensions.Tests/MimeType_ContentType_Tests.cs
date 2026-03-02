@@ -265,7 +265,5 @@ public class MimeType_ContentType_Tests : Assert
     // VIDEOS
 
     // IMAGES
-    public void Test_ContentType( string s ) => this.AreEqual(s.ToMimeType()
-                                                               .ToContentType(),
-                                                              s);
+    public void Test_ContentType( string s ) => this.AreEqual(s.ToMimeType().ToContentType(), s);
 }

@@ -162,8 +162,7 @@ public class StringCollectionBenchmarks
     }
 
 
-    private static string[] GetArray( int count ) => GetValues(count)
-       .ToArray(count);
+    private static string[] GetArray( int count ) => GetValues(count).ToArray(count);
     private static IEnumerable<string> GetValues( int count )
     {
         for ( int i = 0; i < count; i++ ) { yield return Randoms.RandomString(Random.Shared.Next(10, 50)); }

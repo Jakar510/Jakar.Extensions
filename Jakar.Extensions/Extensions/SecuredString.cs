@@ -75,9 +75,7 @@ public sealed class SecuredString( SecureString value ) : IDisposable
 
             if ( __value6 is not null ) { return __value6; }
 
-            return configuration.GetSection(section)
-                                .GetValue<string?>(key) ??
-                   throw new KeyNotFoundException(key);
+            return configuration.GetSection(section).GetValue<string?>(key) ?? throw new KeyNotFoundException(key);
         }
     }
 }

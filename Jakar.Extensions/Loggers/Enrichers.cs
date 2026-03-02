@@ -3,7 +3,6 @@
 
 
 using Serilog.Events;
-using ZLinq;
 
 
 
@@ -13,66 +12,6 @@ namespace Jakar.Extensions;
 public static class Enricher
 {
     private static readonly ConcurrentDictionary<string, LogEventProperty> __sourceContexts = new();
-
-
-
-    /// <param name="activity"> The activity. </param>
-    extension( Activity activity )
-    {
-        /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
-        /// <returns> The span unique identifier. </returns>
-        public string GetSpanID()
-        {
-            ArgumentNullException.ThrowIfNull(activity);
-
-            string? spanId = activity.IdFormat switch
-                             {
-                                 ActivityIdFormat.Hierarchical => activity.Id,
-                                 ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
-                                 ActivityIdFormat.Unknown      => null,
-                                 _                             => null
-                             };
-
-            return spanId ?? EMPTY;
-        }
-
-
-        /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
-        /// <returns> The span trace unique identifier. </returns>
-        public string GetTraceID()
-        {
-            ArgumentNullException.ThrowIfNull(activity);
-
-            string? traceId = activity.IdFormat switch
-                              {
-                                  ActivityIdFormat.Hierarchical => activity.RootId,
-                                  ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
-                                  ActivityIdFormat.Unknown      => null,
-                                  _                             => null
-                              };
-
-            return traceId ?? EMPTY;
-        }
-
-
-        /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
-        /// <returns> The span parent unique identifier. </returns>
-        public string GetParentID()
-        {
-            ArgumentNullException.ThrowIfNull(activity);
-
-            string? parentId = activity.IdFormat switch
-                               {
-                                   ActivityIdFormat.Hierarchical => activity.ParentId,
-                                   ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
-                                   ActivityIdFormat.Unknown      => null,
-                                   _                             => null
-                               };
-
-            return parentId ?? EMPTY;
-        }
-    }
-
 
 
     public static void             TryEnrich( this         LogEvent log, string sourceContext ) => log.AddPropertyIfAbsent(__sourceContexts.GetOrAdd(sourceContext, GetSourceProperty));
@@ -139,13 +78,10 @@ public static class Enricher
                                                                                                                                           typeof(AppVersion))
                                                                                             };
 
-    public static StructureValue GetPropertyValue( ActivityEvent value ) => new([GetProperty(value.Name, nameof(ActivityEvent.Name)), GetProperty(value.Timestamp, nameof(ActivityEvent.Timestamp)), GetProperty(value.Tags, nameof(ActivityEvent.Tags))]);
-    public static SequenceValue GetPropertyValue( IEnumerable<ActivityEvent> events ) => new(events.OrderBy(static x => x.Timestamp)
-                                                                                                   .Select(GetPropertyValue));
-    public static StructureValue GetPropertyValue( IEnumerable<KeyValuePair<string, string?>> value ) => new(value.OrderBy(static x => x.Key)
-                                                                                                                  .Select(GetProperty));
-    public static StructureValue GetPropertyValue( IEnumerable<KeyValuePair<string, object?>> value ) => new(value.OrderBy(static x => x.Key)
-                                                                                                                  .Select(GetPropertyValue));
+    public static StructureValue GetPropertyValue( ActivityEvent                              value )  => new([GetProperty(value.Name, nameof(ActivityEvent.Name)), GetProperty(value.Timestamp, nameof(ActivityEvent.Timestamp)), GetProperty(value.Tags, nameof(ActivityEvent.Tags))]);
+    public static SequenceValue  GetPropertyValue( IEnumerable<ActivityEvent>                 events ) => new(events.OrderBy(static x => x.Timestamp).Select(GetPropertyValue));
+    public static StructureValue GetPropertyValue( IEnumerable<KeyValuePair<string, string?>> value )  => new(value.OrderBy(static x => x.Key).Select(GetProperty));
+    public static StructureValue GetPropertyValue( IEnumerable<KeyValuePair<string, object?>> value )  => new(value.OrderBy(static x => x.Key).Select(GetPropertyValue));
 
 
     public static KeyValuePair<ScalarValue, LogEventPropertyValue> GetPropertyValue( string?           value, string name ) => new(new ScalarValue(name), new ScalarValue(value));
@@ -161,4 +97,63 @@ public static class Enricher
     public static KeyValuePair<ScalarValue, LogEventPropertyValue> GetPropertyValue( in TimeOnly       value, string name ) => new(new ScalarValue(name), new ScalarValue(value));
     public static KeyValuePair<ScalarValue, LogEventPropertyValue> GetPropertyValue( in Guid           value, string name ) => new(new ScalarValue(name), new ScalarValue(value));
     public static KeyValuePair<ScalarValue, LogEventPropertyValue> GetPropertyValue( AppVersion        value, string name ) => new(new ScalarValue(name), new ScalarValue(value.ToString()));
+
+
+
+    /// <param name="activity"> The activity. </param>
+    extension( Activity activity )
+    {
+        /// <summary> Gets the span unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span unique identifier. </returns>
+        public string GetSpanID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
+
+            string? spanId = activity.IdFormat switch
+                             {
+                                 ActivityIdFormat.Hierarchical => activity.Id,
+                                 ActivityIdFormat.W3C          => activity.SpanId.ToHexString(),
+                                 ActivityIdFormat.Unknown      => null,
+                                 _                             => null
+                             };
+
+            return spanId ?? EMPTY;
+        }
+
+
+        /// <summary> Gets the span trace unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span trace unique identifier. </returns>
+        public string GetTraceID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
+
+            string? traceId = activity.IdFormat switch
+                              {
+                                  ActivityIdFormat.Hierarchical => activity.RootId,
+                                  ActivityIdFormat.W3C          => activity.TraceId.ToHexString(),
+                                  ActivityIdFormat.Unknown      => null,
+                                  _                             => null
+                              };
+
+            return traceId ?? EMPTY;
+        }
+
+
+        /// <summary> Gets the span parent unique identifier regardless of the activity identifier format. </summary>
+        /// <returns> The span parent unique identifier. </returns>
+        public string GetParentID()
+        {
+            ArgumentNullException.ThrowIfNull(activity);
+
+            string? parentId = activity.IdFormat switch
+                               {
+                                   ActivityIdFormat.Hierarchical => activity.ParentId,
+                                   ActivityIdFormat.W3C          => activity.ParentSpanId.ToHexString(),
+                                   ActivityIdFormat.Unknown      => null,
+                                   _                             => null
+                               };
+
+            return parentId ?? EMPTY;
+        }
+    }
 }

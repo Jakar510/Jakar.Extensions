@@ -25,21 +25,11 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
             if ( SetProperty(ref __confirmPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
         }
     }
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserLogin))] public virtual bool IsUserLogin => !string.IsNullOrWhiteSpace(UserLogin);
 
 
-    [JsonIgnore]                                                                          public override bool IsValid         => base.IsValid && IsUserLogin && IsValidPassword;
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserLogin))]                             public virtual  bool IsUserLogin     => !string.IsNullOrWhiteSpace(UserLogin);
+    [JsonIgnore]                                                                          public override bool IsValid         => base.IsValid                             && IsUserLogin                                                            && IsValidPassword;
     [JsonIgnore] [MemberNotNullWhen(true, nameof(UserPassword), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(UserPassword) && string.Equals(UserPassword, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(UserPassword);
-
-
-    [Required] [StringLength(PASSWORD)] public virtual string UserPassword
-    {
-        get => __userPassword;
-        set
-        {
-            if ( SetProperty(ref __userPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
-        }
-    }
 
 
     [Required] [StringLength(USER_NAME)] public virtual string UserLogin
@@ -51,6 +41,16 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
             OnPropertyChanged(nameof(IsValid));
         }
     } = EMPTY;
+
+
+    [Required] [StringLength(PASSWORD)] public virtual string UserPassword
+    {
+        get => __userPassword;
+        set
+        {
+            if ( SetProperty(ref __userPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
+        }
+    }
 
 
     public AppVersion Version { get; set; } = AppVersion.Default;

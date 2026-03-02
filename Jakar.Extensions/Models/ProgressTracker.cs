@@ -8,8 +8,8 @@ public sealed class ProgressTracker<TNumber>() : Progress<TNumber>()
     where TNumber : INumber<TNumber>
 {
     private TNumber __number = TNumber.Zero;
-    public  TNumber Min  { get; init; } = TNumber.Zero;
     public  TNumber Max  { get; init; } = TNumber.CreateTruncating(100);
+    public  TNumber Min  { get; init; } = TNumber.Zero;
     public  TNumber Step { get; init; } = TNumber.One;
 
 

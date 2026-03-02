@@ -1,8 +1,4 @@
-﻿using ZLinq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class Types
@@ -13,6 +9,14 @@ public static partial class Types
     public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper(property.DeclaringType, property.CustomAttributes);
     public static bool IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper(field.DeclaringType, field.CustomAttributes);
     public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
+
+
+    [RequiresDynamicCode("The native code for this instantiation might not be available at runtime.")] [RequiresUnreferencedCode("If some of the generic arguments are annotated (either with DynamicallyAccessedMembersAttribute, or generic constraints), trimming can't validate that the requirements of those annotations are met.")]
+    public static object? Construct( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] this Type target, params Type[] args )
+    {
+        Type type = target.MakeGenericType(args);
+        return Activator.CreateInstance(type);
+    }
 
 
 
@@ -93,8 +97,7 @@ public static partial class Types
 
             if ( setMethod.ReturnParameter is null ) { throw new NullReferenceException(nameof(setMethod.ReturnParameter)); }
 
-            return setMethod.ReturnParameter.GetRequiredCustomModifiers()
-                            .Contains(isExternalInit);
+            return setMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(isExternalInit);
         }
     }
 
@@ -204,19 +207,7 @@ public static partial class Types
                              _                         => throw new InvalidOperationException($"MemberInfo type {self.MemberType} is not supported.")
                          };
 
-            return type?.IsNullableType() is true        ||
-                   type?.IsBuiltInNullableType() is true ||
-                   self.GetNullabilityInfo()
-                       .ReadState is NullabilityState.NotNull;
+            return type?.IsNullableType() is true || type?.IsBuiltInNullableType() is true || self.GetNullabilityInfo().ReadState is NullabilityState.NotNull;
         }
-    }
-
-
-
-    [RequiresDynamicCode("The native code for this instantiation might not be available at runtime.")] [RequiresUnreferencedCode("If some of the generic arguments are annotated (either with DynamicallyAccessedMembersAttribute, or generic constraints), trimming can't validate that the requirements of those annotations are met.")]
-    public static object? Construct( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] this Type target, params Type[] args )
-    {
-        Type type = target.MakeGenericType(args);
-        return Activator.CreateInstance(type);
     }
 }

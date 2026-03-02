@@ -15,8 +15,7 @@ public static partial class Enums
     [RequiresDynamicCode(nameof(GetEnumNamedValues))] public static FrozenDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>()
         where TEnum : unmanaged, Enum
     {
-        IEnumerable<TValue> values = Enum.GetValues<TEnum>()
-                                         .Cast<TValue>();
+        IEnumerable<TValue> values = Enum.GetValues<TEnum>().Cast<TValue>();
 
         return values.ToFrozenDictionary(keySelector, elementSelector);
 
@@ -27,12 +26,9 @@ public static partial class Enums
 
 
     public static TEnum GetEnumValue<TEnum>( this IReadOnlyDictionary<string, TEnum> dictionary, TEnum value )
-        where TEnum : Enum => dictionary.First(pair => pair.Key == value.ToString())
-                                        .Value;
+        where TEnum : Enum => dictionary.First(pair => pair.Key == value.ToString()).Value;
 
 
     [RequiresDynamicCode(nameof(GetEnumValue))] public static TValue GetEnumValue<TValue, TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => GetEnumNamedValues<TEnum, TValue>()
-                                        .First(pair => pair.Key == value.ToString())
-                                        .Value;
+        where TEnum : unmanaged, Enum => GetEnumNamedValues<TEnum, TValue>().First(pair => pair.Key == value.ToString()).Value;
 }

@@ -49,8 +49,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
                                       Options = GetOptions(width, height)
                                   };
 
-        string? result = writer.Write(GetContent(record))
-                               .ToString();
+        string? result = writer.Write(GetContent(record)).ToString();
 
         return result ?? throw new NullReferenceException(nameof(result));
     }
@@ -77,7 +76,6 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
                                       Options = GetOptions(width, height)
                                   };
 
-        return writer.Write(GetContent(userName))
-                     .ToString();
+        return writer.Write(GetContent(userName)).ToString();
     }
 }

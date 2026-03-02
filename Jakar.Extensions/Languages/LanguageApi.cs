@@ -4,9 +4,9 @@
 [Serializable]
 public class LanguageApi : BaseClass
 {
-    protected const  string             SHARED_KEY               = "LanguageApi";
     public const     string             CURRENT_LANGUAGE_VERSION = "CurrentLanguageVersion";
     public const     string             SELECTED_LANGUAGE_NAME   = "SelectedLanguageDisplayName";
+    protected const  string             SHARED_KEY               = "LanguageApi";
     protected static LanguageApi?       _api;
     protected        CultureInfo        _currentCulture   = CultureInfo.CurrentCulture;
     protected        CultureInfo        _currentUiCulture = CultureInfo.CurrentUICulture;

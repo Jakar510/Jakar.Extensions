@@ -439,17 +439,11 @@ public class DictionaryLookupBenchmarks
 
     [GlobalSetup] public void GlobalSetup()
     {
-        __items = Enumerable.Range(0, Items)
-                            .Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7()
-                                                                                  .ToString(),
-                                                                              Random.Shared.Next()))
-                            .ToArray();
+        __items = Enumerable.Range(0, Items).Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7().ToString(), Random.Shared.Next())).ToArray();
 
-        __firstKey = __items.First()
-                            .Key;
+        __firstKey = __items.First().Key;
 
-        __lastKey = __items.Last()
-                           .Key;
+        __lastKey = __items.Last().Key;
 
         __randomPair           = RandomPair();
         __dictionary           = new Dictionary<string, int>(__items);
@@ -460,9 +454,8 @@ public class DictionaryLookupBenchmarks
     }
 
 
-    [BenchmarkCategory("Commons")] [Benchmark] public int RandomIndex() => Random.Shared.Next(0, Items);
-    [BenchmarkCategory("Commons")] [Benchmark] public KeyValuePair<string, int> RandomPair() => __items.Random(Random.Shared)
-                                                                                                       .First();
+    [BenchmarkCategory("Commons")] [Benchmark] public int                       RandomIndex() => Random.Shared.Next(0, Items);
+    [BenchmarkCategory("Commons")] [Benchmark] public KeyValuePair<string, int> RandomPair()  => __items.Random(Random.Shared).First();
 
 
     [BenchmarkCategory("Construct")] [Benchmark(Baseline = true)] public Dictionary<string, int>           ConstructDictionary()           => new(__items);
@@ -508,21 +501,11 @@ public class DictionaryLookupBenchmarks
     [BenchmarkCategory("TryGetValue_Last")] [Benchmark]                  public bool FrozenDictionary_TryGetValue_Last()     => __frozenDictionary.TryGetValue(__lastKey, out _);
 
 
-    [BenchmarkCategory("TryGetValue_Random")] [Benchmark(Baseline = true)] public bool Dictionary_TryGetValue_Random() => __dictionary.TryGetValue(RandomPair()
-                                                                                                                                                      .Key,
-                                                                                                                                                   out _);
-    [BenchmarkCategory("TryGetValue_Random")] [Benchmark] public bool ReadOnlyDictionary_TryGetValue_Random() => __readOnlyDictionary.TryGetValue(RandomPair()
-                                                                                                                                                     .Key,
-                                                                                                                                                  out _);
-    [BenchmarkCategory("TryGetValue_Random")] [Benchmark] public bool ConcurrentDictionary_TryGetValue_Random() => __concurrentDictionary.TryGetValue(RandomPair()
-                                                                                                                                                         .Key,
-                                                                                                                                                      out _);
-    [BenchmarkCategory("TryGetValue_Random")] [Benchmark] public bool ImmutableDictionary_TryGetValue_Random() => __immutableDictionary.TryGetValue(RandomPair()
-                                                                                                                                                       .Key,
-                                                                                                                                                    out _);
-    [BenchmarkCategory("TryGetValue_Random")] [Benchmark] public bool FrozenDictionary_TryGetValue_Random() => __frozenDictionary.TryGetValue(RandomPair()
-                                                                                                                                                 .Key,
-                                                                                                                                              out _);
+    [BenchmarkCategory("TryGetValue_Random")] [Benchmark(Baseline = true)] public bool Dictionary_TryGetValue_Random()           => __dictionary.TryGetValue(RandomPair().Key, out _);
+    [BenchmarkCategory("TryGetValue_Random")] [Benchmark]                  public bool ReadOnlyDictionary_TryGetValue_Random()   => __readOnlyDictionary.TryGetValue(RandomPair().Key, out _);
+    [BenchmarkCategory("TryGetValue_Random")] [Benchmark]                  public bool ConcurrentDictionary_TryGetValue_Random() => __concurrentDictionary.TryGetValue(RandomPair().Key, out _);
+    [BenchmarkCategory("TryGetValue_Random")] [Benchmark]                  public bool ImmutableDictionary_TryGetValue_Random()  => __immutableDictionary.TryGetValue(RandomPair().Key, out _);
+    [BenchmarkCategory("TryGetValue_Random")] [Benchmark]                  public bool FrozenDictionary_TryGetValue_Random()     => __frozenDictionary.TryGetValue(RandomPair().Key, out _);
 
 
     [BenchmarkCategory("TryGetValue_Random_Single")] [Benchmark(Baseline = true)] public bool Dictionary_TryGetValue_Random_Single()           => __dictionary.TryGetValue(__randomPair.Key, out _);
@@ -539,16 +522,11 @@ public class DictionaryLookupBenchmarks
     [BenchmarkCategory("Get_Random_Single")] [Benchmark]                  public int FrozenDictionary_Get_Random_Single()     => __frozenDictionary[__randomPair.Key];
 
 
-    [BenchmarkCategory("Get_Random")] [Benchmark(Baseline = true)] public int Dictionary_Get_Random() => __dictionary[RandomPair()
-                                                                                                                         .Key];
-    [BenchmarkCategory("Get_Random")] [Benchmark] public int ReadOnlyDictionary_Get_Random() => __readOnlyDictionary[RandomPair()
-                                                                                                                        .Key];
-    [BenchmarkCategory("Get_Random")] [Benchmark] public int ConcurrentDictionary_Get_Random() => __concurrentDictionary[RandomPair()
-                                                                                                                            .Key];
-    [BenchmarkCategory("Get_Random")] [Benchmark] public int ImmutableDictionary_Get_Random() => __immutableDictionary[RandomPair()
-                                                                                                                          .Key];
-    [BenchmarkCategory("Get_Random")] [Benchmark] public int FrozenDictionary_Get_Random() => __frozenDictionary[RandomPair()
-                                                                                                                    .Key];
+    [BenchmarkCategory("Get_Random")] [Benchmark(Baseline = true)] public int Dictionary_Get_Random()           => __dictionary[RandomPair().Key];
+    [BenchmarkCategory("Get_Random")] [Benchmark]                  public int ReadOnlyDictionary_Get_Random()   => __readOnlyDictionary[RandomPair().Key];
+    [BenchmarkCategory("Get_Random")] [Benchmark]                  public int ConcurrentDictionary_Get_Random() => __concurrentDictionary[RandomPair().Key];
+    [BenchmarkCategory("Get_Random")] [Benchmark]                  public int ImmutableDictionary_Get_Random()  => __immutableDictionary[RandomPair().Key];
+    [BenchmarkCategory("Get_Random")] [Benchmark]                  public int FrozenDictionary_Get_Random()     => __frozenDictionary[RandomPair().Key];
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     private ConcurrentDictionary<string, int> __concurrentDictionary;
     private Dictionary<string, int>           __dictionary;

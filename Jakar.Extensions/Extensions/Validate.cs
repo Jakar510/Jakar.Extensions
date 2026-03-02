@@ -2,73 +2,15 @@
 
 
 /// <summary> Validator Extensions </summary>
-public static partial class Validate
+public static class Validate
 {
     private static volatile string __demo = "DEMO";
-
-
-
-    extension( WeakReference self )
-    {
-        public object? TryGetTarget() => self.Target;
-        public TValue? TryGetTarget<TValue>()
-            where TValue : class => self.Target as TValue;
-    }
-
 
 
     public static TValue? TryGetTarget<TValue>( this WeakReference<TValue> value )
         where TValue : class => value.TryGetTarget(out TValue? target)
                                     ? target
                                     : null;
-
-
-
-    extension( float self )
-    {
-        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
-    }
-
-
-
-    extension( double self )
-    {
-        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
-    }
-
-
-
-    extension( decimal self )
-    {
-        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
-    }
-
-
-
-    extension<TValue>( [NotNullIfNotNull("self")] TValue? self )
-        where TValue : struct, IComparable<TValue>
-    {
-        public TValue? Min( [NotNullIfNotNull("other")] TValue? other )
-        {
-            if ( self is null && other is null ) { return null; }
-
-            return Nullable.Compare(self, other) == NOT_FOUND
-                       ? self  ?? other
-                       : other ?? self;
-        }
-        public TValue? Max( [NotNullIfNotNull("other")] TValue? other )
-        {
-            if ( self is null && other is null ) { return null; }
-
-            return Nullable.Compare(self, other) == 1
-                       ? self  ?? other
-                       : other ?? self;
-        }
-    }
-
 
 
     public static bool IsDemo( this string value, params ReadOnlySpan<string> options )
@@ -121,7 +63,7 @@ public static partial class Validate
     {
         if ( string.IsNullOrWhiteSpace(value) ) { return false; }
 
-        Uri? uriResult = ParseWebAddress(value);
+        Uri? uriResult = value.ParseWebAddress();
         return uriResult != null && ( uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps );
     }
 
@@ -189,5 +131,61 @@ public static partial class Validate
         if ( maxLength.HasValue ) { return span.Length <= maxLength.Value; }
 
         return true;
+    }
+
+
+
+    extension( WeakReference self )
+    {
+        public object? TryGetTarget() => self.Target;
+        public TValue? TryGetTarget<TValue>()
+            where TValue : class => self.Target as TValue;
+    }
+
+
+
+    extension( float self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
+
+
+    extension( double self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
+
+
+    extension( decimal self )
+    {
+        public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+    }
+
+
+
+    extension<TValue>( [NotNullIfNotNull("self")] TValue? self )
+        where TValue : struct, IComparable<TValue>
+    {
+        public TValue? Min( [NotNullIfNotNull("other")] TValue? other )
+        {
+            if ( self is null && other is null ) { return null; }
+
+            return Nullable.Compare(self, other) == NOT_FOUND
+                       ? self  ?? other
+                       : other ?? self;
+        }
+        public TValue? Max( [NotNullIfNotNull("other")] TValue? other )
+        {
+            if ( self is null && other is null ) { return null; }
+
+            return Nullable.Compare(self, other) == 1
+                       ? self  ?? other
+                       : other ?? self;
+        }
     }
 }

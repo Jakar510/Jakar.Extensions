@@ -3,6 +3,26 @@
 
 public static class Base64
 {
+    public static string ToBase64( this byte[] payload ) => Convert.ToBase64String(payload);
+    public static string ToBase64( this ref readonly Memory<byte> payload )
+    {
+        ReadOnlySpan<byte> span = payload.Span;
+        return span.ToBase64();
+    }
+    public static string ToBase64( this ref readonly ReadOnlyMemory<byte> payload )
+    {
+        ReadOnlySpan<byte> span = payload.Span;
+        return span.ToBase64();
+    }
+    public static string ToBase64( this ref readonly Span<byte> payload )
+    {
+        ReadOnlySpan<byte> span = payload;
+        return span.ToBase64();
+    }
+    public static string ToBase64( this ref readonly ReadOnlySpan<byte> payload ) => Convert.ToBase64String(payload);
+
+
+
     extension( string self )
     {
         public byte[] FromBase64String() => Convert.FromBase64String(self);
@@ -35,31 +55,11 @@ public static class Base64
 
 
 
-    public static string ToBase64( this byte[] payload ) => Convert.ToBase64String(payload);
-    public static string ToBase64( this ref readonly Memory<byte> payload )
-    {
-        ReadOnlySpan<byte> span = payload.Span;
-        return span.ToBase64();
-    }
-    public static string ToBase64( this ref readonly ReadOnlyMemory<byte> payload )
-    {
-        ReadOnlySpan<byte> span = payload.Span;
-        return span.ToBase64();
-    }
-    public static string ToBase64( this ref readonly Span<byte> payload )
-    {
-        ReadOnlySpan<byte> span = payload;
-        return span.ToBase64();
-    }
-    public static string ToBase64( this ref readonly ReadOnlySpan<byte> payload ) => Convert.ToBase64String(payload);
-
-
-
     extension( string b64 )
     {
         public TValue JsonFromBase64String<TValue>() => b64.JsonFromBase64String<TValue>(Encoding.Default);
         public TValue JsonFromBase64String<TValue>( Encoding encoding )
-            
+
         {
             byte[] bytes = b64.FromBase64String();
             string temp  = encoding.GetString(bytes);

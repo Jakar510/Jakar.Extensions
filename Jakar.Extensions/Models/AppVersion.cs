@@ -11,7 +11,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     private                string?    __string;
 
 
-    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer => FuzzyEqualizer<AppVersion>.Default; 
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer => FuzzyEqualizer<AppVersion>.Default;
     public        int?                       Build          { get; init; }
     int IReadOnlyCollection<int>.            Count          => (int)Scheme;
     public              AppVersionFlags      Flags          { get; init; }

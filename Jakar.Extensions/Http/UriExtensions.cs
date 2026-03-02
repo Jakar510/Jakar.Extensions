@@ -3,6 +3,47 @@
 
 public static class UriExtensions
 {
+    public static string Parameterize( this IDictionary<string, object?> parameters )
+    {
+        StringBuilder sb = new(parameters.Keys.Sum(static x => x.Length));
+        sb.Parameterize(parameters);
+        return sb.ToString();
+    }
+
+
+    public static Uri GetRoute( this string baseUri, params ReadOnlySpan<string> parameters ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters);
+    public static Uri GetRoute( this Uri baseUri, params ReadOnlySpan<string> parameters )
+    {
+        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
+
+        return parameters.Length <= 0
+                   ? baseUri
+                   : new Uri(baseUri, parameters.Parameterize());
+    }
+
+    public static Uri GetRoute( this string baseUri, IDictionary<string, object?> parameters ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters);
+    public static Uri GetRoute( this Uri baseUri, IDictionary<string, object?> parameters )
+    {
+        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
+
+        return parameters.Count <= 0
+                   ? baseUri
+                   : new Uri(baseUri, parameters.Parameterize());
+    }
+
+
+    public static Uri GetRoute( this string baseUri, IDictionary<string, object?> parameters, params ReadOnlySpan<string> paths ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters, paths);
+    public static Uri GetRoute( this Uri baseUri, IDictionary<string, object?> parameters, params ReadOnlySpan<string> paths )
+    {
+        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
+
+        return parameters.Count <= 0
+                   ? baseUri
+                   : new Uri(baseUri, paths.Parameterize(parameters));
+    }
+
+
+
     extension( ReadOnlySpan<string> types )
     {
         public string Parameterize( IDictionary<string, object?> parameters )
@@ -39,12 +80,6 @@ public static class UriExtensions
 
 
 
-    public static string Parameterize( this IDictionary<string, object?> parameters )
-    {
-        StringBuilder sb = new(parameters.Keys.Sum(static x => x.Length));
-        sb.Parameterize(parameters);
-        return sb.ToString();
-    }
     extension( StringBuilder sb )
     {
         public void Parameterize( IDictionary<string, object?> parameters )
@@ -57,50 +92,12 @@ public static class UriExtensions
             ( string? key, object? value ) = pair;
             string? s = value?.ToString();
 
-            if ( string.IsNullOrWhiteSpace(key) ||
-                 string.IsNullOrWhiteSpace(s)   ||
-                 ( value is not null &&
-                   value.GetType()
-                        .Name ==
-                   s ) ) { return; }
+            if ( string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(s) || ( value is not null && value.GetType().Name == s ) ) { return; }
 
             sb.Append(key);
             sb.Append('=');
             sb.Append(s);
             sb.Append(',');
         }
-    }
-
-
-
-    public static Uri GetRoute( this string baseUri, params ReadOnlySpan<string> parameters ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters);
-    public static Uri GetRoute( this Uri baseUri, params ReadOnlySpan<string> parameters )
-    {
-        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
-
-        return parameters.Length <= 0
-                   ? baseUri
-                   : new Uri(baseUri, parameters.Parameterize());
-    }
-
-    public static Uri GetRoute( this string baseUri, IDictionary<string, object?> parameters ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters);
-    public static Uri GetRoute( this Uri baseUri, IDictionary<string, object?> parameters )
-    {
-        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
-
-        return parameters.Count <= 0
-                   ? baseUri
-                   : new Uri(baseUri, parameters.Parameterize());
-    }
-
-
-    public static Uri GetRoute( this string baseUri, IDictionary<string, object?> parameters, params ReadOnlySpan<string> paths ) => new Uri(baseUri, UriKind.Absolute).GetRoute(parameters, paths);
-    public static Uri GetRoute( this Uri baseUri, IDictionary<string, object?> parameters, params ReadOnlySpan<string> paths )
-    {
-        if ( baseUri is null ) { throw new ArgumentNullException(nameof(baseUri)); }
-
-        return parameters.Count <= 0
-                   ? baseUri
-                   : new Uri(baseUri, paths.Parameterize(parameters));
     }
 }

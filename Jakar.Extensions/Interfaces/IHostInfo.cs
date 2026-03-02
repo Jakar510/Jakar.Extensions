@@ -14,18 +14,15 @@ public interface IHostInfo
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static IServiceCollection AddSingleton<TSelf>( IServiceCollection collection, TSelf value )
-        where TSelf : class, IHostInfo => collection.AddSingleton(value)
-                                                    .AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
+        where TSelf : class, IHostInfo => collection.AddSingleton(value).AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static IServiceCollection AddSingleton<TSelf>( IServiceCollection collection, Func<IServiceProvider, TSelf> value )
-        where TSelf : class, IHostInfo => collection.AddSingleton(value)
-                                                    .AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
+        where TSelf : class, IHostInfo => collection.AddSingleton(value).AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static IServiceCollection AddScoped<TSelf>( IServiceCollection collection, Func<IServiceProvider, TSelf> value )
-        where TSelf : class, IHostInfo => collection.AddScoped(value)
-                                                    .AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
+        where TSelf : class, IHostInfo => collection.AddScoped(value).AddTransient<IHostInfo, TSelf>(static provider => provider.GetRequiredService<TSelf>());
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static IHostInfo Get( IServiceProvider provider ) => provider.GetRequiredService<IHostInfo>();

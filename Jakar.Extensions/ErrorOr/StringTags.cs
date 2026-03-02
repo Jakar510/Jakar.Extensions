@@ -93,12 +93,9 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
         tags    = Tags;
         entries = Entries;
     }
-    public bool Equals( StringTags other ) => Tags.AsSpan()
-                                                  .SequenceEqual(other.Tags) &&
-                                              Entries.AsSpan()
-                                                     .SequenceEqual(other.Entries);
-    public override bool Equals( object? obj ) => obj is StringTags other && Equals(other);
-    public override int  GetHashCode()         => HashCode.Combine(Tags, Entries);
+    public          bool Equals( StringTags other ) => Tags.AsSpan().SequenceEqual(other.Tags) && Entries.AsSpan().SequenceEqual(other.Entries);
+    public override bool Equals( object?    obj )   => obj is StringTags other                 && Equals(other);
+    public override int  GetHashCode()              => HashCode.Combine(Tags, Entries);
 
 
     public static bool operator ==( StringTags left, StringTags right ) => Equals(left, right);

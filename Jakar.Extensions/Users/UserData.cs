@@ -2,6 +2,7 @@
 // 4/1/2024  22:4
 
 using System.Security.Claims;
+using ZLinq;
 
 
 
@@ -13,6 +14,49 @@ public static class UserData
 {
     public const ClaimType ADDRESS     = ClaimType.StreetAddressLine1 | ClaimType.StreetAddressLine2 | ClaimType.StateOrProvince | ClaimType.Country | ClaimType.PostalCode;
     public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.Group           | ClaimType.Role;
+
+
+    public static Claim[] GetClaims<TUser, TID, TAddress, TGroupModel, TRoleModel>( this TUser model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
+        where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>, IUserDetails
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+        where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
+        where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
+        where TAddress : IAddress<TID>, IEquatable<TAddress>
+    {
+        using ArrayBuffer<Claim> owner = new(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
+        int                      size  = 0;
+        Span<Claim>              span  = owner.Span;
+        model.GetClaims(span, ref size, types, issuer);
+
+        if ( HasFlag(types, ADDRESS) )
+        {
+            foreach ( TAddress address in model.Addresses )
+            {
+                if ( HasFlag(types, ClaimType.StreetAddressLine1) ) { span[size++] = ClaimType.StreetAddressLine1.ToClaim(address.Line1, issuer); }
+
+                if ( HasFlag(types, ClaimType.StreetAddressLine2) ) { span[size++] = ClaimType.StreetAddressLine2.ToClaim(address.Line2, issuer); }
+
+                if ( HasFlag(types, ClaimType.StateOrProvince) ) { span[size++] = ClaimType.StateOrProvince.ToClaim(address.StateOrProvince, issuer); }
+
+                if ( HasFlag(types, ClaimType.Country) ) { span[size++] = ClaimType.Country.ToClaim(address.Country, issuer); }
+
+                if ( HasFlag(types, ClaimType.PostalCode) ) { span[size++] = ClaimType.PostalCode.ToClaim(address.PostalCode, issuer); }
+            }
+        }
+
+        if ( HasFlag(types, ClaimType.Group) )
+        {
+            foreach ( TGroupModel record in model.Groups.AsValueEnumerable() ) { span[size++] = ClaimType.Group.ToClaim(record.NameOfGroup, issuer); }
+        }
+
+
+        if ( HasFlag(types, ClaimType.Role) )
+        {
+            foreach ( TRoleModel record in model.Roles.AsValueEnumerable() ) { span[size++] = ClaimType.Role.ToClaim(record.NameOfRole, issuer); }
+        }
+
+        return [.. span];
+    }
 
 
 
@@ -54,50 +98,6 @@ public static class UserData
             self.GetClaims(span, ref size, types, issuer);
             return [.. span];
         }
-    }
-
-
-
-    public static Claim[] GetClaims<TUser, TID, TAddress, TGroupModel, TRoleModel>( this TUser model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
-        where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>, IUserDetails
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TID>, IEquatable<TAddress>
-    {
-        using ArrayBuffer<Claim> owner = new(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
-        int                      size  = 0;
-        Span<Claim>              span  = owner.Span;
-        model.GetClaims(span, ref size, types, issuer);
-
-        if ( HasFlag(types, ADDRESS) )
-        {
-            foreach ( TAddress address in model.Addresses )
-            {
-                if ( HasFlag(types, ClaimType.StreetAddressLine1) ) { span[size++] = ClaimType.StreetAddressLine1.ToClaim(address.Line1, issuer); }
-
-                if ( HasFlag(types, ClaimType.StreetAddressLine2) ) { span[size++] = ClaimType.StreetAddressLine2.ToClaim(address.Line2, issuer); }
-
-                if ( HasFlag(types, ClaimType.StateOrProvince) ) { span[size++] = ClaimType.StateOrProvince.ToClaim(address.StateOrProvince, issuer); }
-
-                if ( HasFlag(types, ClaimType.Country) ) { span[size++] = ClaimType.Country.ToClaim(address.Country, issuer); }
-
-                if ( HasFlag(types, ClaimType.PostalCode) ) { span[size++] = ClaimType.PostalCode.ToClaim(address.PostalCode, issuer); }
-            }
-        }
-
-        if ( HasFlag(types, ClaimType.Group) )
-        {
-            foreach ( TGroupModel record in model.Groups.AsSpan() ) { span[size++] = ClaimType.Group.ToClaim(record.NameOfGroup, issuer); }
-        }
-
-
-        if ( HasFlag(types, ClaimType.Role) )
-        {
-            foreach ( TRoleModel record in model.Roles.AsSpan() ) { span[size++] = ClaimType.Role.ToClaim(record.NameOfRole, issuer); }
-        }
-
-        return [.. span];
     }
 
 

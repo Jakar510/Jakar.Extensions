@@ -288,8 +288,7 @@ public readonly struct Permissions<TEnum> : IDisposable
                 rights.Add(in right);
             }
 
-            rights.Values[offset..]
-                  .CopyTo(destination[offset..]);
+            rights.Values[offset..].CopyTo(destination[offset..]);
 
             return true;
         }

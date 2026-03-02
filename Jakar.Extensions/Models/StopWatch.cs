@@ -67,8 +67,7 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
     }
 
 
-    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span)
-       .ToString(format);
+    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span).ToString(format);
     public static SpanDuration Create( in TimeSpan span )
     {
         if ( span.Days != 0 ) { return new SpanDuration(span.TotalDays, Range.Days); }

@@ -27,7 +27,7 @@ public static class Statuses
                                                                                 [typeof(AccessViolationException)]    = Status.Unauthorized,
                                                                                 [typeof(HttpRequestException)]        = Status.ServiceUnavailable,
                                                                                 [typeof(ValidationException)]         = Status.BadRequest,
-                                                                                [typeof(OperationCanceledException)]  = Status.RequestTimeout,
+                                                                                [typeof(OperationCanceledException)]  = Status.RequestTimeout
                                                                             };
     public static Func<Exception, Status> GetStatusFromException { get; set; } = Statuses.AsStatus;
 
@@ -52,9 +52,8 @@ public static class Statuses
 
     extension( HttpStatusCode code )
     {
-        public Status ToStatus() => (Status)code;
-        public string ToStringFast() => code.ToStatus()
-                                            .ToStringFast();
+        public Status ToStatus()     => (Status)code;
+        public string ToStringFast() => code.ToStatus().ToStringFast();
     }
 
 

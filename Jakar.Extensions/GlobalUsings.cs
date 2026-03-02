@@ -55,7 +55,7 @@ global using OneOf;
 global using OneOf.Types;
 global using static Jakar.Extensions.Claims;
 global using static Jakar.Extensions.Validate;
-global using static Jakar.Extensions.Constants; 
+global using static Jakar.Extensions.Constants;
 global using static Jakar.Extensions.WebRequester;
 global using ErrorEventArgs = System.IO.ErrorEventArgs;
 global using ILogger = Microsoft.Extensions.Logging.ILogger;

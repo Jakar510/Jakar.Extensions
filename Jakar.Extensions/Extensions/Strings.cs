@@ -16,38 +16,6 @@ public static class Strings
                                                                           }.ToImmutableDictionary();
 
 
-
-    extension( string source )
-    {
-        public bool ContainsAbout( string search ) => source.Contains(search, StringComparison.OrdinalIgnoreCase);
-
-        public bool ContainsExact( string search ) => source.Contains(search, StringComparison.Ordinal);
-
-        /// <summary>
-        ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
-        ///     <para>
-        ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
-        ///         <list type="bullet">
-        ///             <item>
-        ///                 <term> ( ) </term> <description> Parenthesis </description>
-        ///             </item>
-        ///             <item>
-        ///                 <term> [ ] </term> <description> Square Brackets </description>
-        ///             </item>
-        ///             <item>
-        ///                 <term> { } </term> <description> Curly Braces </description>
-        ///             </item>
-        ///         </list>
-        ///     </para>
-        ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
-        /// </summary>
-        /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-        public bool IsBalanced( IReadOnlyDictionary<char, char>? bracketPairs = null ) => source.AsSpan()
-                                                                                                .IsBalanced(bracketPairs); // TODO: ReadOnlySpan<char>
-    }
-
-
-
     /// <summary>
     ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
     ///     <para>
@@ -105,16 +73,6 @@ public static class Strings
     }
 
 
-
-    extension( string value )
-    {
-        public byte[] ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
-
-        [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding encoding ) => AsSpanBytes(value.AsSpan(), encoding);
-    }
-
-
-
     [MustDisposeResource] public static Buffer<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
         Buffer<byte> span = new(encoding.GetByteCount(value));
@@ -123,54 +81,8 @@ public static class Strings
     }
 
 
-
-    extension( string value )
-    {
-        public string[] SplitAndTrimLines( char separator = '\n' )
-        {
-            string[] array = value.Split(separator);
-
-            for ( int i = 0; i < array.Length; i++ )
-            {
-                array[i] = array[i]
-                   .Trim();
-            }
-
-            return array;
-        }
-
-        public string[] SplitAndTrimLines( string separator )
-        {
-            string[] array = value.Split(separator);
-
-            for ( int i = 0; i < array.Length; i++ )
-            {
-                array[i] = array[i]
-                   .Trim();
-            }
-
-            return array;
-        }
-
-        public string[] SplitLines( char separator = '\n' ) => value.Split(separator);
-
-        public string[] SplitLines( string separator ) => value.Split(separator);
-
-        public Memory<byte> ToMemory( Encoding? encoding = null ) => value.ToByteArray(encoding ?? Encoding.Default)
-                                                                          .AsMemory();
-
-        public object ConvertTo( Type target ) => Convert.ChangeType(value, target);
-
-        public ReadOnlyMemory<byte> ToReadOnlyMemory( Encoding? encoding = null ) => value.ToMemory(encoding ?? Encoding.Default);
-    }
-
-
-
-    public static SecureString ToSecureString( this ReadOnlySpan<byte> value, bool makeReadonly = true ) => Convert.ToBase64String(value)
-                                                                                                                   .AsSpan()
-                                                                                                                   .ToSecureString(makeReadonly);
-    public static SecureString ToSecureString( this string value, bool makeReadonly = true ) => value.AsSpan()
-                                                                                                     .ToSecureString(makeReadonly);
+    public static SecureString ToSecureString( this ReadOnlySpan<byte>   value, bool makeReadonly = true ) => Convert.ToBase64String(value).AsSpan().ToSecureString(makeReadonly);
+    public static SecureString ToSecureString( this string               value, bool makeReadonly = true ) => value.AsSpan().ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this ReadOnlyMemory<char> value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this Span<char>           value, bool makeReadonly = true ) => ( (ReadOnlySpan<char>)value ).ToSecureString(makeReadonly);
@@ -207,31 +119,6 @@ public static class Strings
     }
 
 
-
-    /// <param name="str"> </param>
-    extension( string str )
-    {
-        /// <summary>
-        ///     <para>
-        ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
-        ///     </para>
-        /// </summary>
-        /// <param name="separator"> the <see cref="char"/> to split on </param>
-        public SpanSplitEnumerator<char> SplitOn( char separator ) => str.AsSpan()
-                                                                         .SplitOn(separator);
-
-        /// <summary>
-        ///     <para>
-        ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
-        ///     </para>
-        ///     Default chars <see cref="char"/> to '\n' and '\r'
-        /// </summary>
-        public SpanSplitEnumerator<char> SplitOn() => str.AsSpan()
-                                                         .SplitOn();
-    }
-
-
-
     /// <summary>
     ///     <para>
     ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
@@ -242,86 +129,11 @@ public static class Strings
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, __ends);
 
 
-
-    extension<TValue>( Span<TValue> span )
-        where TValue : unmanaged, IEquatable<TValue>
-    {
-        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
-
-        public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
-    }
-
-
-
-    extension<TValue>( ReadOnlySpan<TValue> span )
-        where TValue : unmanaged, IEquatable<TValue>
-    {
-        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
-
-        public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
-    }
-
-
-
     public static string ConvertToString( this byte[]               value, Encoding encoding ) => encoding.GetString(value);
     public static string ConvertToString( this Span<byte>           value, Encoding encoding ) => encoding.GetString(value);
     public static string ConvertToString( this ReadOnlySpan<byte>   value, Encoding encoding ) => encoding.GetString(value);
     public static string ConvertToString( this Memory<byte>         value, Encoding encoding ) => value.Span.ConvertToString(encoding);
     public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding encoding ) => value.Span.ConvertToString(encoding);
-
-
-
-    extension( StringBuilder self )
-    {
-        public StringBuilder AppendJoin<TEnumerator>( char separator, ValueEnumerable<TEnumerator, string> enumerable )
-            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
-        {
-            using PooledArray<string> strings = enumerable.ToArrayPool();
-            return self.AppendJoin(separator, strings.Span);
-        }
-
-        public StringBuilder AppendJoin<TEnumerator>( string separator, ValueEnumerable<TEnumerator, string> enumerable )
-            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
-        {
-            using PooledArray<string> strings = enumerable.ToArrayPool();
-            return self.AppendJoin(separator, strings.Span);
-        }
-
-        public StringBuilder AppendJoin<TEnumerator, TValue>( char separator, ValueEnumerable<TEnumerator, TValue> enumerable )
-            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
-        {
-            using PooledArray<TValue> strings = enumerable.ToArrayPool();
-            return self.AppendJoin(separator, strings.Array);
-        }
-
-        public StringBuilder AppendJoin<TEnumerator, TValue>( string separator, ValueEnumerable<TEnumerator, TValue> enumerable )
-            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
-        {
-            using PooledArray<TValue> strings = enumerable.ToArrayPool();
-            return self.AppendJoin(separator, strings.Array);
-        }
-    }
-
-
-
-    extension( string self )
-    {
-        public StringBuilder AppendJoin<TEnumerator>( ValueEnumerable<TEnumerator, string> enumerable, string? before = "( ", string? after = " )" )
-            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct => new StringBuilder().Append(before)
-                                                                                                          .AppendJoin(self, enumerable)
-                                                                                                          .Append(after);
-
-        public StringBuilder AppendJoin<TEnumerator, TValue>( ValueEnumerable<TEnumerator, TValue> enumerable, string? before = "( ", string? after = " )" )
-            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => new StringBuilder().Append(before)
-                                                                                                          .AppendJoin(self, enumerable)
-                                                                                                          .Append(after);
-
-
-        public string RemoveAll( string old ) => self.Replace(old, EMPTY, StringComparison.Ordinal);
-
-        public string RemoveAll( char old ) => self.Replace(old.Repeat(1), EMPTY);
-    }
-
 
 
     /// <summary>
@@ -333,36 +145,6 @@ public static class Strings
     ///     <see cref="string"/>
     /// </returns>
     public static string Repeat( this char c, int count ) => new(c, count);
-
-
-
-    extension( string self )
-    {
-        /// <summary>
-        ///     <seealso href="https://stackoverflow.com/a/720915/9530917"/>
-        /// </summary>
-        /// <param name="count"> </param>
-        /// <returns>
-        ///     <see cref="string"/>
-        /// </returns>
-        public string Repeat( int count ) => new StringBuilder(self.Length * count).Insert(0, self, count)
-                                                                                   .ToString();
-
-        public string ReplaceAll( string old, string newString ) => self.Replace(old, newString, StringComparison.Ordinal);
-
-        public string ReplaceAll( char old, char newString ) => self.Replace(old, newString);
-
-        public string ToScreamingCase() => self.ToSnakeCase()
-                                               .ToUpper()
-                                               .Replace("__", "_");
-
-        /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-        public string ToSnakeCase() => self.ToSnakeCase(CultureInfo.InvariantCulture);
-
-        /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-        public string ToSnakeCase( CultureInfo cultureInfo ) => ToSnakeCase(self.AsSpan(), cultureInfo);
-    }
-
 
 
     public static string ToSnakeCase( this scoped in ReadOnlySpan<char> span, CultureInfo cultureInfo )
@@ -430,6 +212,195 @@ public static class Strings
 
 
 
+    extension( string source )
+    {
+        public bool ContainsAbout( string search ) => source.Contains(search, StringComparison.OrdinalIgnoreCase);
+
+        public bool ContainsExact( string search ) => source.Contains(search, StringComparison.Ordinal);
+
+        /// <summary>
+        ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
+        ///     <para>
+        ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
+        ///         <list type="bullet">
+        ///             <item>
+        ///                 <term> ( ) </term> <description> Parenthesis </description>
+        ///             </item>
+        ///             <item>
+        ///                 <term> [ ] </term> <description> Square Brackets </description>
+        ///             </item>
+        ///             <item>
+        ///                 <term> { } </term> <description> Curly Braces </description>
+        ///             </item>
+        ///         </list>
+        ///     </para>
+        ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
+        /// </summary>
+        /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
+        public bool IsBalanced( IReadOnlyDictionary<char, char>? bracketPairs = null ) => source.AsSpan().IsBalanced(bracketPairs); // TODO: ReadOnlySpan<char>
+    }
+
+
+
+    extension( string value )
+    {
+        public byte[] ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
+
+        [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding encoding ) => value.AsSpan().AsSpanBytes(encoding);
+    }
+
+
+
+    extension( string value )
+    {
+        public string[] SplitAndTrimLines( char separator = '\n' )
+        {
+            string[] array = value.Split(separator);
+
+            for ( int i = 0; i < array.Length; i++ ) { array[i] = array[i].Trim(); }
+
+            return array;
+        }
+
+        public string[] SplitAndTrimLines( string separator )
+        {
+            string[] array = value.Split(separator);
+
+            for ( int i = 0; i < array.Length; i++ ) { array[i] = array[i].Trim(); }
+
+            return array;
+        }
+
+        public string[] SplitLines( char separator = '\n' ) => value.Split(separator);
+
+        public string[] SplitLines( string separator ) => value.Split(separator);
+
+        public Memory<byte> ToMemory( Encoding? encoding = null ) => value.ToByteArray(encoding ?? Encoding.Default).AsMemory();
+
+        public object ConvertTo( Type target ) => Convert.ChangeType(value, target);
+
+        public ReadOnlyMemory<byte> ToReadOnlyMemory( Encoding? encoding = null ) => value.ToMemory(encoding ?? Encoding.Default);
+    }
+
+
+
+    /// <param name="str"> </param>
+    extension( string str )
+    {
+        /// <summary>
+        ///     <para>
+        ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
+        ///     </para>
+        /// </summary>
+        /// <param name="separator"> the <see cref="char"/> to split on </param>
+        public SpanSplitEnumerator<char> SplitOn( char separator ) => str.AsSpan().SplitOn(separator);
+
+        /// <summary>
+        ///     <para>
+        ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
+        ///     </para>
+        ///     Default chars <see cref="char"/> to '\n' and '\r'
+        /// </summary>
+        public SpanSplitEnumerator<char> SplitOn() => str.AsSpan().SplitOn();
+    }
+
+
+
+    extension<TValue>( Span<TValue> span )
+        where TValue : unmanaged, IEquatable<TValue>
+    {
+        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
+
+        public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
+    }
+
+
+
+    extension<TValue>( ReadOnlySpan<TValue> span )
+        where TValue : unmanaged, IEquatable<TValue>
+    {
+        public SpanSplitEnumerator<TValue> SplitOn( TValue separator ) => new(span, separator);
+
+        public SpanSplitEnumerator<TValue> SplitOn( params TValue[] separators ) => new(span, separators);
+    }
+
+
+
+    extension( StringBuilder self )
+    {
+        public StringBuilder AppendJoin<TEnumerator>( char separator, ValueEnumerable<TEnumerator, string> enumerable )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
+        {
+            using PooledArray<string> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Span);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator>( string separator, ValueEnumerable<TEnumerator, string> enumerable )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct
+        {
+            using PooledArray<string> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Span);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( char separator, ValueEnumerable<TEnumerator, TValue> enumerable )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
+        {
+            using PooledArray<TValue> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Array);
+        }
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( string separator, ValueEnumerable<TEnumerator, TValue> enumerable )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
+        {
+            using PooledArray<TValue> strings = enumerable.ToArrayPool();
+            return self.AppendJoin(separator, strings.Array);
+        }
+    }
+
+
+
+    extension( string self )
+    {
+        public StringBuilder AppendJoin<TEnumerator>( ValueEnumerable<TEnumerator, string> enumerable, string? before = "( ", string? after = " )" )
+            where TEnumerator : struct, IValueEnumerator<string>, allows ref struct => new StringBuilder().Append(before).AppendJoin(self, enumerable).Append(after);
+
+        public StringBuilder AppendJoin<TEnumerator, TValue>( ValueEnumerable<TEnumerator, TValue> enumerable, string? before = "( ", string? after = " )" )
+            where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => new StringBuilder().Append(before).AppendJoin(self, enumerable).Append(after);
+
+
+        public string RemoveAll( string old ) => self.Replace(old, EMPTY, StringComparison.Ordinal);
+
+        public string RemoveAll( char old ) => self.Replace(old.Repeat(1), EMPTY);
+    }
+
+
+
+    extension( string self )
+    {
+        /// <summary>
+        ///     <seealso href="https://stackoverflow.com/a/720915/9530917"/>
+        /// </summary>
+        /// <param name="count"> </param>
+        /// <returns>
+        ///     <see cref="string"/>
+        /// </returns>
+        public string Repeat( int count ) => new StringBuilder(self.Length * count).Insert(0, self, count).ToString();
+
+        public string ReplaceAll( string old, string newString ) => self.Replace(old, newString, StringComparison.Ordinal);
+
+        public string ReplaceAll( char old, char newString ) => self.Replace(old, newString);
+
+        public string ToScreamingCase() => self.ToSnakeCase().ToUpper().Replace("__", "_");
+
+        /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+        public string ToSnakeCase() => self.ToSnakeCase(CultureInfo.InvariantCulture);
+
+        /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+        public string ToSnakeCase( CultureInfo cultureInfo ) => self.AsSpan().ToSnakeCase(cultureInfo);
+    }
+
+
+
     /// <param name="self"> </param>
     extension( string self )
     {
@@ -437,8 +408,7 @@ public static class Strings
         /// <param name="c"> </param>
         /// <param name="padding"> </param>
         /// <returns> </returns>
-        public string Wrapper( char c, int padding ) => self.PadLeft(padding, c)
-                                                            .PadRight(padding, c);
+        public string Wrapper( char c, int padding ) => self.PadLeft(padding, c).PadRight(padding, c);
 
         public TResult ConvertTo<TResult>()
             where TResult : IConvertible => (TResult)self.ConvertTo(typeof(TResult));

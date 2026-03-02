@@ -25,15 +25,14 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public string?          DirectoryName   => Info.DirectoryName;
     public bool             DoesNotExist    => !Exists;
     public bool             Exists          => Info.Exists;
-    public long             Length          => Info.Length;
-    public string?          PhysicalPath    => FullPath;
     public string           Extension       => Info.Extension;
+    public bool             IsDirectory     => false;
     bool TempFile.ITempFile.IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
     public DateTimeOffset   LastAccess      => Info.LastAccessTime;
+    public DateTimeOffset   LastModified    => Info.LastWriteTimeUtc;
+    public long             Length          => Info.Length;
     public MimeType         Mime            => Extension.FromExtension();
     public string           Name            => Info.Name;
-    public DateTimeOffset   LastModified    => Info.LastWriteTimeUtc;
-    public bool             IsDirectory     => false;
 
     [JsonIgnore] public LocalDirectory? Parent
     {
@@ -46,7 +45,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
                        : new LocalDirectory(parent);
         }
     }
-    public string Root => Directory.GetDirectoryRoot(FullPath);
+    public string? PhysicalPath => FullPath;
+    public string  Root         => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
@@ -171,8 +171,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
 
-        await file.WriteAsync(payload, token)
-                  .ConfigureAwait(false);
+        await file.WriteAsync(payload, token).ConfigureAwait(false);
 
         return file;
     }
@@ -193,8 +192,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
 
-        await file.WriteAsync(payload, token)
-                  .ConfigureAwait(false);
+        await file.WriteAsync(payload, token).ConfigureAwait(false);
 
         return file;
     }
@@ -362,8 +360,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         FileStream          stream        = OpenRead();
 
-        await newFile.WriteAsync(stream, token)
-                     .ConfigureAwait(false);
+        await newFile.WriteAsync(stream, token).ConfigureAwait(false);
     }
 
 
@@ -377,15 +374,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         {
             ZipArchiveEntry entry = archive.CreateEntry(file.FullPath);
 
-            await using Stream stream = await entry.OpenAsync(token)
-                                                   .ConfigureAwait(false);
+            await using Stream stream = await entry.OpenAsync(token).ConfigureAwait(false);
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token)
-                                                  .ConfigureAwait(false);
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token).ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token)
-                        .ConfigureAwait(false);
+            await stream.WriteAsync(data, token).ConfigureAwait(false);
         }
 
         Info.Refresh();
@@ -402,15 +395,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         {
             ZipArchiveEntry entry = archive.CreateEntry(file.FullPath);
 
-            await using Stream stream = await entry.OpenAsync(token)
-                                                   .ConfigureAwait(false);
+            await using Stream stream = await entry.OpenAsync(token).ConfigureAwait(false);
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync()
-                                                  .AsMemory(token)
-                                                  .ConfigureAwait(false);
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token).ConfigureAwait(false);
 
-            await stream.WriteAsync(data, token)
-                        .ConfigureAwait(false);
+            await stream.WriteAsync(data, token).ConfigureAwait(false);
         }
 
         Info.Refresh();
@@ -650,8 +639,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         payload.CopyTo(owner.Span);
 
-        await writer.WriteAsync(owner.Memory, token)
-                    .ConfigureAwait(false);
+        await writer.WriteAsync(owner.Memory, token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -672,8 +660,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
 
-        await stream.WriteAsync(payload, token)
-                    .ConfigureAwait(false);
+        await stream.WriteAsync(payload, token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -694,8 +681,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
 
-        await stream.WriteAsync(payload, token)
-                    .ConfigureAwait(false);
+        await stream.WriteAsync(payload, token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -715,8 +701,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
 
-        await writer.WriteAsync(payload, token)
-                    .ConfigureAwait(false);
+        await writer.WriteAsync(payload, token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -737,8 +722,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
 
-        await payload.CopyToAsync(stream, token)
-                     .ConfigureAwait(false);
+        await payload.CopyToAsync(stream, token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -750,8 +734,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        return await stream.ReadToEndAsync(token)
-                           .ConfigureAwait(false);
+        return await stream.ReadToEndAsync(token).ConfigureAwait(false);
     }
 
     async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
@@ -759,8 +742,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using StreamReader  stream        = new(OpenRead(), FileEncoding);
 
-        string content = await stream.ReadToEndAsync(token)
-                                     .ConfigureAwait(false);
+        string content = await stream.ReadToEndAsync(token).ConfigureAwait(false);
 
         return content.FromJson<TValue>();
     }
@@ -771,8 +753,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new();
 
-        await file.CopyToAsync(stream, token)
-                  .ConfigureAwait(false);
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
 
         return stream.GetBuffer();
     }
@@ -783,8 +764,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new((int)file.Length);
 
-        await file.CopyToAsync(stream, token)
-                  .ConfigureAwait(false);
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
 
         ReadOnlyMemory<byte> results = stream.GetBuffer();
         return results;
@@ -796,8 +776,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream file   = OpenRead();
         MemoryStream           stream = new((int)file.Length);
 
-        await file.CopyToAsync(stream, token)
-                  .ConfigureAwait(false);
+        await file.CopyToAsync(stream, token).ConfigureAwait(false);
 
         return stream;
     }
@@ -810,8 +789,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         while ( token.ShouldContinue() )
         {
-            string? line = await stream.ReadLineAsync(token)
-                                       .ConfigureAwait(false);
+            string? line = await stream.ReadLineAsync(token).ConfigureAwait(false);
 
             if ( string.IsNullOrWhiteSpace(line) ) { yield break; }
 
@@ -907,8 +885,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         {
             await using FileStream stream = OpenRead();
 
-            byte[] hash = await hasher.ComputeHashAsync(stream)
-                                      .ConfigureAwait(false);
+            byte[] hash = await hasher.ComputeHashAsync(stream).ConfigureAwait(false);
 
             return BitConverter.ToString(hash);
         }

@@ -9,9 +9,9 @@ public sealed class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TV
 {
     private const    int                                START_INDEX  = 0;
     private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          ArrayBuffer<TValue>?               __buffer;
     private          bool                               __isDisposed;
     private          CancellationToken                  __token = token;
-    private          ArrayBuffer<TValue>?              __buffer;
     private          int                                __index = START_INDEX;
 
 

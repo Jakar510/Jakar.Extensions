@@ -29,9 +29,8 @@ public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualCompar
     }
 
 
-    public static ParameterDetails[] Create( MethodBase method ) => Create(method.GetParameters());
-    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items ) => items.Select(static x => new ParameterDetails(x))
-                                                                                        .ToArray();
+    public static ParameterDetails[] Create( MethodBase                 method ) => Create(method.GetParameters());
+    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items )  => items.Select(static x => new ParameterDetails(x)).ToArray();
 
 
     public override int CompareTo( ParameterDetails? other )

@@ -326,27 +326,18 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static          UserModel Create( IUserData<Guid> model ) => new(model);
-    public static UserModel Create( IUserData<Guid> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
-                                                                                                                                                                .With(addresses)
-                                                                                                                                                                .With(groups)
-                                                                                                                                                                .With(roles);
-    public static UserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
-                                                                                                                                                                                                 .With(addresses)
-                                                                                                                                                                                                 .With(groups)
-                                                                                                                                                                                                 .With(roles);
+    public static UserModel Create( IUserData<Guid> model )                                                                                                                                    => new(model);
+    public static UserModel Create( IUserData<Guid> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static UserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
     public static async ValueTask<UserModel> CreateAsync( IUserData<Guid> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         UserModel user = Create(model);
 
-        await user.Addresses.Add(addresses, token)
-                  .ConfigureAwait(false);
+        await user.Addresses.Add(addresses, token).ConfigureAwait(false);
 
-        await user.Groups.Add(groups, token)
-                  .ConfigureAwait(false);
+        await user.Groups.Add(groups, token).ConfigureAwait(false);
 
-        await user.Roles.Add(roles, token)
-                  .ConfigureAwait(false);
+        await user.Roles.Add(roles, token).ConfigureAwait(false);
 
         return user;
     }
@@ -370,27 +361,18 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, Use
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static CreateUserModel Create( IUserData<Guid> model ) => new(model);
-    public static CreateUserModel Create( IUserData<Guid> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
-                                                                                                                                                                      .With(addresses)
-                                                                                                                                                                      .With(groups)
-                                                                                                                                                                      .With(roles);
-    public static CreateUserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
-                                                                                                                                                                                                       .With(addresses)
-                                                                                                                                                                                                       .With(groups)
-                                                                                                                                                                                                       .With(roles);
+    public static CreateUserModel Create( IUserData<Guid> model )                                                                                                                                    => new(model);
+    public static CreateUserModel Create( IUserData<Guid> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static CreateUserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
     public static async ValueTask<CreateUserModel> CreateAsync( IUserData<Guid> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         CreateUserModel user = Create(model);
 
-        await user.Addresses.Add(addresses, token)
-                  .ConfigureAwait(false);
+        await user.Addresses.Add(addresses, token).ConfigureAwait(false);
 
-        await user.Groups.Add(groups, token)
-                  .ConfigureAwait(false);
+        await user.Groups.Add(groups, token).ConfigureAwait(false);
 
-        await user.Roles.Add(roles, token)
-                  .ConfigureAwait(false);
+        await user.Roles.Add(roles, token).ConfigureAwait(false);
 
         return user;
     }

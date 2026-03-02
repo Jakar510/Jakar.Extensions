@@ -36,8 +36,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string content = file.Read()
-                             .AsString();
+        string content = file.Read().AsString();
 
         return Parse(content, provider);
     }
@@ -45,9 +44,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string content = await file.ReadAsync()
-                                   .AsString(token)
-                                   .ConfigureAwait(false);
+        string content = await file.ReadAsync().AsString(token).ConfigureAwait(false);
 
         return Parse(content, provider);
     }
@@ -99,8 +96,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
 
             ReadOnlySpan<char> keySpan = line[..separator];
 
-            string key = keySpan.Trim()
-                                .ToString();
+            string key = keySpan.Trim().ToString();
 
             ReadOnlySpan<char> valueSpan = line[( separator + 1 )..];
             valueSpan = valueSpan.Trim();
@@ -110,8 +106,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
 
             Debug.Assert(!string.IsNullOrEmpty(section));
 
-            if ( config[section]
-               .ContainsKey(key) ) { throw new FormatException($"Duplicate key '{key}':  '{section}'"); }
+            if ( config[section].ContainsKey(key) ) { throw new FormatException($"Duplicate key '{key}':  '{section}'"); }
 
             config[section][key] = value;
         }
@@ -239,6 +234,5 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         ReadOnlyMemory<byte> buffer = Encoding.Default.GetBytes(ToString());
         return stream.WriteAsync(buffer, token);
     }
-    public async ValueTask WriteToFile( StringWriter writer ) => await writer.WriteAsync(ToString())
-                                                                             .ConfigureAwait(false);
+    public async ValueTask WriteToFile( StringWriter writer ) => await writer.WriteAsync(ToString()).ConfigureAwait(false);
 }

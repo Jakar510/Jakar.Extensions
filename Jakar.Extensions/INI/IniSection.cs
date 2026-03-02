@@ -32,11 +32,7 @@ public partial class IniConfig
         {
             Span<char> span = stackalloc char[Length + 1];
 
-            if ( TryFormat(span, out int charsWritten, format, formatProvider) )
-            {
-                return span[..charsWritten]
-                   .ToString();
-            }
+            if ( TryFormat(span, out int charsWritten, format, formatProvider) ) { return span[..charsWritten].ToString(); }
 
             throw new InvalidOperationException("Cannot convert to string");
         }
@@ -117,8 +113,7 @@ public partial class IniConfig
 
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
-            value = this[key]
-              ?.FromJson<string[]>();
+            value = this[key]?.FromJson<string[]>();
 
             return value is not null;
         }

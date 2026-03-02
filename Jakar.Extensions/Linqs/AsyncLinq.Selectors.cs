@@ -28,8 +28,7 @@ public static partial class AsyncLinq
         }
         public TElement? Single<TValue>( Func<TElement, TValue, bool> selector, TValue value )
         {
-            Enumerable.Range(0, 10)
-                      .AsAsyncEnumerable();
+            Enumerable.Range(0, 10).AsAsyncEnumerable();
 
             TElement? result = default;
 

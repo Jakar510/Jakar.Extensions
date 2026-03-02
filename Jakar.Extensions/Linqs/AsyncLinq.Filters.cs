@@ -7,88 +7,6 @@ namespace Jakar.Extensions;
 
 public static partial class AsyncLinq
 {
-    extension<TElement>( IEnumerable<IEnumerable<TElement>> values )
-    {
-        public IEnumerable<TElement> Consolidate()
-        {
-            List<TElement> results = new();
-            foreach ( IEnumerable<TElement> element in values ) { results.AddRange(element); }
-
-            return results;
-        }
-        public IEnumerable<TElement> ConsolidateUnique()
-        {
-            HashSet<TElement> results = new();
-
-            foreach ( IEnumerable<TElement> element in values )
-            {
-                foreach ( TElement item in element ) { results.Add(item); }
-            }
-
-            return results;
-        }
-    }
-
-
-
-    extension<TElement>( IAsyncEnumerable<IAsyncEnumerable<TElement>> source )
-    {
-        public async IAsyncEnumerable<TElement> Consolidate()
-        {
-            await foreach ( IAsyncEnumerable<TElement> element in source.ConfigureAwait(false) )
-            {
-                await foreach ( TElement item in element.ConfigureAwait(false) ) { yield return item; }
-            }
-        }
-        public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
-        {
-            HashSet<TElement> results = new();
-
-            await foreach ( TElement element in source.Consolidate()
-                                                      .WithCancellation(token)
-                                                      .ConfigureAwait(false) ) { results.Add(element); }
-
-            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach ( TElement element in results )
-            {
-                if ( token.IsCancellationRequested ) { yield break; }
-
-                yield return element;
-            }
-        }
-    }
-
-
-
-    extension<TElement>( IAsyncEnumerable<IEnumerable<TElement>> source )
-    {
-        public async IAsyncEnumerable<TElement> Consolidate()
-        {
-            await foreach ( IEnumerable<TElement> element in source.ConfigureAwait(false) )
-            {
-                foreach ( TElement item in element ) { yield return item; }
-            }
-        }
-        public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
-        {
-            HashSet<TElement> results = new();
-
-            await foreach ( TElement element in source.Consolidate()
-                                                      .WithCancellation(token)
-                                                      .ConfigureAwait(false) ) { results.Add(element); }
-
-            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach ( TElement element in results )
-            {
-                if ( token.IsCancellationRequested ) { yield break; }
-
-                yield return element;
-            }
-        }
-    }
-
-
-
     public static async IAsyncEnumerable<TElement> CastSafe<TElement>( this IAsyncEnumerable<object> source )
     {
         await foreach ( object element in source.ConfigureAwait(false) )
@@ -192,6 +110,84 @@ public static partial class AsyncLinq
         foreach ( TElement? element in await values.ConfigureAwait(false) )
         {
             if ( element is not null ) { yield return element; }
+        }
+    }
+
+
+
+    extension<TElement>( IEnumerable<IEnumerable<TElement>> values )
+    {
+        public IEnumerable<TElement> Consolidate()
+        {
+            List<TElement> results = new();
+            foreach ( IEnumerable<TElement> element in values ) { results.AddRange(element); }
+
+            return results;
+        }
+        public IEnumerable<TElement> ConsolidateUnique()
+        {
+            HashSet<TElement> results = new();
+
+            foreach ( IEnumerable<TElement> element in values )
+            {
+                foreach ( TElement item in element ) { results.Add(item); }
+            }
+
+            return results;
+        }
+    }
+
+
+
+    extension<TElement>( IAsyncEnumerable<IAsyncEnumerable<TElement>> source )
+    {
+        public async IAsyncEnumerable<TElement> Consolidate()
+        {
+            await foreach ( IAsyncEnumerable<TElement> element in source.ConfigureAwait(false) )
+            {
+                await foreach ( TElement item in element.ConfigureAwait(false) ) { yield return item; }
+            }
+        }
+        public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
+        {
+            HashSet<TElement> results = new();
+
+            await foreach ( TElement element in source.Consolidate().WithCancellation(token).ConfigureAwait(false) ) { results.Add(element); }
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach ( TElement element in results )
+            {
+                if ( token.IsCancellationRequested ) { yield break; }
+
+                yield return element;
+            }
+        }
+    }
+
+
+
+    extension<TElement>( IAsyncEnumerable<IEnumerable<TElement>> source )
+    {
+        public async IAsyncEnumerable<TElement> Consolidate()
+        {
+            await foreach ( IEnumerable<TElement> element in source.ConfigureAwait(false) )
+            {
+                foreach ( TElement item in element ) { yield return item; }
+            }
+        }
+        public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
+        {
+            HashSet<TElement> results = new();
+
+            await foreach ( TElement element in source.Consolidate().WithCancellation(token).ConfigureAwait(false) ) { results.Add(element); }
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach ( TElement element in results )
+            {
+                if ( token.IsCancellationRequested ) { yield break; }
+
+                yield return element;
+            }
         }
     }
 }

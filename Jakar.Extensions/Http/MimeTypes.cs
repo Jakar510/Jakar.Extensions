@@ -3,8 +3,7 @@
 
 public static class MimeTypes
 {
-    public static readonly FrozenSet<MimeType> All = Enum.GetValues<MimeType>()
-                                                         .ToFrozenSet();
+    public static readonly FrozenSet<MimeType>                All                   = Enum.GetValues<MimeType>().ToFrozenSet();
     public static readonly FrozenDictionary<string, MimeType> ReverseNames          = All.ToFrozenDictionary(ToStringFast, SelectSelf);
     public static readonly FrozenDictionary<MimeType, string> Names                 = All.ToFrozenDictionary(SelectSelf,   ToStringFast);
     public static readonly FrozenDictionary<MimeType, string> ContentNames          = All.ToFrozenDictionary(SelectSelf,   ToContentType);
@@ -23,8 +22,7 @@ public static class MimeTypes
     /// <returns>
     ///     <see cref="MimeType"/>
     /// </returns>
-    public static MimeType FromExtension( this string mime ) => mime.AsSpan()
-                                                                    .FromExtension();
+    public static MimeType FromExtension( this string mime ) => mime.AsSpan().FromExtension();
 
 
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>

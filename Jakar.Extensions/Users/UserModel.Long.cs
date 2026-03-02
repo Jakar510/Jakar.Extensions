@@ -56,9 +56,6 @@ public interface IEscalateToUser : IEscalateToUser<long>;
 public interface IUserModel : IUserData<long>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
 
 
- 
-
-
 
 [Serializable]
 public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IAddress, IEqualComparable<UserAddress>
@@ -327,27 +324,18 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static UserModel Create( IUserData<long> model ) => new(model);
-    public static UserModel Create( IUserData<long> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
-                                                                                                                                                                .With(addresses)
-                                                                                                                                                                .With(groups)
-                                                                                                                                                                .With(roles);
-    public static UserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
-                                                                                                                                                                                                 .With(addresses)
-                                                                                                                                                                                                 .With(groups)
-                                                                                                                                                                                                 .With(roles);
+    public static UserModel Create( IUserData<long> model )                                                                                                                                    => new(model);
+    public static UserModel Create( IUserData<long> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static UserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
     public static async ValueTask<UserModel> CreateAsync( IUserData<long> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         UserModel user = Create(model);
 
-        await user.Addresses.Add(addresses, token)
-                  .ConfigureAwait(false);
+        await user.Addresses.Add(addresses, token).ConfigureAwait(false);
 
-        await user.Groups.Add(groups, token)
-                  .ConfigureAwait(false);
+        await user.Groups.Add(groups, token).ConfigureAwait(false);
 
-        await user.Roles.Add(roles, token)
-                  .ConfigureAwait(false);
+        await user.Roles.Add(roles, token).ConfigureAwait(false);
 
         return user;
     }
@@ -371,27 +359,18 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, Use
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static CreateUserModel Create( IUserData<long> model ) => new(model);
-    public static CreateUserModel Create( IUserData<long> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
-                                                                                                                                                                      .With(addresses)
-                                                                                                                                                                      .With(groups)
-                                                                                                                                                                      .With(roles);
-    public static CreateUserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
-                                                                                                                                                                                                       .With(addresses)
-                                                                                                                                                                                                       .With(groups)
-                                                                                                                                                                                                       .With(roles);
+    public static CreateUserModel Create( IUserData<long> model )                                                                                                                                    => new(model);
+    public static CreateUserModel Create( IUserData<long> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static CreateUserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
     public static async ValueTask<CreateUserModel> CreateAsync( IUserData<long> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         CreateUserModel user = Create(model);
 
-        await user.Addresses.Add(addresses, token)
-                  .ConfigureAwait(false);
+        await user.Addresses.Add(addresses, token).ConfigureAwait(false);
 
-        await user.Groups.Add(groups, token)
-                  .ConfigureAwait(false);
+        await user.Groups.Add(groups, token).ConfigureAwait(false);
 
-        await user.Roles.Add(roles, token)
-                  .ConfigureAwait(false);
+        await user.Roles.Add(roles, token).ConfigureAwait(false);
 
         return user;
     }
@@ -471,10 +450,10 @@ public sealed class UserLoginRequest( string userName, string password, UserMode
 
     public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserLogin, request.UserPassword, data) { }
     public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
-    public override bool Equals( UserLoginRequest?    other ) => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserLogin, other.UserLogin, StringComparison.InvariantCulture) && string.Equals(UserPassword, other.UserPassword, StringComparison.InvariantCulture) );
-    public override int  CompareTo( UserLoginRequest? other ) => string.Compare(UserLogin, other?.UserPassword, StringComparison.CurrentCultureIgnoreCase);
-    public override bool Equals( object?              other ) => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
-    public override int  GetHashCode()                        => HashCode.Combine(UserLogin, UserPassword);
+    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || ( other is not null && string.Equals(UserLogin, other.UserLogin, StringComparison.InvariantCulture) && string.Equals(UserPassword, other.UserPassword, StringComparison.InvariantCulture) );
+    public override int  CompareTo( UserLoginRequest? other )                           => string.Compare(UserLogin, other?.UserPassword, StringComparison.CurrentCultureIgnoreCase);
+    public override bool Equals( object?              other )                           => ReferenceEquals(this, other) || ( other is UserLoginRequest x && Equals(x) );
+    public override int  GetHashCode()                                                  => HashCode.Combine(UserLogin, UserPassword);
     public static   bool operator ==( UserLoginRequest? left, UserLoginRequest? right ) => EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator !=( UserLoginRequest? left, UserLoginRequest? right ) => !EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
     public static   bool operator >( UserLoginRequest   left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) > 0;

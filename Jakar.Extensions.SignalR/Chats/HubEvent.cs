@@ -20,11 +20,11 @@ public enum HubEventType
 
 public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
 {
-    [StringLength(CONNECTION_ID)] public required string                   ConnectionID  { get; init; }
-    [StringLength(NAME)]          public required string                   Group         { get; init; }
-    public                                        InstantMessage?          Message       { get; init; }
-    public required                               HubEventType             Type          { get; init; }
-    public required                               ChatUser                 User          { get; init; }
+    [StringLength(CONNECTION_ID)] public required string          ConnectionID { get; init; }
+    [StringLength(NAME)]          public required string          Group        { get; init; }
+    public                                        InstantMessage? Message      { get; init; }
+    public required                               HubEventType    Type         { get; init; }
+    public required                               ChatUser        User         { get; init; }
 
 
     public HubEvent() { }

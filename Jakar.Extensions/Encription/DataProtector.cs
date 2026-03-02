@@ -124,24 +124,19 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await resources.GetResourceTextAsync(name)
-                                      .ConfigureAwait(false));
+        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false));
     }
     public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name, string password )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await resources.GetResourceTextAsync(name)
-                                      .ConfigureAwait(false),
-                       password);
+        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false), password);
     }
     public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name, SecuredString password )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await resources.GetResourceTextAsync(name)
-                                      .ConfigureAwait(false),
-                       password);
+        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false), password);
     }
 
 
@@ -150,11 +145,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return await WithKeyAsync(resources,
-                                  name,
-                                  await password.GetSecuredStringAsync(configuration, token)
-                                                .ConfigureAwait(false))
-                  .ConfigureAwait(false);
+        return await WithKeyAsync(resources, name, await password.GetSecuredStringAsync(configuration, token).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
 
@@ -162,50 +153,37 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(pem.Read()
-                          .AsString());
+        return WithKey(pem.Read().AsString());
     }
     public DataProtector WithKeyFile( LocalFile pem, scoped in ReadOnlySpan<char> password )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(pem.Read()
-                          .AsString(),
-                       password);
+        return WithKey(pem.Read().AsString(), password);
     }
     public DataProtector WithKeyFile( LocalFile pem, SecuredString password )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(pem.Read()
-                          .AsString(),
-                       password);
+        return WithKey(pem.Read().AsString(), password);
     }
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await pem.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false));
+        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false));
     }
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string password, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await pem.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false),
-                       password);
+        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false), password);
     }
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString password, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return WithKey(await pem.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false),
-                       password);
+        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false), password);
     }
 
 
@@ -214,11 +192,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return await WithKeyAsync(pem,
-                                  await password.GetSecuredStringAsync(configuration, token)
-                                                .ConfigureAwait(false),
-                                  token)
-                  .ConfigureAwait(false);
+        return await WithKeyAsync(pem, await password.GetSecuredStringAsync(configuration, token).ConfigureAwait(false), token).ConfigureAwait(false);
     }
 
 
@@ -308,8 +282,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        byte[] raw = file.Read()
-                         .AsBytes();
+        byte[] raw = file.Read().AsBytes();
 
         byte[] result = Decrypt(raw);
         return result;
@@ -318,8 +291,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string raw = file.Read()
-                         .AsString();
+        string raw = file.Read().AsString();
 
         string result = Decrypt(raw, encoding);
         return result;
@@ -333,9 +305,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        byte[] raw = await file.ReadAsync()
-                               .AsBytes(token)
-                               .ConfigureAwait(false);
+        byte[] raw = await file.ReadAsync().AsBytes(token).ConfigureAwait(false);
 
         byte[] result = Decrypt(raw);
         return result;
@@ -344,9 +314,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string raw = await file.ReadAsync()
-                               .AsString(token)
-                               .ConfigureAwait(false);
+        string raw = await file.ReadAsync().AsString(token).ConfigureAwait(false);
 
         string result = Decrypt(raw, encoding);
         return result;
@@ -355,34 +323,27 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        return await func(file.ReadAsync(), this, token)
-                  .ConfigureAwait(false);
+        return await func(file.ReadAsync(), this, token).ConfigureAwait(false);
     }
     public async ValueTask DecryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        byte[] raw = await input.ReadAsync()
-                                .AsBytes(token)
-                                .ConfigureAwait(false);
+        byte[] raw = await input.ReadAsync().AsBytes(token).ConfigureAwait(false);
 
         byte[] result = Decrypt(raw);
 
-        await output.WriteAsync(result, token)
-                    .ConfigureAwait(false);
+        await output.WriteAsync(result, token).ConfigureAwait(false);
     }
     public async ValueTask DecryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string raw = await input.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false);
+        string raw = await input.ReadAsync().AsString(token).ConfigureAwait(false);
 
         string result = Decrypt(raw, encoding);
 
-        await output.WriteAsync(result, token)
-                    .ConfigureAwait(false);
+        await output.WriteAsync(result, token).ConfigureAwait(false);
     }
 
 
@@ -449,30 +410,25 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await EncryptAsync(file, value, Encoding.Default, token)
-           .ConfigureAwait(false);
+        await EncryptAsync(file, value, Encoding.Default, token).ConfigureAwait(false);
     }
     public async ValueTask EncryptAsync( LocalFile file, string value, Encoding encoding, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await file.WriteAsync(Encrypt(value, encoding), token)
-                  .ConfigureAwait(false);
+        await file.WriteAsync(Encrypt(value, encoding), token).ConfigureAwait(false);
     }
     public async ValueTask EncryptAsync( LocalFile file, byte[] value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await file.WriteAsync(Encrypt(value), token)
-                  .ConfigureAwait(false);
+        await file.WriteAsync(Encrypt(value), token).ConfigureAwait(false);
     }
     public async ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        byte[] raw = await value.ReadAsync()
-                                .AsBytes(token)
-                                .ConfigureAwait(false);
+        byte[] raw = await value.ReadAsync().AsBytes(token).ConfigureAwait(false);
 
         byte[] result = Encrypt(raw);
         return result;
@@ -481,9 +437,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string raw = await value.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false);
+        string raw = await value.ReadAsync().AsString(token).ConfigureAwait(false);
 
         string result = Encrypt(raw, encoding);
         return result;
@@ -492,26 +446,20 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        byte[] raw = await input.ReadAsync()
-                                .AsBytes(token)
-                                .ConfigureAwait(false);
+        byte[] raw = await input.ReadAsync().AsBytes(token).ConfigureAwait(false);
 
         byte[] result = Encrypt(raw);
 
-        await output.WriteAsync(result, token)
-                    .ConfigureAwait(false);
+        await output.WriteAsync(result, token).ConfigureAwait(false);
     }
     public async ValueTask EncryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string raw = await input.ReadAsync()
-                                .AsString(token)
-                                .ConfigureAwait(false);
+        string raw = await input.ReadAsync().AsString(token).ConfigureAwait(false);
 
         string result = Encrypt(raw, encoding);
 
-        await output.WriteAsync(result, token)
-                    .ConfigureAwait(false);
+        await output.WriteAsync(result, token).ConfigureAwait(false);
     }
 }

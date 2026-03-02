@@ -111,29 +111,11 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
     #region Lists
 
-    public static PooledArray<Language> NeutralCultures
-    {
-        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.NeutralCultures)
-                                                .AsValueEnumerable()
-                                                .Select(Create)
-                                                .ToArrayPool();
-    }
+    public static PooledArray<Language> NeutralCultures { [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.NeutralCultures).AsValueEnumerable().Select(Create).ToArrayPool(); }
 
-    public static PooledArray<Language> SpecificCultures
-    {
-        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-                                                .AsValueEnumerable()
-                                                .Select(Create)
-                                                .ToArrayPool();
-    }
+    public static PooledArray<Language> SpecificCultures { [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.SpecificCultures).AsValueEnumerable().Select(Create).ToArrayPool(); }
 
-    public static PooledArray<Language> All
-    {
-        [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.AllCultures)
-                                                .AsValueEnumerable()
-                                                .Select(Create)
-                                                .ToArrayPool();
-    }
+    public static PooledArray<Language> All { [MustDisposeResource] get => CultureInfo.GetCultures(CultureTypes.AllCultures).AsValueEnumerable().Select(Create).ToArrayPool(); }
 
     public static LanguageCollection Supported { get; } =
         [

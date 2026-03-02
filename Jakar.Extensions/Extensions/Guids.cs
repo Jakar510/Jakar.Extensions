@@ -2,7 +2,6 @@
 // 04/15/2022  5:45 PM
 
 using System.Buffers.Text;
-using System.Text;
 
 
 
@@ -56,7 +55,7 @@ public static class Guids
     public static Guid? AsGuid( this string value )
     {
         ReadOnlySpan<char> span = value;
-        return AsGuid(in span);
+        return span.AsGuid();
     }
 
 
@@ -95,12 +94,12 @@ public static class Guids
     public static string NewBase64()
     {
         Guid id = Guid.CreateVersion7(DateTimeOffset.UtcNow);
-        return NewBase64(in id);
+        return id.NewBase64();
     }
     public static string NewBase64( in this DateTimeOffset timeStamp )
     {
         Guid id = Guid.CreateVersion7(timeStamp);
-        return NewBase64(in id);
+        return id.NewBase64();
     }
     public static string NewBase64( in this DateTimeOffset? timeStamp )
     {
@@ -108,7 +107,65 @@ public static class Guids
                       ? Guid.CreateVersion7(timeStamp.Value)
                       : Guid.NewGuid();
 
-        return NewBase64(in id);
+        return id.NewBase64();
+    }
+
+
+    public static Guid AsGuid( in this (long Lower, long Upper) value )
+    {
+        const int  SIZE = sizeof(long);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+
+        if ( BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper) ) { return new Guid(span); }
+
+        throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
+    }
+    public static Guid AsGuid( in this (ulong Lower, ulong Upper) value )
+    {
+        const int  SIZE = sizeof(ulong);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+
+        return BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper)
+                   ? new Guid(span)
+                   : throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
+    }
+    public static Guid AsGuid( in this long value )
+    {
+        const int  SIZE = sizeof(long);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+        span.Clear();
+
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+
+        return new Guid(span);
+    }
+    public static Guid AsGuid( in this ulong value )
+    {
+        const int  SIZE = sizeof(ulong);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+        span.Clear();
+
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+
+        return new Guid(span);
+    }
+
+
+    public static Guid AsGuid( in this Int128 value )
+    {
+        const int  SIZE = sizeof(ulong);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+
+        return new Guid(span[..bytesWritten]);
+    }
+    public static Guid AsGuid( in this UInt128 value )
+    {
+        const int  SIZE = sizeof(ulong);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+
+        return new Guid(span[..bytesWritten]);
     }
 
 
@@ -209,65 +266,6 @@ public static class Guids
             upper = 0;
             return false;
         }
-    }
-
-
-
-    public static Guid AsGuid( in this (long Lower, long Upper) value )
-    {
-        const int  SIZE = sizeof(long);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-
-        if ( BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper) ) { return new Guid(span); }
-
-        throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
-    }
-    public static Guid AsGuid( in this (ulong Lower, ulong Upper) value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-
-        return BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper)
-                   ? new Guid(span)
-                   : throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
-    }
-    public static Guid AsGuid( in this long value )
-    {
-        const int  SIZE = sizeof(long);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-        span.Clear();
-
-        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
-
-        return new Guid(span);
-    }
-    public static Guid AsGuid( in this ulong value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-        span.Clear();
-
-        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
-
-        return new Guid(span);
-    }
-
-
-    public static Guid AsGuid( in this Int128 value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
-
-        return new Guid(span[..bytesWritten]);
-    }
-    public static Guid AsGuid( in this UInt128 value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
-
-        return new Guid(span[..bytesWritten]);
     }
 
 

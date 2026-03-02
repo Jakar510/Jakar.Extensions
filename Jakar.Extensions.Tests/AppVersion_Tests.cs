@@ -71,8 +71,7 @@ public class AppVersion_Tests : Assert
     [Test] [TestCase("1.0")] [TestCase("1.2.3")] [TestCase("1.2.3.4")] [TestCase("0.7.0.25")] [TestCase("2147483647.2147483647.2147483647.2147483647")]
     public void ToVersion( string input )
     {
-        Version value = AppVersion.Parse(input)
-                                  .ToVersion();
+        Version value = AppVersion.Parse(input).ToVersion();
 
         this.AreEqual(Version.Parse(input), value);
     }
@@ -216,7 +215,5 @@ public class AppVersion_Tests : Assert
     [TestCase("21.10.3.5.1", "21.12.1.5.1", false)]
     [TestCase("21.10.3.5.1", "22.10.3.5.1", false)]
     [TestCase("21.10.3.5.1", "22.12.1.5.1", false)]
-    public void FuzzyEquals_Test( string left, string right, bool expected = true ) => this.AreEqual(expected,
-                                                                                                     AppVersion.Parse(left)
-                                                                                                               .FuzzyEquals(AppVersion.Parse(right)));
+    public void FuzzyEquals_Test( string left, string right, bool expected = true ) => this.AreEqual(expected, AppVersion.Parse(left).FuzzyEquals(AppVersion.Parse(right)));
 }

@@ -5,7 +5,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Nodes;
 using System.Threading;
 using Jakar.Permissions.Generator.Runtime;
 using Microsoft.CodeAnalysis;
@@ -96,12 +95,7 @@ internal static class PermissionGenUtilities
         string projectDir = Directory.GetCurrentDirectory();
         if ( string.IsNullOrEmpty(projectDir) ) { return ImmutableArray<AdditionalText>.Empty; }
 
-        ImmutableArray<AdditionalText> found =
-        [
-            ..Constants.Candidates.Select(name => Path.Combine(projectDir, name))
-                       .Where(File.Exists)
-                       .Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))
-        ];
+        ImmutableArray<AdditionalText> found = [..Constants.Candidates.Select(name => Path.Combine(projectDir, name)).Where(File.Exists).Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))];
 
         return found;
     }
@@ -180,8 +174,7 @@ internal static class PermissionGenUtilities
 
         for ( int i = 0; i < permissions.Count; i++ )
         {
-            string[] parts = permissions[i]
-               .Split('.', StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = permissions[i].Split('.', StringSplitOptions.RemoveEmptyEntries);
 
             Node current = root;
 
@@ -210,9 +203,7 @@ internal static class PermissionGenUtilities
 
         sb.AppendLine();
 
-        sb.Append("namespace ")
-          .Append(ns)
-          .AppendLine(";");
+        sb.Append("namespace ").Append(ns).AppendLine(";");
 
         sb.AppendLine();
         WriteNode(in sb, in root, 0, in includeDocs, in includeDebugger);
@@ -225,48 +216,20 @@ internal static class PermissionGenUtilities
 
         if ( indent > 0 )
         {
-            sb.Append(ind)
-              .Append("public static class ")
-              .Append(node.Name)
-              .AppendLine();
+            sb.Append(ind).Append("public static class ").Append(node.Name).AppendLine();
 
-            sb.Append(ind)
-              .AppendLine("{");
+            sb.Append(ind).AppendLine("{");
         }
 
         foreach ( ( string field, int id, string path ) in node.Fields )
         {
             string fieldIndent = ind + "    ";
 
-            if ( includeDocs )
-            {
-                sb.Append(fieldIndent)
-                  .Append("/// <summary>Permission: ")
-                  .Append(path)
-                  .AppendLine("</summary>");
-            }
+            if ( includeDocs ) { sb.Append(fieldIndent).Append("/// <summary>Permission: ").Append(path).AppendLine("</summary>"); }
 
-            if ( includeDebugger )
-            {
-                sb.Append(fieldIndent)
-                  .Append("[DebuggerDisplay(")
-                  .Append('"')
-                  .Append(path)
-                  .Append('"')
-                  .Append(')')
-                  .AppendLine("]");
-            }
+            if ( includeDebugger ) { sb.Append(fieldIndent).Append("[DebuggerDisplay(").Append('"').Append(path).Append('"').Append(')').AppendLine("]"); }
 
-            sb.Append(fieldIndent)
-              .Append($"public static readonly {nameof(PermissionIndex)} ")
-              .Append(field)
-              .Append(" = new(")
-              .Append(id)
-              .Append(", ")
-              .Append('"')
-              .Append(path)
-              .Append('"')
-              .AppendLine(");");
+            sb.Append(fieldIndent).Append($"public static readonly {nameof(PermissionIndex)} ").Append(field).Append(" = new(").Append(id).Append(", ").Append('"').Append(path).Append('"').AppendLine(");");
         }
 
         foreach ( Node child in node.Children.Values )

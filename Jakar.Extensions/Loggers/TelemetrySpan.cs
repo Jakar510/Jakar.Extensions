@@ -138,8 +138,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     {
         using TelemetrySpan telemetrySpan = Create();
 
-        await timer.WaitForNextTickAsync(token)
-                   .ConfigureAwait(false);
+        await timer.WaitForNextTickAsync(token).ConfigureAwait(false);
     }
     public ValueTask Delay( double seconds, CancellationToken token = default ) => Delay(TimeSpan.FromSeconds(seconds), token);
     public ValueTask Delay( long   ms,      CancellationToken token = default ) => Delay(TimeSpan.FromMilliseconds(ms), token);
@@ -147,8 +146,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     {
         using TelemetrySpan telemetrySpan = Create();
 
-        await Task.Delay(delay, token)
-                  .ConfigureAwait(false);
+        await Task.Delay(delay, token).ConfigureAwait(false);
     }
 
 

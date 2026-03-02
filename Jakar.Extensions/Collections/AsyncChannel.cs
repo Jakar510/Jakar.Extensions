@@ -70,8 +70,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
                     while ( TryRead(out TValue? value) ) { yield return value; }
                 }
 
-                await telemetrySpan.Delay(5, token)
-                                   .ConfigureAwait(false);
+                await telemetrySpan.Delay(5, token).ConfigureAwait(false);
             }
         }
         public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(!__parent.__values.IsEmpty);

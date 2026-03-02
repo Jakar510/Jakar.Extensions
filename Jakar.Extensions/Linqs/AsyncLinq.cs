@@ -22,52 +22,6 @@ public static partial class AsyncLinq
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsEmpty( this ICollection collection ) => collection.Count == 0;
 
 
-
-    extension<TElement>( IAsyncEnumerable<TElement> self )
-    {
-        public ValueTask<HashSet<TElement>> ToHashSet( CancellationToken token = default ) => self.ToHashSet(EqualityComparer<TElement>.Default, token);
-
-        public async ValueTask<HashSet<TElement>> ToHashSet( EqualityComparer<TElement> comparer, CancellationToken token = default )
-        {
-            HashSet<TElement> list = new(comparer);
-
-            await foreach ( TElement element in self.WithCancellation(token)
-                                                    .ConfigureAwait(false) ) { list.Add(element); }
-
-            return list;
-        }
-       
-        public async ValueTask<TElement[]> ToArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-        {
-            List<TElement> array = await self.ToList(initialCapacity, token)
-                                             .ConfigureAwait(false);
-
-            return array.ToArray();
-        }
-       
-        public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-        {
-            List<TElement> list = new(initialCapacity);
-
-            await foreach ( TElement element in self.WithCancellation(token)
-                                                    .ConfigureAwait(false) ) { list.Add(element); }
-
-            return list;
-        }
-      
-        public async ValueTask<ImmutableArray<TElement>> ToImmutableArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
-        {
-            List<TElement> list = new(initialCapacity);
-
-            await foreach ( TElement element in self.WithCancellation(token)
-                                                    .ConfigureAwait(false) ) { list.Add(element); }
-
-            return [..list];
-        }
-    }
-
-
-
     public static List<char>     ToList( this           string                        sequence ) => sequence.ToList(sequence.Length);
     public static List<TElement> ToList<TElement>( this IReadOnlyCollection<TElement> sequence ) => sequence.ToList(sequence.Count);
     public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int initialCapacity )
@@ -160,6 +114,47 @@ public static partial class AsyncLinq
 
 
 
+    extension<TElement>( IAsyncEnumerable<TElement> self )
+    {
+        public ValueTask<HashSet<TElement>> ToHashSet( CancellationToken token = default ) => self.ToHashSet(EqualityComparer<TElement>.Default, token);
+
+        public async ValueTask<HashSet<TElement>> ToHashSet( EqualityComparer<TElement> comparer, CancellationToken token = default )
+        {
+            HashSet<TElement> list = new(comparer);
+
+            await foreach ( TElement element in self.WithCancellation(token).ConfigureAwait(false) ) { list.Add(element); }
+
+            return list;
+        }
+
+        public async ValueTask<TElement[]> ToArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> array = await self.ToList(initialCapacity, token).ConfigureAwait(false);
+
+            return array.ToArray();
+        }
+
+        public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> list = new(initialCapacity);
+
+            await foreach ( TElement element in self.WithCancellation(token).ConfigureAwait(false) ) { list.Add(element); }
+
+            return list;
+        }
+
+        public async ValueTask<ImmutableArray<TElement>> ToImmutableArray( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        {
+            List<TElement> list = new(initialCapacity);
+
+            await foreach ( TElement element in self.WithCancellation(token).ConfigureAwait(false) ) { list.Add(element); }
+
+            return [..list];
+        }
+    }
+
+
+
     extension<TElement>( TElement[] array )
         where TElement : IComparable<TElement>
     {
@@ -189,12 +184,7 @@ public static partial class AsyncLinq
         {
             ObservableCollection<TElement> list = new(initialCapacity);
 
-            await foreach ( TElement element in source.WithCancellation(token)
-                                                      .ConfigureAwait(false) )
-            {
-                await list.AddAsync(element, token)
-                          .ConfigureAwait(false);
-            }
+            await foreach ( TElement element in source.WithCancellation(token).ConfigureAwait(false) ) { await list.AddAsync(element, token).ConfigureAwait(false); }
 
             return list;
         }
@@ -202,12 +192,7 @@ public static partial class AsyncLinq
         {
             ConcurrentObservableCollection<TElement> list = new(initialCapacity);
 
-            await foreach ( TElement element in source.WithCancellation(token)
-                                                      .ConfigureAwait(false) )
-            {
-                await list.AddAsync(element, token)
-                          .ConfigureAwait(false);
-            }
+            await foreach ( TElement element in source.WithCancellation(token).ConfigureAwait(false) ) { await list.AddAsync(element, token).ConfigureAwait(false); }
 
             return list;
         }

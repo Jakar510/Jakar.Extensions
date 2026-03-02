@@ -12,6 +12,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
+    protected string            __userName = EMPTY;
     protected string?           __company;
     protected string?           __department;
     protected string?           __email;
@@ -21,7 +22,6 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     protected string?           __lastName;
     protected string?           __phoneNumber;
     protected string?           __title;
-    protected string            __userName = EMPTY;
     protected string?           __website;
     protected string?           _description;
     protected string?           _fullName;

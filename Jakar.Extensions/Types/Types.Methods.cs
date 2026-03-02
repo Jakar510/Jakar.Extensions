@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using ZLinq;
+﻿using ZLinq;
 
 
 
@@ -14,13 +13,7 @@ public static partial class Types
 
     extension( MethodBase self )
     {
-        public string MethodSignature()
-        {
-            return self.Name.AppendJoin(self.GetParameters()
-                                            .AsValueEnumerable()
-                                            .Select(static x => x.ParameterType.FullName ?? x.ParameterType.Name))
-                       .ToString();
-        }
+        public string MethodSignature() { return self.Name.AppendJoin(self.GetParameters().AsValueEnumerable().Select(static x => x.ParameterType.FullName ?? x.ParameterType.Name)).ToString(); }
 
         public string MethodName() => self.Name;
 

@@ -15,7 +15,7 @@ public class EncodingConverter : JsonConverter<Encoding>
         if ( reader.TokenType is not JsonToken.String ) { throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing Encoding. Expected a string."); }
 
         string? name = (string?)reader.Value;
-                if ( string.IsNullOrWhiteSpace(name) ) { return null; }
+        if ( string.IsNullOrWhiteSpace(name) ) { return null; }
 
         try { return Encoding.GetEncoding(name); }
         catch ( Exception ex ) { throw new JsonSerializationException($"Unknown encoding '{name}'.", ex); }

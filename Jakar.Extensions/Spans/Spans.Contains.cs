@@ -36,8 +36,7 @@ public static partial class Spans
 
             for ( int i = 0; i < self.Length || i + value.Length < self.Length; i++ )
             {
-                if ( self.Slice(i, value.Length)
-                         .SequenceEqual(value) ) { return true; }
+                if ( self.Slice(i, value.Length).SequenceEqual(value) ) { return true; }
             }
 
             return false;
@@ -119,9 +118,7 @@ public static partial class Spans
         }
 
 
-        public bool EndsWith( TValue value ) => !self.IsEmpty &&
-                                                self[^1]
-                                                   .Equals(value);
+        public bool EndsWith( TValue value ) => !self.IsEmpty && self[^1].Equals(value);
         public bool EndsWith( params ReadOnlySpan<TValue> value )
         {
             if ( self.IsEmpty ) { return false; }
@@ -132,17 +129,14 @@ public static partial class Spans
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                if ( !temp[i]
-                        .Equals(value[i]) ) { return false; }
+                if ( !temp[i].Equals(value[i]) ) { return false; }
             }
 
             return true;
         }
 
 
-        public bool StartsWith( TValue value ) => !self.IsEmpty &&
-                                                  self[0]
-                                                     .Equals(value);
+        public bool StartsWith( TValue value ) => !self.IsEmpty && self[0].Equals(value);
         public bool StartsWith( params ReadOnlySpan<TValue> value )
         {
             if ( self.IsEmpty ) { return false; }
@@ -153,8 +147,7 @@ public static partial class Spans
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                if ( !temp[i]
-                        .Equals(value[i]) ) { return false; }
+                if ( !temp[i].Equals(value[i]) ) { return false; }
             }
 
             return true;
@@ -174,8 +167,7 @@ public static partial class Spans
 
             for ( int i = 0; i < self.Length || i + value.Length < self.Length; i++ )
             {
-                if ( self.Slice(i, value.Length)
-                         .SequenceEqual(value) ) { return true; }
+                if ( self.Slice(i, value.Length).SequenceEqual(value) ) { return true; }
             }
 
             return false;
@@ -257,9 +249,7 @@ public static partial class Spans
         }
 
 
-        public bool EndsWith( TValue value ) => !self.IsEmpty &&
-                                                self[^1]
-                                                   .Equals(value);
+        public bool EndsWith( TValue value ) => !self.IsEmpty && self[^1].Equals(value);
         public bool EndsWith( params ReadOnlySpan<TValue> value )
         {
             if ( self.IsEmpty ) { return false; }
@@ -270,17 +260,14 @@ public static partial class Spans
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                if ( !temp[i]
-                        .Equals(value[i]) ) { return false; }
+                if ( !temp[i].Equals(value[i]) ) { return false; }
             }
 
             return true;
         }
 
 
-        public bool StartsWith( TValue value ) => !self.IsEmpty &&
-                                                  self[0]
-                                                     .Equals(value);
+        public bool StartsWith( TValue value ) => !self.IsEmpty && self[0].Equals(value);
         public bool StartsWith( params ReadOnlySpan<TValue> value )
         {
             if ( self.IsEmpty ) { return false; }
@@ -291,8 +278,7 @@ public static partial class Spans
 
             for ( int i = 0; i < value.Length; i++ )
             {
-                if ( !temp[i]
-                        .Equals(value[i]) ) { return false; }
+                if ( !temp[i].Equals(value[i]) ) { return false; }
             }
 
             return true;

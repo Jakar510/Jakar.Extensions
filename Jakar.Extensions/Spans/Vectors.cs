@@ -21,7 +21,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<uint> source, uint value )
     {
@@ -32,7 +32,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<byte> source, byte value )
     {
@@ -43,7 +43,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<byte> source, sbyte value )
     {
@@ -70,7 +70,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<int> source, int value )
     {
@@ -81,7 +81,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<long> source, long value )
     {
@@ -92,7 +92,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<ushort> source, ushort value )
     {
@@ -103,7 +103,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<nint> source, nint value )
     {
@@ -114,7 +114,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<ulong> source, ulong value )
     {
@@ -125,7 +125,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<float> source, float value )
     {
@@ -136,7 +136,7 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<double> source, double value )
     {
@@ -147,6 +147,6 @@ public static class Vectors
             return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains(source, value);
+        return source.Contains(value);
     }
 }

@@ -1,21 +1,14 @@
-﻿using System.Linq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public static class Languages
 {
-    public static readonly ImmutableArray<SupportedLanguage> All = Enum.GetValues<SupportedLanguage>()
-                                                                       .AsImmutableArray();
-    public static readonly FrozenDictionary<string, SupportedLanguage> FromStrings = CreateFromStrings();
-    public static readonly FrozenDictionary<SupportedLanguage, Language> Cache = Enum.GetValues<SupportedLanguage>()
-                                                                                     .ToFrozenDictionary(static x => x, static x => new Language(CultureInfo.GetCultureInfo(x.GetShortName())));
+    public static readonly ImmutableArray<SupportedLanguage>                All          = Enum.GetValues<SupportedLanguage>().AsImmutableArray();
+    public static readonly FrozenDictionary<string, SupportedLanguage>      FromStrings  = CreateFromStrings();
+    public static readonly FrozenDictionary<SupportedLanguage, Language>    Cache        = Enum.GetValues<SupportedLanguage>().ToFrozenDictionary(static x => x, static x => new Language(CultureInfo.GetCultureInfo(x.GetShortName())));
     public static readonly FrozenDictionary<SupportedLanguage, CultureInfo> CultureCache = All.ToFrozenDictionary(static x => x, static x => CultureInfo.GetCultureInfo(x.GetShortName()));
-    public static readonly FrozenDictionary<CultureInfo, SupportedLanguage> Cultures = Enum.GetValues<SupportedLanguage>()
-                                                                                           .ToFrozenDictionary(static x => CultureInfo.GetCultureInfo(x.GetShortName()), static x => x);
+    public static readonly FrozenDictionary<CultureInfo, SupportedLanguage> Cultures     = Enum.GetValues<SupportedLanguage>().ToFrozenDictionary(static x => CultureInfo.GetCultureInfo(x.GetShortName()), static x => x);
 
 
     static FrozenDictionary<string, SupportedLanguage> CreateFromStrings()
@@ -42,6 +35,39 @@ public static class Languages
         }
 
         return dictionary.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    }
+
+
+    public static string? ToStringFast( this SupportedLanguage? language ) => language?.ToStringFast();
+
+
+    public static SupportedLanguage GetSupportedLanguage( this CultureInfo culture )
+    {
+        if ( CultureInfo.InvariantCulture.Equals(culture) ) { return SupportedLanguage.Unspecified; }
+
+        // ReSharper disable DuplicatedSequentialIfBodies
+        if ( FromStrings.TryGetValue(culture.ThreeLetterISOLanguageName, out var language) ) { return language; }
+
+        if ( FromStrings.TryGetValue(culture.ThreeLetterWindowsLanguageName, out language) ) { return language; }
+
+        if ( FromStrings.TryGetValue(culture.TwoLetterISOLanguageName, out language) ) { return language; }
+
+        if ( FromStrings.TryGetValue(culture.DisplayName, out language) ) { return language; }
+
+        if ( FromStrings.TryGetValue(culture.Name, out language) ) { return language; }
+
+        // ReSharper restore DuplicatedSequentialIfBodies
+        return FromStrings.GetValueOrDefault(culture.ToString(), SupportedLanguage.Unspecified);
+    }
+    public static SupportedLanguage GetSupportedLanguage( this IFormatProvider culture )
+    {
+        if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
+
+        string? name = culture.ToString();
+
+        return string.IsNullOrEmpty(name)
+                   ? SupportedLanguage.Unspecified
+                   : FromStrings.GetValueOrDefault(name, SupportedLanguage.Unspecified);
     }
 
 
@@ -113,39 +139,5 @@ public static class Languages
                                             SupportedLanguage.Arabic      => nameof(SupportedLanguage.Arabic),
                                             _                             => throw new OutOfRangeException(language)
                                         };
-    }
-
-
-
-    public static string? ToStringFast( this SupportedLanguage? language ) => language?.ToStringFast();
-
-
-    public static SupportedLanguage GetSupportedLanguage( this CultureInfo culture )
-    {
-        if ( CultureInfo.InvariantCulture.Equals(culture) ) { return SupportedLanguage.Unspecified; }
-
-        // ReSharper disable DuplicatedSequentialIfBodies
-        if ( FromStrings.TryGetValue(culture.ThreeLetterISOLanguageName, out var language) ) { return language; }
-
-        if ( FromStrings.TryGetValue(culture.ThreeLetterWindowsLanguageName, out language) ) { return language; }
-
-        if ( FromStrings.TryGetValue(culture.TwoLetterISOLanguageName, out language) ) { return language; }
-
-        if ( FromStrings.TryGetValue(culture.DisplayName, out language) ) { return language; }
-
-        if ( FromStrings.TryGetValue(culture.Name, out language) ) { return language; }
-
-        // ReSharper restore DuplicatedSequentialIfBodies
-        return FromStrings.GetValueOrDefault(culture.ToString(), SupportedLanguage.Unspecified);
-    }
-    public static SupportedLanguage GetSupportedLanguage( this IFormatProvider culture )
-    {
-        if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
-
-        string? name = culture.ToString();
-
-        return string.IsNullOrEmpty(name)
-                   ? SupportedLanguage.Unspecified
-                   : FromStrings.GetValueOrDefault(name, SupportedLanguage.Unspecified);
     }
 }

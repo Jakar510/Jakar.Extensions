@@ -22,9 +22,7 @@ public sealed class PermissionGenerator : IIncrementalGenerator
         IncrementalValuesProvider<AdditionalText> additional = context.AdditionalTextsProvider;
 
         // Try to find explicit AdditionalFile named permissions.json
-        IncrementalValuesProvider<AdditionalText> explicitJson = additional.Where(CheckText)
-                                                                           .Collect()
-                                                                           .SelectMany(ConsolidateText);
+        IncrementalValuesProvider<AdditionalText> explicitJson = additional.Where(CheckText).Collect().SelectMany(ConsolidateText);
 
         // Map to text contents
         IncrementalValuesProvider<(string Path, string Text)>                                                                                                   jsonContent = explicitJson.Select(HandleText);
@@ -61,14 +59,11 @@ public sealed class PermissionGenerator : IIncrementalGenerator
         PermissionGenUtilities.GenerateConstants(context, permissions, opts.IncludeDocs, opts.IncludeDebuggerDisplay, opts.Namespace, opts.RootClass);
     }
     private static (string Path, string Text) HandleText( AdditionalText file, CancellationToken token ) =>
-        ( file.Path, Text: file.GetText(token)
-                              ?.ToString() ??
-                           string.Empty );
+        ( file.Path, Text: file.GetText(token)?.ToString() ?? string.Empty );
     private static ImmutableArray<AdditionalText> ConsolidateText( ImmutableArray<AdditionalText> files, CancellationToken token ) =>
         files.Length > 0
             ? files
             : PermissionGenUtilities.AutoDiscoverFiles(token);
     private static bool CheckText( AdditionalText file ) =>
-        Path.GetFileName(file.Path)
-            .Equals(Constants.FILE_NAME, StringComparison.OrdinalIgnoreCase);
+        Path.GetFileName(file.Path).Equals(Constants.FILE_NAME, StringComparison.OrdinalIgnoreCase);
 }

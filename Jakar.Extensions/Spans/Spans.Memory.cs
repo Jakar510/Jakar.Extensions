@@ -13,24 +13,11 @@ public static partial class Spans
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         MemoryStream        buffer        = new((int)stream.Length);
 
-        await stream.CopyToAsync(buffer)
-                    .ConfigureAwait(false);
+        await stream.CopyToAsync(buffer).ConfigureAwait(false);
 
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
     }
-
-
-
-    extension( MemoryStream stream )
-    {
-        [Pure] public Span<byte>           AsSpan()           => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public ReadOnlySpan<byte>   AsReadOnlySpan()   => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(stream.GetBuffer(), 0, (int)stream.Length);
-        [Pure] public ArraySegment<byte>   AsArraySegment()   => new(stream.GetBuffer(), 0, (int)stream.Length);
-    }
-
 
 
     /// <summary> USE WITH CAUTION </summary>
@@ -40,50 +27,11 @@ public static partial class Spans
     [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<T> AsSpan<T>( this List<T> list ) => CollectionsMarshal.AsSpan(list);
 
 
-
-    extension<T>( ReadOnlyMemory<T> self )
-    {
-        [Pure] public bool TryAsSegment( out ArraySegment<T> result ) => MemoryMarshal.TryGetArray(self, out result);
-
-        [Pure] public ImmutableArray<T> AsImmutableArray() => [..self.Span];
-    }
-
-
-
-    extension<TValue>( Memory<TValue> self )
-    {
-        [Pure] public bool TryAsSegment( out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(self, out result);
-
-        [Pure] public ImmutableArray<TValue> AsImmutableArray() => [..self.Span];
-    }
-
-
-
-    /// <param name="self">The enumerable source.</param>
-    /// <typeparam name="TValue">The type of elements in the sequence.</typeparam>
-    extension<TValue>( IEnumerable<TValue> self )
-    {
-        [Pure] public Memory<TValue>         ToMemory()         => self as TValue[] ?? [..self];
-        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => self as TValue[] ?? [..self];
-
-
-        /// <summary>
-        /// Tries to divine the number of elements in a sequence without actually enumerating each element.
-        /// </summary>
-        /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
-        /// <returns><c>true</c> if the count could be determined; <c>false</c> otherwise.</returns>
-        public bool TryGetCount( out int count ) => ( (IEnumerable)self ).TryGetCount<TValue>(out count);
-    }
-
-
-
-    /// <summary>
-    /// Tries to divine the number of elements in a sequence without actually enumerating each element.
-    /// </summary>
-    /// <typeparam name="T">The type of elements in the sequence.</typeparam>
-    /// <param name="sequence">The enumerable source.</param>
-    /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
-    /// <returns><c>true</c> if the count could be determined; <c>false</c> otherwise.</returns>
+    /// <summary> Tries to divine the number of elements in a sequence without actually enumerating each element. </summary>
+    /// <typeparam name="T"> The type of elements in the sequence. </typeparam>
+    /// <param name="sequence"> The enumerable source. </param>
+    /// <param name="count"> Receives the number of elements in the enumeration, if it could be determined. </param>
+    /// <returns> <c> true </c> if the count could be determined; <c> false </c> otherwise. </returns>
     public static bool TryGetCount<T>( this IEnumerable sequence, out int count )
     {
         switch ( sequence )
@@ -136,5 +84,50 @@ public static partial class Spans
     {
         Guard.IsInRangeFor(value.Length, buffer, nameof(buffer));
         value.Span.CopyTo(buffer);
+    }
+
+
+
+    extension( MemoryStream stream )
+    {
+        [Pure] public Span<byte>           AsSpan()           => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ReadOnlySpan<byte>   AsReadOnlySpan()   => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public Memory<byte>         AsMemory()         => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(stream.GetBuffer(), 0, (int)stream.Length);
+        [Pure] public ArraySegment<byte>   AsArraySegment()   => new(stream.GetBuffer(), 0, (int)stream.Length);
+    }
+
+
+
+    extension<T>( ReadOnlyMemory<T> self )
+    {
+        [Pure] public bool TryAsSegment( out ArraySegment<T> result ) => MemoryMarshal.TryGetArray(self, out result);
+
+        [Pure] public ImmutableArray<T> AsImmutableArray() => [..self.Span];
+    }
+
+
+
+    extension<TValue>( Memory<TValue> self )
+    {
+        [Pure] public bool TryAsSegment( out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(self, out result);
+
+        [Pure] public ImmutableArray<TValue> AsImmutableArray() => [..self.Span];
+    }
+
+
+
+    /// <param name="self"> The enumerable source. </param>
+    /// <typeparam name="TValue"> The type of elements in the sequence. </typeparam>
+    extension<TValue>( IEnumerable<TValue> self )
+    {
+        [Pure] public Memory<TValue>         ToMemory()         => self as TValue[] ?? [..self];
+        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => self as TValue[] ?? [..self];
+
+
+        /// <summary> Tries to divine the number of elements in a sequence without actually enumerating each element. </summary>
+        /// <param name="count"> Receives the number of elements in the enumeration, if it could be determined. </param>
+        /// <returns> <c> true </c> if the count could be determined; <c> false </c> otherwise. </returns>
+        public bool TryGetCount( out int count ) => ( (IEnumerable)self ).TryGetCount<TValue>(out count);
     }
 }

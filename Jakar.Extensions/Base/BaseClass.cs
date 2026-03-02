@@ -1,15 +1,11 @@
-﻿using System.Text.Json.Nodes;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
-    protected JObject? _additionalData;
     protected bool     _disposed;
+    protected JObject? _additionalData;
 
 
     [JsonExtensionData] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
@@ -35,14 +31,6 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
 
     public void OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.AsPropertyChangingEventArgs());
     public void OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
-
-
-#pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
-#pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
-    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )                                                 => SetPropertyWithoutNotify(ref backingStore, value);
-    bool IObservableObject.SetProperty<TValue>( ref              TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY ) => SetProperty(ref backingStore, value, propertyName);
-#pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
-#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
 
     protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
@@ -71,6 +59,14 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
 
         return SetProperty(ref backingStore, value, propertyName);
     }
+
+
+#pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+#pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )                                                 => SetPropertyWithoutNotify(ref backingStore, value);
+    bool IObservableObject.SetProperty<TValue>( ref              TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY ) => SetProperty(ref backingStore, value, propertyName);
+#pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 }
 
 

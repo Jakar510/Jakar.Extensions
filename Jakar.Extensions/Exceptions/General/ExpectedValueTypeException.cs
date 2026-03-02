@@ -34,14 +34,10 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         builder.AppendLine("It can be any of the following types: ");
         builder.AppendLine(GetTypes(in expected));
 
-        return builder.ToString()
-                      .Replace("\r\n", "\n");
+        return builder.ToString().Replace("\r\n", "\n");
     }
-    protected static string GetTypes( scoped ref readonly ReadOnlySpan<Type> expected ) => GetTypeNames(in expected)
-       .ToJson();
-    protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.AsValueEnumerable()
-                                                                                                          .Select(static item => item.FullName)
-                                                                                                          .ToArray();
+    protected static string    GetTypes( scoped ref readonly     ReadOnlySpan<Type> expected ) => GetTypeNames(in expected).ToJson();
+    protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.AsValueEnumerable().Select(static item => item.FullName).ToArray();
 
 
     public static TValue Verify<TValue>( object? item, TKey key )
@@ -69,8 +65,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         Data[nameof(Key)]    = Key?.ToString();
         Data[nameof(Actual)] = Actual?.FullName;
 
-        Data[nameof(Expected)] = GetTypeNames(in expected)
-           .ToJson();
+        Data[nameof(Expected)] = GetTypeNames(in expected).ToJson();
     }
 }
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/13/2025  10:16
 
-using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -36,11 +35,9 @@ public sealed class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnriche
 
         if ( log.Level >= LogEventLevel.Warning )
         {
-            log.AddOrUpdateProperty(ThreadInformation.Create()
-                                                     .GetProperty());
+            log.AddOrUpdateProperty(ThreadInformation.Create().GetProperty());
 
-            log.AddOrUpdateProperty(GcInfo.Create()
-                                          .GetProperty());
+            log.AddOrUpdateProperty(GcInfo.Create().GetProperty());
         }
 
         foreach ( ref readonly ILogEventEnricher enricher in enrichers ) { enricher.Enrich(log, factory); }

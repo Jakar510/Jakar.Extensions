@@ -98,29 +98,21 @@ public static class AppPreference
         private readonly LocalFile __file            = file;
 
 
-        public static File Create()                           => Create(LocalDirectory.CurrentDirectory);
-        public static File Create( LocalDirectory directory ) => Create(directory.Join(DEFAULT_FILE_NAME));
-        public static File Create( LocalFile      file )      => new(file);
-        public async ValueTask DisposeAsync() => await SaveAsync()
-                                                    .ConfigureAwait(false);
-        private async Task SaveAsync() => await __config.WriteToFile(__file)
-                                                        .ConfigureAwait(false);
+        public static File      Create()                           => Create(LocalDirectory.CurrentDirectory);
+        public static File      Create( LocalDirectory directory ) => Create(directory.Join(DEFAULT_FILE_NAME));
+        public static File      Create( LocalFile      file )      => new(file);
+        public async  ValueTask DisposeAsync()                     => await SaveAsync().ConfigureAwait(false);
+        private async Task      SaveAsync()                        => await __config.WriteToFile(__file).ConfigureAwait(false);
 
 
-        public bool ContainsKey( string key, string sharedName ) => __config[sharedName]
-           .ContainsKey(key);
+        public bool ContainsKey( string key, string sharedName ) => __config[sharedName].ContainsKey(key);
         public void Remove( string key, string sharedName, params ReadOnlySpan<string> alternateKeys )
         {
-            __config[sharedName]
-               .TryRemove(key, out _);
+            __config[sharedName].TryRemove(key, out _);
 
             foreach ( string alternateKey in alternateKeys )
             {
-                if ( !string.IsNullOrWhiteSpace(alternateKey) )
-                {
-                    __config[sharedName]
-                       .TryRemove(alternateKey, out _);
-                }
+                if ( !string.IsNullOrWhiteSpace(alternateKey) ) { __config[sharedName].TryRemove(alternateKey, out _); }
             }
 
             _ = SaveAsync();
@@ -132,8 +124,7 @@ public static class AppPreference
         }
         public void Clear( string sharedName )
         {
-            __config[sharedName]
-               .Clear();
+            __config[sharedName].Clear();
 
             _ = SaveAsync();
         }

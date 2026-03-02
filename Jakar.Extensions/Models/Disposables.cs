@@ -68,11 +68,7 @@ public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisp
     public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => __disposables = [..enumerable];
     public async ValueTask DisposeAsync()
     {
-        foreach ( IAsyncDisposable disposable in __disposables )
-        {
-            await disposable.DisposeAsync()
-                            .ConfigureAwait(false);
-        }
+        foreach ( IAsyncDisposable disposable in __disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }
 
         __disposables.Clear();
     }

@@ -2,7 +2,6 @@
 // 04/12/2022  1:54 PM
 
 using ZLinq;
-using ZLinq.Linq;
 
 
 
@@ -41,8 +40,8 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 {
 // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
-    public abstract           int                              Count          { get; }
     public abstract           int                              Capacity       { get; }
+    public abstract           int                              Count          { get; }
     public                    bool                             IsEmpty        { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count <= 0; }
     public                    bool                             IsNotEmpty     { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count > 0; }
     public                    FilterDelegate<TValue>?          OverrideFilter { get; set; }
@@ -84,7 +83,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 
 
     [Pure] [MustDisposeResource] protected internal abstract ArrayBuffer<TValue>                          FilteredValues();
-    [Pure] [MustDisposeResource] public                      ValueEnumerable<ArrayBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
+    [Pure]                       public                      ValueEnumerable<ArrayBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
 
 
     public virtual IEnumerator<TValue> GetEnumerator()

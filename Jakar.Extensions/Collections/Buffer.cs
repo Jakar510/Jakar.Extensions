@@ -90,8 +90,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public void Reverse( int start, int length ) => Values.Slice(start, length)
-                                                          .Reverse();
+    public void Reverse( int start, int length ) => Values.Slice(start, length).Reverse();
     public void Reverse() => Values.Reverse();
 
 
@@ -206,23 +205,9 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         return default;
     }
-    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
-    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, _length - 1);
-    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
-    {
-        Guard.IsInRange(start,        0, _length);
-        Guard.IsInRange(endInclusive, 0, _length);
-        Guard.IsGreaterThanOrEqualTo(endInclusive, start);
-        ArrayBuffer<TValue>  buffer = new(_length);
-        ReadOnlySpan<TValue> span   = Span;
-
-        for ( int i = start; i <= endInclusive; i++ )
-        {
-            if ( match(span[i]) ) { buffer.Add(in span[i]); }
-        }
-
-        return buffer;
-    }
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match )                              => FindAll(match, 0);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start )                   => FindAll(match, start, _length - 1);
+    [Pure] [MustDisposeResource] public readonly ArrayBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive ) => ArrayBuffer<TValue>.Create(AsValueEnumerable(start, endInclusive).Where(match));
 
 
     public readonly bool Contains( TValue                      value ) => Values.Contains(value);
@@ -237,8 +222,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         int          moveCount = _length - index - 1;
         if ( moveCount <= 0 ) { return false; }
 
-        span.Slice(index + 1, moveCount)
-            .CopyTo(span.Slice(index));
+        span.Slice(index + 1, moveCount).CopyTo(span.Slice(index));
 
         _length--;
         return true;
@@ -252,8 +236,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         Guard.IsGreaterThanOrEqualTo(count, 0);
         Guard.IsInRange(start + count, 0, Capacity);
 
-        Values.Slice(start, count)
-              .Fill(value);
+        Values.Slice(start, count).Fill(value);
     }
     public void Replace( int start, params ReadOnlySpan<TValue> values )
     {
@@ -282,8 +265,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         int index  = start    - values.Length;
         int length = Capacity - index;
 
-        Span.Slice(start, length)
-            .CopyTo(Span[index..]);
+        Span.Slice(start, length).CopyTo(Span[index..]);
 
         values.CopyTo(Span.Slice(start, values.Length));
         Length += values.Length;
@@ -351,8 +333,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
                 Guard.IsInRange(list.Count + _length, 0, Capacity);
 
-                list.AsSpan()
-                    .CopyTo(Next);
+                list.AsSpan().CopyTo(Next);
 
                 _length += count;
                 return;
@@ -409,8 +390,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         if ( start <= 0 ) { return; }
 
-        span[start.._length]
-           .CopyTo(span);
+        span[start.._length].CopyTo(span);
 
         _length -= start;
     }
@@ -423,8 +403,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         if ( start <= 0 ) { return; }
 
-        span[start.._length]
-           .CopyTo(span);
+        span[start.._length].CopyTo(span);
 
         _length -= start;
     }
@@ -450,11 +429,10 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public readonly void Sort()                              => Sort(Comparer<TValue>.Default);
-    public readonly void Sort( Comparer<TValue>   comparer ) => Span.Sort(comparer);
-    public readonly void Sort( Comparison<TValue> comparer ) => Span.Sort(comparer);
-    public readonly void Sort( int start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length)
-                                                                                          .Sort(comparer);
+    public readonly void Sort()                                                                   => Sort(Comparer<TValue>.Default);
+    public readonly void Sort( Comparer<TValue>   comparer )                                      => Span.Sort(comparer);
+    public readonly void Sort( Comparison<TValue> comparer )                                      => Span.Sort(comparer);
+    public readonly void Sort( int                start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length).Sort(comparer);
 
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
@@ -489,7 +467,16 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public ValueEnumerable<FromSpan<TValue>, TValue> AsValueEnumerable() => new(new FromSpan<TValue>(Values));
+    public readonly ValueEnumerable<FromSpan<TValue>, TValue> AsValueEnumerable() => new(new FromSpan<TValue>(Values));
+    public readonly ValueEnumerable<FromSpan<TValue>, TValue> AsValueEnumerable( int start, int endInclusive )
+    {
+        Guard.IsInRange(start,        0, _length);
+        Guard.IsInRange(endInclusive, 0, _length);
+        Guard.IsGreaterThanOrEqualTo(endInclusive, start);
+        return new ValueEnumerable<FromSpan<TValue>, TValue>(new FromSpan<TValue>(Values.Slice(start, endInclusive - start)));
+    }
+
+
     public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator()
     {
         ReadOnlySpan<TValue> span = Values;

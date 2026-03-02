@@ -32,5 +32,5 @@ global using Jakar.Extensions.UserGuid;
 global using JetBrains.Annotations;
 global using Newtonsoft.Json;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
-global using static Jakar.Extensions.Constants; 
-global using Hashids = HashidsNet.Hashids;  
+global using static Jakar.Extensions.Constants;
+global using Hashids = HashidsNet.Hashids;

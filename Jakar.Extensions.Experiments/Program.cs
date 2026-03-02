@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using System.Runtime.CompilerServices;
-
-
-Console.WriteLine(DateTimeOffset.UtcNow.ToString());
+﻿Console.WriteLine(DateTimeOffset.UtcNow.ToString());
 
 ReadOnlySpan<string> span = ["one", "two", "three"];
 
@@ -21,15 +17,11 @@ ReadOnlySpan<int> numbers =
 ];
 
 
-span.Hash()
-    .WriteToConsole();
+span.Hash().WriteToConsole();
 
-span.Hash128()
-    .WriteToConsole();
+span.Hash128().WriteToConsole();
 
 
-numbers.Hash()
-       .WriteToConsole();
+numbers.Hash().WriteToConsole();
 
-numbers.Hash128()
-       .WriteToConsole();
+numbers.Hash128().WriteToConsole();

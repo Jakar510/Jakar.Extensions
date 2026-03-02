@@ -27,7 +27,7 @@ public sealed class Synchronized<TValue>( TValue value )
 
 public sealed class SynchronizedValue<TValue>( TValue value )
 {
-    private readonly Lock   __lock  = new();
+    private readonly Lock __lock = new();
 
     public TValue Value
     {

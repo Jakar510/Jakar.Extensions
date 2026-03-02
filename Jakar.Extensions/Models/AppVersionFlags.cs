@@ -17,10 +17,8 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     public int  Length     => Flag.Length + 15;
 
 
-    public override string ToString() => AsSpan()
-       .ToString();
-    public string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan(format, formatProvider)
-       .ToString();
+    public override string ToString()                                                  => AsSpan().ToString();
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan(format, formatProvider).ToString();
 
 
     public ReadOnlySpan<char> AsSpan()                            => AsSpan(default, CultureInfo.CurrentCulture);
@@ -131,10 +129,8 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
         int end = flag.IndexOfAny(Randoms.Numeric);
 
         return end < 0
-                   ? new AppVersionFlags(flag.ToString(), 0)
-                   : new AppVersionFlags(flag[..end]
-                                            .ToString(),
-                                         uint.Parse(flag[end..]));
+                   ? new AppVersionFlags(flag.ToString(),        0)
+                   : new AppVersionFlags(flag[..end].ToString(), uint.Parse(flag[end..]));
     }
     public static AppVersionFlags Parse( string flag, IFormatProvider? provider )
     {

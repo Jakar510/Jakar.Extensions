@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 02/17/2026  14:40
 
-using System.Security.Cryptography;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -127,6 +123,8 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
 
 public interface IUserDetails
 {
+    public                string? Company     { get; set; }
+    public                string? Department  { get; set; }
     public                string? Description { get; set; }
     [EmailAddress] public string? Email       { get; set; }
     public                string? Ext         { get; set; }
@@ -135,8 +133,6 @@ public interface IUserDetails
     public                string? Gender      { get; set; }
     [Required] public     string? LastName    { get; set; }
     [Phone]    public     string? PhoneNumber { get; set; }
-    public                string? Company     { get; set; }
-    public                string? Department  { get; set; }
     public                string? Title       { get; set; }
     [Url] public          string? Website     { get; set; }
 

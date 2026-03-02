@@ -99,7 +99,7 @@ public class SpansBenchmarks
     [Benchmark] public bool EndsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return Spans.EndsWith(in span, '1');
+        return span.EndsWith('1');
     }
     [Benchmark] public bool IsNullOrWhiteSpace()
     {
@@ -109,13 +109,13 @@ public class SpansBenchmarks
     [Benchmark] public bool StartsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return Spans.StartsWith(in span, '1');
+        return span.StartsWith('1');
     }
 
 
     [Benchmark] public ReadOnlySpan<char> AsBuffer() => Value;
 
-    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>(Value, NEW_VALUE);
+    [Benchmark] public ReadOnlySpan<char> Join() => Value.Join<char>(NEW_VALUE);
 
     [Benchmark] [MustDisposeResource] public Buffer<char> RemoveAll_Params()
     {

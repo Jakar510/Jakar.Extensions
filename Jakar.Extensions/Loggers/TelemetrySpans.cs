@@ -86,7 +86,15 @@ public static class TelemetrySpans
 
     public static IEnumerable<ActivityLink> Link( this IEnumerable<Activity>      activity, ActivityTagsCollection? tags = null ) => activity.Select(x => x.Link(tags));
     public static IEnumerable<ActivityLink> Link( this IEnumerable<TelemetrySpan> activity, ActivityTagsCollection? tags = null ) => activity.Select(x => x.Link(tags));
-    extension( Activity                        activity )
+
+
+    public static ActivityEvent   GetEvent( this string name, ActivityTagsCollection? tags = null ) => new(name, DateTimeOffset.UtcNow, tags);
+    public static ActivityContext RandomContext()                    => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
+    public static string          GetClassName<T>( this T instance ) => ( instance?.GetType() ?? typeof(T) ).Name;
+
+
+
+    extension( Activity activity )
     {
         public ActivityLink Link( in       ActivityTagsCollection? tags = null )                                           => new(activity.Context, tags);
         public void         TrackEvent( in ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY ) => activity.AddEvent(caller.GetEvent(tags));
@@ -99,10 +107,4 @@ public static class TelemetrySpans
         public void SetAttribute( string key, object? value ) => activity.SetTag(key, value);
         public void AddAttribute( string key, object? value ) => activity.AddTag(key, value);
     }
-
-
-
-    public static ActivityEvent   GetEvent( this     string   name,     ActivityTagsCollection? tags = null ) => new(name, DateTimeOffset.UtcNow, tags);
-    public static ActivityContext RandomContext()                    => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
-    public static string          GetClassName<T>( this T instance ) => ( instance?.GetType() ?? typeof(T) ).Name;
 }

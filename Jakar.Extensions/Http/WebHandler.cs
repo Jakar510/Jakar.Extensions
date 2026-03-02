@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
 
-using Org.BouncyCastle.Asn1.Ocsp;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -40,8 +36,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        HttpResponseMessage response = await Client.SendAsync(request, token)
-                                                   .ConfigureAwait(false);
+        HttpResponseMessage response = await Client.SendAsync(request, token).ConfigureAwait(false);
 
         Logger?.LogDebug(EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, request.RequestUri?.OriginalString);
         return response;
@@ -54,25 +49,21 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         await using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token)
-                                                    .ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
 
             try
             {
                 RetryPolicy? policy = RetryPolicy;
 
                 return policy?.AllowRetries is true
-                           ? await WebResponse<TValue>.Create(response, func, policy.Value, token)
-                                                      .ConfigureAwait(false)
-                           : await WebResponse<TValue>.Create(response, func, token)
-                                                      .ConfigureAwait(false);
+                           ? await WebResponse<TValue>.Create(response, func, policy.Value, token).ConfigureAwait(false)
+                           : await WebResponse<TValue>.Create(response, func, token).ConfigureAwait(false);
             }
             catch ( HttpRequestException e )
             {
                 telemetrySpan.AddException(e);
 
-                return await WebResponse<TValue>.Create(response, e, token)
-                                                .ConfigureAwait(false);
+                return await WebResponse<TValue>.Create(response, e, token).ConfigureAwait(false);
             }
         }
     }
@@ -82,19 +73,13 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         await using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token)
-                                                    .ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
 
             try
             {
-                if ( !response.IsSuccessStatusCode )
-                {
-                    return await WebResponse<TValue>.Create(response, token)
-                                                    .ConfigureAwait(false);
-                }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create(response, token).ConfigureAwait(false); }
 
-                TValue result = await func(response, arg, token)
-                                   .ConfigureAwait(false);
+                TValue result = await func(response, arg, token).ConfigureAwait(false);
 
                 return new WebResponse<TValue>(response, result);
             }
@@ -102,8 +87,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
             {
                 telemetrySpan.AddException(e);
 
-                return await WebResponse<TValue>.Create(response, e, token)
-                                                .ConfigureAwait(false);
+                return await WebResponse<TValue>.Create(response, e, token).ConfigureAwait(false);
             }
         }
     }
@@ -113,19 +97,13 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         await using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token)
-                                                    .ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
 
             try
             {
-                if ( !response.IsSuccessStatusCode )
-                {
-                    return await WebResponse<TValue>.Create(response, token)
-                                                    .ConfigureAwait(false);
-                }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create(response, token).ConfigureAwait(false); }
 
-                TValue result = await func(response, arg1, arg2, token)
-                                   .ConfigureAwait(false);
+                TValue result = await func(response, arg1, arg2, token).ConfigureAwait(false);
 
                 return new WebResponse<TValue>(response, result);
             }
@@ -133,8 +111,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
             {
                 telemetrySpan.AddException(e);
 
-                return await WebResponse<TValue>.Create(response, e, token)
-                                                .ConfigureAwait(false);
+                return await WebResponse<TValue>.Create(response, e, token).ConfigureAwait(false);
             }
         }
     }
@@ -158,8 +135,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         await using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token)
-                                                    .ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
 
             return response.IsSuccessStatusCode
                        ? true
@@ -174,11 +150,9 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
 
-        await using Stream stream = await content.ReadAsStreamAsync(token)
-                                                 .ConfigureAwait(false);
+        await using Stream stream = await content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
-        JToken result = await stream.FromJson(token)
-                                     .ConfigureAwait(false);
+        JToken result = await stream.FromJson(token).ConfigureAwait(false);
 
         return ThrowIfNull(result);
     }
@@ -188,11 +162,9 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
 
-        await using Stream stream = await content.ReadAsStreamAsync(token)
-                                                 .ConfigureAwait(false);
+        await using Stream stream = await content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
-        TValue result = await stream.FromJson<TValue>(token)
-                                    .ConfigureAwait(false);
+        TValue result = await stream.FromJson<TValue>(token).ConfigureAwait(false);
 
         return result;
     }
@@ -200,8 +172,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string content = await AsString(response, token)
-                            .ConfigureAwait(false);
+        string content = await AsString(response, token).ConfigureAwait(false);
 
         return bool.TryParse(content, out bool result) && result;
     }
@@ -209,8 +180,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        string content = await AsString(response, token)
-                            .ConfigureAwait(false);
+        string content = await AsString(response, token).ConfigureAwait(false);
 
         return Guid.TryParse(content, out Guid result)
                    ? result
@@ -220,8 +190,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await using MemoryStream stream = await AsStream(response, token)
-                                             .ConfigureAwait(false);
+        await using MemoryStream stream = await AsStream(response, token).ConfigureAwait(false);
 
         return stream.ToArray();
     }
@@ -229,8 +198,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await using MemoryStream stream = await AsStream(response, token)
-                                             .ConfigureAwait(false);
+        await using MemoryStream stream = await AsStream(response, token).ConfigureAwait(false);
 
         await using FileStream fs = LocalFile.CreateTempFileAndOpen(out LocalFile file);
         await stream.CopyToAsync(fs, token).ConfigureAwait(false);
@@ -243,36 +211,25 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         if ( response.Headers.Contains(fileNameHeader) )
         {
-            MimeType mimeType = response.Headers.GetValues(fileNameHeader)
-                                        .First()
-                                        .ToMimeType();
+            MimeType mimeType = response.Headers.GetValues(fileNameHeader).First().ToMimeType();
 
-            return await AsFile(response, mimeType, token)
-                      .ConfigureAwait(false);
+            return await AsFile(response, mimeType, token).ConfigureAwait(false);
         }
 
 
         if ( response.Content.Headers.Contains(fileNameHeader) )
         {
-            MimeType mimeType = response.Content.Headers.GetValues(fileNameHeader)
-                                        .First()
-                                        .ToMimeType();
+            MimeType mimeType = response.Content.Headers.GetValues(fileNameHeader).First().ToMimeType();
 
-            return await AsFile(response, mimeType, token)
-                      .ConfigureAwait(false);
+            return await AsFile(response, mimeType, token).ConfigureAwait(false);
         }
 
 
-        await using Stream stream = await AsStream(response, token)
-                                       .ConfigureAwait(false);
+        await using Stream stream = await AsStream(response, token).ConfigureAwait(false);
 
         await using FileStream fs = LocalFile.CreateTempFileAndOpen(out LocalFile file);
 
-        using ( telemetrySpan.SubSpan("WriteToFile") )
-        {
-            await stream.CopyToAsync(fs, token)
-                        .ConfigureAwait(false);
-        }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync(fs, token).ConfigureAwait(false); }
 
         return file;
     }
@@ -286,21 +243,15 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        await using MemoryStream stream = await AsStream(response, token)
-                                             .ConfigureAwait(false);
+        await using MemoryStream stream = await AsStream(response, token).ConfigureAwait(false);
 
-        using ( telemetrySpan.SubSpan("WriteToFile") )
-        {
-            await stream.CopyToAsync(stream, token)
-                        .ConfigureAwait(false);
-        }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync(stream, token).ConfigureAwait(false); }
 
         return file;
     }
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type, CancellationToken token )
     {
-        await using MemoryStream stream = await AsStream(response, token)
-                                             .ConfigureAwait(false);
+        await using MemoryStream stream = await AsStream(response, token).ConfigureAwait(false);
 
         await using FileStream fs = LocalFile.CreateTempFileAndOpen(type, out LocalFile file);
         await stream.CopyToAsync(fs, token).ConfigureAwait(false);
@@ -312,16 +263,11 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
 
-        await using Stream stream = await content.ReadAsStreamAsync(token)
-                                                 .ConfigureAwait(false);
+        await using Stream stream = await content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
         MemoryStream buffer = new((int)stream.Length);
 
-        using ( telemetrySpan.SubSpan("WriteToFile") )
-        {
-            await stream.CopyToAsync(buffer, token)
-                        .ConfigureAwait(false);
-        }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync(buffer, token).ConfigureAwait(false); }
 
         buffer.Seek(0, SeekOrigin.Begin);
         return buffer;
@@ -333,8 +279,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
 
-        return await content.ReadAsStringAsync(token)
-                            .ConfigureAwait(false);
+        return await content.ReadAsStringAsync(token).ConfigureAwait(false);
     }
 
 

@@ -1,13 +1,85 @@
-﻿using System.Collections.Generic;
-
-
-
-namespace Jakar.Extensions.Wpf;
+﻿namespace Jakar.Extensions.Wpf;
 
 
 public static partial class WpfApi
 {
     public static BitmapImage ConvertImage( this LocalFile file ) => new(file.ToUri());
+
+
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/41579163/9530917"> Convert drawing.bitmap to windows.controls.image </see>
+    /// </summary>
+    /// <param name="image"> </param>
+    /// <returns>
+    ///     <see cref="ImageSource"/>
+    /// </returns>
+    public static ImageSource ConvertImage( this Bitmap image )
+    {
+        using MemoryStream stream = new();
+        image.Save(stream, ImageFormat.Png);
+
+        BitmapImage photo = new();
+
+        photo.BeginInit();
+        photo.CacheOption  = BitmapCacheOption.OnLoad;
+        photo.StreamSource = stream;
+        photo.EndInit();
+
+        return photo;
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/65200533/9530917"/>
+    /// </summary>
+    /// <param name="title"> </param>
+    /// <returns> </returns>
+    public static LocalDirectory? PickFolder( string title )
+    {
+        using FolderBrowserDialog dialog = new()
+                                           {
+                                               Description            = title,
+                                               UseDescriptionForTitle = true,
+                                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
+                                               ShowNewFolderButton    = true
+                                           };
+
+        DialogResult result = dialog.ShowDialog();
+
+        return result is DialogResult.OK or DialogResult.Yes
+                   ? new LocalDirectory(dialog.SelectedPath)
+                   : null;
+    }
+
+    public static LocalFile? PickFile( string title, params string[] filters )
+    {
+        OpenFileDialog file = new()
+                              {
+                                  Title            = title,
+                                  Multiselect      = false,
+                                  AddExtension     = true,
+                                  CheckFileExists  = true,
+                                  CheckPathExists  = true,
+                                  InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
+                                  Filter           = @"Files|" + string.Join(';', filters)
+                              };
+
+        DialogResult result = file.ShowDialog();
+
+        return result is DialogResult.OK or DialogResult.Yes
+                   ? new LocalFile(file.FileName)
+                   : null;
+    }
+    public static void SetContent( this ContentControl control, object? value )
+    {
+        object old = control.Content;
+        control.Content = value;
+
+        ContentControl.ContentProperty.GetMetadata(control).PropertyChangedCallback.Invoke(control, new DependencyPropertyChangedEventArgs(ContentControl.ContentProperty, old, value));
+    }
 
 
 
@@ -96,29 +168,6 @@ public static partial class WpfApi
 
 
 
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/41579163/9530917"> Convert drawing.bitmap to windows.controls.image </see>
-    /// </summary>
-    /// <param name="image"> </param>
-    /// <returns>
-    ///     <see cref="ImageSource"/>
-    /// </returns>
-    public static ImageSource ConvertImage( this Bitmap image )
-    {
-        using MemoryStream stream = new();
-        image.Save(stream, ImageFormat.Png);
-
-        BitmapImage photo = new();
-
-        photo.BeginInit();
-        photo.CacheOption  = BitmapCacheOption.OnLoad;
-        photo.StreamSource = stream;
-        photo.EndInit();
-
-        return photo;
-    }
-
-
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -155,60 +204,5 @@ public static partial class WpfApi
             return collection;
             bool doFilter( object item ) => item is TValue value && filter(value);
         }
-    }
-
-
-
-    // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-    /// <summary>
-    ///     <see href="https://stackoverflow.com/a/65200533/9530917"/>
-    /// </summary>
-    /// <param name="title"> </param>
-    /// <returns> </returns>
-    public static LocalDirectory? PickFolder( string title )
-    {
-        using FolderBrowserDialog dialog = new()
-                                           {
-                                               Description            = title,
-                                               UseDescriptionForTitle = true,
-                                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
-                                               ShowNewFolderButton    = true
-                                           };
-
-        DialogResult result = dialog.ShowDialog();
-
-        return result is DialogResult.OK or DialogResult.Yes
-                   ? new LocalDirectory(dialog.SelectedPath)
-                   : null;
-    }
-
-    public static LocalFile? PickFile( string title, params string[] filters )
-    {
-        OpenFileDialog file = new()
-                              {
-                                  Title            = title,
-                                  Multiselect      = false,
-                                  AddExtension     = true,
-                                  CheckFileExists  = true,
-                                  CheckPathExists  = true,
-                                  InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
-                                  Filter           = @"Files|" + string.Join(';', filters)
-                              };
-
-        DialogResult result = file.ShowDialog();
-
-        return result is DialogResult.OK or DialogResult.Yes
-                   ? new LocalFile(file.FileName)
-                   : null;
-    }
-    public static void SetContent( this ContentControl control, object? value )
-    {
-        object old = control.Content;
-        control.Content = value;
-
-        ContentControl.ContentProperty.GetMetadata(control)
-                      .PropertyChangedCallback.Invoke(control, new DependencyPropertyChangedEventArgs(ContentControl.ContentProperty, old, value));
     }
 }
