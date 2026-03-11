@@ -16,69 +16,76 @@ public static class Strings
                                                                           }.ToImmutableDictionary();
 
 
-    /// <summary>
-    ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
-    ///     <para>
-    ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
-    ///         <list type="bullet">
-    ///             <item>
-    ///                 <term> ( ) </term> <description> Parenthesis </description>
-    ///             </item>
-    ///             <item>
-    ///                 <term> [ ] </term> <description> Square Brackets </description>
-    ///             </item>
-    ///             <item>
-    ///                 <term> { } </term> <description> Curly Braces </description>
-    ///             </item>
-    ///         </list>
-    ///     </para>
-    ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
-    /// </summary>
-    /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-    public static bool IsBalanced( this ReadOnlySpan<char> input, IReadOnlyDictionary<char, char>? bracketPairs = null ) // TODO: ReadOnlySpan<char>
+
+    extension( ReadOnlySpan<char> input )
     {
-        bracketPairs ??= BracketPairs;
-        using IMemoryOwner<char> buffer = MemoryPool<char>.Shared.Rent(bracketPairs.Count);
-        foreach ( ( int i, char item ) in bracketPairs.Values.Enumerate(0) ) { buffer.Memory.Span[i] = item; }
-
-        ReadOnlySpan<char> values   = buffer.Memory.Span[..bracketPairs.Count];
-        Stack<char>        brackets = new(input.Length);
-
-        try
+        /// <summary>
+        ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
+        ///     <para>
+        ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
+        ///         <list type="bullet">
+        ///             <item>
+        ///                 <term> ( ) </term> <description> Parenthesis </description>
+        ///             </item>
+        ///             <item>
+        ///                 <term> [ ] </term> <description> Square Brackets </description>
+        ///             </item>
+        ///             <item>
+        ///                 <term> { } </term> <description> Curly Braces </description>
+        ///             </item>
+        ///         </list>
+        ///     </para>
+        ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
+        /// </summary>
+        /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
+        public bool IsBalanced( IReadOnlyDictionary<char, char>? bracketPairs = null ) // TODO: ReadOnlySpan<char>
         {
-            // Iterate through each character in the input string
-            foreach ( char c in input )
+            bracketPairs ??= BracketPairs;
+            using IMemoryOwner<char> buffer = MemoryPool<char>.Shared.Rent(bracketPairs.Count);
+            foreach ( ( int i, char item ) in bracketPairs.Values.Enumerate(0) ) { buffer.Memory.Span[i] = item; }
+
+            ReadOnlySpan<char> values   = buffer.Memory.Span[..bracketPairs.Count];
+            Stack<char>        brackets = new(input.Length);
+
+            try
             {
-                // Check if the character is one of the 'opening' brackets. If yes, push to stack
-                if ( bracketPairs.ContainsKey(c) ) { brackets.Push(c); }
-                else if ( values.Contains(c) ) // check if the character is one of the 'closing' brackets
+                // Iterate through each character in the input string
+                foreach ( char c in input )
                 {
-                    // Check if the closing bracket matches the 'latest' 'opening' bracket 
-                    if ( c == bracketPairs[brackets.Peek()] ) { brackets.Pop(); }
-                    else { return false; } // if not, it's an unbalanced string
+                    // Check if the character is one of the 'opening' brackets. If yes, push to stack
+                    if ( bracketPairs.ContainsKey(c) ) { brackets.Push(c); }
+                    else if ( values.Contains(c) ) // check if the character is one of the 'closing' brackets
+                    {
+                        // Check if the closing bracket matches the 'latest' 'opening' bracket 
+                        if ( c == bracketPairs[brackets.Peek()] ) { brackets.Pop(); }
+                        else { return false; } // if not, it's an unbalanced string
+                    }
+
+                    // Continue looking
                 }
-
-                // Continue looking
             }
+            catch ( Exception e )
+            {
+                // An exception will be caught in case a closing bracket is found, before any opening bracket. that implies, the string is not balanced. Return false
+                Console.WriteLine(e);
+                return false;
+            }
+
+            // Ensure all brackets are closed
+            return brackets.Count == 0;
         }
-        catch ( Exception e )
+
+
+        [Pure] [MustDisposeResource] public ArrayBuffer<byte> AsSpanBytes( Encoding encoding )
         {
-            // An exception will be caught in case a closing bracket is found, before any opening bracket. that implies, the string is not balanced. Return false
-            Console.WriteLine(e);
-            return false;
+            int               length = encoding.GetByteCount(input);
+            ArrayBuffer<byte> span   = new(length);
+            encoding.GetBytes(input, span.Span);
+            span.Length = length;
+            return span;
         }
-
-        // Ensure all brackets are closed
-        return brackets.Count == 0;
     }
 
-
-    [MustDisposeResource] public static Buffer<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
-    {
-        Buffer<byte> span = new(encoding.GetByteCount(value));
-        encoding.GetBytes(value, span.Span);
-        return span;
-    }
 
 
     public static SecureString ToSecureString( this ReadOnlySpan<byte>   value, bool makeReadonly = true ) => Convert.ToBase64String(value).AsSpan().ToSecureString(makeReadonly);
@@ -244,9 +251,8 @@ public static class Strings
 
     extension( string value )
     {
-        public byte[] ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
-
-        [MustDisposeResource] public Buffer<byte> AsSpanBytes( Encoding encoding ) => value.AsSpan().AsSpanBytes(encoding);
+        public                              byte[]            ToByteArray( Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
+        [Pure] [MustDisposeResource] public ArrayBuffer<byte> AsSpanBytes( Encoding  encoding )        => value.AsSpan().AsSpanBytes(encoding);
     }
 
 

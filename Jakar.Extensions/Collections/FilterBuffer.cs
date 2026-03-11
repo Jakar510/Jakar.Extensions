@@ -3,6 +3,7 @@
 
 using ZLinq;
 using ZLinq.Internal;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 
@@ -22,11 +23,12 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
     private         int __index;
 
 
-    public          int                  Length { get; private set; } = 0;
+    public          int                  Length { get; internal set; } = 0;
     public readonly Memory<TValue>       Memory => new(__array, 0, Length);
     public readonly Span<TValue>         Span   => new(__array, 0, Capacity);
     public readonly ReadOnlySpan<TValue> Values => Span[..Length];
     public ref readonly TValue this[ int index ] => ref Values[index];
+    int IReadOnlyCollection<TValue>.Count => Length;
 
     public readonly ArraySegment<TValue> Array => __array is not null
                                                       ? new ArraySegment<TValue>(__array, 0, Length)
@@ -56,44 +58,50 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
     [MustDisposeResource] public static implicit operator ArrayBuffer<TValue>( List<TValue>           self ) => new(self.AsSpan());
 
 
-    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> Create( IEnumerable<TValue> self )
-    {
-        return self switch
-               {
-                   IReadOnlyCollection<TValue> readOnlyCollection => new ArrayBuffer<TValue>(self, readOnlyCollection.Count),
-                   ICollection<TValue> readOnlyCollection         => new ArrayBuffer<TValue>(self, readOnlyCollection.Count),
-                   _                                              => new ArrayBuffer<TValue>(self.ToList().AsSpan())
-               };
-    }
-
-    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> Create<TEnumerator>( scoped ValueEnumerable<TEnumerator, TValue> self )
+    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> Create( IEnumerable<TValue> self ) => Create(self.AsValueEnumerable());
+    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> Create<TEnumerator>( ValueEnumerable<TEnumerator, TValue> source )
         where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct
     {
-        if ( self.TryGetNonEnumeratedCount(out int length) )
-        {
-            ArrayBuffer<TValue> buffer = new(length);
-            foreach ( TValue value in self ) { buffer.Add(in value); }
+        using TEnumerator enumerator = source.Enumerator;
 
-            return buffer;
+        if ( enumerator.TryGetNonEnumeratedCount(out int count) )
+        {
+            ArrayBuffer<TValue> array = new(count);
+            while ( enumerator.TryGetNext(out TValue item) ) { array.Add(item); }
+
+            return array;
         }
 
-        using PooledArray<TValue> array = self.ToArrayPool();
-        return new ArrayBuffer<TValue>(array.Span);
+
+        Buffer<TValue> buffer = new(64);
+        if ( enumerator.TryCopyTo(buffer.Span, 0) ) { return new ArrayBuffer<TValue>(buffer.Span); }
+
+        while ( enumerator.TryGetNext(out TValue item) ) { buffer.Add(item); }
+
+        return buffer.ToArrayBuffer();
     }
 
 
+    [HandlesResourceDisposal] public TValue[] ToArray()
+    {
+        TValue[] array = Values.ToArray();
+        Dispose();
+        return array;
+    }
     public ValueEnumerable<ArrayBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
     IEnumerator IEnumerable.                            GetEnumerator()     => ( (IEnumerable<TValue>)this ).GetEnumerator();
-    int IReadOnlyCollection<TValue>.                    Count               => Length;
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+
     {
         for ( int i = 0; i < Length; i++ ) { yield return Values[i]; }
     }
+
     public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator() => Values.GetEnumerator();
 
 
     public void Add( TValue              value ) => Span[Length++] = value;
     public void Add( ref readonly TValue value ) => Span[Length++] = value;
+
     public void Add( params ReadOnlySpan<TValue> span )
     {
         if ( span.TryCopyTo(Span[Length..]) ) { Length += span.Length; }
@@ -105,6 +113,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
         count = Length;
         return true;
     }
+
     public bool TryGetNext( out TValue current )
     {
         if ( __index < Length )
@@ -116,11 +125,13 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
         Unsafe.SkipInit(out current);
         return false;
     }
+
     public bool TryGetSpan( out ReadOnlySpan<TValue> span )
     {
         span = Values;
         return true;
     }
+
     public bool TryCopyTo( Span<TValue> destination, Index offset )
     {
         if ( !EnumeratorHelper.TryGetSlice(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }

@@ -11,24 +11,22 @@ namespace Jakar.Extensions;
 
 
 [StructLayout(LayoutKind.Auto)]
-public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
-    where TValue : IEquatable<TValue>
+public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 {
-    private static readonly TValue[]     _empty = [];
-    private readonly        TValue[]     _array;
-    private                 int          _length;
-    public readonly         Span<TValue> Span;
-    public readonly         int          Capacity;
-    public readonly         int          FreeCapacity => Capacity - _length;
-    public                  int          Length       { [Pure] readonly get => _length; set => _length = Math.Clamp(value, 0, Capacity); }
-    public readonly         bool         IsEmpty      { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _length == 0; }
-    public readonly         bool         IsNotEmpty   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _length > 0; }
-    public                  bool         IsReadOnly   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; } = false;
+    private readonly        TValue[] _array;
+    private                 int      _length;
+    public readonly         int      Capacity;
+    public readonly         int      FreeCapacity => Capacity - _length;
+    public                  int      Length       { [Pure] readonly get => _length; set => _length = Math.Clamp(value, 0, Capacity); }
+    public readonly         bool     IsEmpty      { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _length == 0; }
+    public readonly         bool     IsNotEmpty   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _length > 0; }
+    public                  bool     IsReadOnly   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; } = false;
     public readonly ref TValue this[ int     index ] { [Pure] get => ref Values[index]; }
     public readonly ref TValue this[ Index   index ] { [Pure] get => ref Values[index]; }
     public readonly Span<TValue> this[ Range range ] { [Pure] get => Values[range]; }
     public readonly Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
     public readonly Memory<TValue> Memory { [Pure] get => new(_array, 0, _length); }
+    public readonly Span<TValue>   Span   { [Pure] get => new(_array, 0, Capacity); }
     public readonly Span<TValue>   Next   { [Pure] get => Span[_length..]; }
     public readonly Span<TValue>   Values { [Pure] get => Span[.._length]; }
 
@@ -39,32 +37,20 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     {
         _array   = ArrayPool<TValue>.Shared.Rent(capacity);
         Capacity = _array.Length;
-        Span     = _array;
         _length  = 0;
     }
     public void Dispose() => ArrayPool<TValue>.Shared.Return(_array, RuntimeHelpers.IsReferenceOrContainsReferences<TValue>());
 
 
-    public void Advance( int count )
-    {
-        EnsureCapacity(_length + count);
-        Length += count;
-    }
-    public Memory<TValue> GetMemory( int sizeHint = 0 )
-    {
-        EnsureCapacity(_length + sizeHint);
-        return Memory;
-    }
-    public Span<TValue> GetSpan( int sizeHint = 0 )
-    {
-        EnsureCapacity(Length + sizeHint);
-        return Next;
-    }
-
-
-    public TValue[] ToArray()
+    [HandlesResourceDisposal] public TValue[] ToArray()
     {
         TValue[] array = Values.ToArray();
+        Dispose();
+        return array;
+    }
+    [Pure] [MustDisposeResource] [HandlesResourceDisposal] public ArrayBuffer<TValue> ToArrayBuffer()
+    {
+        ArrayBuffer<TValue> array = new(Values);
         Dispose();
         return array;
     }
@@ -96,7 +82,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
     public ReadOnlySpan<TValue> AsSpan( TValue? terminate )
     {
-        if ( terminate is not null ) { Add(terminate); }
+        if ( terminate is not null ) { AddInternal(terminate); }
 
         return Values;
     }
@@ -115,7 +101,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( value.Equals(span[i]) ) { return i; }
+            if ( EqualityComparer<TValue>.Default.Equals(value, span[i]) ) { return i; }
         }
 
         return NOT_FOUND;
@@ -147,7 +133,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         for ( int i = start; i >= endInclusive; i-- )
         {
-            if ( value.Equals(span[i]) ) { return i; }
+            if ( EqualityComparer<TValue>.Default.Equals(value, span[i]) ) { return i; }
         }
 
         return NOT_FOUND;
@@ -211,7 +197,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
 
     public readonly bool Contains( TValue                      value ) => Values.Contains(value);
-    public readonly bool Contains( params ReadOnlySpan<TValue> value ) => Values.ContainsAll(value);
+    public readonly bool Contains( params ReadOnlySpan<TValue> value ) => Values.ContainsAll(EqualityComparer<TValue>.Default, value);
 
 
     public bool RemoveAt( int index )
@@ -248,14 +234,14 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    public void Insert( int start, TValue value, int count = 1 )
+    internal void InsertInternal( int start, TValue value, int count = 1 )
     {
         Guard.IsGreaterThanOrEqualTo(count, 0);
         using ArrayBuffer<TValue> owner = new(count);
         owner.Span.Fill(value);
-        Insert(start, owner.Span);
+        InsertInternal(start, owner.Span);
     }
-    public void Insert( int start, params ReadOnlySpan<TValue> values )
+    internal void InsertInternal( int start, params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         Guard.IsInRange(start,                 0, _length);
@@ -272,8 +258,8 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Add( TValue value ) => Span[_length++] = value;
-    public void Add( TValue value, int count )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] internal void AddInternal( TValue value ) => Span[_length++] = value;
+    internal void AddInternal( TValue value, int count )
     {
         ThrowIfReadOnly();
         Guard.IsGreaterThanOrEqualTo(count, 0);
@@ -284,7 +270,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
         _length += count;
     }
-    public void Add( params ReadOnlySpan<TValue> values )
+    internal void AddInternal( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         Span<TValue> next = Next;
@@ -302,14 +288,13 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
             default:
             {
-                EnsureCapacity(values.Length + Length);
                 values.CopyTo(Next);
                 _length += values.Length;
                 return;
             }
         }
     }
-    public void AddRange( IEnumerable<TValue> enumerable )
+    internal void AddRangeInternal( IEnumerable<TValue> enumerable )
     {
         ThrowIfReadOnly();
 
@@ -360,7 +345,7 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
             default:
             {
-                foreach ( TValue value in enumerable ) { Add(value); }
+                foreach ( TValue value in enumerable ) { AddInternal(value); }
 
                 return;
             }
@@ -435,32 +420,6 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     public readonly void Sort( int                start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length).Sort(comparer);
 
 
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
-    /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
-    public Buffer<TValue> Grow( uint additionalRequestedCapacity )
-    {
-        ThrowIfReadOnly();
-        Guard.IsInRange(additionalRequestedCapacity, 1, int.MaxValue);
-        int            capacity = Buffers.GetLength((uint)Capacity, additionalRequestedCapacity);
-        Buffer<TValue> old      = this;
-
-        using ( old )
-        {
-            // ReSharper disable once NotDisposedResource
-            Buffer<TValue> buffer = new(capacity);
-            Values.CopyTo(buffer.Span);
-            this = buffer;
-            return this;
-        }
-    }
-    public void EnsureCapacity( int min )
-    {
-        if ( min <= Capacity ) { return; }
-
-        Grow((uint)( min - Capacity ));
-    }
-
-
     public readonly void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException($"Buffer<{typeof(TValue).Name}> is read only"); }
@@ -482,4 +441,9 @@ public ref struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         ReadOnlySpan<TValue> span = Values;
         return span.GetEnumerator();
     }
+
+
+    void IBufferWriter<TValue>.          Advance( int   count )    { this.Advance(count); }
+    Memory<TValue> IBufferWriter<TValue>.GetMemory( int sizeHint ) => this.GetMemory(sizeHint);
+    Span<TValue> IBufferWriter<TValue>.  GetSpan( int   sizeHint ) => this.GetMemory(sizeHint).Span;
 }

@@ -26,6 +26,136 @@ public static partial class Spans
 
 
     extension<TValue>( scoped in Span<TValue> self )
+    {
+        public bool ContainsExact( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> value )
+        {
+            if ( value.Length > self.Length ) { return false; }
+
+            if ( value.Length == self.Length ) { return self.SequenceEqual(value, comparer); }
+
+            for ( int i = 0; i < self.Length || i + value.Length < self.Length; i++ )
+            {
+                if ( self.Slice(i, value.Length).SequenceEqual(value, comparer) ) { return true; }
+            }
+
+            return false;
+        }
+
+        public bool ContainsAll( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> values )
+        {
+            /*
+            if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+            {
+                Vector<TValue> source = Vector.Create( span );
+                if ( values.Length >= Vector<TValue>.Count ) { return Vector.EqualsAll( source, Vector.Create( values ) ); }
+
+                using LinkSpan<Vector<TValue>> vectors = values.GetVectors();
+
+                foreach ( Vector<TValue> vector in vectors.ReadOnlySpan )
+                {
+                    if ( Vector.EqualsAll( source, vector ) ) { return true; }
+                }
+            }
+            */
+
+            foreach ( TValue c in values )
+            {
+                if ( !self.Contains(c, comparer) ) { return false; }
+            }
+
+            return true;
+        }
+
+        public bool ContainsAny( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> values )
+        {
+            /*
+            if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+            {
+                Vector<TValue> source = Vector.Create( span );
+                if ( values.Length >= Vector<TValue>.Count ) { return Vector.EqualsAny( source, Vector.Create( values ) ); }
+
+                using LinkSpan<Vector<TValue>> vectors = values.GetVectors();
+
+                foreach ( Vector<TValue> vector in vectors.ReadOnlySpan )
+                {
+                    if ( Vector.EqualsAny( source, vector ) ) { return true; }
+                }
+            }
+            */
+
+            foreach ( TValue c in values )
+            {
+                if ( self.Contains(c, comparer) ) { return true; }
+            }
+
+            return false;
+        }
+
+        public bool ContainsNone( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> values )
+        {
+            /*
+            if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+            {
+                Vector<TValue> source = Vector.Create( span );
+                if ( values.Length >= Vector<TValue>.Count ) { return Vector.EqualsAny( source, Vector.Create( values ) ); }
+
+                using LinkSpan<Vector<TValue>> vectors = values.GetVectors();
+
+                foreach ( Vector<TValue> vector in vectors.ReadOnlySpan )
+                {
+                    if ( Vector.EqualsAny( source, vector ) ) { return false; }
+                }
+            }
+            */
+
+            foreach ( TValue c in values )
+            {
+                if ( self.Contains(c, comparer) ) { return false; }
+            }
+
+            return true;
+        }
+
+
+        public bool EndsWith( EqualityComparer<TValue> comparer, TValue value ) => !self.IsEmpty && comparer.Equals(self[0], value);
+        public bool EndsWith( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> value )
+        {
+            if ( self.IsEmpty ) { return false; }
+
+            if ( self.Length < value.Length ) { return false; }
+
+            ReadOnlySpan<TValue> temp = self.Slice(self.Length - value.Length, value.Length);
+
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                if ( !comparer.Equals(temp[i], value[i]) ) { return false; }
+            }
+
+            return true;
+        }
+
+
+        public bool StartsWith( EqualityComparer<TValue> comparer, TValue value ) => !self.IsEmpty && comparer.Equals(self[0], value);
+        public bool StartsWith( EqualityComparer<TValue> comparer, params ReadOnlySpan<TValue> value )
+        {
+            if ( self.IsEmpty ) { return false; }
+
+            if ( self.Length < value.Length ) { return false; }
+
+            ReadOnlySpan<TValue> temp = self[..value.Length];
+
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                if ( !comparer.Equals(temp[i], value[i]) ) { return false; }
+            }
+
+            return true;
+        }
+    }
+
+
+
+    extension<TValue>( scoped in Span<TValue> self )
         where TValue : IEquatable<TValue>
     {
         public bool ContainsExact( params ReadOnlySpan<TValue> value )

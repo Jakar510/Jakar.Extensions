@@ -302,8 +302,7 @@ public static class Json
             // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
             using StreamReader         textReader = new(self, leaveOpen: true);
             await using JsonTextReader reader     = new(textReader) { CloseInput = false };
-
-            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
+            JToken                     jToken     = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
 
             return ThrowIfNull(jToken.ToObject<T>(serializer));
         }
@@ -330,12 +329,10 @@ public static class Json
             JsonLoadSettings loadSettings = LoadSettings;
 
             // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            using StreamReader textReader = new(self, leaveOpen: true);
+            using StreamReader         textReader = new(self, leaveOpen: true);
+            await using JsonTextReader reader     = new(textReader) { CloseInput = false };
 
-            await using ( JsonTextReader reader = new(textReader) { CloseInput = false } )
-            {
-                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken; }
-            }
+            await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken; }
         }
     }
 

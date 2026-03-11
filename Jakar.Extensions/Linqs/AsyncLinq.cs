@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 /// <summary>
@@ -71,10 +75,10 @@ public static partial class AsyncLinq
 
             default:
             {
-                using Buffer<TElement> builder = new();
-                foreach ( TElement equatable in sequence ) { builder.Add(equatable); }
+                Buffer<TElement> buffer = new();
+                foreach ( TElement equatable in sequence ) { buffer.Add(equatable); }
 
-                return builder.Values.ToArray();
+                return buffer.ToArray();
             }
         }
     }
@@ -98,19 +102,22 @@ public static partial class AsyncLinq
     public static TResult[] ToArray<TElement, TResult>( this IEnumerable<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using Buffer<TResult> buffer = new();
+        Buffer<TResult> buffer = new(64);
         foreach ( TElement item in sequence ) { buffer.Add(func(item)); }
 
-        return buffer.Span.ToArray();
+        return buffer.ToArray();
     }
     public static TResult[] ToArray<TElement, TResult>( this ReadOnlySpan<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using Buffer<TResult> buffer = new(sequence.Length);
+        Buffer<TResult> buffer = new(sequence.Length);
         foreach ( TElement item in sequence ) { buffer.Add(func(item)); }
 
-        return buffer.Span.ToArray();
+        return buffer.ToArray();
     }
+
+    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> ToArrayBuffer<TEnumerator, TValue>( this in ValueEnumerable<TEnumerator, TValue> source )
+        where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => ArrayBuffer<TValue>.Create(source);
 
 
 

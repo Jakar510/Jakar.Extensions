@@ -39,16 +39,11 @@ public static partial class Spans
     extension<TValue>( scoped in ReadOnlySpan<TValue> self )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        [Pure] public ReadOnlySpan<TValue> Replace( scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue )
+        [Pure] [MustDisposeResource] public ArrayBuffer<TValue> Replace( scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue )
         {
             Buffer<TValue> buffer = new(self.Length + self.Count(oldValue) * Math.Abs(newValue.Length - oldValue.Length) + 1);
-
-            try
-            {
-                self.Replace(oldValue, newValue, ref buffer);
-                return buffer.ToArray();
-            }
-            finally { buffer.Dispose(); }
+            self.Replace(oldValue, newValue, ref buffer);
+            return buffer.ToArrayBuffer();
         }
 
         public void Replace( scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue, scoped ref Buffer<TValue> buffer )

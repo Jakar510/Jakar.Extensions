@@ -13,12 +13,19 @@ public static partial class Types
             return interfaces.Any(static t => t == typeof(TValue) || ( t.IsGenericType && t.GetGenericTypeDefinition() == typeof(TValue) ));
         }
 
-        public bool HasInterface( Type interfaceType )
+        public bool HasInterface( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type interfaceType )
         {
             ReadOnlySpan<Type> interfaces = type.GetInterfaces();
             if ( interfaces.Contains(interfaceType) ) { return true; }
 
-            return interfaces.Any(t => t == interfaceType || ( t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType ));
+            foreach ( Type t in interfaces )
+            {
+                if ( t == interfaceType ) { return true; }
+                
+                if ( t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType ) { return true; }
+            }
+
+            return false;
         }
     }
 }
