@@ -82,8 +82,9 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
     }
 
 
-    IEnumerator IEnumerable.        GetEnumerator() => ( (IEnumerable<TValue>)this ).GetEnumerator();
-    int IReadOnlyCollection<TValue>.Count           => Length;
+    public ValueEnumerable<ArrayBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
+    IEnumerator IEnumerable.                            GetEnumerator()     => ( (IEnumerable<TValue>)this ).GetEnumerator();
+    int IReadOnlyCollection<TValue>.                    Count               => Length;
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
     {
         for ( int i = 0; i < Length; i++ ) { yield return Values[i]; }

@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    public static Span<TValue> RemoveAll<TValue>( this scoped ref readonly Span<TValue> source, params ReadOnlySpan<TValue> removed )
+    public static Span<TValue> RemoveAll<TValue>( this scoped in Span<TValue> source, params ReadOnlySpan<TValue> removed )
         where TValue : unmanaged, IEquatable<TValue>
     {
         using ArrayBuffer<TValue> owner  = new(source.Length);
@@ -18,7 +18,7 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly TValue value, scoped ref readonly Span<TValue> result, out int length )
+    public static void RemoveAll<TValue>( scoped in ReadOnlySpan<TValue> source, scoped in TValue value, scoped in Span<TValue> result, out int length )
         where TValue : unmanaged, IEquatable<TValue>
     {
         Guard.IsInRangeFor(source.Length - 1, result, nameof(result));
@@ -39,7 +39,7 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly ReadOnlySpan<TValue> removed, scoped ref readonly Span<TValue> result, out int length )
+    public static void RemoveAll<TValue>( scoped in ReadOnlySpan<TValue> source, scoped in ReadOnlySpan<TValue> removed, scoped in Span<TValue> result, out int length )
         where TValue : unmanaged, IEquatable<TValue>
     {
         Guard.IsInRangeFor(source.Length - 1, result, nameof(result));
@@ -66,7 +66,7 @@ public static partial class Spans
     }
 
 
-    [Pure] public static ReadOnlySpan<TValue> Slice<TValue>( this ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds )
+    [Pure] public static ReadOnlySpan<TValue> Slice<TValue>( this scoped in ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds )
         where TValue : unmanaged, IEquatable<TValue>
     {
         int start = source.IndexOf(startValue);
@@ -90,7 +90,7 @@ public static partial class Spans
         Guard.IsInRangeFor(end,   source, nameof(source));
         return source.Slice(start, length);
     }
-    public static void Slice<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds, scoped ref Span<TValue> result, out int length )
+    public static void Slice<TValue>( scoped in ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds, scoped ref Span<TValue> result, out int length )
         where TValue : unmanaged, IEquatable<TValue>
     {
         int start = source.IndexOf(startValue);
@@ -121,7 +121,7 @@ public static partial class Spans
 
 
 
-    extension<TValue>( scoped ref readonly ReadOnlySpan<TValue> source )
+    extension<TValue>( scoped in ReadOnlySpan<TValue> source )
         where TValue : unmanaged, IEquatable<TValue>
     {
         public ReadOnlySpan<TValue> RemoveAll( TValue c )
