@@ -10,28 +10,37 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
     private int  __count;
     private Node __head = Node.Empty;
     private Node __tail = Node.Empty;
-    public  int  Count => Interlocked.CompareExchange(ref __count, 0, 0);
+
+    // Volatile.Read gives the acquire fence needed for a correct atomic read.
+    public int Count => Volatile.Read(ref __count);
 
 
     public void Enqueue( TValue value )
     {
         Node newNode = new(value);
 
+        // Michael-Scott enqueue: link newNode at the tail, then advance the tail pointer.
         while ( true )
         {
-            Node  tail = __tail;
-            Node? next = tail.Next;
+            Node  tail = Volatile.Read(ref __tail);
+            Node? next = Volatile.Read(ref tail.Next);
 
             if ( next is null )
             {
+                // Tail is consistent — try to link newNode.
                 if ( Interlocked.CompareExchange(ref tail.Next, newNode, null) is null )
                 {
+                    // Best-effort tail advance; if it races, the next thread will fix it.
                     Interlocked.CompareExchange(ref __tail, newNode, tail);
                     Interlocked.Increment(ref __count);
                     return;
                 }
             }
-            else { Interlocked.CompareExchange(ref __tail, next, tail); }
+            else
+            {
+                // Tail is lagging — help advance it before retrying.
+                Interlocked.CompareExchange(ref __tail, next!, tail);
+            }
         }
     }
 
@@ -41,28 +50,38 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
                                        : null;
     public bool TryDequeue( out TValue? result )
     {
+        // Michael-Scott dequeue: head is always the sentinel (dummy) node;
+        // the real first value lives in head.Next.
         while ( true )
         {
-            Interlocked.Decrement(ref __count);
-            Node  head = __head;
-            Node  tail = __tail;
-            Node? next = head.Next;
+            Node  head = Volatile.Read(ref __head);
+            Node  tail = Volatile.Read(ref __tail);
+            Node? next = Volatile.Read(ref head.Next);
 
-            if ( head == tail )
+            if ( ReferenceEquals(head, tail) )
             {
                 if ( next is null )
                 {
+                    // Queue is empty.
                     result = null;
                     return false;
                 }
 
-                Interlocked.CompareExchange(ref __tail, next, tail);
+                // Tail is lagging behind head — help it catch up and retry.
+                Interlocked.CompareExchange(ref __tail, next!, tail);
             }
             else
             {
                 Debug.Assert(next is not null, "next should not be null when head != tail");
-                result = next.Value;
-                if ( Interlocked.CompareExchange(ref __head, next, head) == head ) { return true; }
+                result = next!.Value;
+
+                // Swing head to next (making next the new sentinel).
+                // Only decrement the count after a successful CAS.
+                if ( ReferenceEquals(Interlocked.CompareExchange(ref __head, next!, head), head) )
+                {
+                    Interlocked.Decrement(ref __count);
+                    return true;
+                }
             }
         }
     }
@@ -70,12 +89,13 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
 
     public IEnumerator<TValue> GetEnumerator()
     {
-        Node? current = __head;
+        // __head is the sentinel (dummy) node — skip it and start from the first real node.
+        Node? current = Volatile.Read(ref __head).Next;
 
         while ( current is not null )
         {
             yield return current.Value;
-            current = current.Next;
+            current = Volatile.Read(ref current.Next);
         }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -89,10 +109,10 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
         public                 Node?  Next;
 
 
-        public          bool Equals( Node?   other )                => ReferenceEquals(this, other);
-        public override bool Equals( object? obj )                  => ReferenceEquals(this, obj) || Equals(obj as Node);
+        public          bool Equals( Node?   other )                => ReferenceEquals(this, other) || other is not null && Value.Equals(other.Value);
+        public override bool Equals( object? obj )                  => ReferenceEquals(this, obj)   || Equals(obj as Node);
         public override int  GetHashCode()                          => HashCode.Combine(Value);
-        public static   bool operator ==( Node? left, Node? right ) => left?.Equals(right) is true;
-        public static   bool operator !=( Node? left, Node? right ) => left?.Equals(right) is not true;
+        public static   bool operator ==( Node? left, Node? right ) => left?.Equals(right) ?? right is null;
+        public static   bool operator !=( Node? left, Node? right ) => !( left == right );
     }
 }

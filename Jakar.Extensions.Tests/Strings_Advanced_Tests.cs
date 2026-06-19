@@ -193,7 +193,7 @@ public class Strings_Advanced_Tests : Assert
     [Test]
     public void ConvertTo_InvalidThrows()
     {
-        Throws<Exception>(() => _ = "notAnInt".ConvertTo<int>());
+        Throws<FormatException>(() => _ = "notAnInt".ConvertTo<int>());
     }
 
 

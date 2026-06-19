@@ -39,7 +39,13 @@ public static class Guids
     public static bool TryWriteBytes( in this Guid value, [MustDisposeResource] out Buffer<byte> result )
     {
         result = new Buffer<byte>(16);
-        if ( value.TryWriteBytes(result.Span) ) { return true; }
+        if ( value.TryWriteBytes(result.Span) )
+        {
+            // TryWriteBytes writes to the underlying array but does not update _length.
+            // Set Length so callers see 16 bytes, not 0.
+            result.Length = 16;
+            return true;
+        }
 
         result.Dispose();
         result = default;
@@ -67,6 +73,9 @@ public static class Guids
     public static Guid? AsGuid( in this ReadOnlySpan<char> value )
     {
         if ( Guid.TryParse(value, out Guid result) ) { return result; }
+
+        // URL-safe base64 GUIDs are always 22 chars (24 minus 2 '=' padding chars stripped).
+        if ( value.Length < 22 ) { return Guid.Empty; }
 
         Span<char> base64Chars = stackalloc char[24];
 
@@ -155,17 +164,29 @@ public static class Guids
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid(span[..bytesWritten]);
+        // Reverse of AsInt128: upper 64 bits → span[0..8], lower 64 bits → span[8..16].
+        if ( !BitConverter.TryWriteBytes(span[..SIZE],  (ulong)( value >> 64 )) ||
+             !BitConverter.TryWriteBytes(span[SIZE..],  (ulong)value) )
+        {
+            throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
+        }
+
+        return new Guid(span);
     }
     public static Guid AsGuid( in this UInt128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid(span[..bytesWritten]);
+        // Reverse of AsUInt128: upper 64 bits → span[0..8], lower 64 bits → span[8..16].
+        if ( !BitConverter.TryWriteBytes(span[..SIZE],  (ulong)( value >> 64 )) ||
+             !BitConverter.TryWriteBytes(span[SIZE..],  (ulong)value) )
+        {
+            throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
+        }
+
+        return new Guid(span);
     }
 
 
@@ -191,9 +212,10 @@ public static class Guids
         }
         public string ToHex()
         {
-            Span<byte> result = stackalloc byte[32];
-            self.AsSpan(ref result, out int bytesWritten);
-            return Convert.ToHexString(result[..bytesWritten]);
+            // Write raw 16 GUID bytes; Convert.ToHexString produces a 32-char uppercase hex string.
+            Span<byte> result = stackalloc byte[16];
+            self.TryWriteBytes(result);
+            return Convert.ToHexString(result);
         }
 
         /// <summary>
@@ -204,12 +226,16 @@ public static class Guids
             Guard.IsGreaterThanOrEqualTo(result.Length, 22);
             Span<byte> base64Bytes = stackalloc byte[24];
             Span<byte> idBytes     = stackalloc byte[16];
-            if ( !self.TryWriteBytes(idBytes, BitConverter.IsLittleEndian, out bytesWritten) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
+            // Use the basic overload: it writes bytes in the same layout that new Guid(ReadOnlySpan<byte>) expects.
+            // The bigEndian overload with BitConverter.IsLittleEndian passes bigEndian=true on x86, producing
+            // full big-endian bytes that new Guid() cannot round-trip back to the same value.
+            if ( !self.TryWriteBytes(idBytes) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
 
-            System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out bytesWritten);
-            result = result[..bytesWritten];
+            System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out _);
 
-            for ( int i = 0; i < bytesWritten; i++ )
+            // URL-safe base64 without padding: 16 GUID bytes → 24 base64 bytes, strip 2 '=' → 22 chars.
+            const int OUTPUT_LEN = 22;
+            for ( int i = 0; i < OUTPUT_LEN; i++ )
             {
                 result[i] = base64Bytes[i] switch
                             {
@@ -219,6 +245,8 @@ public static class Guids
                             };
             }
 
+            bytesWritten = OUTPUT_LEN;
+            result       = result[..OUTPUT_LEN];
             return true;
         }
         public bool AsSpan( scoped ref Span<byte> result, out int bytesWritten, StandardFormat format = default )

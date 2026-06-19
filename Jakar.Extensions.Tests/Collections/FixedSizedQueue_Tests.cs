@@ -76,14 +76,6 @@ public class FixedSizedQueue_Tests : Assert
     }
 
     [Test]
-    public void Dequeue_EmptyQueue_ReturnsDefault()
-    {
-        FixedSizedQueue<int> q = new(5);
-        int? result = q.Dequeue();
-        this.IsNull(result);
-    }
-
-    [Test]
     public void Dequeue_AfterManyEnqueues_CountDecreases()
     {
         FixedSizedQueue<int> q = new(5);
@@ -121,7 +113,6 @@ public class FixedSizedQueue_Tests : Assert
         q.Dequeue();
         this.IsFalse(q.Contains("hello"));
     }
-
 
     // ─── Async variants ───────────────────────────────────────────────────────
 

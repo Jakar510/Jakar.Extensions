@@ -9,7 +9,7 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Guids))]
 public class Guids_Tests : Assert
 {
-    private static readonly Guid SAMPLE_GUID = new("12345678-1234-1234-1234-123456789ABC");
+    private static readonly Guid SAMPLE_GUID = new("5BE6F8AE-33D3-4E82-84EC-B7B89064F36A");
 
 
     // ─── AsGuid (string) ──────────────────────────────────────────────────────
