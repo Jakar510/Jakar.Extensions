@@ -86,11 +86,11 @@ public static class Numbers
             return self;
         }
         public T Min( T other ) => self < other
-                                       ? other
-                                       : self;
+                                       ? self
+                                       : other;
         public T Max( T other ) => self > other
-                                       ? other
-                                       : self;
+                                       ? self
+                                       : other;
     }
 
 
