@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.SignalR.Chats;
 
 
-public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INotifyPropertyChanged
+public interface IChatRoom : INotifyPropertyChanged
 {
     public bool              Active      { get; set; }
     string                   Group       { get; }

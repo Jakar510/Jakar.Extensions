@@ -67,9 +67,10 @@ public readonly struct Permissions<TEnum> : IDisposable
     public override string ToString()
     {
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(Count);
-        Span<char>               chars = owner.Memory.Span;
+        // Rent returns a buffer of AT LEAST Count chars (usually larger, bucket-rounded); slice to Count so the un-filled tail is not serialized as embedded '\0'.
+        Span<char> chars = owner.Memory.Span[..Count];
 
-        for ( int i = 0; i < Count; i++ )
+        for ( int i = 0; i < chars.Length; i++ )
         {
             chars[i] = Has(EnumValues[i])
                            ? ValidChar
