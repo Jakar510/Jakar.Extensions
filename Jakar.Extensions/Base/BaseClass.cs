@@ -8,7 +8,8 @@ public class BaseClass : IJsonModel, IObservableObject, IDisposable
     protected JObject? _additionalData;
 
 
-    [JsonExtensionData] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    /// <summary> <see cref="JObject"/> is a Newtonsoft type and its <c> [JsonExtensionData] </c> attribute is Newtonsoft's, so System.Text.Json would otherwise try to bind this bag as an ordinary dictionary property - which it cannot construct. Hiding it from STJ is what lets these models cross Minimal API's serializer. </summary>
+    [JsonExtensionData] [MsJsonIgnore] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;

@@ -32,9 +32,10 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
     public readonly        Errors?       Error = error;
 
 
+    /// <summary> <see langword="true"/> when this result carries at least one error. Never inferred from the value; see <c> Errors.IsValid </c> . </summary>
     [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true;
-    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Value is not null;
-    [MemberNotNullWhen(true, nameof(Value))] public bool Passed    => Value is true;
+    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Error?.IsValid is not true && Value is not null;
+    [MemberNotNullWhen(true, nameof(Value))] public bool Passed    => Error?.IsValid is not true && Value is true;
 
 
     public static ErrorOrResult Create( bool   value )  => new(value, Errors.Empty);
@@ -59,21 +60,35 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
                                                                                                                        : value(Value);
     public Task<TResult> Match<TResult>( Func<bool, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) => TryGetValue(out Errors? e)
                                                                                                                       ? errors(e)
-                                                                                                                      : value(this);
+                                                                                                                      : value(Value is true);
 
 
-    [MemberNotNullWhen(true, nameof(Value))] [MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value, [NotNullWhen(false)] out Errors? errors )
+    /// <summary> Value path returns <see langword="true"/> ; otherwise <paramref name="errors"/> is always non-<see langword="null"/> . </summary>
+    [MemberNotNullWhen(true, nameof(Value))] public bool TryGetValue( [NotNullWhen(true)] out bool? value, [NotNullWhen(false)] out Errors? errors )
     {
+        if ( Error?.IsValid is true || Value is not true )
+        {
+            value  = null;
+            errors = Error ?? Errors.Empty;
+            return false;
+        }
+
         value  = Value;
         errors = null;
-        return value is true;
+        return true;
     }
 
 
-    [MemberNotNullWhen(true, nameof(Value))] [MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value )
+    [MemberNotNullWhen(true, nameof(Value))] public bool TryGetValue( [NotNullWhen(true)] out bool? value )
     {
+        if ( Error?.IsValid is true || Value is not true )
+        {
+            value = null;
+            return false;
+        }
+
         value = Value;
-        return value is true;
+        return true;
     }
 
 
@@ -101,8 +116,8 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
     }
     public void Deconstruct( out bool value, out Errors? error )
     {
-        value = false;
-        error = null;
+        value = Passed;
+        error = Error;
     }
 
 
@@ -111,9 +126,9 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
                                                                                         : result.Value;
     public static implicit operator OneOf<bool, Errors>( ErrorOrResult result ) => result.TryGetValue(out Errors? errors)
                                                                                        ? errors
-                                                                                       : true;
+                                                                                       : result.Value is true;
     public static implicit operator bool?( ErrorOrResult                 result ) => result.Value;
-    public static implicit operator bool( ErrorOrResult                  result ) => result.Value is true;
+    public static implicit operator bool( ErrorOrResult                  result ) => result.Passed;
     public static implicit operator ErrorOrResult( bool                  value )  => Create(value);
     public static implicit operator ErrorOrResult( Error                 error )  => Create(error);
     public static implicit operator ErrorOrResult( Error[]               errors ) => Create(errors);
@@ -136,8 +151,12 @@ public readonly struct ErrorOrResult<TValue>( TValue? value, Errors? error ) : I
     public readonly        TValue?               Value = value;
 
 
-    [MemberNotNullWhen(false, nameof(Value))] [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true && Value is null;
-    [MemberNotNullWhen(true,  nameof(Value))]                                          public bool HasValue  => Value is not null;
+    /// <summary>
+    ///     <see langword="true"/> when this result carries at least one error.
+    ///     <para> This must NOT be inferred from the value: for a value type <c> TValue </c> , <c> default(TValue) </c> is never <see langword="null"/> , so a null check silently reports "no errors" for every result built from <c> Errors </c> . </para>
+    /// </summary>
+    [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true;
+    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Error?.IsValid is not true && Value is not null;
 
 
     public static ErrorOrResult<TValue> Create( TValue value )  => new(value, Errors.Empty);
@@ -159,22 +178,36 @@ public readonly struct ErrorOrResult<TValue>( TValue? value, Errors? error ) : I
             : errors(e);
 
 
-    [MemberNotNullWhen(true, nameof(Value))] [MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value, [NotNullWhen(false)] out Errors? errors )
+    /// <summary> Value path returns <see langword="true"/> ; otherwise <paramref name="errors"/> is always non-<see langword="null"/> . </summary>
+    [MemberNotNullWhen(true, nameof(Value))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value, [NotNullWhen(false)] out Errors? errors )
     {
-        errors = Error;
+        if ( Error?.IsValid is true || Value is null )
+        {
+            value  = default;
+            errors = Error ?? Errors.Empty;
+            return false;
+        }
+
         value  = Value;
-        return value is not null;
+        errors = null;
+        return true;
     }
 
 
-    [MemberNotNullWhen(true, nameof(Value))] [MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value )
+    [MemberNotNullWhen(true, nameof(Value))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value )
     {
+        if ( Error?.IsValid is true || Value is null )
+        {
+            value = default;
+            return false;
+        }
+
         value = Value;
-        return value is not null;
+        return true;
     }
 
 
-    [MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out Errors? errors )
+    [MemberNotNullWhen(true, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out Errors? errors )
     {
         errors = Error;
         return errors?.IsValid is true;

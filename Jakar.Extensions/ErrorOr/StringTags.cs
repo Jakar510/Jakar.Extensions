@@ -11,6 +11,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Empty))]
+[MsJsonConverter(typeof(StringTagsMsJsonConverter))]
 [method: JsonConstructor]
 public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
 {
@@ -27,21 +28,24 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
     public StringTags( Pair[]   pairs ) : this(pairs, []) { }
     public StringTags( string[] entries ) : this([], entries) { }
     public StringTags( string   value ) : this([], [value]) { }
-    public StringTags( ref readonly StringValues entries ) : this([],
-                                                                  entries.Count > 1
-                                                                      ? (string[])entries.ToArray()!
-                                                                      : [entries.ToString()]) { }
+    public StringTags( in StringValues entries ) : this([],
+                                                        entries.Count switch
+                                                        {
+                                                            > 1 => [.. entries.WhereNotNull()]!,
+                                                            1   => [entries.ToString()],
+                                                            _   => []
+                                                        }) { }
 
 
     public static implicit operator StringTags( (Pair[] Tags, string[] Entries) pair )    => new(pair.Tags, pair.Entries);
     public static implicit operator StringTags( StringValues                    entries ) => new(in entries);
     public static implicit operator StringTags( Pair                            pair )    => new([pair]);
-    public static implicit operator StringTags( Span<Pair>                      pair )    => new([..pair]);
-    public static implicit operator StringTags( ReadOnlySpan<Pair>              pair )    => new([..pair]);
+    public static implicit operator StringTags( Span<Pair>                      pair )    => new([.. pair]);
+    public static implicit operator StringTags( ReadOnlySpan<Pair>              pair )    => new([.. pair]);
     public static implicit operator StringTags( Pair[]                          entries ) => new(entries);
     public static implicit operator StringTags( string                          entry )   => new([entry]);
-    public static implicit operator StringTags( Span<string>                    entry )   => new([..entry]);
-    public static implicit operator StringTags( ReadOnlySpan<string>            entry )   => new([..entry]);
+    public static implicit operator StringTags( Span<string>                    entry )   => new([.. entry]);
+    public static implicit operator StringTags( ReadOnlySpan<string>            entry )   => new([.. entry]);
     public static implicit operator StringTags( string[]                        entries ) => new(entries);
     public static implicit operator ReadOnlySpan<string>( StringTags            value )   => new(value.Entries);
     public static implicit operator ReadOnlySpan<Pair>( StringTags              value )   => new(value.Tags);
@@ -62,7 +66,7 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
         Deconstruct(out ReadOnlySpan<Pair> tags1, out ReadOnlySpan<string> entries1);
         other.Deconstruct(out ReadOnlySpan<Pair> tags2, out ReadOnlySpan<string> entries2);
 
-        return new StringTags([..tags1, ..tags2], [..entries1, ..entries2]);
+        return new StringTags([.. tags1, .. tags2], [.. entries1, .. entries2]);
     }
     public override string ToString() => $"{nameof(Tags)}: {Tags}, {nameof(Entries)}: {Entries}";
     public string ToString( string? format, IFormatProvider? formatProvider ) => string.Equals("json", format, StringComparison.OrdinalIgnoreCase)

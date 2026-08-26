@@ -8,6 +8,14 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Permissions<>))]
 public class Permissions_Tests : Assert
 {
+    // NOTE: the null-padding checks below use string.Contains(char), which is ORDINAL.
+    // Do not switch them back to Does.Not.Contain("\0") - NUnit's SubstringConstraint compares with
+    // StringComparison.CurrentCulture, and under ICU collation U+0000 is a zero-weight ignorable
+    // character, so "++++".IndexOf("\0", CurrentCulture) returns 0. That assertion can never pass,
+    // for any string, including string.Empty - it reports a defect that is not there.
+
+
+
     private enum Right
     {
         None,
@@ -17,6 +25,7 @@ public class Permissions_Tests : Assert
     }
 
 
+
     [Test] public void ToString_is_exact_length_with_no_null_padding()
     {
         using Permissions<Right> permissions = Permissions<Right>.SA();
@@ -24,9 +33,9 @@ public class Permissions_Tests : Assert
 
         Multiple(() =>
                  {
-                     That(value.Length, Is.EqualTo(Permissions<Right>.Count));
-                     That(value,        Does.Not.Contain("\0"));
-                     That(value,        Is.EqualTo(new string(Permissions<Right>.ValidChar, Permissions<Right>.Count)));
+                     That(value.Length,         Is.EqualTo(Permissions<Right>.Count));
+                     That(value.Contains('\0'), Is.False);
+                     That(value,                Is.EqualTo(new string(Permissions<Right>.ValidChar, Permissions<Right>.Count)));
                  });
     }
 
@@ -36,11 +45,11 @@ public class Permissions_Tests : Assert
         using Permissions<Right> original = Permissions<Right>.Create(Right.Read, Right.Delete);
         string                   encoded  = original.ToString();
 
-        using Permissions<Right> parsed = Permissions<Right>.Create(encoded.AsSpan());
 
         Multiple(() =>
                  {
-                     That(encoded,                  Does.Not.Contain("\0"));
+                     using Permissions<Right> parsed = Permissions<Right>.Create(encoded);
+                     That(encoded.Contains('\0'),   Is.False);
                      That(encoded.Length,           Is.EqualTo(Permissions<Right>.Count));
                      That(parsed.ToString(),        Is.EqualTo(encoded));
                      That(parsed.Has(Right.Read),   Is.True);

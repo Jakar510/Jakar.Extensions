@@ -13,12 +13,13 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     [JsonIgnore] public readonly StringTags details;
 
 
-    [JsonRequired] public string?    Description { get;            init; }
+    /// <summary> Every RFC 7807 member except <see cref="StatusCode"/> is optional, so the nullable ones must NOT be marked <c> [JsonRequired] </c> : Newtonsoft maps that to <c> Required.Always </c> , which rejects a <see langword="null"/> on write as well as on read - which is what made every factory-built error throw on serialization. </summary>
+    public                string?    Description { get;            init; }
     [JsonRequired] public StringTags Details     { get => details; init => details = value; }
-    [JsonRequired] public string?    Instance    { get;            init; }
+    public                string?    Instance    { get;            init; }
     [JsonRequired] public Status     StatusCode  { get;            init; }
-    [JsonRequired] public string?    Title       { get;            init; }
-    [JsonRequired] public string?    Type        { get;            init; }
+    public                string?    Title       { get;            init; }
+    public                string?    Type        { get;            init; }
 
 
     public Error() : base() { }

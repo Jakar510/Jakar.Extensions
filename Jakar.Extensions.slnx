@@ -21,7 +21,6 @@
   <Project Path="Jakar.Extensions.Blazor/Jakar.Extensions.Blazor.csproj" />
   <Project Path="Jakar.Extensions.Bogus/Jakar.Extensions.Bogus.csproj" />
   <Project Path="Jakar.Extensions.Experiments/Experiments.csproj" />
-  <Project Path="Jakar.Extensions.Maui/Jakar.Extensions.Maui.csproj" />
   <Project Path="Jakar.Extensions.SignalR/Jakar.Extensions.SignalR.csproj" />
   <Project Path="Jakar.Extensions.Tests/Jakar.Extensions.Tests.csproj" />
   <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />

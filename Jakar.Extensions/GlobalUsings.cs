@@ -60,6 +60,13 @@ global using static Jakar.Extensions.WebRequester;
 global using ErrorEventArgs = System.IO.ErrorEventArgs;
 global using ILogger = Microsoft.Extensions.Logging.ILogger;
 global using ISerilogger = Serilog.ILogger;
+global using MsJsonConstructorAttribute = System.Text.Json.Serialization.JsonConstructorAttribute;
+global using MsJsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
+global using MsJsonExtensionDataAttribute = System.Text.Json.Serialization.JsonExtensionDataAttribute;
+global using MsJsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using MsJsonPropertyNameAttribute = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+global using MsJsonSerializer = System.Text.Json.JsonSerializer;
+global using MsJsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 
 
 /*

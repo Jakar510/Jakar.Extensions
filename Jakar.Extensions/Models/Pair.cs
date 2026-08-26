@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+[MsJsonConverter(typeof(PairMsJsonConverter))]
 [method: JsonConstructor]
 public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable, ISpanFormattable
 {

@@ -113,10 +113,14 @@ public static class LoginRequestExtensions
 public abstract class LoginRequest<TSelf>( string userLogin, string userPassword ) : BaseClass<TSelf>, ILoginRequest
     where TSelf : LoginRequest<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    [JsonIgnore] public virtual bool       IsValid      => this.IsValid();
-    [Required]   public         string     UserLogin    { get; init; } = userLogin;
-    [Required]   public         string     UserPassword { get; init; } = userPassword;
-    public                      AppVersion Version      { get; init; } = AppVersion.Default;
+    [JsonIgnore] [MsJsonIgnore] public virtual bool       IsValid      => this.IsValid();
+    [Required]                  public         string     UserLogin    { get; init; } = userLogin;
+    [Required]                  public         string     UserPassword { get; init; } = userPassword;
+    public                                     AppVersion Version      { get; init; } = AppVersion.Default;
+
+
+    /// <summary> System.Text.Json (Minimal API model binding) needs either a parameterless constructor, exactly one parameterized constructor, or one marked with its own <c> [JsonConstructor] </c> . Newtonsoft keeps using the primary constructor via <c> [method: JsonConstructor] </c> ; this overload is what lets the same type cross the wire through STJ. </summary>
+    protected LoginRequest() : this(EMPTY, EMPTY) { }
 
 
     public virtual NetworkCredential GetCredential( Uri uri, string authType ) => this.GetNetworkCredentials();
@@ -139,10 +143,11 @@ public abstract class LoginRequest<TSelf>( string userLogin, string userPassword
 public abstract class LoginRequest<TSelf, TValue>( string userName, string password, TValue data ) : LoginRequest<TSelf>(userName, password), ILoginRequest<TValue>
     where TSelf : LoginRequest<TSelf, TValue>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    [Required]   public          TValue Data    { get; init; } = data;
-    [JsonIgnore] public override bool   IsValid => this.IsValid();
+    [Required]                  public          TValue Data    { get; init; } = data;
+    [JsonIgnore] [MsJsonIgnore] public override bool   IsValid => this.IsValid();
 
 
+    protected LoginRequest() : this(EMPTY, EMPTY, default!) { }
     protected LoginRequest( ILoginRequest         request, TValue data ) : this(request.UserLogin, request.UserPassword, data) { }
     protected LoginRequest( ILoginRequest<TValue> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
 
@@ -179,8 +184,9 @@ public abstract class LoginRequest<TSelf, TValue>( string userName, string passw
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class LoginRequestVersion( string userName, string password, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userName, password, data), IJsonModel<LoginRequestVersion>, IEqualComparable<LoginRequestVersion>
+public sealed class LoginRequestVersion( string userLogin, string userPassword, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userLogin, userPassword, data), IJsonModel<LoginRequestVersion>, IEqualComparable<LoginRequestVersion>
 {
+    public LoginRequestVersion() : this(EMPTY, EMPTY, AppVersion.Default) { }
     public LoginRequestVersion( ILoginRequest             request, AppVersion data ) : this(request.UserLogin, request.UserPassword, data) { }
     public LoginRequestVersion( ILoginRequest<AppVersion> request ) : this(request.UserLogin, request.UserLogin, request.Data) { }
 
@@ -199,8 +205,9 @@ public sealed class LoginRequestVersion( string userName, string password, AppVe
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class LoginRequestValue( string userName, string password, JToken data ) : LoginRequest<LoginRequestValue, JToken>(userName, password, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
+public sealed class LoginRequestValue( string userLogin, string userPassword, JToken data ) : LoginRequest<LoginRequestValue, JToken>(userLogin, userPassword, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
 {
+    public LoginRequestValue() : this(EMPTY, EMPTY, JValue.CreateNull()) { }
     public LoginRequestValue( ILoginRequest         request, JToken data ) : this(request.UserLogin, request.UserPassword, data) { }
     public LoginRequestValue( ILoginRequest<JValue> request ) : this(request.UserLogin, request.UserLogin, request.Data) { }
 
@@ -222,8 +229,9 @@ public sealed class LoginRequestValue( string userName, string password, JToken 
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class LoginRequest( string userName, string password ) : LoginRequest<LoginRequest>(userName, password), IJsonModel<LoginRequest>, IEqualComparable<LoginRequest>
+public sealed class LoginRequest( string userLogin, string userPassword ) : LoginRequest<LoginRequest>(userLogin, userPassword), IJsonModel<LoginRequest>, IEqualComparable<LoginRequest>
 {
+    public LoginRequest() : this(EMPTY, EMPTY) { }
     public LoginRequest( ILoginRequest request ) : this(request.UserLogin, request.UserPassword) { }
 
 
