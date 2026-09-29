@@ -16,9 +16,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Http\**" />
-	  <EmbeddedResource Remove="Http\**" />
-	  <None Remove="Http\**" />
+	  <Compile Remove="Http\Requests\**" />
+	  <EmbeddedResource Remove="Http\Requests\**" />
+	  <None Remove="Http\Requests\**" />
 	</ItemGroup>
 
 	<ItemGroup>
