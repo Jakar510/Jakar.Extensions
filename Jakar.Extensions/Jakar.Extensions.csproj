@@ -43,15 +43,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="SorterEqualizer\**" />
-		<Compile Remove="WeakEventManagers\**" />
-		<EmbeddedResource Remove="SorterEqualizer\**" />
-		<EmbeddedResource Remove="WeakEventManagers\**" />
-		<None Remove="SorterEqualizer\**" />
-		<None Remove="WeakEventManagers\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
 		<InternalsVisibleTo Include="Jakar.Extensions.Tests" />
 	</ItemGroup>
