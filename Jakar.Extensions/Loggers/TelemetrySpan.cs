@@ -8,8 +8,9 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Empty))]
 public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 {
-    public static readonly TelemetrySpan Empty = new(EMPTY, null);
-    private readonly       Activity?     __parent;
+    public static readonly TelemetrySpan    Empty = new(EMPTY, null);
+    private readonly       TelemetrySource? __source;
+    private readonly       Activity?        __parent;
     private readonly       Activity?     __activity;
     private readonly       long          __start;
     private readonly       string        __id;
@@ -25,10 +26,11 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     public        bool            IsValid        => __activity is not null;
 
 
-    public TelemetrySpan( string name, Activity? parent, int? randomIDLength = null )
+    public TelemetrySpan( string name, Activity? parent, int? randomIDLength = null ) : this(TelemetrySource.Current, name, parent, randomIDLength) { }
+    public TelemetrySpan( TelemetrySource? source, string name, Activity? parent, int? randomIDLength = null )
     {
-        __start = Stopwatch.GetTimestamp();
-        TelemetrySource? source = TelemetrySource.Current;
+        __start  = Stopwatch.GetTimestamp();
+        __source = source;
 
         if ( string.IsNullOrWhiteSpace(name) || source is null )
         {
@@ -65,8 +67,9 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
                                                                            : new ActivityLink(__activity.Context, tags);
 
 
-    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( string                           name )                                           => new(name, __activity);
+    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( string                           name )                                           => new(__source, name, __activity);
     [Pure] [MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName] string         name                                   = EMPTY ) => new(name, Activity.Current);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( TelemetrySource                   source, [CallerMemberName] string name = EMPTY ) => new(source, name, Activity.Current);
     [Pure] [MustDisposeResource] public static TelemetrySpan Create( ref readonly       TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
 
 
@@ -150,9 +153,9 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     }
 
 
-    public          bool Equals( TelemetrySpan other )                          => string.Equals(__id, other.__id, StringComparison.Ordinal) && Equals(__activity, other.__activity) && Equals(__parent, other.__parent);
+    public          bool Equals( TelemetrySpan other )                          => string.Equals(__id, other.__id, StringComparison.Ordinal) && Equals(__activity, other.__activity) && Equals(__parent, other.__parent) && ReferenceEquals(__source, other.__source);
     public override bool Equals( object?       obj )                            => obj is TelemetrySpan other                                && Equals(other);
-    public override int  GetHashCode()                                          => HashCode.Combine(__id, __activity, __parent);
+    public override int  GetHashCode()                                          => HashCode.Combine(__id, __activity, __parent, RuntimeHelpers.GetHashCode(__source));
     public static   bool operator ==( TelemetrySpan left, TelemetrySpan right ) => left.Equals(right);
     public static   bool operator !=( TelemetrySpan left, TelemetrySpan right ) => !left.Equals(right);
 }

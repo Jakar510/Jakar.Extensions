@@ -1,3 +1,9 @@
+using System.Collections.Generic;
+using System.ComponentModel;
+using Microsoft.Extensions.Configuration;
+
+
+
 namespace Jakar.Extensions.Tests;
 
 
@@ -216,4 +222,43 @@ public class AppVersion_Tests : Assert
     [TestCase("21.10.3.5.1", "22.10.3.5.1", false)]
     [TestCase("21.10.3.5.1", "22.12.1.5.1", false)]
     public void FuzzyEquals_Test( string left, string right, bool expected = true ) => this.AreEqual(expected, AppVersion.Parse(left).FuzzyEquals(AppVersion.Parse(right)));
+
+
+    [Test] public void TypeConverter_RoundTrip()
+    {
+        TypeConverter converter = TypeDescriptor.GetConverter(typeof(AppVersion));
+        this.IsTrue(converter.CanConvertFrom(typeof(string)));
+        this.IsTrue(converter.CanConvertTo(typeof(string)));
+
+        AppVersion expected = new(1, 2, 3);
+        AppVersion? version  = converter.ConvertFrom("1.2.3") as AppVersion;
+        this.NotNull(version);
+        this.AreEqual(expected.ToString(), version!.ToString());
+        this.AreEqual("1.2.3",             converter.ConvertTo(version, typeof(string)));
+    }
+
+
+    [Test] public void Configuration_Binds()
+    {
+        IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection([new KeyValuePair<string, string?>("Version", "1.2.3")]).Build();
+        VersionOptions options       = new();
+        configuration.Bind(options);
+
+        this.NotNull(options.Version);
+        this.AreEqual("1.2.3", options.Version!.ToString());
+    }
+
+
+    [Test] public void Configuration_Invalid_Throws()
+    {
+        IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection([new KeyValuePair<string, string?>("Version", "not-a-version")]).Build();
+        Throws<InvalidOperationException>(() => configuration.Bind(new VersionOptions()));
+    }
+
+
+
+    private sealed class VersionOptions
+    {
+        public AppVersion? Version { get; set; }
+    }
 }

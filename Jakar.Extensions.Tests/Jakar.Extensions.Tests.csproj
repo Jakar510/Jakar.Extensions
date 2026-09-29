@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.DotMemoryUnit" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="NUnit" />
 		<PackageReference Include="NUnit3TestAdapter" />

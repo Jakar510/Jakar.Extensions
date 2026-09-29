@@ -15,8 +15,8 @@ public interface ITelemetrySource
     public ref readonly ActivitySource Source { get; }
 
 
-    public Activity? StartActivity( string name, Activity?          parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
-    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
+    public Activity? StartActivity( string name, Activity?          parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Unknown, ActivityTraceFlags? traceFlags = null );
+    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Unknown, ActivityTraceFlags? traceFlags = null );
 
 
     public DeviceInformation? TryGetDeviceInformation();
@@ -53,15 +53,13 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     ref readonly ActivitySource ITelemetrySource.Source => ref Source;
 
 
-    static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
     public TelemetrySource( AppVersion version, Guid appID, string appName, string? packageName ) : this(new AppInformation(version, appID, appName, packageName)) { }
     public TelemetrySource( AppInformation info )
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
-        Activity.Current = null;
-        Info             = info;
-        Source           = new ActivitySource(info.AppName, info.Version.ToString());
-        Meter            = new Meter(info.AppName, info.Version.ToString());
+        Info   = info;
+        Source = new ActivitySource(info.AppName, info.Version.ToString());
+        Meter  = new Meter(info.AppName, info.Version.ToString());
     }
     public virtual void Dispose()
     {
@@ -90,22 +88,21 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     */
 
 
-    public Activity? StartActivity( string name, Activity? parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
+    public Activity? StartActivity( string name, Activity? parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Unknown, ActivityTraceFlags? traceFlags = null )
     {
         ActivityContext parentContext = ( parent ?? Activity.Current )?.Context ?? EmptyActivityContext;
         return StartActivity(name, in parentContext, tags, links, kind, idFormat, traceFlags);
     }
-    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
+    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Unknown, ActivityTraceFlags? traceFlags = null )
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         if ( !Source.HasListeners() ) { return null; }
 
-        Activity activity = Source.CreateActivity(name, kind, parentContext, tags, links, idFormat) ?? throw new InvalidOperationException($"{nameof(Source)}.{nameof(Source.CreateActivity)}");
-        activity.ActivityTraceFlags = traceFlags;
-        activity.IsAllDataRequested = true;
-        activity.TraceStateString   = null;
+        Activity? activity = Source.CreateActivity(name, kind, parentContext, tags, links, idFormat);
+        if ( activity is null ) { return null; }
 
-        activity.SetStatus(ActivityStatusCode.Ok);
+        if ( traceFlags.HasValue ) { activity.ActivityTraceFlags = traceFlags.Value; }
+
         return activity.Start();
     }
 

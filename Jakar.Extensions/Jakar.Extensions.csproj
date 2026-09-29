@@ -6,13 +6,13 @@
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>10.9.3</Version>
+		<Version>10.10.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageIcon>icon.png</PackageIcon>
 		<Company></Company>
-		<PackageReleaseNotes>Fix ErrorOrResult&lt;T&gt; reporting no errors for value-type T; make factory-built Error/Errors serializable; make LoginRequest bindable by System.Text.Json.</PackageReleaseNotes>
+		<PackageReleaseNotes>TelemetrySource uses W3C activity IDs: the process-wide hierarchical default is gone and the StartActivity idFormat default is now Unknown (default parameter values are compiled into call sites, so recompile callers). StartActivity respects the sampler: it returns null instead of throwing when sampled out, no longer forces IsAllDataRequested, the Recorded trace flag (traceFlags is now ActivityTraceFlags?) or Ok status, and keeps the parent tracestate. Constructing a TelemetrySource no longer clears Activity.Current. AppVersion has a TypeConverter, so it binds from configuration strings. TelemetrySpan can target a specific TelemetrySource via TelemetrySpan.Create(TelemetrySource, string).</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
