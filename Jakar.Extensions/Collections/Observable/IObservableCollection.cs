@@ -119,4 +119,4 @@ public interface ICollectionSearch<TValue>
 
 
 
-public interface IIObservableCollection<TValue> : ICollectionAlerts, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollectionSearch<TValue>, ICollectionSort<TValue>, ICollectionAdd<TValue>, ICollectionRemove<TValue>, IDisposable;
+public interface IObservableCollection<TValue> : ICollectionAlerts, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollectionSearch<TValue>, ICollectionSort<TValue>, ICollectionAdd<TValue>, ICollectionRemove<TValue>, IDisposable;

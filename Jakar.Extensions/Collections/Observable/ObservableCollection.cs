@@ -61,7 +61,7 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
 
 
 [Serializable]
-public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IIObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
     where TValue : IEquatable<TValue>
     where TSelf : ObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
