@@ -58,6 +58,11 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
         try
         {
             TryCancel(previous);
+
+            // A cancelled handler may not stop immediately (or may ignore its token): wait for it, and everything before it, so executions never overlap.
+            // If this execution is itself superseded or cancelled while waiting, WaitAsync throws and it ends without running its handler.
+            if ( !previousRun.IsCompleted ) { await previousRun.WaitAsync(source.Token).ConfigureAwait(false); }
+
             if ( source.IsCancellationRequested ) { return; }
 
             await _execute.Execute(this, parameter, source.Token).ConfigureAwait(false);
