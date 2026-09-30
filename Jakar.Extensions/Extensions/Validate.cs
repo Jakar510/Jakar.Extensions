@@ -144,10 +144,57 @@ public static class Validate
 
 
 
+    /// <summary> Formats with <c>N{maxDecimals}</c> in <paramref name="info"/>, then drops trailing zeros after the decimal separator (and the separator if nothing is left). </summary>
+    /// <remarks>
+    ///     Formats into a stack buffer and trims in place instead of running <see cref="string.Format(IFormatProvider, string, object)"/> (which boxed the value) and an uncached <see cref="Regex.Replace(string, string, string)"/>.
+    ///     Only zeros after the decimal separator are removed: the previous pattern also stripped trailing zeros of the integer part when there were no decimals (e.g. 100 with <c>maxDecimals: 0</c> became "1").
+    /// </remarks>
+    private static string FormatNumberCore<TNumber>( TNumber value, CultureInfo info, int maxDecimals )
+        where TNumber : ISpanFormattable
+    {
+        Span<char> format = stackalloc char[12];
+        format[0] = 'n'; // same as the previous "{0:n...}" (identical output, including for invalid precisions)
+        maxDecimals.TryFormat(format[1..], out int digits, default, CultureInfo.InvariantCulture);
+        format = format[..( digits + 1 )];
+
+        Span<char> buffer = stackalloc char[128];
+
+        if ( value.TryFormat(buffer, out int written, format, info) )
+        {
+            ReadOnlySpan<char> text = buffer[..written];
+            return new string(text[..TrimTrailingDecimalZeros(text, info.NumberFormat.NumberDecimalSeparator, maxDecimals)]);
+        }
+
+        // Very large values (e.g. double.MaxValue with group separators) don't fit the stack buffer.
+        string result = value.ToString(format.ToString(), info);
+        int    length = TrimTrailingDecimalZeros(result, info.NumberFormat.NumberDecimalSeparator, maxDecimals);
+
+        return length == result.Length
+                   ? result
+                   : result[..length];
+    }
+    private static int TrimTrailingDecimalZeros( ReadOnlySpan<char> text, string separator, int maxDecimals )
+    {
+        if ( maxDecimals <= 0 ) { return text.Length; }
+
+        int decimalPoint = text.LastIndexOf(separator);
+        if ( decimalPoint < 0 ) { return text.Length; } // NaN, infinity
+
+        int start = decimalPoint + separator.Length;
+        int end   = text.Length;
+        while ( end > start && text[end - 1] == '0' ) { end--; }
+
+        return end == start
+                   ? decimalPoint
+                   : end;
+    }
+
+
+
     extension( float self )
     {
         public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => FormatNumberCore(self, info, maxDecimals);
     }
 
 
@@ -155,7 +202,7 @@ public static class Validate
     extension( double self )
     {
         public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => FormatNumberCore(self, info, maxDecimals);
     }
 
 
@@ -163,7 +210,7 @@ public static class Validate
     extension( decimal self )
     {
         public string FormatNumber( int         maxDecimals           = 4 ) => self.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", self), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
+        public string FormatNumber( CultureInfo info, int maxDecimals = 4 ) => FormatNumberCore(self, info, maxDecimals);
     }
 
 

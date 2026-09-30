@@ -376,7 +376,32 @@ public static class Strings
 
         public string RemoveAll( string old ) => self.Replace(old, EMPTY, StringComparison.Ordinal);
 
-        public string RemoveAll( char old ) => self.Replace(old.Repeat(1), EMPTY);
+        /// <remarks> Returns <paramref name="self"/> unchanged when <paramref name="old"/> is absent; otherwise copies the kept segments once (no temporary one-char string, no <see cref="string.Replace(string, string)"/> search). </remarks>
+        public string RemoveAll( char old )
+        {
+            int first = self.IndexOf(old);
+            if ( first < 0 ) { return self; }
+
+            int removed = self.AsSpan(first).Count(old);
+
+            return string.Create(self.Length - removed,
+                                 (Value: self, Old: old),
+                                 static ( span, state ) =>
+                                 {
+                                     ReadOnlySpan<char> source = state.Value;
+                                     int                written = 0;
+                                     int                index;
+
+                                     while ( ( index = source.IndexOf(state.Old) ) >= 0 )
+                                     {
+                                         source[..index].CopyTo(span[written..]);
+                                         written += index;
+                                         source  =  source[( index + 1 )..];
+                                     }
+
+                                     source.CopyTo(span[written..]);
+                                 });
+        }
     }
 
 
@@ -390,7 +415,23 @@ public static class Strings
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        public string Repeat( int count ) => new StringBuilder(self.Length * count).Insert(0, self, count).ToString();
+        /// <remarks> Builds the result directly with <see cref="string.Create{TState}"/> (no <see cref="StringBuilder"/>); a single-char string uses <c>new string(char, count)</c>. </remarks>
+        public string Repeat( int count )
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
+            if ( count == 0 || self.Length == 0 ) { return EMPTY; }
+
+            if ( count == 1 ) { return self; }
+
+            if ( self.Length == 1 ) { return new string(self[0], count); }
+
+            return string.Create(checked(self.Length * count),
+                                 self,
+                                 static ( span, value ) =>
+                                 {
+                                     for ( int i = 0; i < span.Length; i += value.Length ) { value.CopyTo(span[i..]); }
+                                 });
+        }
 
         public string ReplaceAll( string old, string newString ) => self.Replace(old, newString, StringComparison.Ordinal);
 

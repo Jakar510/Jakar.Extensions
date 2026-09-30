@@ -50,11 +50,19 @@ public class Randoms : BaseClass
     public static char RandomChar( int  startInclusive, int  endExclusive ) => Convert.ToChar(RandomNumberGenerator.GetInt32(startInclusive, endExclusive));
 
 
-    public static string RandomString( int length ) => RandomString(length, char.ToUpperInvariant);
+    private const string LATIN_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private const string LATIN_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+
+    /// <summary> <paramref name="length"/> uniformly random letters A-Z from <see cref="RandomNumberGenerator"/>. </summary>
+    /// <remarks> One <see cref="RandomNumberGenerator.GetString"/> call instead of one <see cref="RandomNumberGenerator.GetInt32(int, int)"/> call per character. </remarks>
+    public static string RandomString( int length ) => RandomNumberGenerator.GetString(LATIN_UPPER, length);
+    /// <summary> <paramref name="length"/> uniformly random letters a-z from <see cref="RandomNumberGenerator"/>, each passed through <paramref name="converter"/>. </summary>
     public static string RandomString( int length, Func<char, char> converter )
     {
         Span<char> span = stackalloc char[length];
-        for ( int i = 0; i < length; i++ ) { span[i] = converter(RandomChar(97, 123)); }
+        RandomNumberGenerator.GetItems(LATIN_LOWER, span);
+        for ( int i = 0; i < span.Length; i++ ) { span[i] = converter(span[i]); }
 
         return span.ToString();
     }
