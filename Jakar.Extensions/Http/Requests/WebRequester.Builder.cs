@@ -228,11 +228,11 @@ public partial class WebRequester
             options.ClientCertificateContext = value;
             return this;
         }
-        public Builder With_Ssl( bool AllowRenegotiation, bool AllowTlsResume )
+        public Builder With_Ssl( bool allowRenegotiation, bool allowTlsResume )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
-            options.AllowTlsResume     = AllowTlsResume;
-            options.AllowRenegotiation = AllowRenegotiation;
+            options.AllowTlsResume     = allowTlsResume;
+            options.AllowRenegotiation = allowRenegotiation;
             return this;
         }
         public Builder With_Ssl( X509CertificateCollection value )

@@ -1,4 +1,4 @@
-﻿// Jakar.Extensions :: Jakar.Extensions
+// Jakar.Extensions :: Jakar.Extensions
 // 06/07/2022  3:25 PM
 
 
@@ -6,42 +6,85 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     <para> Based on System.Text.ValueStringBuilder </para>
+///     <para> A stack-only string builder, based on System.Text.ValueStringBuilder. </para>
+///     <para>
+///         Nothing is allocated on the GC heap except the final <see cref="ToString()"/>: start from a caller buffer (<c>new ValueStringBuilder(stackalloc char[256])</c>) or from a rented
+///         <see cref="ArrayPool{T}"/> array; growing rents a larger array and returns the previous one. Values are formatted in place through <see cref="ISpanFormattable"/>.
+///     </para>
+///     <para> Builder methods return <see langword="ref"/> this builder, so chained calls (<c>sb.Append(a).Append(b)</c>) all apply to the same instance. </para>
 /// </summary>
+/// <remarks> <see cref="ToString()"/> and <see cref="TryCopyTo"/> dispose the builder; <see cref="Dispose"/> is idempotent, so a <see langword="using"/> declaration remains safe. </remarks>
 public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 {
-    private Buffer<char> __chars;
+    private const int        MAX_FORMAT_GROWTH = 1 << 24; // stop growing for a value that refuses to format after this many chars and fall back to ToString
+    private       char[]?    __arrayToReturnToPool;
+    private       Span<char> __chars;
+    private       int        __length;
 
 
-    public readonly bool       IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.IsEmpty; }
-    public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Capacity; }
-    public readonly Span<char> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Next; }
-    public readonly Span<char> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
-    public readonly Span<char> this[ Range range ] => __chars[range];
-    public ref char this[ Index            index ] => ref __chars[index];
-    public ref char this[ int              index ] => ref __chars[index];
-    public readonly ReadOnlySpan<char> Result { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Span; }
-    public          int                Length { [MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get => __chars.Length; set => __chars.Length = value; }
-    public readonly ReadOnlySpan<char> Values => __chars.Values;
+    public readonly bool       IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __length == 0; }
+    public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Length; }
+    /// <summary> The unused storage after <see cref="Length"/>. </summary>
+    public readonly Span<char> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[__length..]; }
+    /// <summary> The written characters (<see cref="Length"/> chars). </summary>
+    public readonly Span<char> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[..__length]; }
+    /// <summary> The whole underlying storage (<see cref="Capacity"/> chars). </summary>
+    public readonly Span<char> RawChars { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars; }
+    public readonly Span<char> this[ Range range ] => Span[range];
+    public ref char this[ Index            index ] => ref Span[index];
+    public ref char this[ int              index ] => ref Span[index];
+    public readonly ReadOnlySpan<char> Result { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[..__length]; }
+    public          int                Length { [MethodImpl(MethodImplOptions.AggressiveInlining)] readonly get => __length; set => __length = Math.Clamp(value, 0, __chars.Length); }
+    public readonly ReadOnlySpan<char> Values { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[..__length]; }
 
 
     public ValueStringBuilder() : this(DEFAULT_CAPACITY) { }
-    public ValueStringBuilder( int                       initialCapacity ) => __chars = new Buffer<char>(initialCapacity);
-    public ValueStringBuilder( params ReadOnlySpan<char> span ) => __chars = new Buffer<char>(span);
-    public void Dispose() => __chars.Dispose();
-
-
-    public ValueStringBuilder Reset()
+    /// <summary> Starts with a rented array of at least <paramref name="initialCapacity"/> chars. </summary>
+    public ValueStringBuilder( int initialCapacity )
     {
-        __chars.Span.Fill('\0');
-        return this;
+        __arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
+        __chars               = __arrayToReturnToPool;
+        __length              = 0;
     }
-    public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format )   => EnsureCapacity(Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
-    public void EnsureCapacity( int                                     capacity ) => __chars.EnsureCapacity(capacity);
+    /// <summary> Starts with <paramref name="initialBuffer"/> as storage (typically <c>stackalloc char[N]</c>); it is only replaced by a rented array if more room is needed. </summary>
+    public ValueStringBuilder( Span<char> initialBuffer )
+    {
+        __arrayToReturnToPool = null;
+        __chars               = initialBuffer;
+        __length              = 0;
+    }
+    /// <summary> Starts with a copy of <paramref name="span"/>. </summary>
+    public ValueStringBuilder( params ReadOnlySpan<char> span ) : this(Math.Max(span.Length, DEFAULT_CAPACITY))
+    {
+        span.CopyTo(__chars);
+        __length = span.Length;
+    }
+    /// <summary> Returns any rented array to the pool and resets the builder. Safe to call more than once. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Dispose()
+    {
+        char[]? toReturn = __arrayToReturnToPool;
+        this = default; // so the pooled array can't be used again through this instance
+        if ( toReturn is not null ) { ArrayPool<char>.Shared.Return(toReturn); }
+    }
+
+
+    /// <summary> Clears the content (<see cref="Length"/> becomes 0), keeping the storage. </summary>
+    [UnscopedRef] public ref ValueStringBuilder Reset()
+    {
+        __length = 0;
+        return ref this;
+    }
+    /// <summary> Ensures room for one value of <typeparamref name="TValue"/> (or <paramref name="format"/>'s length, whichever is larger) after <see cref="Length"/>. </summary>
+    public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format ) => EnsureCapacity(__length + Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
+    /// <summary> Ensures <see cref="Capacity"/> is at least <paramref name="capacity"/>. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void EnsureCapacity( int capacity )
+    {
+        if ( (uint)capacity > (uint)__chars.Length ) { Grow(capacity - __length); }
+    }
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
-    [Pure] public readonly ref char GetPinnableReference() => ref __chars.Span.GetPinnableReference();
+    [Pure] public readonly ref char GetPinnableReference() => ref MemoryMarshal.GetReference(__chars);
 
 
     /// <summary> Get a pinnable reference to the builder. </summary>
@@ -54,154 +97,214 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
     }
 
 
-    /// <summary> Get a pinnable reference to the builder. </summary>
-    /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
+    /// <summary> Get a pinnable reference to the builder, with <paramref name="terminate"/> written just after <see cref="Length"/> (the length itself is unchanged). </summary>
+    /// <param name="terminate"> The terminator written after <see cref="Length"/> </param>
     [Pure] public ref char GetPinnableReference( char terminate )
     {
-        EnsureCapacity(Length + 1);
-        __chars[++Length] = terminate;
+        EnsureCapacity(__length + 1);
+        __chars[__length] = terminate;
 
         return ref GetPinnableReference();
     }
 
 
-    [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => __chars.Span;
-    [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => __chars[start..];
-    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => __chars.Span.Slice(start, length);
+    [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => __chars[..__length];
+    [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => __chars[start..__length];
+    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => __chars[..__length].Slice(start, length);
 
 
+    /// <summary> Copies the content to <paramref name="destination"/> and disposes the builder. </summary>
     public bool TryCopyTo( scoped ref Span<char> destination, out int charsWritten )
     {
-        if ( __chars.Span.TryCopyTo(destination) )
+        bool copied = Values.TryCopyTo(destination);
+
+        charsWritten = copied
+                           ? __length
+                           : 0;
+
+        Dispose();
+        return copied;
+    }
+
+
+    // ─── Trim ────────────────────────────────────────────────────────────────
+
+    [UnscopedRef] public ref ValueStringBuilder Trim( char                      value ) => ref TrimEnd(value).TrimStart(value);
+    [UnscopedRef] public ref ValueStringBuilder Trim( params ReadOnlySpan<char> value ) => ref TrimEnd(value).TrimStart(value);
+    [UnscopedRef] public ref ValueStringBuilder TrimEnd( char value )
+    {
+        __length = MemoryExtensions.TrimEnd(Values, value).Length;
+        return ref this;
+    }
+    /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
+    [UnscopedRef] public ref ValueStringBuilder TrimEnd( params ReadOnlySpan<char> value )
+    {
+        if ( !value.IsEmpty ) { __length = MemoryExtensions.TrimEnd(Values, value).Length; }
+
+        return ref this;
+    }
+    [UnscopedRef] public ref ValueStringBuilder TrimStart( char value )
+    {
+        RemoveStart(__length - MemoryExtensions.TrimStart(Values, value).Length);
+        return ref this;
+    }
+    /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
+    [UnscopedRef] public ref ValueStringBuilder TrimStart( params ReadOnlySpan<char> value )
+    {
+        if ( !value.IsEmpty ) { RemoveStart(__length - MemoryExtensions.TrimStart(Values, value).Length); }
+
+        return ref this;
+    }
+    private void RemoveStart( int count )
+    {
+        if ( count <= 0 ) { return; }
+
+        __chars[count..__length].CopyTo(__chars);
+        __length -= count;
+    }
+
+
+    // ─── Replace / Insert ────────────────────────────────────────────────────
+
+    /// <summary> Overwrites the char at <paramref name="index"/> (within <see cref="Length"/>). </summary>
+    [UnscopedRef] public ref ValueStringBuilder Replace( int index, char value )
+    {
+        Span[index] = value;
+        return ref this;
+    }
+    /// <summary> Overwrites <paramref name="count"/> chars from <paramref name="index"/> (within <see cref="Length"/>). </summary>
+    [UnscopedRef] public ref ValueStringBuilder Replace( int index, char value, int count )
+    {
+        Span.Slice(index, count).Fill(value);
+        return ref this;
+    }
+    /// <summary> Overwrites chars from <paramref name="index"/> with <paramref name="value"/> (within <see cref="Length"/>). </summary>
+    [UnscopedRef] public ref ValueStringBuilder Replace( int index, params ReadOnlySpan<char> value )
+    {
+        value.CopyTo(Span[index..]);
+        return ref this;
+    }
+
+
+    [UnscopedRef] public ref ValueStringBuilder Insert( int index, char value ) => ref Insert(index, value, 1);
+    /// <summary> Inserts <paramref name="count"/> copies of <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
+    [UnscopedRef] public ref ValueStringBuilder Insert( int index, char value, int count )
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)index, (uint)__length, nameof(index));
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+        if ( __length > __chars.Length - count ) { Grow(count); }
+
+        __chars[index..__length].CopyTo(__chars[( index + count )..]);
+        __chars.Slice(index, count).Fill(value);
+        __length += count;
+        return ref this;
+    }
+    /// <summary> Inserts <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
+    [UnscopedRef] public ref ValueStringBuilder Insert( int index, params ReadOnlySpan<char> value )
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)index, (uint)__length, nameof(index));
+
+        int count = value.Length;
+        if ( __length > __chars.Length - count ) { Grow(count); }
+
+        __chars[index..__length].CopyTo(__chars[( index + count )..]);
+        value.CopyTo(__chars[index..]);
+        __length += count;
+        return ref this;
+    }
+
+
+    // ─── Append ──────────────────────────────────────────────────────────────
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] [UnscopedRef] public ref ValueStringBuilder Append( char c )
+    {
+        int        pos   = __length;
+        Span<char> chars = __chars;
+
+        if ( (uint)pos < (uint)chars.Length )
         {
-            charsWritten = __chars.Length;
-            Dispose();
-            return true;
+            chars[pos] = c;
+            __length   = pos + 1;
+        }
+        else { GrowAndAppend(c); }
+
+        return ref this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] [UnscopedRef] public ref ValueStringBuilder Append( string? value )
+    {
+        if ( value is null ) { return ref this; }
+
+        int pos = __length;
+
+        // Very common case: single-char strings (separators, symbols).
+        if ( value.Length == 1 && (uint)pos < (uint)__chars.Length )
+        {
+            __chars[pos] = value[0];
+            __length     = pos + 1;
+            return ref this;
         }
 
-        charsWritten = 0;
-        Dispose();
-        return false;
+        return ref Append(value.AsSpan());
+    }
+    [UnscopedRef] public ref ValueStringBuilder Append( IEnumerable<string> values )
+    {
+        foreach ( string value in values ) { Append(value); }
+
+        return ref this;
+    }
+    [UnscopedRef] public ref ValueStringBuilder Append( params ReadOnlySpan<string> values )
+    {
+        int total = 0;
+        foreach ( string value in values ) { total += value.Length; }
+
+        EnsureCapacity(__length + total);
+        foreach ( string value in values ) { AppendUnchecked(value); }
+
+        return ref this;
+    }
+    [UnscopedRef] public ref ValueStringBuilder Append( char c, int count )
+    {
+        if ( count <= 0 ) { return ref this; }
+
+        if ( __length > __chars.Length - count ) { Grow(count); }
+
+        __chars.Slice(__length, count).Fill(c);
+        __length += count;
+        return ref this;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] [UnscopedRef] public ref ValueStringBuilder Append( scoped ReadOnlySpan<char> value )
+    {
+        int pos = __length;
+        if ( pos > __chars.Length - value.Length ) { Grow(value.Length); }
+
+        value.CopyTo(__chars[pos..]);
+        __length = pos + value.Length;
+        return ref this;
     }
 
 
-    public ValueStringBuilder Trim( char value )
-    {
-        __chars.Trim(value);
-        return this;
-    }
-    public ValueStringBuilder Trim( params ReadOnlySpan<char> value )
-    {
-        __chars.Trim(value);
-        return this;
-    }
-    public ValueStringBuilder TrimEnd( char value )
-    {
-        __chars.TrimEnd(value);
-        return this;
-    }
-    public ValueStringBuilder TrimEnd( params ReadOnlySpan<char> value )
-    {
-        __chars.TrimEnd(value);
-        return this;
-    }
-    public ValueStringBuilder TrimStart( char value )
-    {
-        __chars.TrimStart(value);
-        return this;
-    }
-    public ValueStringBuilder TrimStart( params ReadOnlySpan<char> value )
-    {
-        __chars.TrimStart(value);
-        return this;
-    }
+    // ─── AppendFormat ────────────────────────────────────────────────────────
 
-
-    public ValueStringBuilder Replace( int index, char value )
-    {
-        __chars.Span[index] = value;
-        return this;
-    }
-    public ValueStringBuilder Replace( int index, char value, int count )
-    {
-        for ( int i = 0; i < count; i++ ) { __chars.Span[index + i] = value; }
-
-        return this;
-    }
-    public ValueStringBuilder Replace( int index, params ReadOnlySpan<char> value )
-    {
-        value.CopyTo(__chars.Span[index..]);
-        return this;
-    }
-
-
-    public ValueStringBuilder Insert( int index, char value )
-    {
-        __chars.Insert(index, value);
-        return this;
-    }
-    public ValueStringBuilder Insert( int index, char value, int count )
-    {
-        __chars.Insert(index, value, count);
-        return this;
-    }
-    public ValueStringBuilder Insert( int index, params ReadOnlySpan<char> value )
-    {
-        __chars.Insert(index, value);
-        return this;
-    }
-
-
-    public ValueStringBuilder Append( char c )
-    {
-        __chars.Add(c);
-        return this;
-    }
-    public ValueStringBuilder Append( IEnumerable<string> values )
-    {
-        foreach ( string value in values ) { __chars.Add(value); }
-
-        return this;
-    }
-    public ValueStringBuilder Append( params ReadOnlySpan<string> values )
-    {
-        foreach ( string value in values ) { __chars.Add(value); }
-
-        return this;
-    }
-    public ValueStringBuilder Append( char c, int count )
-    {
-        for ( int i = 0; i < count; i++ ) { __chars.Add(c); }
-
-        return this;
-    }
-    public ValueStringBuilder Append( ReadOnlySpan<char> value )
-    {
-        __chars.Add(value);
-        return this;
-    }
-
-
-    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         AppendFormatHelper(provider, format, arg0);
-        return this;
+        return ref this;
     }
-    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
-
     {
         AppendFormatHelper(provider, format, arg0, arg1);
-        return this;
+        return ref this;
     }
-    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, TValue arg2, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, TValue arg2, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         AppendFormatHelper(provider, format, arg0, arg1, arg2);
-        return this;
+        return ref this;
     }
-    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, IFormatProvider? provider, params ReadOnlySpan<TValue> args )
+    [UnscopedRef] public ref ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, IFormatProvider? provider, params ReadOnlySpan<TValue> args )
         where TValue : ISpanFormattable
     {
         if ( args.IsEmpty )
@@ -215,145 +318,132 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         }
 
         AppendFormatHelper(provider, format, args);
-        return this;
+        return ref this;
     }
 
 
-    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
+    // ─── AppendJoin ──────────────────────────────────────────────────────────
+
+    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")] [UnscopedRef]
+    public ref ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
         ReadOnlySpan<string> span = enumerable.GetInternalArray();
-        return AppendJoin(separator, span);
+        return ref AppendJoin(separator, span);
     }
-    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-    public ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")] [UnscopedRef]
+    public ref ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
         ReadOnlySpan<string> span = enumerable.GetInternalArray();
-        return AppendJoin(separator, span);
+        return ref AppendJoin(separator, span);
     }
 
 
-    public ValueStringBuilder AppendJoin( char separator, params ReadOnlySpan<string> span )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin( char separator, params ReadOnlySpan<string> span )
     {
-        EnsureCapacity(span.Sum(static x => x.Length) + span.Length * 2 + 1);
-        ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
-        bool                            shouldContinue = enumerator.MoveNext();
+        if ( span.IsEmpty ) { return ref this; }
 
-        while ( shouldContinue )
+        int total = span.Length - 1;
+        foreach ( string? value in span ) { total += value?.Length ?? 0; }
+
+        EnsureCapacity(__length + total);
+        AppendUnchecked(span[0]);
+
+        for ( int i = 1; i < span.Length; i++ )
         {
-            ReadOnlySpan<char> current = enumerator.Current;
-            __chars.Add(current);
-            shouldContinue = enumerator.MoveNext();
-
-            if ( shouldContinue ) { __chars.Add(separator); }
+            __chars[__length++] = separator;
+            AppendUnchecked(span[i]);
         }
 
-        return this;
+        return ref this;
     }
-    public ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, params ReadOnlySpan<string> span )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, params ReadOnlySpan<string> span )
     {
-        EnsureCapacity(span.Sum(static x => x.Length) + separator.Length * span.Length + 1);
-        ReadOnlySpan<string>.Enumerator enumerator     = span.GetEnumerator();
-        bool                            shouldContinue = enumerator.MoveNext();
+        if ( span.IsEmpty ) { return ref this; }
 
-        while ( shouldContinue )
+        int total = separator.Length * ( span.Length - 1 );
+        foreach ( string value in span ) { total += value.Length; }
+
+        EnsureCapacity(__length + total);
+        AppendUnchecked(span[0]);
+
+        for ( int i = 1; i < span.Length; i++ )
         {
-            ReadOnlySpan<char> current = enumerator.Current;
-            __chars.Add(current);
-            shouldContinue = enumerator.MoveNext();
-
-            if ( shouldContinue ) { __chars.Add(separator); }
+            separator.CopyTo(__chars[__length..]);
+            __length += separator.Length;
+            AppendUnchecked(span[i]);
         }
 
-        return this;
+        return ref this;
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
-        bool                            shouldContinue = enumerator.MoveNext();
-
-        while ( shouldContinue )
+        for ( int i = 0; i < enumerable.Length; i++ )
         {
-            if ( !enumerator.Current.TryFormat(Next, out int charsWritten, format, provider) ) { continue; }
+            if ( i > 0 ) { Append(separator); }
 
-            __chars.Length += charsWritten;
-            shouldContinue =  enumerator.MoveNext();
-
-            if ( shouldContinue ) { __chars.Add(separator); }
+            AppendFormatted(enumerable[i], format, provider);
         }
 
-        return this;
+        return ref this;
     }
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
-        bool                            shouldContinue = enumerator.MoveNext();
-
-        while ( shouldContinue )
+        for ( int i = 0; i < enumerable.Length; i++ )
         {
-            if ( !enumerator.Current.TryFormat(__chars.Next, out int charsWritten, format, provider) ) { continue; }
+            if ( i > 0 ) { Append(separator); }
 
-            __chars.Length += charsWritten;
-            shouldContinue =  enumerator.MoveNext();
-            if ( shouldContinue ) { __chars.Add(separator); }
+            AppendFormatted(enumerable[i], format, provider);
         }
 
-        return this;
+        return ref this;
     }
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
-        bool                      shouldContinue = enumerator.MoveNext();
+        bool first = true;
 
-        while ( shouldContinue )
+        foreach ( TValue value in enumerable )
         {
-            if ( enumerator.Current is not null ) { AppendSpanFormattable(enumerator.Current, format, provider); }
+            if ( !first ) { Append(separator); }
 
-            shouldContinue = enumerator.MoveNext();
-            if ( shouldContinue ) { __chars.Add(separator); }
+            first = false;
+            AppendFormatted(value, format, provider);
         }
 
-        return this;
+        return ref this;
     }
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
-        bool                      shouldContinue = enumerator.MoveNext();
+        bool first = true;
 
-        while ( shouldContinue )
+        foreach ( TValue value in enumerable )
         {
-            if ( enumerator.Current is not null ) { AppendSpanFormattable(enumerator.Current, format, provider); }
+            if ( !first ) { Append(separator); }
 
-            shouldContinue = enumerator.MoveNext();
-            if ( shouldContinue ) { __chars.Add(separator); }
+            first = false;
+            AppendFormatted(value, format, provider);
         }
 
-        return this;
+        return ref this;
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+    /// <summary> Formats <paramref name="value"/> directly into the builder, growing as needed (no intermediate string). </summary>
+    [UnscopedRef] public ref ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        EnsureCapacity<TValue>(in format);
-        if ( value.TryFormat(Next, out int charsWritten, format, provider) ) { __chars.Length += charsWritten; }
-
-        Debug.Assert(charsWritten > 0, $"No values added to {nameof(__chars)}");
-        return this;
+        AppendFormatted(value, format, provider);
+        return ref this;
     }
 
 
-    /// <summary> Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used a generic. </summary>
-    /// <param name="provider"> </param>
-    /// <param name="formatSpan"> </param>
-    /// <param name="args"> </param>
-    /// <returns> </returns>
+    /// <summary> Composite formatting (<c>{index[,alignment][:format]}</c>, <c>{{</c>/<c>}}</c> escapes) with the same rules and exceptions as <see cref="string.Format(IFormatProvider, string, object[])"/>. </summary>
+    /// <remarks> Literal text is copied in runs, and arguments are formatted (and padded) in place, so nothing is allocated unless <paramref name="provider"/> supplies an <see cref="ICustomFormatter"/>. </remarks>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="FormatException"> </exception>
     internal void AppendFormatHelper<TValue>( IFormatProvider? provider, ReadOnlySpan<char> formatSpan, params ReadOnlySpan<TValue> args )
@@ -365,55 +455,41 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
         if ( formatSpan.IsEmpty ) { throw new ArgumentNullException(nameof(formatSpan)); }
 
-        EnsureCapacity<TValue>(in formatSpan);
-        int               pos             = 0;
-        char              ch              = '\0';
+        EnsureCapacity(__length + formatSpan.Length);
+
         ICustomFormatter? customFormatter = provider?.GetFormat(typeof(ICustomFormatter)) as ICustomFormatter;
+        int               pos             = 0;
 
         while ( true )
         {
-            while ( pos < formatSpan.Length )
+            // Copy literal text up to the next brace in one go.
+            int brace = formatSpan[pos..].IndexOfAny('{', '}');
+
+            if ( brace < 0 )
             {
-                ch = formatSpan[pos++];
-
-                // Is it a closing brace?
-                if ( ch == '}' )
-                {
-                    // Check next character (if there is one) to see if it is escaped. eg }}
-                    if ( pos < formatSpan.Length && formatSpan[pos] == '}' ) { pos++; }
-                    else
-                    {
-                        // Otherwise treat it as an error (Mismatched closing brace)
-                        ThrowFormatError();
-                    }
-                }
-
-                // Is it a opening brace?
-                else if ( ch == '{' )
-                {
-                    // Check next character (if there is one) to see if it is escaped. eg {{
-                    if ( pos < formatSpan.Length && formatSpan[pos] == '{' ) { pos++; }
-                    else
-                    {
-                        // Otherwise treat it as the opening brace of an Argument Hole.
-                        pos--;
-                        break;
-                    }
-                }
-
-                // If it's neither then treat the character as just text.
-                Append(ch);
+                Append(formatSpan[pos..]);
+                return;
             }
+
+            Append(formatSpan.Slice(pos, brace));
+            pos += brace;
+
+            char ch = formatSpan[pos];
+
+            // Escaped "{{" or "}}".
+            if ( pos + 1 < formatSpan.Length && formatSpan[pos + 1] == ch )
+            {
+                Append(ch);
+                pos += 2;
+                continue;
+            }
+
+            // A lone closing brace is an error.
+            if ( ch == '}' ) { ThrowFormatError(); }
 
             //
             // Start of parsing of Argument Hole.
             // Argument Hole ::= { Count (, WS* Alignment WS*)? (: Formatting)? }
-            //
-            if ( pos == formatSpan.Length ) { break; }
-
-            //
-            //  Start of parsing required Count parameter.
-            //  Count ::= ('0'-'9')+ WS*
             //
             pos++;
 
@@ -438,8 +514,6 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
             // Consume optional whitespace.
             while ( pos < formatSpan.Length && ( ch = formatSpan[pos] ) == ' ' ) { pos++; }
 
-            // End of parsing index parameter.
-
             //
             //  Start of parsing of optional Alignment
             //  Alignment ::= comma WS* minus? ('0'-'9')+ WS*
@@ -447,7 +521,6 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
             bool leftJustify = false;
             int  width       = 0;
 
-            // Is the character a comma, which indicates the start of alignment parameter.
             if ( ch == ',' )
             {
                 pos++;
@@ -458,40 +531,30 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
                 // If reached the end of the text then error (Unexpected end of text)
                 if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
-                // Is there a minus sign?
                 ch = formatSpan[pos];
 
                 if ( ch == '-' )
                 {
-                    // Yes, then alignment is left justified.
                     leftJustify = true;
                     pos++;
 
-                    // If reached end of text then error (Unexpected end of text)
                     if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
                     ch = formatSpan[pos];
                 }
 
-                // If current character is not a digit then error (Unexpected character)
                 if ( ch < '0' || ch > '9' ) { ThrowFormatError(); }
 
-                // Parse alignment digits.
                 do
                 {
                     width = width * 10 + ch - '0';
                     pos++;
 
-                    // If reached end of text then error. (Unexpected end of text)
                     if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
                     ch = formatSpan[pos];
-
-                    // So long a current character is a digit and the value of width is less than 100000 ( width limit )
                 }
                 while ( ch is >= '0' and <= '9' && width < WIDTH_LIMIT );
-
-                // end of parsing Argument Alignment
             }
 
             // Consume optional whitespace
@@ -500,11 +563,8 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
             //
             // Start of parsing of optional formatting parameter.
             //
-            TValue arg = args[index];
+            ReadOnlySpan<char> itemFormatSpan = default;
 
-            ReadOnlySpan<char> itemFormatSpan = default; // used if itemFormat is null
-
-            // Is current character a colon? which indicates start of formatting parameter.
             if ( ch == ':' )
             {
                 pos++;
@@ -512,22 +572,13 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
                 while ( true )
                 {
-                    // If reached end of text then error. (Unexpected end of text)
                     if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
                     ch = formatSpan[pos];
 
-                    if ( ch == '}' )
-                    {
-                        // Argument hole closed
-                        break;
-                    }
+                    if ( ch == '}' ) { break; } // Argument hole closed
 
-                    if ( ch == '{' )
-                    {
-                        // Braces inside the argument hole are not supported
-                        ThrowFormatError();
-                    }
+                    if ( ch == '{' ) { ThrowFormatError(); } // Braces inside the argument hole are not supported
 
                     pos++;
                 }
@@ -536,51 +587,32 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
             }
             else if ( ch != '}' )
             {
-                // Unexpected character
-                ThrowFormatError();
+                ThrowFormatError(); // Unexpected character
             }
 
-            // Construct the output for this arg hole.
             pos++;
-            string? s          = null;
-            string? itemFormat = null;
+
+            // Construct the output for this arg hole.
+            TValue arg = args[index];
 
             if ( customFormatter is not null )
             {
-                if ( itemFormatSpan.Length != 0 ) { itemFormat = new string(itemFormatSpan); }
+                string? itemFormat = itemFormatSpan.IsEmpty
+                                         ? null
+                                         : new string(itemFormatSpan);
 
-                s = customFormatter.Format(itemFormat, arg, provider);
-            }
+                string custom = customFormatter.Format(itemFormat, arg, provider);
 
-            if ( s is not null )
-            {
-                // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
-                if ( ( leftJustify || width == 0 ) && arg.TryFormat(Next, out int charsWritten, itemFormatSpan, provider) )
+                if ( !string.IsNullOrWhiteSpace(custom) )
                 {
-                    __chars.Length += charsWritten;
-
-                    // Pad the end, if needed.
-                    int padding = width - charsWritten;
-                    if ( leftJustify && padding > 0 ) { Append(' ', padding); }
-
-                    // Continue to parse other characters.
+                    AppendPadded(custom, width, leftJustify);
                     continue;
                 }
-
-                if ( itemFormatSpan.Length != 0 ) { itemFormat ??= new string(itemFormatSpan); }
-
-                s = arg.ToString(itemFormat, provider);
             }
 
-            // Append it to the final output of the Format String.
-            s ??= EMPTY;
-            int pad = width - s.Length;
-            if ( !leftJustify && pad > 0 ) { Append(' ', pad); }
-
-            Append(s);
-            if ( leftJustify && pad > 0 ) { Append(' ', pad); }
-
-            // Continue to parse other characters.
+            int start = __length;
+            AppendFormatted(arg, itemFormatSpan, provider);
+            PadFrom(start, width, leftJustify);
         }
     }
 
@@ -588,308 +620,118 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
     [DoesNotReturn] private static void ThrowFormatError() => throw new FormatException("Invalid Format String");
 
 
-    public string ToString( string? format, IFormatProvider? formatProvider ) => Values.ToString();
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
-    {
-        ReadOnlySpan<char> values = Values;
+    // ─── Output ──────────────────────────────────────────────────────────────
 
-        if ( values.TryCopyTo(destination) )
+    /// <summary> The content as a string. Does not dispose the builder. </summary>
+    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => Values.ToString();
+    public readonly bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+    {
+        if ( Values.TryCopyTo(destination) )
         {
-            charsWritten = values.Length;
+            charsWritten = __length;
             return true;
         }
 
         charsWritten = 0;
         return false;
     }
+    /// <summary> The content as a string; the builder is disposed (its pooled array returned). </summary>
     public override string ToString()
     {
-        string result = Span.ToString();
-
+        string result = Values.ToString();
         Dispose();
         return result;
     }
-}
 
 
+    // ─── Internals ───────────────────────────────────────────────────────────
 
-/*
-public ref struct ValueStringBuilder
-{
-    private char[]?    _arrayToReturnToPool;
-    private Span<char> _chars;
-    private int        _pos;
-
-    public ValueStringBuilder( Span<char> initialBuffer )
+    /// <summary> Formats <paramref name="value"/> into the free space; if it doesn't fit, grows and retries instead of allocating a string. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void AppendFormatted<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where TValue : ISpanFormattable
     {
-        _arrayToReturnToPool = null;
-        _chars               = initialBuffer;
-        _pos                 = 0;
+        if ( value.TryFormat(__chars[__length..], out int charsWritten, format, provider) ) { __length += charsWritten; }
+        else { AppendFormattedSlow(value, format, provider); }
     }
-
-    public ValueStringBuilder( int initialCapacity )
+    [MethodImpl(MethodImplOptions.NoInlining)] private void AppendFormattedSlow<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider )
+        where TValue : ISpanFormattable
     {
-        _arrayToReturnToPool = ArrayPool<char>.Shared.Rent( initialCapacity );
-        _chars               = _arrayToReturnToPool;
-        _pos                 = 0;
-    }
-
-    public int Length
-    {
-        get => _pos;
-        set
+        while ( __chars.Length - __length < MAX_FORMAT_GROWTH )
         {
-            Debug.Assert( value >= 0 );
-            Debug.Assert( value <= _chars.Length );
-            _pos = value;
-        }
-    }
+            Grow(Math.Max(__chars.Length - __length + 1, 64));
 
-    public int Capacity => _chars.Length;
-
-    public void EnsureCapacity( int capacity )
-    {
-        // This is not expected to be called this with negative capacity
-        Debug.Assert( capacity >= 0 );
-
-        // If the caller has a bug and calls this with negative capacity, make sure to call Grow to throw an exception.
-        if ( (uint)capacity > (uint)_chars.Length ) Grow( capacity - _pos );
-    }
-
-    /// <summary>
-    /// Get a pinnable reference to the builder.
-    /// Does not ensure there is a null char after <see cref="Length"/>
-    /// This overload is pattern matched in the C# 7.3+ compiler so you can omit
-    /// the explicit method call, and write eg "fixed (char* c = builder)"
-    /// </summary>
-    public ref char GetPinnableReference() { return ref MemoryMarshal.GetReference( _chars ); }
-
-    /// <summary>
-    /// Get a pinnable reference to the builder.
-    /// </summary>
-    /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-    public ref char GetPinnableReference( bool terminate )
-    {
-        if ( terminate )
-        {
-            EnsureCapacity( Length + 1 );
-            _chars[Length] = '\0';
+            if ( value.TryFormat(__chars[__length..], out int charsWritten, format, provider) )
+            {
+                __length += charsWritten;
+                return;
+            }
         }
 
-        return ref MemoryMarshal.GetReference( _chars );
+        // A formatter that never succeeds into a span: fall back to its string.
+        Append(value.ToString(format.IsEmpty
+                                  ? null
+                                  : new string(format),
+                              provider));
     }
 
-    public ref char this[ int index ]
+
+    /// <summary> Pads the text written since <paramref name="start"/> to <paramref name="width"/> chars: spaces after it when <paramref name="leftJustify"/>, otherwise before it (shifted in place). </summary>
+    private void PadFrom( int start, int width, bool leftJustify )
     {
-        get
+        int padding = width - ( __length - start );
+        if ( padding <= 0 ) { return; }
+
+        if ( leftJustify )
         {
-            Debug.Assert( index < _pos );
-            return ref _chars[index];
-        }
-    }
-
-    public override string ToString()
-    {
-        string s = _chars.Slice( 0, _pos ).ToString();
-        Dispose();
-        return s;
-    }
-
-    /// <summary>Returns the underlying storage of the builder.</summary>
-    public Span<char> RawChars => _chars;
-
-    /// <summary>
-    /// Returns a span around the contents of the builder.
-    /// </summary>
-    /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
-    public ReadOnlySpan<char> AsSpan( bool terminate )
-    {
-        if ( terminate )
-        {
-            EnsureCapacity( Length + 1 );
-            _chars[Length] = '\0';
+            Append(' ', padding);
+            return;
         }
 
-        return _chars.Slice( 0, _pos );
+        if ( __length > __chars.Length - padding ) { Grow(padding); }
+
+        __chars[start..__length].CopyTo(__chars[( start + padding )..]);
+        __chars.Slice(start, padding).Fill(' ');
+        __length += padding;
+    }
+    private void AppendPadded( string value, int width, bool leftJustify )
+    {
+        int padding = width - value.Length;
+        if ( !leftJustify && padding > 0 ) { Append(' ', padding); }
+
+        Append(value.AsSpan());
+        if ( leftJustify && padding > 0 ) { Append(' ', padding); }
     }
 
-    public ReadOnlySpan<char> AsSpan()                        => _chars.Slice( 0,     _pos );
-    public ReadOnlySpan<char> AsSpan( int start )             => _chars.Slice( start, _pos - start );
-    public ReadOnlySpan<char> AsSpan( int start, int length ) => _chars.Slice( start, length );
 
-    public bool TryCopyTo( Span<char> destination, out int charsWritten )
+    /// <summary> Appends without a capacity check; callers have already ensured room. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void AppendUnchecked( string? value )
     {
-        if ( _chars.Slice( 0, _pos ).TryCopyTo( destination ) )
-        {
-            charsWritten = _pos;
-            Dispose();
-            return true;
-        }
-        else
-        {
-            charsWritten = 0;
-            Dispose();
-            return false;
-        }
+        if ( value is null ) { return; }
+
+        value.CopyTo(__chars[__length..]);
+        __length += value.Length;
     }
 
-    public void Insert( int index, char value, int count )
-    {
-        if ( _pos > _chars.Length - count ) { Grow( count ); }
 
-        int remaining = _pos - index;
-        _chars.Slice( index, remaining ).CopyTo( _chars.Slice( index + count ) );
-        _chars.Slice( index, count ).Fill( value );
-        _pos += count;
+    [MethodImpl(MethodImplOptions.NoInlining)] private void GrowAndAppend( char c )
+    {
+        Grow(1);
+        __chars[__length++] = c;
     }
 
-    public void Insert( int index, string? s )
+
+    /// <summary> Resize to at least <see cref="Length"/> + <paramref name="additionalCapacityBeyondPos"/>, doubling when that is larger, copying the content into a newly rented array and returning the previous rented array (if any). </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)] private void Grow( int additionalCapacityBeyondPos )
     {
-        if ( s is not null ) { return; }
+        // Increase to at least the required size, but try to double, bounded by the max array length.
+        int newCapacity = (int)Math.Max((uint)( __length + additionalCapacityBeyondPos ), Math.Min((uint)Math.Max(__chars.Length, 16) * 2, (uint)Array.MaxLength));
 
-        int count = s.Length;
+        // Let Rent throw if the requested capacity is negative (caller bug or overflow).
+        char[] poolArray = ArrayPool<char>.Shared.Rent(newCapacity);
+        __chars[..__length].CopyTo(poolArray);
 
-        if ( _pos > (_chars.Length - count) ) { Grow( count ); }
-
-        int remaining = _pos - index;
-        _chars.Slice( index, remaining ).CopyTo( _chars.Slice( index + count ) );
-
-        s
-        #if !NET
-                .AsSpan()
-        #endif
-           .CopyTo( _chars.Slice( index ) );
-
-        _pos += count;
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void Append( char c )
-    {
-        int        pos   = _pos;
-        Span<char> chars = _chars;
-
-        if ( (uint)pos < (uint)chars.Length )
-        {
-            chars[pos] = c;
-            _pos       = pos + 1;
-        }
-        else { GrowAndAppend( c ); }
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void Append( string? s )
-    {
-        if ( s is not null ) { return; }
-
-        int pos = _pos;
-
-        if ( s.Length == 1 && (uint)pos < (uint)_chars.Length ) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-        {
-            _chars[pos] = s[0];
-            _pos        = pos + 1;
-        }
-        else { AppendSlow( s ); }
-    }
-
-    private void AppendSlow( string s )
-    {
-        int pos = _pos;
-        if ( pos > _chars.Length - s.Length ) { Grow( s.Length ); }
-
-        s
-        #if !NET
-                .AsSpan()
-        #endif
-           .CopyTo( _chars.Slice( pos ) );
-
-        _pos += s.Length;
-    }
-
-    public void Append( char c, int count )
-    {
-        if ( _pos > _chars.Length - count ) { Grow( count ); }
-
-        Span<char> dst = _chars.Slice( _pos, count );
-        for ( int i = 0; i < dst.Length; i++ ) { dst[i] = c; }
-
-        _pos += count;
-    }
-
-    public unsafe void Append( char* value, int length )
-    {
-        int pos = _pos;
-        if ( pos > _chars.Length - length ) { Grow( length ); }
-
-        Span<char> dst = _chars.Slice( _pos, length );
-        for ( int i = 0; i < dst.Length; i++ ) { dst[i] = *value++; }
-
-        _pos += length;
-    }
-
-    public void Append( scoped ReadOnlySpan<char> value )
-    {
-        int pos = _pos;
-        if ( pos > _chars.Length - value.Length ) { Grow( value.Length ); }
-
-        value.CopyTo( _chars.Slice( _pos ) );
-        _pos += value.Length;
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public Span<char> AppendSpan( int length )
-    {
-        int origPos = _pos;
-        if ( origPos > _chars.Length - length ) { Grow( length ); }
-
-        _pos = origPos + length;
-        return _chars.Slice( origPos, length );
-    }
-
-    [MethodImpl( MethodImplOptions.NoInlining )]
-    private void GrowAndAppend( char c )
-    {
-        Grow( 1 );
-        Append( c );
-    }
-
-    /// <summary>
-    /// Resize the internal buffer either by doubling current buffer size or
-    /// by adding <paramref name="additionalCapacityBeyondPos"/> to
-    /// <see cref="_pos"/> whichever is greater.
-    /// </summary>
-    /// <param name="additionalCapacityBeyondPos">
-    /// Number of chars requested beyond current position.
-    /// </param>
-    [MethodImpl( MethodImplOptions.NoInlining )]
-    private void Grow( int additionalCapacityBeyondPos )
-    {
-        Debug.Assert( additionalCapacityBeyondPos > 0 );
-        Debug.Assert( _pos                        > _chars.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed." );
-
-        const uint ArrayMaxLength = 0x7FFFFFC7; // same as Array.MaxLength
-
-        // Increase to at least the required size (_pos + additionalCapacityBeyondPos), but try
-        // to double the size if possible, bounding the doubling to not go beyond the max array length.
-        int newCapacity = (int)Math.Max( (uint)(_pos + additionalCapacityBeyondPos), Math.Min( (uint)_chars.Length * 2, ArrayMaxLength ) );
-
-        // Make sure to let Rent throw an exception if the caller has a bug and the desired capacity is negative.
-        // This could also go negative if the actual required length wraps around.
-        char[] poolArray = ArrayPool<char>.Shared.Rent( newCapacity );
-
-        _chars.Slice( 0, _pos ).CopyTo( poolArray );
-
-        char[]? toReturn              = _arrayToReturnToPool;
-        _chars = _arrayToReturnToPool = poolArray;
-        if ( toReturn != null ) { ArrayPool<char>.Shared.Return( toReturn ); }
-    }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void Dispose()
-    {
-        char[]? toReturn = _arrayToReturnToPool;
-        this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
-        if ( toReturn != null ) { ArrayPool<char>.Shared.Return( toReturn ); }
+        char[]? toReturn                = __arrayToReturnToPool;
+        __chars = __arrayToReturnToPool = poolArray;
+        if ( toReturn is not null ) { ArrayPool<char>.Shared.Return(toReturn); }
     }
 }
-*/

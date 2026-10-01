@@ -12,49 +12,49 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    protected string            __userName = EMPTY;
-    protected string?           __company;
-    protected string?           __department;
-    protected string?           __email;
-    protected string?           __ext;
-    protected string?           __firstName;
-    protected string?           __gender;
-    protected string?           __lastName;
-    protected string?           __phoneNumber;
-    protected string?           __title;
-    protected string?           __website;
+    protected string            _userName = EMPTY;
+    protected string?           _company;
+    protected string?           _department;
+    protected string?           _email;
+    protected string?           _ext;
+    protected string?           _firstName;
+    protected string?           _gender;
+    protected string?           _lastName;
+    protected string?           _phoneNumber;
+    protected string?           _title;
+    protected string?           _website;
     protected string?           _description;
     protected string?           _fullName;
-    protected SupportedLanguage __preferredLanguage = SupportedLanguage.English;
+    protected SupportedLanguage _preferredLanguage = SupportedLanguage.English;
     protected TID               _id;
-    protected TID?              __createdBy;
-    protected TID?              __escalateTo;
-    protected TID?              __imageID;
-    protected UserRights        __rights = new();
+    protected TID?              _createdBy;
+    protected TID?              _escalateTo;
+    protected TID?              _imageID;
+    protected UserRights        _rights = new();
 
 
     public ObservableCollection<TAddress> Addresses { get; init; } = [];
 
     [StringLength(COMPANY)] public string? Company
     {
-        get => __company;
+        get => _company;
         set
         {
-            if ( !SetProperty(ref __company, value) ) { return; }
+            if ( !SetProperty(ref _company, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
         }
     }
 
-    public TID? CreatedBy { get => __createdBy; set => SetProperty(ref __createdBy, value); }
+    public TID? CreatedBy { get => _createdBy; set => SetProperty(ref _createdBy, value); }
 
     [StringLength(DEPARTMENT)] public string? Department
     {
-        get => __department;
+        get => _department;
         set
         {
-            if ( !SetProperty(ref __department, value) ) { return; }
+            if ( !SetProperty(ref _department, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
@@ -62,16 +62,16 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => __email;                           set => SetProperty(ref __email,      value); }
-    public                                            TID?    EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
-    [StringLength(PHONE_EXT)] public                  string? Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                           set => SetProperty(ref _email,      value); }
+    public                                            TID?    EscalateTo  { get => _escalateTo;                      set => SetProperty(ref _escalateTo, value); }
+    [StringLength(PHONE_EXT)] public                  string? Ext         { get => _ext;                             set => SetProperty(ref _ext,        value); }
 
     [Required] [StringLength(FIRST_NAME)] public string? FirstName
     {
-        get => __firstName;
+        get => _firstName;
         set
         {
-            if ( !SetProperty(ref __firstName, value) ) { return; }
+            if ( !SetProperty(ref _firstName, value) ) { return; }
 
             _fullName = null;
             OnPropertyChanged(nameof(FullName));
@@ -79,10 +79,10 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(FULL_NAME)] public string?                           FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public string?                           Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    [StringLength(GENDER)]    public string?                           Gender             { get => _gender;                    set => SetProperty(ref _gender,  value); }
     public                           ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
     public                           TID                               ID                 { get => _id;                         init => _id = value; }
-    public                           TID?                              ImageID            { get => __imageID;                   set => SetProperty(ref __imageID, value); }
+    public                           TID?                              ImageID            { get => _imageID;                   set => SetProperty(ref _imageID, value); }
     [JsonIgnore] public virtual      bool                              IsValid            => IsValidEmail                      && IsValidName && IsValidUserName;
     [JsonIgnore] public virtual      bool                              IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
     [JsonIgnore] public virtual      bool                              IsValidName        => !string.IsNullOrWhiteSpace(FullName);
@@ -92,28 +92,28 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     [Required] [StringLength(LAST_NAME)] public string? LastName
     {
-        get => __lastName;
+        get => _lastName;
         set
         {
-            if ( !SetProperty(ref __lastName, value) ) { return; }
+            if ( !SetProperty(ref _lastName, value) ) { return; }
 
             _fullName = null;
             OnPropertyChanged(nameof(FullName));
         }
     }
 
-    [Phone] [StringLength(PHONE)]             public string?                          PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
-    [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => __preferredLanguage; set => SetProperty(ref __preferredLanguage, value); }
-    [StringLength(RIGHTS)]                    public UserRights                       Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
+    [Phone] [StringLength(PHONE)]             public string?                          PhoneNumber         { get => _phoneNumber;       set => SetProperty(ref _phoneNumber,       value); }
+    [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => _preferredLanguage; set => SetProperty(ref _preferredLanguage, value); }
+    [StringLength(RIGHTS)]                    public UserRights                       Rights              { get => _rights;            set => SetProperty(ref _rights,            value); }
     public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
     public                                           DateTimeOffset?                  SubscriptionExpires { get;                        init; }
 
     [StringLength(TITLE)] public string? Title
     {
-        get => __title;
+        get => _title;
         set
         {
-            if ( !SetProperty(ref __title, value) ) { return; }
+            if ( !SetProperty(ref _title, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
@@ -123,14 +123,14 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     [StringLength(USER_NAME)] public virtual string UserName
     {
-        get => __userName;
+        get => _userName;
         set
         {
-            if ( SetProperty(ref __userName, value) ) { OnPropertyChanged(nameof(IsValid)); }
+            if ( SetProperty(ref _userName, value) ) { OnPropertyChanged(nameof(IsValid)); }
         }
     }
 
-    [Url] [StringLength(WEBSITE)] public string? Website { get => __website; set => SetProperty(ref __website, value); }
+    [Url] [StringLength(WEBSITE)] public string? Website { get => _website; set => SetProperty(ref _website, value); }
 
 
     protected UserModel() : base() { }
@@ -142,8 +142,8 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
     protected UserModel( string firstName, string lastName )
     {
-        __firstName = firstName;
-        __lastName  = lastName;
+        _firstName = firstName;
+        _lastName  = lastName;
     }
 
 
@@ -235,10 +235,10 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         int addressComparison = string.Compare(UserName, other.UserName, StringComparison.Ordinal);
         if ( addressComparison != 0 ) { return addressComparison; }
 
-        int firstNameComparison = string.Compare(__firstName, other.FirstName, StringComparison.Ordinal);
+        int firstNameComparison = string.Compare(_firstName, other.FirstName, StringComparison.Ordinal);
         if ( firstNameComparison != 0 ) { return firstNameComparison; }
 
-        int lastNameComparison = string.Compare(__lastName, other.LastName, StringComparison.Ordinal);
+        int lastNameComparison = string.Compare(_lastName, other.LastName, StringComparison.Ordinal);
         if ( lastNameComparison != 0 ) { return lastNameComparison; }
 
         int fullNameComparison = string.Compare(_fullName, other.FullName, StringComparison.Ordinal);
@@ -247,25 +247,25 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         int descriptionComparison = string.Compare(_description, other.Description, StringComparison.Ordinal);
         if ( descriptionComparison != 0 ) { return descriptionComparison; }
 
-        int companyComparison = string.Compare(__company, other.Company, StringComparison.Ordinal);
+        int companyComparison = string.Compare(_company, other.Company, StringComparison.Ordinal);
         if ( companyComparison != 0 ) { return companyComparison; }
 
-        int departmentComparison = string.Compare(__department, other.Department, StringComparison.Ordinal);
+        int departmentComparison = string.Compare(_department, other.Department, StringComparison.Ordinal);
         if ( departmentComparison != 0 ) { return departmentComparison; }
 
-        int titleComparison = string.Compare(__title, other.Title, StringComparison.Ordinal);
+        int titleComparison = string.Compare(_title, other.Title, StringComparison.Ordinal);
         if ( titleComparison != 0 ) { return titleComparison; }
 
-        int emailComparison = string.Compare(__email, other.Email, StringComparison.Ordinal);
+        int emailComparison = string.Compare(_email, other.Email, StringComparison.Ordinal);
         if ( emailComparison != 0 ) { return emailComparison; }
 
-        int phoneNumberComparison = string.Compare(__phoneNumber, other.PhoneNumber, StringComparison.Ordinal);
+        int phoneNumberComparison = string.Compare(_phoneNumber, other.PhoneNumber, StringComparison.Ordinal);
         if ( phoneNumberComparison != 0 ) { return phoneNumberComparison; }
 
-        int extComparison = string.Compare(__ext, other.Ext, StringComparison.Ordinal);
+        int extComparison = string.Compare(_ext, other.Ext, StringComparison.Ordinal);
         if ( extComparison != 0 ) { return extComparison; }
 
-        int websiteComparison = string.Compare(__website, other.Website, StringComparison.Ordinal);
+        int websiteComparison = string.Compare(_website, other.Website, StringComparison.Ordinal);
         if ( websiteComparison != 0 ) { return websiteComparison; }
 
         return ( (int)PreferredLanguage ).CompareTo((int)other.PreferredLanguage);
@@ -276,24 +276,24 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return __company           == other.__company            &&
-               __department        == other.__department         &&
-               __email             == other.__email              &&
-               __ext               == other.__ext                &&
-               __firstName         == other.__firstName          &&
-               __gender            == other.__gender             &&
-               __lastName          == other.__lastName           &&
-               __phoneNumber       == other.__phoneNumber        &&
-               __rights            == other.__rights             &&
-               __title             == other.__title              &&
-               __userName          == other.__userName           &&
-               __website           == other.__website            &&
+        return _company           == other._company            &&
+               _department        == other._department         &&
+               _email             == other._email              &&
+               _ext               == other._ext                &&
+               _firstName         == other._firstName          &&
+               _gender            == other._gender             &&
+               _lastName          == other._lastName           &&
+               _phoneNumber       == other._phoneNumber        &&
+               _rights            == other._rights             &&
+               _title             == other._title              &&
+               _userName          == other._userName           &&
+               _website           == other._website            &&
                _description        == other._description         &&
                _fullName           == other._fullName            &&
-               __preferredLanguage == other.__preferredLanguage  &&
-               Nullable.Equals(__createdBy,  other.__createdBy)  &&
-               Nullable.Equals(__escalateTo, other.__escalateTo) &&
-               Nullable.Equals(__imageID,    other.__imageID)    &&
+               _preferredLanguage == other._preferredLanguage  &&
+               Nullable.Equals(_createdBy,  other._createdBy)  &&
+               Nullable.Equals(_escalateTo, other._escalateTo) &&
+               Nullable.Equals(_imageID,    other._imageID)    &&
                Equals(UserID, other.UserID)                      &&
                Addresses.Equals(other.Addresses)                 &&
                Groups.Equals(other.Groups)                       &&
@@ -306,24 +306,24 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(_additionalData);
-        hashCode.Add(__company);
-        hashCode.Add(__department);
-        hashCode.Add(__email);
-        hashCode.Add(__ext);
-        hashCode.Add(__firstName);
-        hashCode.Add(__gender);
-        hashCode.Add(__lastName);
-        hashCode.Add(__phoneNumber);
-        hashCode.Add(__rights);
-        hashCode.Add(__title);
-        hashCode.Add(__userName);
-        hashCode.Add(__website);
+        hashCode.Add(_company);
+        hashCode.Add(_department);
+        hashCode.Add(_email);
+        hashCode.Add(_ext);
+        hashCode.Add(_firstName);
+        hashCode.Add(_gender);
+        hashCode.Add(_lastName);
+        hashCode.Add(_phoneNumber);
+        hashCode.Add(_rights);
+        hashCode.Add(_title);
+        hashCode.Add(_userName);
+        hashCode.Add(_website);
         hashCode.Add(_description);
         hashCode.Add(_fullName);
-        hashCode.Add(__preferredLanguage);
-        hashCode.Add(__createdBy);
-        hashCode.Add(__escalateTo);
-        hashCode.Add(__imageID);
+        hashCode.Add(_preferredLanguage);
+        hashCode.Add(_createdBy);
+        hashCode.Add(_escalateTo);
+        hashCode.Add(_imageID);
         hashCode.Add(UserID);
         hashCode.Add(Addresses);
         hashCode.Add(Groups);

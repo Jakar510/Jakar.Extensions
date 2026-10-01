@@ -17,7 +17,7 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Hashes))]
 public class Hashes_Optimization_Tests : Assert
 {
-    private static readonly string LONG = new('x', 5000); // larger than the stack buffer, exercises the pooled path
+    private static readonly string __long = new('x', 5000); // larger than the stack buffer, exercises the pooled path
 
 
     [TestCase("")]
@@ -45,21 +45,21 @@ public class Hashes_Optimization_Tests : Assert
     [Test]
     public void LongInput_And_OtherEncodings_MatchTheBcl()
     {
-        this.AreEqual(Convert.ToHexString(SHA256.HashData(Encoding.Default.GetBytes(LONG))), LONG.Hash_SHA256());
+        this.AreEqual(Convert.ToHexString(SHA256.HashData(Encoding.Default.GetBytes(__long))), __long.Hash_SHA256());
         this.AreEqual(Convert.ToHexString(SHA256.HashData(Encoding.UTF32.GetBytes("abc"))),  "abc".Hash_SHA256(Encoding.UTF32));
 
-        ReadOnlySpan<char> span = LONG;
-        this.AreEqual(Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(LONG))), span.Hash_SHA512(Encoding.UTF8));
+        ReadOnlySpan<char> span = __long;
+        this.AreEqual(Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(__long))), span.Hash_SHA512(Encoding.UTF8));
     }
 
     [Test]
     public void HashAlgorithmExtensions_MatchTheBcl()
     {
         using SHA256 hasher = SHA256.Create();
-        byte[]       bytes  = Encoding.Default.GetBytes(LONG);
+        byte[]       bytes  = Encoding.Default.GetBytes(__long);
 
         this.AreEqual(Convert.ToHexString(SHA256.HashData(bytes)), hasher.Hash(bytes.AsSpan()));
-        this.AreEqual(Convert.ToHexString(SHA256.HashData(bytes)), hasher.Hash(Encoding.Default, LONG.AsSpan()));
+        this.AreEqual(Convert.ToHexString(SHA256.HashData(bytes)), hasher.Hash(Encoding.Default, __long.AsSpan()));
     }
 
     [Test]

@@ -54,13 +54,13 @@ public class SafeFireAndForget_Tests : Assert
         OperationCanceledException    thrown = new(cts.Token);
         TaskCompletionSource<Exception> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        Task task = Throw();
+        Task task = @throw();
         task.SafeFireAndForget(e => received.TrySetResult(e));
 
         Assert.AreSame(thrown, await received.Task.WaitAsync(__timeout));
         return;
 
-        async Task Throw()
+        async Task @throw()
         {
             await Task.Yield();
             throw thrown;

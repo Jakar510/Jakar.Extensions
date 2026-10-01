@@ -9,7 +9,7 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Guids))]
 public class Guids_Tests : Assert
 {
-    private static readonly Guid SAMPLE_GUID = new("5BE6F8AE-33D3-4E82-84EC-B7B89064F36A");
+    private static readonly Guid __sample_GUID = new("5BE6F8AE-33D3-4E82-84EC-B7B89064F36A");
 
 
     // ─── AsGuid (string) ──────────────────────────────────────────────────────
@@ -17,10 +17,10 @@ public class Guids_Tests : Assert
     [Test]
     public void AsGuid_String_KnownGuid()
     {
-        string input  = SAMPLE_GUID.ToString();
+        string input  = __sample_GUID.ToString();
         Guid?  result = input.AsGuid();
         this.NotNull(result);
-        this.AreEqual(SAMPLE_GUID, result!.Value);
+        this.AreEqual(__sample_GUID, result!.Value);
     }
 
     [Test]
@@ -43,11 +43,11 @@ public class Guids_Tests : Assert
     [Test]
     public void TryAsGuid_ValidString_ReturnsTrue()
     {
-        string input   = SAMPLE_GUID.ToString();
+        string input   = __sample_GUID.ToString();
         bool   success = input.TryAsGuid(out Guid? result);
         this.IsTrue(success);
         this.NotNull(result);
-        this.AreEqual(SAMPLE_GUID, result!.Value);
+        this.AreEqual(__sample_GUID, result!.Value);
     }
 
 
@@ -85,10 +85,10 @@ public class Guids_Tests : Assert
     [Test]
     public void NewBase64_SpecificGuid_Roundtrip()
     {
-        string b64  = SAMPLE_GUID.NewBase64();
+        string b64  = __sample_GUID.NewBase64();
         Guid?  back = b64.AsGuid();
         this.NotNull(back);
-        this.AreEqual(SAMPLE_GUID, back!.Value);
+        this.AreEqual(__sample_GUID, back!.Value);
     }
 
 
@@ -97,7 +97,7 @@ public class Guids_Tests : Assert
     [Test]
     public void ToHex_ProducesHexString()
     {
-        string hex = SAMPLE_GUID.ToHex();
+        string hex = __sample_GUID.ToHex();
         this.IsTrue(hex.Length > 0);
         // Hex strings consist only of 0-9 and A-F
         foreach ( char c in hex )
@@ -140,11 +140,11 @@ public class Guids_Tests : Assert
     [Test]
     public void AsLong_KnownGuid_OutParams()
     {
-        bool success = SAMPLE_GUID.AsLong(out long lower, out long upper);
+        bool success = __sample_GUID.AsLong(out long lower, out long upper);
         this.IsTrue(success);
         // Reconstruct and verify roundtrip
         Guid recovered = ( lower, upper ).AsGuid();
-        this.AreEqual(SAMPLE_GUID, recovered);
+        this.AreEqual(__sample_GUID, recovered);
     }
 
     [Test]
@@ -193,7 +193,7 @@ public class Guids_Tests : Assert
     [Test]
     public void TryWriteBytes_ReturnsBuffer()
     {
-        bool success = SAMPLE_GUID.TryWriteBytes(out Buffer<byte> buffer);
+        bool success = __sample_GUID.TryWriteBytes(out Buffer<byte> buffer);
         using ( buffer )
         {
             this.IsTrue(success);

@@ -6,8 +6,8 @@ namespace Jakar.Extensions;
 
 public static class Json
 {
-    public const  string                 AotWarning  = "Newtonsoft.Json relies on dynamically creating types that may not be available with Ahead of Time compilation.";
-    public const  string                 TrimWarning = "Newtonsoft.Json relies on reflection over types that may be removed when trimming.";
+    public const  string                 AOT_WARNING  = "Newtonsoft.Json relies on dynamically creating types that may not be available with Ahead of Time compilation.";
+    public const  string                 TRIM_WARNING = "Newtonsoft.Json relies on reflection over types that may be removed when trimming.";
     public static JsonLoadSettings       LoadSettings { get; set; } = new();
     public static JsonSerializerSettings Settings     { get; set; } = new();
 

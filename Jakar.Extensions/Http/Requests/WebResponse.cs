@@ -108,14 +108,14 @@ public sealed class WebResponse<TValue>
         if ( Error.TryCreate(this, title, out Error? error) ) { return error; }
 
 
-        Errors? errors = Errors.Match(this, FromNode, FromString, FromErrors, FromTags);
+        Errors? errors = Errors.Match(this, fromNode, fromString, fromErrors, fromTags);
         return errors ?? Error.Create(StatusCode, title, ErrorMessage(), URL?.OriginalString);
 
 
-        static Errors FromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
-        static Errors FromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
-        static Errors FromNode( WebResponse<TValue>   response, JToken     node )   => FromString(response, node.ToJson());
-        static Errors FromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Error.Create(response.StatusCode), ..errors.Details]);
+        static Errors fromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
+        static Errors fromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
+        static Errors fromNode( WebResponse<TValue>   response, JToken     node )   => fromString(response, node.ToJson());
+        static Errors fromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Error.Create(response.StatusCode), ..errors.Details]);
     }
     public string ErrorMessage() => StatusCode.GetErrorTitle();
 

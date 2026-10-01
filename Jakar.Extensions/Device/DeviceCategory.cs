@@ -10,6 +10,6 @@ public enum DeviceCategory
     Phone   = 1,
     Tablet  = 2,
     Desktop = 3,
-    TV      = 4,
+    Tv      = 4,
     Watch   = 5
 }

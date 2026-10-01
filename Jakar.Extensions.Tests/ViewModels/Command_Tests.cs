@@ -155,10 +155,10 @@ public class Command_Tests : Assert
 
         Command<int>.Executable[] executables =
         [
-            new Func<int, CancellationToken, Task>(( x, ct ) => { Check(x, ct); return Task.CompletedTask; }),
-            new Func<int, CancellationToken, ValueTask>(( x, ct ) => { Check(x, ct); return ValueTask.CompletedTask; }),
-            new Func<object?, int, CancellationToken, Task>(( s, x, ct ) => { Assert.AreSame(__sender, s); Check(x, ct); return Task.CompletedTask; }),
-            new Func<object?, int, CancellationToken, ValueTask>(( s, x, ct ) => { Assert.AreSame(__sender, s); Check(x, ct); return ValueTask.CompletedTask; })
+            new Func<int, CancellationToken, Task>(( x, ct ) => { check(x, ct); return Task.CompletedTask; }),
+            new Func<int, CancellationToken, ValueTask>(( x, ct ) => { check(x, ct); return ValueTask.CompletedTask; }),
+            new Func<object?, int, CancellationToken, Task>(( s, x, ct ) => { Assert.AreSame(__sender, s); check(x, ct); return Task.CompletedTask; }),
+            new Func<object?, int, CancellationToken, ValueTask>(( s, x, ct ) => { Assert.AreSame(__sender, s); check(x, ct); return ValueTask.CompletedTask; })
         ];
 
         foreach ( Command<int>.Executable executable in executables ) { await executable.Execute(__sender, 5, expected); }
@@ -166,7 +166,7 @@ public class Command_Tests : Assert
         this.AreEqual(executables.Length, calls);
         return;
 
-        void Check( int x, CancellationToken ct )
+        void check( int x, CancellationToken ct )
         {
             this.AreEqual(5, x);
             this.AreEqual(expected, ct);
@@ -385,7 +385,7 @@ public class Command_Tests : Assert
         Command<int> command = new(new Func<int, CancellationToken, Task>(async ( _, ct ) =>
                                                                           {
                                                                               int now = Interlocked.Increment(ref running);
-                                                                              InterlockedMax(ref maxRunning, now);
+                                                                              interlockedMax(ref maxRunning, now);
 
                                                                               try
                                                                               {
@@ -422,7 +422,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
         return;
 
-        static void InterlockedMax( ref int target, int value )
+        static void interlockedMax( ref int target, int value )
         {
             int current;
             do { current = Volatile.Read(ref target); }

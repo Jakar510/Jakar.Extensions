@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 public static class Statuses
 {
-    private static readonly ConcurrentDictionary<Type, Status> _statusMap = new()
+    private static readonly ConcurrentDictionary<Type, Status> __statusMap = new()
                                                                             {
                                                                                 [typeof(NotImplementedException)]     = Status.NotImplemented,
                                                                                 [typeof(UnauthorizedAccessException)] = Status.Unauthorized,
@@ -33,14 +33,14 @@ public static class Statuses
 
 
     public static void RegisterStatus<TException>( Status status )
-        where TException : Exception => _statusMap[typeof(TException)] = status;
+        where TException : Exception => __statusMap[typeof(TException)] = status;
     public static Status AsStatus( this Exception e )
     {
         Type type = e.GetType();
-        if ( _statusMap.TryGetValue(type, out var status) ) { return status; }
+        if ( __statusMap.TryGetValue(type, out var status) ) { return status; }
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( KeyValuePair<Type, Status> kv in _statusMap )
+        foreach ( KeyValuePair<Type, Status> kv in __statusMap )
         {
             if ( kv.Key.IsAssignableFrom(type) ) { return kv.Value; }
         }

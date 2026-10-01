@@ -11,13 +11,13 @@ public static partial class AsyncLinq
         public async IAsyncEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>( TNumber start )
             where TNumber : INumber<TNumber>
         {
-            TNumber Index = start;
+            TNumber index = start;
 
             await foreach ( TElement x in self.ConfigureAwait(false) )
             {
-                checked { Index++; }
+                checked { index++; }
 
-                yield return ( Index, x );
+                yield return ( index, x );
             }
         }
     }
@@ -32,12 +32,12 @@ public static partial class AsyncLinq
         public IEnumerable<(TNumber Index, object? Value)> Enumerate<TNumber>( TNumber start )
             where TNumber : INumber<TNumber>
         {
-            TNumber Index = start;
+            TNumber index = start;
 
             foreach ( object? item in self )
             {
-                yield return ( Index, item );
-                Index++;
+                yield return ( index, item );
+                index++;
             }
         }
     }
@@ -52,12 +52,12 @@ public static partial class AsyncLinq
         public IEnumerable<(TNumber Index, TElement Value)> Enumerate<TNumber>( TNumber start )
             where TNumber : INumber<TNumber>
         {
-            TNumber Index = start;
+            TNumber index = start;
 
             foreach ( TElement item in self )
             {
-                yield return ( Index, item );
-                Index++;
+                yield return ( index, item );
+                index++;
             }
         }
     }
@@ -73,7 +73,7 @@ public static partial class AsyncLinq
         public IEnumerable<(TNumber Index, TKey Key, TElement Value)> Enumerate<TNumber>( TNumber start, bool sorted = true )
             where TNumber : INumber<TNumber>
         {
-            TNumber           Index = start;
+            TNumber           index = start;
             ICollection<TKey> keys  = self.Keys;
 
             if ( sorted )
@@ -83,10 +83,10 @@ public static partial class AsyncLinq
                 keys = list;
             }
 
-            foreach ( var Key in keys )
+            foreach ( var key in keys )
             {
-                yield return ( Index, Key, self[Key] );
-                Index++;
+                yield return ( index, key, self[key] );
+                index++;
             }
         }
 
@@ -97,7 +97,7 @@ public static partial class AsyncLinq
         public IEnumerable<(TNumber Index, KeyValuePair<TKey, TElement> Pair)> EnumeratePairs<TNumber>( TNumber start, bool sorted = true )
             where TNumber : INumber<TNumber>
         {
-            TNumber           Index = start;
+            TNumber           index = start;
             ICollection<TKey> keys  = self.Keys;
 
             if ( sorted )
@@ -107,10 +107,10 @@ public static partial class AsyncLinq
                 keys = list;
             }
 
-            foreach ( var Key in keys )
+            foreach ( var key in keys )
             {
-                yield return ( Index, new KeyValuePair<TKey, TElement>(Key, self[Key]) );
-                Index++;
+                yield return ( index, new KeyValuePair<TKey, TElement>(key, self[key]) );
+                index++;
             }
         }
     }
@@ -125,12 +125,12 @@ public static partial class AsyncLinq
         public IEnumerable<(TNumber Index, object Key, object? Value)> Enumerate<TNumber>( TNumber start )
             where TNumber : INumber<TNumber>
         {
-            TNumber Index = start;
+            TNumber index = start;
 
-            foreach ( DictionaryEntry Pair in self )
+            foreach ( DictionaryEntry pair in self )
             {
-                yield return ( Index, Pair.Key, Pair.Value );
-                Index++;
+                yield return ( index, pair.Key, pair.Value );
+                index++;
             }
         }
     }
