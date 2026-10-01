@@ -36,8 +36,9 @@ public sealed class WebResponse<TValue>
     public WebResponse( HttpResponseMessage response, Exception e, string error ) : this(response, default, e, error) { }
     public WebResponse( HttpResponseMessage response, TValue? payload, Exception? exception = null, string? error = null )
     {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        Errors            = ErrorResponse.Parse(error ?? exception?.Message);
+        Errors = error is null && exception is null
+                     ? ErrorResponse.Empty
+                     : ErrorResponse.Parse(error ?? exception?.Message);
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
@@ -55,6 +56,22 @@ public sealed class WebResponse<TValue>
         ContentType     = contentHeaders.ContentType?.ToString();
         ContentEncoding = [.. contentHeaders.ContentEncoding];
         Allow           = [.. contentHeaders.Allow];
+    }
+    /// <summary> A request that got no response: the connection failed or it timed out (<see cref="Status.RequestTimeout"/> for timeouts, otherwise <see cref="Status.ServiceUnavailable"/>). </summary>
+    public WebResponse( HttpRequestMessage? request, Exception exception )
+    {
+        StatusCode = exception is OperationCanceledException
+                         ? Status.RequestTimeout
+                         : Status.ServiceUnavailable;
+
+        Errors            = ErrorResponse.Parse(exception.Message);
+        Exception         = exception;
+        StatusDescription = StatusCode.ToStringFast();
+        URL               = request?.RequestUri;
+        Method            = request?.Method.Method;
+        Sender            = request?.Headers.From;
+        ContentEncoding   = [];
+        Allow             = [];
     }
 
 
@@ -172,110 +189,24 @@ public sealed class WebResponse<TValue>
     }
 
 
-    public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        ushort              count         = 0;
-        List<Exception>     exceptions    = new(policy.MaxRetires);
-
-        while ( count < policy.MaxRetires )
-        {
-            try
-            {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
-
-                TValue result = await func(response, token).ConfigureAwait(false);
-
-                return new WebResponse<TValue>(response, result);
-            }
-            catch ( HttpRequestException e ) { exceptions.Add(e); }
-
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token).ConfigureAwait(false); }
-        }
-
-        try { throw new AggregateException(exceptions.ToArray()); }
-        catch ( AggregateException e )
-        {
-            telemetrySpan.AddException(e);
-
-            return await Create(response, e, token).ConfigureAwait(false);
-        }
-    }
-    public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        ushort              count         = 0;
-        List<Exception>     exceptions    = new(policy.MaxRetires);
-
-        while ( count < policy.MaxRetires )
-        {
-            try
-            {
-                if ( !response.IsSuccessStatusCode ) { return await Create(response, token).ConfigureAwait(false); }
-
-                TValue result = await func(response, arg, token).ConfigureAwait(false);
-
-                return new WebResponse<TValue>(response, result);
-            }
-            catch ( HttpRequestException e ) { exceptions.Add(e); }
-
-            using ( telemetrySpan.SubSpan(nameof(policy.IncrementAndWait)) ) { await policy.IncrementAndWait(ref count, token).ConfigureAwait(false); }
-        }
-
-        try { throw new AggregateException(exceptions.ToArray()); }
-        catch ( AggregateException e )
-        {
-            telemetrySpan.AddException(e);
-
-            return await Create(response, e, token).ConfigureAwait(false);
-        }
-    }
+    /// <summary> Parses <paramref name="response"/>. <paramref name="policy"/> is ignored: an existing response cannot be retried, the request has to be sent again (see <see cref="WebHandler"/>). </summary>
+    [Obsolete("Retries re-send the request; WebHandler applies RetryPolicy. This overload ignores the policy.")]
+    public static ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token ) => Create(response, func, token);
+    /// <summary> Parses <paramref name="response"/>. <paramref name="policy"/> is ignored: an existing response cannot be retried, the request has to be sent again (see <see cref="WebHandler"/>). </summary>
+    [Obsolete("Retries re-send the request; WebHandler applies RetryPolicy. This overload ignores the policy.")]
+    public static ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token ) => Create(response, arg, func, token);
 
 
+    /// <summary> An unsuccessful response: the body is read as the error message. </summary>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, CancellationToken token )
     {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-
-        string error;
-
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = UNKNOWN_ERROR; }
-        else
-        {
-            using StreamReader reader = new(stream);
-
-            string errorMessage = await reader.ReadToEndAsync(token).ConfigureAwait(false);
-
-            if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, errorMessage); }
-
-            error = errorMessage;
-        }
-
+        string error = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
         return new WebResponse<TValue>(response, error);
     }
+    /// <summary> A response whose processing failed with <paramref name="e"/>: the body is read as the error message. </summary>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        await using Stream? stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-
-        string error;
-
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = UNKNOWN_ERROR; }
-        else
-        {
-            using StreamReader reader = new(stream);
-
-            string errorMessage = await reader.ReadToEndAsync(token).ConfigureAwait(false);
-
-            if ( string.IsNullOrWhiteSpace(errorMessage) ) { return new WebResponse<TValue>(response, e, errorMessage); }
-
-            error = errorMessage;
-        }
-
+        string error = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
         return new WebResponse<TValue>(response, e, error);
     }
 }

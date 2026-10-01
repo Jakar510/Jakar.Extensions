@@ -4,6 +4,7 @@
 
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.DependencyInjection;
 
 
 
@@ -18,10 +19,9 @@ namespace Jakar.Extensions;
 public partial class WebRequester
 {
     [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-    public class Builder( IHostInfo value ) : IHttpClientFactory
+    public class Builder( IHostInfo hostInfo ) : IHttpClientFactory, IDisposable
     {
-        private readonly IHostInfo                       __hostInfo = value;
-        private readonly WebHeaders                      __headers  = [];
+        private readonly WebHeaders                      __headers = [];
         private          AuthenticationHeaderValue?      __authenticationHeader;
         private          bool?                           __allowAutoRedirect;
         private          bool?                           __preAuthenticate;
@@ -45,8 +45,16 @@ public partial class WebRequester
         private          TimeSpan?                       __keepAlivePingDelay;
         private          TimeSpan?                       __keepAlivePingTimeout;
         private          TimeSpan?                       __pooledConnectionIdleTimeout;
-        private          TimeSpan?                       __pooledConnectionLifetime;
+        private          TimeSpan?                       __pooledConnectionLifetime = DefaultPooledConnectionLifetime;
         private          TimeSpan?                       __responseDrainTimeout;
+        private          TimeSpan?                       __timeout;
+        private          DecompressionMethods            __automaticDecompression = DecompressionMethods.All;
+        private readonly Lock                            __lock                   = new();
+        private          HttpMessageHandler?             __handler;
+        private          ILoggerFactory?                 __factory;
+
+        /// <summary> Default <see cref="SocketsHttpHandler.PooledConnectionLifetime"/>: connections are recycled so DNS changes are picked up by long-lived clients. </summary>
+        public static readonly TimeSpan DefaultPooledConnectionLifetime = TimeSpan.FromMinutes(5);
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
@@ -55,16 +63,45 @@ public partial class WebRequester
         public static Builder Create( Func<Uri>       value ) => Create(new HostHolder(value));
 
 
-        [Pure] public Builder Reset() => Create(__hostInfo);
+        [Pure] public Builder Reset() => Create(hostInfo);
 
 
+        /// <summary> Any configuration change invalidates the shared handler, so the next client gets one built from the new settings. </summary>
+        private Builder Changed()
+        {
+            lock ( __lock ) { __handler = null; }
+
+            return this;
+        }
+        /// <summary> One handler (connection pool) shared by every client this builder creates, built on first use. </summary>
+        private HttpMessageHandler GetSharedHandler()
+        {
+            lock ( __lock ) { return __handler ??= GetHandler(); }
+        }
+        /// <summary> Disposes the shared handler (and with it every connection of clients created by this builder). </summary>
+        public void Dispose()
+        {
+            HttpMessageHandler? handler;
+
+            lock ( __lock )
+            {
+                handler   = __handler;
+                __handler = null;
+            }
+
+            handler?.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+
+        /// <summary> A client over the builder's shared handler, so clients reuse pooled connections instead of each opening (and leaking) their own. </summary>
         protected virtual HttpClient GetClient()
         {
-            HttpClient client = new(GetHandler());
+            HttpClient client = new(GetSharedHandler(), false);
             foreach ( ( string key, IEnumerable<string> value ) in __headers ) { client.DefaultRequestHeaders.Add(key, value); }
 
             client.DefaultRequestHeaders.Authorization = __authenticationHeader;
-            if ( __connectTimeout.HasValue ) { client.Timeout = __connectTimeout.Value; }
+            if ( __timeout.HasValue ) { client.Timeout = __timeout.Value; }
 
             if ( __maxResponseContentBufferSize.HasValue ) { client.MaxResponseContentBufferSize = __maxResponseContentBufferSize.Value; }
 
@@ -74,7 +111,7 @@ public partial class WebRequester
 
         protected virtual HttpMessageHandler GetHandler()
         {
-            SocketsHttpHandler handler = new();
+            SocketsHttpHandler handler = new() { AutomaticDecompression = __automaticDecompression };
 
             if ( __connectTimeout.HasValue ) { handler.ConnectTimeout = __connectTimeout.Value; }
 
@@ -118,33 +155,38 @@ public partial class WebRequester
 
             return handler;
         }
-        public WebRequester Build()                     => new(GetClient(), __hostInfo, __logger, __encoding) { Retries = __retryPolicy };
+        public WebRequester Build()                     => new(GetClient(), hostInfo, __factory?.CreateLogger<WebRequester>() ?? __logger, __encoding) { Retries = __retryPolicy };
         public HttpClient   CreateClient( string name ) => GetClient();
 
 
+        public Builder With_Logger( ILoggerFactory factory )
+        {
+            __factory = factory;
+            return Changed();
+        }
         public Builder With_Logger( ILogger logger )
         {
             __logger = logger;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_Header( string name, IEnumerable<string?> values )
         {
             __headers.Add(name, values);
-            return this;
+            return Changed();
         }
         public Builder With_Header( string name, string? value )
         {
             __headers.Add(name, value);
-            return this;
+            return Changed();
         }
 
 
         public Builder With_MaxResponseContentBufferSize( int value )
         {
             __maxResponseContentBufferSize = Math.Max(0, value);
-            return this;
+            return Changed();
         }
 
 
@@ -154,14 +196,14 @@ public partial class WebRequester
         public Builder With_Retry( RetryPolicy policy )
         {
             __retryPolicy = policy;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_Encoding( Encoding value )
         {
             __encoding = value;
-            return this;
+            return Changed();
         }
 
 
@@ -169,113 +211,113 @@ public partial class WebRequester
         {
             __proxy    = value;
             __useProxy = true;
-            return this;
+            return Changed();
         }
         public Builder With_Proxy( IWebProxy value, ICredentials credentials )
         {
             __proxy                   = value;
             __useProxy                = true;
             __defaultProxyCredentials = credentials;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_MaxResponseHeadersLength( int value )
         {
             __maxResponseHeadersLength = value;
-            return this;
+            return Changed();
         }
         public Builder With_MaxConnectionsPerServer( int value )
         {
             __maxConnectionsPerServer = value;
-            return this;
+            return Changed();
         }
         public Builder With_MaxRedirects( int value )
         {
             __maxAutomaticRedirections = value;
             __allowAutoRedirect        = value > 0;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_SslOptions( SslClientAuthenticationOptions value )
         {
             __sslOptions = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( RemoteCertificateValidationCallback value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.RemoteCertificateValidationCallback = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool> value ) => With_Ssl(( object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors ) => value((HttpRequestMessage)sender, certificate as X509Certificate2, chain, sslPolicyErrors));
         public Builder With_Ssl( X509ChainPolicy value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.CertificateChainPolicy = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( CipherSuitesPolicy value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.CipherSuitesPolicy = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( SslStreamCertificateContext value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.ClientCertificateContext = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( bool allowRenegotiation, bool allowTlsResume )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.AllowTlsResume     = allowTlsResume;
             options.AllowRenegotiation = allowRenegotiation;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( X509CertificateCollection value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.ClientCertificates = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( List<SslApplicationProtocol> value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.ApplicationProtocols = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( params ReadOnlySpan<SslApplicationProtocol> value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
-            options.ApplicationProtocols = [..value];
-            return this;
+            options.ApplicationProtocols = [.. value];
+            return Changed();
         }
         public Builder With_Ssl( Uri targetHost )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.TargetHost = targetHost.ToString();
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( SslProtocols value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.EnabledSslProtocols = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( EncryptionPolicy value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.EncryptionPolicy = value;
-            return this;
+            return Changed();
         }
         public Builder With_Ssl( X509RevocationMode value )
         {
             SslClientAuthenticationOptions options = __sslOptions ??= new SslClientAuthenticationOptions();
             options.CertificateRevocationCheckMode = value;
-            return this;
+            return Changed();
         }
 
 
@@ -283,14 +325,14 @@ public partial class WebRequester
         public Builder With_Credentials( AuthenticationHeaderValue? value )
         {
             __authenticationHeader = value;
-            return this;
+            return Changed();
         }
         public Builder With_Credentials( ICredentials? value ) => With_Credentials(value, value is not null);
         public Builder With_Credentials( ICredentials? value, bool preAuthenticate )
         {
             __credentials     = value;
             __preAuthenticate = preAuthenticate;
-            return this;
+            return Changed();
         }
 
 
@@ -299,7 +341,7 @@ public partial class WebRequester
             __cookieContainer ??= new CookieContainer();
             __cookieContainer.Add(url, value);
             __useCookies = true;
-            return this;
+            return Changed();
         }
         public Builder With_Cookie( params ReadOnlySpan<Cookie> value )
         {
@@ -307,30 +349,43 @@ public partial class WebRequester
             foreach ( Cookie cookie in value ) { container.Add(cookie); }
 
             __useCookies = true;
-            return this;
+            return Changed();
         }
         public Builder With_Cookie( CookieContainer value )
         {
             __cookieContainer = value;
             __useCookies      = true;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_Timeout( int    minutes )      => With_Timeout(TimeSpan.FromMinutes(minutes));
         public Builder With_Timeout( float  seconds )      => With_Timeout(TimeSpan.FromSeconds(seconds));
         public Builder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
+        /// <summary> The whole-request timeout (<see cref="HttpClient.Timeout"/>). Use <see cref="With_ConnectTimeout"/> to limit only establishing the connection. </summary>
         public Builder With_Timeout( TimeSpan value )
         {
+            __timeout = value;
+            return this; // client setting: the shared handler is unaffected
+        }
+        /// <summary> Time allowed to establish a connection (<see cref="SocketsHttpHandler.ConnectTimeout"/>). </summary>
+        public Builder With_ConnectTimeout( TimeSpan value )
+        {
             __connectTimeout = value;
-            return this;
+            return Changed();
+        }
+        /// <summary> Which response encodings are decompressed automatically (and advertised via Accept-Encoding). Default: <see cref="DecompressionMethods.All"/>. </summary>
+        public Builder With_AutomaticDecompression( DecompressionMethods value )
+        {
+            __automaticDecompression = value;
+            return Changed();
         }
 
 
         public Builder With_MaxResponseDrainSize( int value )
         {
             __maxResponseDrainSize = value;
-            return this;
+            return Changed();
         }
 
 
@@ -345,14 +400,14 @@ public partial class WebRequester
             __keepAlivePingDelay   = pingDelay;
             __keepAlivePingTimeout = pingTimeout;
             __keepAlivePingPolicy  = policy;
-            return this;
+            return Changed();
         }
 
 
         public Builder With_SSL( SslClientAuthenticationOptions value )
         {
             __sslOptions = value;
-            return this;
+            return Changed();
         }
 
 
@@ -362,7 +417,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionIdleTimeout( TimeSpan value )
         {
             __pooledConnectionIdleTimeout = value;
-            return this;
+            return Changed();
         }
 
 
@@ -372,7 +427,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionLifetime( TimeSpan value )
         {
             __pooledConnectionLifetime = value;
-            return this;
+            return Changed();
         }
 
 
@@ -382,7 +437,7 @@ public partial class WebRequester
         public Builder With_ResponseDrainTimeout( TimeSpan value )
         {
             __responseDrainTimeout = value;
-            return this;
+            return Changed();
         }
 
 
