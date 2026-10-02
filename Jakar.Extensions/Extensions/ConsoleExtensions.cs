@@ -53,14 +53,14 @@ public static class ConsoleExtensions
 
     public static void Print( this Span<char>         self ) => Console.Write(self.ToString());
     public static void Print( this ReadOnlySpan<char> self ) => Console.Write(self.ToString());
-    public static void Print( this ValueStringBuilder self ) => self.ToString().Print();
+    public static void Print( this ValueStringBuilder self ) => self.AsSpan().Print(); // ToString() would dispose this copy and return the caller's pooled array
     public static void Print( this StringBuilder      self ) => self.ToString().Print();
     public static void Print( this object             self ) => Console.Write(self);
 
 
     public static void PrintLine( this Span<char>         self ) => Console.WriteLine(self.ToString());
     public static void PrintLine( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
-    public static void PrintLine( this ValueStringBuilder self ) => self.ToString().PrintLine();
+    public static void PrintLine( this ValueStringBuilder self ) => self.AsSpan().PrintLine(); // ToString() would dispose this copy and return the caller's pooled array
     public static void PrintLine( this StringBuilder      self ) => self.ToString().PrintLine();
     public static void PrintLine( this object             self ) => Console.WriteLine(self);
 

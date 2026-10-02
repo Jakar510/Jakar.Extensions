@@ -1,90 +1,71 @@
-﻿namespace Jakar.Extensions;
+namespace Jakar.Extensions;
 
 
 public static class Buffers
 {
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
-    /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
+    /// <summary> Returns a buffer with room for at least <paramref name="additionalRequestedCapacity"/> more elements after its length (doubling when that is larger), keeping the written elements. </summary>
+    /// <remarks> <paramref name="self"/>'s array is returned to the pool; use the returned buffer from now on. Prefer <see cref="EnsureCapacity{TValue}"/>, which grows in place. </remarks>
+    /// <param name="additionalRequestedCapacity"> the number of elements needed after the current length. </param>
     /// <param name="self"> </param>
     [Pure] [MustDisposeResource] public static Buffer<TValue> Grow<TValue>( [HandlesResourceDisposal] this ref readonly Buffer<TValue> self, uint additionalRequestedCapacity )
     {
-        self.ThrowIfReadOnly();
         Guard.IsInRange(additionalRequestedCapacity, 1, int.MaxValue);
-        int capacity = GetLength((uint)self.Capacity, additionalRequestedCapacity);
-
-        using ( self )
-        {
-            // ReSharper disable once NotDisposedResource
-            Buffer<TValue> buffer = new(capacity);
-            self.Values.CopyTo(buffer.Span);
-            return buffer;
-        }
+        Buffer<TValue> buffer = self;
+        buffer.Grow((int)additionalRequestedCapacity);
+        return buffer;
     }
 
 
 
     extension<TValue>( [MustDisposeResource] ref Buffer<TValue> self )
     {
-        public void EnsureCapacity( int additionalRequestedCapacity )
-        {
-            uint capacity = (uint)additionalRequestedCapacity;
-            if ( (uint)self.Length + capacity <= (uint)self.Capacity ) { return; }
-
-            self = self.Grow(capacity);
-        }
+        /// <summary> Ensures room for <paramref name="additionalRequestedCapacity"/> more elements after <see cref="Buffer{TValue}.Length"/>, growing in place. </summary>
+        public void EnsureCapacity( int additionalRequestedCapacity ) => self.EnsureCapacityFor(additionalRequestedCapacity);
 
 
         public void Advance( int count )
         {
-            self.EnsureCapacity(count);
+            self.EnsureCapacityFor(count);
             self.Length += count;
         }
+        /// <summary> Free memory after <see cref="Buffer{TValue}.Length"/> with room for at least <paramref name="sizeHint"/> (minimum 1) elements. </summary>
         public Memory<TValue> GetMemory( int sizeHint = 0 )
         {
-            self.EnsureCapacity(sizeHint);
-            return self.Memory;
+            self.EnsureCapacityFor(Math.Max(sizeHint, 1));
+            return self.FreeMemory;
         }
+        /// <summary> Free span after <see cref="Buffer{TValue}.Length"/> with room for at least <paramref name="sizeHint"/> (minimum 1) elements. </summary>
         public Span<TValue> GetSpan( int sizeHint = 0 )
         {
-            self.EnsureCapacity(sizeHint);
+            self.EnsureCapacityFor(Math.Max(sizeHint, 1));
             return self.Next;
         }
 
 
         public void Insert( int start, TValue value, int count = 1 )
         {
-            self.EnsureCapacity(count);
+            self.EnsureCapacityFor(count);
             self.InsertInternal(start, value, count);
         }
         public void Insert( int start, params ReadOnlySpan<TValue> values )
         {
-            self.EnsureCapacity(values.Length);
+            self.EnsureCapacityFor(values.Length);
             self.InsertInternal(start, values);
         }
 
 
-        public void Add( TValue value )
-        {
-            self.EnsureCapacity(1);
-            self.AddInternal(value);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Add( TValue value ) => self.Append(value);
         public void Add( TValue value, int count )
         {
-            self.EnsureCapacity(count);
+            self.EnsureCapacityFor(count);
             self.AddInternal(value, count);
         }
         public void Add( params ReadOnlySpan<TValue> values )
         {
-            self.EnsureCapacity(values.Length);
+            self.EnsureCapacityFor(values.Length);
             self.AddInternal(values);
         }
-        public void AddRange( IEnumerable<TValue> enumerable )
-        {
-            using ArrayBuffer<TValue> buffer = ArrayBuffer<TValue>.Create(enumerable);
-
-            self.EnsureCapacity(buffer.Length);
-            self.AddInternal(buffer);
-        }
+        public void AddRange( IEnumerable<TValue> enumerable ) => self.AddRangeInternal(enumerable);
     }
 
 

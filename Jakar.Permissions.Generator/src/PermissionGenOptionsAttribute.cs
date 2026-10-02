@@ -11,6 +11,6 @@ public sealed class PermissionGenOptionsAttribute : Attribute
 {
     public bool   IncludeDebuggerDisplay { get; init; } = true;
     public bool   IncludeDocs            { get; init; } = true;
-    public string Namespace              { get; init; } = Constants.App;
-    public string RootClass              { get; init; } = Constants.Permissions;
+    public string Namespace              { get; init; } = Constants.APP;
+    public string RootClass              { get; init; } = Constants.PERMISSIONS;
 }

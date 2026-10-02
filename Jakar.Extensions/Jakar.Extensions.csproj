@@ -6,13 +6,13 @@
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>10.10.0</Version>
+		<Version>10.11.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageIcon>icon.png</PackageIcon>
 		<Company></Company>
-		<PackageReleaseNotes>TelemetrySource uses W3C activity IDs: the process-wide hierarchical default is gone and the StartActivity idFormat default is now Unknown (default parameter values are compiled into call sites, so recompile callers). StartActivity respects the sampler: it returns null instead of throwing when sampled out, no longer forces IsAllDataRequested, the Recorded trace flag (traceFlags is now ActivityTraceFlags?) or Ok status, and keeps the parent tracestate. Constructing a TelemetrySource no longer clears Activity.Current. AppVersion has a TypeConverter, so it binds from configuration strings. TelemetrySpan can target a specific TelemetrySource via TelemetrySpan.Create(TelemetrySource, string).</PackageReleaseNotes>
+		<PackageReleaseNotes>10.11.0: BREAKING: IIObservableCollection&lt;TValue&gt; renamed to IObservableCollection&lt;TValue&gt;. BREAKING: Command&lt;TValue&gt; now follows CommunityToolkit.Mvvm AsyncRelayCommand&lt;T&gt; semantics and implements the new IAsyncCommand&lt;TValue&gt;: ExecutionTask, IsRunning, CanBeCanceled, IsCancellationRequested (with PropertyChanged), ExecuteAsync returning Task, Cancel(), NotifyCanExecuteChanged() (CanExecute no longer raises CanExecuteChanged itself), CommandOptions (AllowConcurrentExecutions, FlowExceptionsToTaskScheduler), CreateCancelCommand(); CanExecute is false while running by default; starting a cancellable handler cancels the previous token; Execute rethrows handler failures on the calling context unless FlowExceptionsToTaskScheduler; object parameters of the wrong type throw ArgumentException. Command&lt;TValue&gt;.Executable accepts CancellationToken-taking handlers, adds Execute(object?, TValue?, CancellationToken), is 16 bytes instead of 72, and no longer drops the Task from Func&lt;TValue?, Task&gt; handlers (it is now awaited). Fixed SelfLogger.WriteLine throwing FormatException for named template holes such as {Error}. Internal folder restructure. Removed the unused Portable.BouncyCastle dependency and System.* package references that are part of the net10.0 shared framework. 10.10.0: TelemetrySource uses W3C activity IDs: the process-wide hierarchical default is gone and the StartActivity idFormat default is now Unknown (default parameter values are compiled into call sites, so recompile callers). StartActivity respects the sampler: it returns null instead of throwing when sampled out, no longer forces IsAllDataRequested, the Recorded trace flag (traceFlags is now ActivityTraceFlags?) or Ok status, and keeps the parent tracestate. Constructing a TelemetrySource no longer clears Activity.Current. AppVersion has a TypeConverter, so it binds from configuration strings. TelemetrySpan can target a specific TelemetrySource via TelemetrySpan.Create(TelemetrySource, string).</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -34,6 +34,8 @@
 		<StripSymbols>false</StripSymbols>
 		<IncludeSymbols>true</IncludeSymbols>
 		<IsAotCompatible>true</IsAotCompatible>
+		<EnablePackageValidation>true</EnablePackageValidation>
+		<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
@@ -41,15 +43,6 @@
 		<PublishTrimmed>true</PublishTrimmed>
 		<TrimMode>link</TrimMode>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<Compile Remove="SorterEqualizer\**" />
-		<Compile Remove="WeakEventManagers\**" />
-		<EmbeddedResource Remove="SorterEqualizer\**" />
-		<EmbeddedResource Remove="WeakEventManagers\**" />
-		<None Remove="SorterEqualizer\**" />
-		<None Remove="WeakEventManagers\**" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
@@ -107,26 +100,14 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
 		<PackageReference Include="Nito.Collections.Deque" />
 		<PackageReference Include="Otp.NET" />
-		<PackageReference Include="Portable.BouncyCastle" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Formatting.Compact" />
 		<PackageReference Include="Serilog.Sinks.Async" />
 		<PackageReference Include="Serilog.Sinks.Console" />
 		<PackageReference Include="Serilog.Sinks.Debug" />
 		<PackageReference Include="Serilog.Sinks.File" />
-		<PackageReference Include="System.Collections.Immutable" />
 		<PackageReference Include="System.ComponentModel.Annotations" />
 		<PackageReference Include="System.IO.Hashing" />
-		<PackageReference Include="System.Net.Http" />
-		<PackageReference Include="System.Net.Http.Json" />
-		<PackageReference Include="System.Text.Encoding.CodePages" />
-		<PackageReference Include="System.Text.Encodings.Web" />
-		<PackageReference Include="System.Text.RegularExpressions" />
-		<PackageReference Include="System.Threading.Tasks" />
-		<PackageReference Include="System.Threading.Tasks.Dataflow" />
-		<PackageReference Include="System.Threading.Tasks.Extensions" />
-		<PackageReference Include="System.Threading.Tasks.Parallel" />
-		<PackageReference Include="System.Threading.ThreadPool" />
 		<PackageReference Include="OneOf" />
 		<PackageReference Include="OneOf.Extended" />
 		<PackageReference Include="OneOf.SourceGenerator" />

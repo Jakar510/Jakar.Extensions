@@ -6,26 +6,26 @@ namespace Jakar.Extensions;
 
 public class UserDetails : BaseClass, IUserDetails, IUserID
 {
-    protected string? __company;
-    protected string? __department;
-    protected string? __email;
-    protected string? __ext;
-    protected string? __firstName;
-    protected string? __gender;
-    protected string? __lastName;
-    protected string? __phoneNumber;
-    protected string? __title;
-    protected string? __website;
+    protected string? _company;
+    protected string? _department;
+    protected string? _email;
+    protected string? _ext;
+    protected string? _firstName;
+    protected string? _gender;
+    protected string? _lastName;
+    protected string? _phoneNumber;
+    protected string? _title;
+    protected string? _website;
     protected string? _description;
     protected string? _fullName;
 
 
     [StringLength(COMPANY)] public string? Company
     {
-        get => __company;
+        get => _company;
         set
         {
-            if ( !SetProperty(ref __company, value) ) { return; }
+            if ( !SetProperty(ref _company, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
@@ -33,10 +33,10 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     }
     [StringLength(DEPARTMENT)] public string? Department
     {
-        get => __department;
+        get => _department;
         set
         {
-            if ( !SetProperty(ref __department, value) ) { return; }
+            if ( !SetProperty(ref _department, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
@@ -44,15 +44,15 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     }
 
     [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => __email;                           set => SetProperty(ref __email,      value); }
-    [StringLength(               PHONE_EXT)]   public string? Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                           set => SetProperty(ref _email,      value); }
+    [StringLength(               PHONE_EXT)]   public string? Ext         { get => _ext;                             set => SetProperty(ref _ext,        value); }
 
     [Required] [StringLength(FIRST_NAME)] public string? FirstName
     {
-        get => __firstName;
+        get => _firstName;
         set
         {
-            if ( !SetProperty(ref __firstName, value) ) { return; }
+            if ( !SetProperty(ref _firstName, value) ) { return; }
 
             _fullName = null;
             OnPropertyChanged(nameof(FullName));
@@ -60,7 +60,7 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     }
 
     [StringLength(FULL_NAME)] public         string? FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public         string? Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    [StringLength(GENDER)]    public         string? Gender             { get => _gender;                    set => SetProperty(ref _gender,  value); }
     [JsonIgnore]              public virtual bool    IsValid            => IsValidEmail                      && IsValidName;
     [JsonIgnore]              public virtual bool    IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
     [JsonIgnore]              public virtual bool    IsValidName        => !string.IsNullOrWhiteSpace(FullName);
@@ -69,24 +69,24 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
 
     [Required] [StringLength(LAST_NAME)] public string? LastName
     {
-        get => __lastName;
+        get => _lastName;
         set
         {
-            if ( !SetProperty(ref __lastName, value) ) { return; }
+            if ( !SetProperty(ref _lastName, value) ) { return; }
 
             _fullName = null;
             OnPropertyChanged(nameof(FullName));
         }
     }
 
-    [Phone] [StringLength(PHONE)] public string? PhoneNumber { get => __phoneNumber; set => SetProperty(ref __phoneNumber, value); }
+    [Phone] [StringLength(PHONE)] public string? PhoneNumber { get => _phoneNumber; set => SetProperty(ref _phoneNumber, value); }
 
     [StringLength(TITLE)] public string? Title
     {
-        get => __title;
+        get => _title;
         set
         {
-            if ( !SetProperty(ref __title, value) ) { return; }
+            if ( !SetProperty(ref _title, value) ) { return; }
 
             _description = null;
             OnPropertyChanged(nameof(Description));
@@ -95,7 +95,7 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     public Guid UserID { get; init; }
 
 
-    [Url] [StringLength(WEBSITE)] public string? Website { get => __website; set => SetProperty(ref __website, value); }
+    [Url] [StringLength(WEBSITE)] public string? Website { get => _website; set => SetProperty(ref _website, value); }
 
 
     public UserDetails() { }

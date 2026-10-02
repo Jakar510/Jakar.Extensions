@@ -468,7 +468,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ValueStringBuilder payload ) => Write(payload.ToString());
+    /// <remarks> Does not dispose <paramref name="payload"/>; the caller owns it. </remarks>
+    public void Write( ValueStringBuilder payload ) => Write(payload.Values.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -616,7 +617,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync(payload.ToString());
+    /// <remarks> Does not dispose <paramref name="payload"/>; the caller owns it. </remarks>
+    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync(payload.Values.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>

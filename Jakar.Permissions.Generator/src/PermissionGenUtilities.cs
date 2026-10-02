@@ -26,13 +26,13 @@ internal static class PermissionGenUtilities
     {
         bool                          includeDocs     = true;
         bool                          includeDebugger = true;
-        string                        name_space      = Constants.App;
-        string                        root            = Constants.Permissions;
+        string                        nameSpace      = Constants.APP;
+        string                        root            = Constants.PERMISSIONS;
         ImmutableArray<AttributeData> attributes      = compilation.Assembly.GetAttributes();
 
         foreach ( AttributeData attribute in attributes.AsSpan() )
         {
-            if ( !string.Equals(attribute.AttributeClass?.ToDisplayString(), Constants.Attribute, StringComparison.Ordinal) ) { continue; }
+            if ( !string.Equals(attribute.AttributeClass?.ToDisplayString(), Constants.ATTRIBUTE, StringComparison.Ordinal) ) { continue; }
 
             foreach ( KeyValuePair<string, TypedConstant> arg in attribute.NamedArguments )
             {
@@ -47,7 +47,7 @@ internal static class PermissionGenUtilities
                         break;
 
                     case nameof(PermissionGenOptionsAttribute.Namespace):
-                        if ( arg.Value.Value is string s1 && !string.IsNullOrWhiteSpace(s1) ) { name_space = s1.Trim(); }
+                        if ( arg.Value.Value is string s1 && !string.IsNullOrWhiteSpace(s1) ) { nameSpace = s1.Trim(); }
 
                         break;
 
@@ -60,19 +60,19 @@ internal static class PermissionGenUtilities
         }
 
         // Validate identifiers
-        if ( !IsValidNamespace(name_space) )
+        if ( !IsValidNamespace(nameSpace) )
         {
-            PendingDiagnostics.Enqueue(Diagnostics.NameSpace(name_space));
-            name_space = Constants.App;
+            PendingDiagnostics.Enqueue(Diagnostics.NameSpace(nameSpace));
+            nameSpace = Constants.APP;
         }
 
         if ( !IsValidIdentifier(root) )
         {
             PendingDiagnostics.Enqueue(Diagnostics.InvalidRoot(root));
-            root = Constants.Permissions;
+            root = Constants.PERMISSIONS;
         }
 
-        return ( includeDocs, includeDebugger, name_space, root );
+        return ( includeDocs, includeDebugger, nameSpace, root );
     }
 
     private static bool IsValidNamespace( string ns )
