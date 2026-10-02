@@ -55,15 +55,18 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     public virtual bool IsSupersetOf( IEnumerable<TValue>       other ) => buffer.IsSupersetOf(other);
     public virtual bool Overlaps( IEnumerable<TValue>           other ) => buffer.Overlaps(other);
     public virtual bool SetEquals( IEnumerable<TValue>          other ) => buffer.SetEquals(other);
+    // Except/Intersect/Union only change the set when they change its count, so unchanged sets raise nothing.
     public virtual void ExceptWith( IEnumerable<TValue> other )
     {
+        int count = buffer.Count;
         buffer.ExceptWith(other);
-        Reset();
+        if ( buffer.Count != count ) { Reset(); }
     }
     public virtual void IntersectWith( IEnumerable<TValue> other )
     {
+        int count = buffer.Count;
         buffer.IntersectWith(other);
-        Reset();
+        if ( buffer.Count != count ) { Reset(); }
     }
     public virtual void SymmetricExceptWith( IEnumerable<TValue> other )
     {
@@ -72,8 +75,9 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     }
     public virtual void UnionWith( IEnumerable<TValue> other )
     {
+        int count = buffer.Count;
         buffer.UnionWith(other);
-        Reset();
+        if ( buffer.Count != count ) { Reset(); }
     }
 
 
@@ -94,7 +98,7 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     }
     public virtual void Add( params ReadOnlySpan<TValue> values )
     {
-        foreach ( TValue value in values ) { Add(value); }
+        foreach ( ref readonly TValue value in values ) { Add(value); }
     }
 
 
@@ -113,8 +117,15 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
 
     [Pure] [MustDisposeResource] protected internal override ArrayBuffer<TValue> FilteredValues()
     {
-        int                    count  = buffer.Count;
-        ArrayBuffer<TValue>    values = new(count);
+        ArrayBuffer<TValue> values = new(buffer.Count);
+
+        if ( !HasFilter )
+        {
+            foreach ( TValue value in buffer ) { values.Add(in value); }
+
+            return values;
+        }
+
         FilterDelegate<TValue> filter = GetFilter();
         int                    index  = 0;
 

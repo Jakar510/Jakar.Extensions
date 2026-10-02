@@ -53,13 +53,9 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
         get => buffer[key];
         set
         {
-            bool exists = ContainsKey(key);
-
-            TValue? old = exists
-                              ? buffer[key]
-                              : default;
-
-            buffer[key] = value;
+            ref TValue? slot = ref CollectionsMarshal.GetValueRefOrAddDefault(buffer, key, out bool exists); // one lookup
+            TValue?     old  = slot;
+            slot = value;
             KeyValuePair<TKey, TValue> pair = new(key, value);
 
             if ( exists )
@@ -89,7 +85,7 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
 
     public bool TryGetValue( TKey                    key, [NotNullWhen(true)] out TValue? value ) => buffer.TryGetValue(key, out value) && value is not null;
     public bool ContainsKey( TKey                    key )   => buffer.ContainsKey(key);
-    public bool Contains( KeyValuePair<TKey, TValue> value ) => ContainsKey(value.Key) && ContainsValue(value.Value);
+    public bool Contains( KeyValuePair<TKey, TValue> value ) => buffer.TryGetValue(value.Key, out TValue? x) && EqualityComparer<TValue>.Default.Equals(x, value.Value);
 
 
     public virtual void Add( KeyValuePair<TKey, TValue> value ) => Add(value.Key, value.Value);
@@ -110,16 +106,14 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
     }
 
 
-    public bool Remove( KeyValuePair<TKey, TValue> value ) => Remove(value.Key);
+    /// <summary> Removes <paramref name="value"/> only when both its key and value match (<see cref="ICollection{T}.Remove"/>). </summary>
+    public bool Remove( KeyValuePair<TKey, TValue> value ) => Contains(value) && Remove(value.Key);
     public bool Remove( TKey key )
     {
-        if ( !buffer.ContainsKey(key) ) { return false; }
-
         if ( !buffer.Remove(key, out TValue? value) ) { return false; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Removed(in pair, -1);
-        OnCountChanged();
         return true;
     }
 
@@ -131,25 +125,23 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
     }
 
 
-    public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
-    {
-        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs(0) )
-        {
-            if ( index < startIndex ) { continue; }
-
-            array[index] = pair;
-        }
-    }
+    public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex ) => ( (ICollection<KeyValuePair<TKey, TValue>>)buffer ).CopyTo(array, startIndex);
 
 
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
-        int                                        count  = buffer.Count;
-        ArrayBuffer<KeyValuePair<TKey, TValue>>    values = new(count);
+        ArrayBuffer<KeyValuePair<TKey, TValue>> values = new(buffer.Count);
+
+        if ( !HasFilter )
+        {
+            foreach ( KeyValuePair<TKey, TValue> pair in buffer ) { values.Add(in pair); }
+
+            return values;
+        }
+
         FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
         int                                        index  = 0;
-
 
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {

@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions
+﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/12/2025  17:03
 
 using ZLinq;
@@ -45,7 +45,11 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
     {
         ArrayBuffer<TValue> self = this;
         this = Empty;
-        if ( self.__array is not null ) { ArrayPool<TValue>.Shared.Return(self.__array); }
+        if ( self.__array is null ) { return; }
+
+        if ( RuntimeHelpers.IsReferenceOrContainsReferences<TValue>() ) { System.Array.Clear(self.__array, 0, self.Length); } // don't keep the items alive from the pool
+
+        ArrayPool<TValue>.Shared.Return(self.__array);
     }
 
 

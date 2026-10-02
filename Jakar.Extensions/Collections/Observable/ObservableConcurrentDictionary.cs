@@ -57,16 +57,26 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
         get => buffer[key];
         set
         {
-            bool exists = TryGetValue(key, out TValue? old);
-            buffer[key] = value;
-            KeyValuePair<TKey, TValue> pair = new(key, value);
-
-            if ( exists )
+            // atomic: the notification always reports the value that was actually replaced
+            while ( true )
             {
-                KeyValuePair<TKey, TValue> oldPair = new(key, old!);
-                Replaced(in oldPair, in pair, -1);
+                if ( buffer.TryGetValue(key, out TValue? old) )
+                {
+                    if ( !buffer.TryUpdate(key, value, old) ) { continue; }
+
+                    KeyValuePair<TKey, TValue> oldPair = new(key, old);
+                    KeyValuePair<TKey, TValue> pair    = new(key, value);
+                    Replaced(in oldPair, in pair, -1);
+                    return;
+                }
+
+                if ( buffer.TryAdd(key, value) )
+                {
+                    KeyValuePair<TKey, TValue> pair = new(key, value);
+                    Added(in pair, -1);
+                    return;
+                }
             }
-            else { Added(in pair, -1); }
         }
     }
 
@@ -87,7 +97,6 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     {
         buffer.Clear();
         Reset();
-        OnCountChanged();
     }
 
 
@@ -117,56 +126,76 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     public bool TryGetValue( TKey key, [NotNullWhen(true)] out TValue? value ) => buffer.TryGetValue(key, out value) && value is not null;
 
 
-    public bool ContainsValue( TValue                value ) => buffer.Values.Contains(value);
-    public bool ContainsKey( TKey                    key )   => buffer.ContainsKey(key);
-    public bool Contains( KeyValuePair<TKey, TValue> item )  => ContainsKey(item.Key) && ContainsValue(item.Value);
+    /// <remarks> Lock free, without the snapshot of <see cref="ConcurrentDictionary{TKey,TValue}.Values"/>. </remarks>
+    public bool ContainsValue( TValue value )
+    {
+        EqualityComparer<TValue> comparer = EqualityComparer<TValue>.Default;
+
+        foreach ( KeyValuePair<TKey, TValue> pair in buffer )
+        {
+            if ( comparer.Equals(pair.Value, value) ) { return true; }
+        }
+
+        return false;
+    }
+    public bool ContainsKey( TKey                    key )  => buffer.ContainsKey(key);
+    public bool Contains( KeyValuePair<TKey, TValue> item ) => buffer.TryGetValue(item.Key, out TValue? x) && EqualityComparer<TValue>.Default.Equals(x, item.Value);
 
 
-    public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove(item.Key);
+    /// <summary> Removes <paramref name="item"/> only when both its key and value match (atomically). </summary>
+    public bool Remove( KeyValuePair<TKey, TValue> item )
+    {
+        if ( !buffer.TryRemove(item) ) { return false; }
+
+        Removed(in item, -1);
+        return true;
+    }
     public bool Remove( TKey key )
     {
-        if ( !buffer.ContainsKey(key) ) { return false; }
-
         if ( !buffer.TryRemove(key, out TValue? value) ) { return false; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Removed(in pair, -1);
-        OnCountChanged();
         return true;
     }
 
 
-    public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex )
-    {
-        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs(0) )
-        {
-            if ( index < startIndex ) { continue; }
-
-            array[index] = pair;
-        }
-    }
+    /// <remarks> An atomic snapshot. </remarks>
+    public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex ) => ( (ICollection<KeyValuePair<TKey, TValue>>)buffer ).CopyTo(array, startIndex);
+    /// <remarks> Not atomic: items added or removed while copying may or may not be included. </remarks>
     public void CopyTo( Span<KeyValuePair<TKey, TValue>> array, int startIndex )
     {
-        foreach ( ( int index, KeyValuePair<TKey, TValue> pair ) in this.EnumeratePairs(0) )
-        {
-            if ( index < startIndex ) { continue; }
+        Span<KeyValuePair<TKey, TValue>> destination = array[startIndex..];
+        int                              index       = 0;
 
-            array[index] = pair;
-        }
+        foreach ( KeyValuePair<TKey, TValue> pair in buffer ) { destination[index++] = pair; }
     }
 
 
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
-        int                                        count  = buffer.Count;
-        ArrayBuffer<KeyValuePair<TKey, TValue>>    values = new(count);
-        FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
-        int                                        index  = 0;
+        // items may be added while enumerating, so the buffer grows when needed (previously it overflowed)
+        ArrayBuffer<KeyValuePair<TKey, TValue>>     values = new(buffer.Count + 4);
+        FilterDelegate<KeyValuePair<TKey, TValue>>? filter = HasFilter
+                                                                 ? GetFilter()
+                                                                 : null;
+
+        int index = 0;
 
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( filter(index++, in pair) ) { values.Add(in pair); }
+            if ( filter is not null && !filter(index++, in pair) ) { continue; }
+
+            if ( values.Length == values.Capacity )
+            {
+                ArrayBuffer<KeyValuePair<TKey, TValue>> larger = new(values.Capacity * 2);
+                larger.Add(values.Values);
+                values.Dispose();
+                values = larger;
+            }
+
+            values.Add(in pair);
         }
 
         return values;

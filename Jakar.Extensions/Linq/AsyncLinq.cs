@@ -30,10 +30,9 @@ public static partial class AsyncLinq
     public static List<TElement> ToList<TElement>( this IReadOnlyCollection<TElement> sequence ) => sequence.ToList(sequence.Count);
     public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int initialCapacity )
     {
-        List<TElement> array = new(initialCapacity);
-        foreach ( ( int i, TElement item ) in sequence.Enumerate(0) ) { array[i] = item; }
-
-        return array;
+        List<TElement> list = new(initialCapacity);
+        list.AddRange(sequence);
+        return list;
     }
 
 
