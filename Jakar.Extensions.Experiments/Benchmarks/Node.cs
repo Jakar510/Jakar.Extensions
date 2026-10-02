@@ -4,7 +4,8 @@
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
-public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
+[JsonModel(typeof(ExperimentsJsonContext))]
+public sealed partial record Node : BaseRecord<Node>, IJsonModel<Node>
 {
     private static readonly Node[]         __empty = [];
     public                  Node[]         Children    { get; init; } = __empty;
@@ -65,7 +66,8 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
-public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
+[JsonModel(typeof(ExperimentsJsonContext))]
+public sealed partial class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
 {
     internal static readonly TestJson Debug = new()
                                               {

@@ -103,8 +103,12 @@ public abstract class BaseClass<TSelf> : BaseClass, IEquatable<TSelf>, IComparab
     public static ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
 
 
-    /// <summary> The JSON of this instance (source-generated metadata, no reflection). </summary>
-    public override string ToString() => ( (TSelf)this ).ToJson();
+    /// <summary> The JSON of this instance (source-generated metadata, no reflection), or the type name when no metadata is registered for it. </summary>
+    public override string ToString()
+    {
+        try { return ( (TSelf)this ).ToJson(); }
+        catch ( NotSupportedException ) { return GetType().Name; }
+    }
 
 
     public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
