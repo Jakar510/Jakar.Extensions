@@ -40,8 +40,6 @@
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>link</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -64,10 +62,6 @@
 		</None>
 	</ItemGroup>
 
-	<PropertyGroup>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</IsAotCompatible>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DocumentationFile>bin\Release\Jakar.Extensions.xml</DocumentationFile>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -86,7 +80,7 @@
 		<!-- <PackageReference Include="AsyncAwaitBestPractices" /> -->
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" /> <!-- ResxString derives from Microsoft.CodeAnalysis.LocalizableString -->
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Http" />
@@ -111,7 +105,6 @@
 		<PackageReference Include="OneOf" />
 		<PackageReference Include="OneOf.Extended" />
 		<PackageReference Include="OneOf.SourceGenerator" />
-		<PackageReference Include="ValueOf" />
 		<PackageReference Include="ZLinq" />
 		<PackageReference Include="ZLinq.DropInGenerator">
 			<PrivateAssets>all</PrivateAssets>

@@ -19,7 +19,7 @@ public static class Json
     public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()[key];
 
 
-    public static JToken? ToToken<TValue>( [NotNullIfNotNull(nameof(value))] this TValue? value )
+    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static JToken? ToToken<TValue>( [NotNullIfNotNull(nameof(value))] this TValue? value )
     {
         JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
         using JTokenWriter jsonWriter     = new();
@@ -34,7 +34,7 @@ public static class Json
 
 
     public static string ToJson( this         JToken value ) => value.ToString(Formatting.Indented);
-    public static string ToJson<TValue>( this TValue value ) => JsonConvert.SerializeObject(value, Formatting.Indented);
+    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static string ToJson<TValue>( this TValue value ) => JsonConvert.SerializeObject(value, Formatting.Indented);
 
 
     /// <summary> Asynchronously load and return JToken values from a stream containing a JSON array. The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
@@ -55,18 +55,8 @@ public static class Json
     }
 
 
-    public static string ToJson<TValue>( this scoped in ReadOnlySpan<TValue> values )
-
-    {
-        TValue[] array = ArrayPool<TValue>.Shared.Rent(values.Length);
-
-        try
-        {
-            values.CopyTo(array);
-            return array.ToJson();
-        }
-        finally { ArrayPool<TValue>.Shared.Return(array); }
-    }
+    /// <remarks> Serializes exactly <paramref name="values"/>. (It used to rent a pooled array and serialize the whole rental, which is usually longer than the span.) </remarks>
+    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static string ToJson<TValue>( this scoped in ReadOnlySpan<TValue> values ) => values.ToArray().ToJson();
 
 
 
@@ -96,7 +86,7 @@ public static class Json
         }
 
 
-        public TValue? TryFromJson<TValue>()
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? TryFromJson<TValue>()
         {
             try
             {
@@ -117,7 +107,7 @@ public static class Json
     extension( string self )
     {
         public JToken FromJson()         => ThrowIfNull(JToken.Parse(self));
-        public TValue FromJson<TValue>() => ThrowIfNull(JsonConvert.DeserializeObject<TValue>(self, Settings));
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue FromJson<TValue>() => ThrowIfNull(JsonConvert.DeserializeObject<TValue>(self, Settings));
 
 
         public JObject? GetAdditionalData()
@@ -180,7 +170,7 @@ public static class Json
 
     extension( IJsonModel self )
     {
-        public TValue? Get<TValue>( string key )
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? Get<TValue>( string key )
         {
             JToken? token = self.Get(key);
             if ( token is null ) { return default; }
@@ -193,7 +183,7 @@ public static class Json
 
     extension( IJsonStringModel self )
     {
-        public TValue? Get<TValue>( string key )
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? Get<TValue>( string key )
         {
             JToken? token = self.Get(key);
             if ( token is null ) { return default; }
@@ -266,7 +256,7 @@ public static class Json
             JToken? element = value;
             self.Add(key, element);
         }
-        public void Add<TValue>( string key, TValue value )
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public void Add<TValue>( string key, TValue value )
         {
             JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
             using JTokenWriter jsonWriter     = new();
@@ -294,7 +284,7 @@ public static class Json
             return jToken;
         }
 
-        public async ValueTask<T> FromJson<T>( CancellationToken token = default )
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public async ValueTask<T> FromJson<T>( CancellationToken token = default )
         {
             JsonLoadSettings loadSettings = LoadSettings;
             JsonSerializer   serializer   = JsonSerializer.Create(Settings);
@@ -309,7 +299,7 @@ public static class Json
 
 
         /// <summary> Asynchronously load and synchronously deserialize values from a stream containing a JSON array.  The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
-        public async IAsyncEnumerable<T?> FromJsonAsync<T>( [EnumeratorCancellation] CancellationToken token = default )
+        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public async IAsyncEnumerable<T?> FromJsonAsync<T>( [EnumeratorCancellation] CancellationToken token = default )
         {
             JsonLoadSettings loadSettings = LoadSettings;
             JsonSerializer   serializer   = JsonSerializer.Create(Settings);

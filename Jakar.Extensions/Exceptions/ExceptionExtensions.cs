@@ -119,6 +119,15 @@ public static class ExceptionExtensions
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public string? MethodSignature() => self.TargetSite?.MethodSignature();
 
 
+        /// <summary> Trim/AOT-safe <see cref="MethodSignature"/> for diagnostic text: <see langword="null"/> when the method metadata isn't available (trimmed, or Native AOT). </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Diagnostic text only. Exception.TargetSite returns null when the metadata was trimmed, and any failure reading it is reported as null ('unknown').")]
+        public string? TryGetMethodSignature()
+        {
+            try { return self.TargetSite?.MethodSignature(); }
+            catch ( Exception ) { return null; }
+        }
+
+
         [RequiresUnreferencedCode(SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
         public JToken GetData() => self.Data.ToJson();
 
@@ -173,7 +182,7 @@ public static class ExceptionExtensions
             Pair source          = new(nameof(self.Source), self.Source);
             Pair message         = new(nameof(self.Message), self.Message);
             Pair stackTrace      = new(nameof(self.StackTrace), self.StackTrace);
-            Pair methodSignature = new(nameof(MethodSignature), self.MethodSignature());
+            Pair methodSignature = new(nameof(MethodSignature), self.TryGetMethodSignature());
 
             using PooledArray<Pair> array = self.Data.AsValueEnumerable<DictionaryEntry>().Select(static pair => new Pair(pair.Key.ToString() ?? EMPTY, pair.Value?.ToString())).ToArrayPool();
 

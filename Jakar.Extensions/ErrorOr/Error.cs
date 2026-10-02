@@ -50,7 +50,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     public static Error Create( Status status, string? title = null, string? description = null, string? instance = null, StringTags details = default, string? type = null ) => new(status, description, instance, details, title, type);
 
 
-    public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), in details, status, type);
+    public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.TryGetMethodSignature(), in details, status, type);
     public static Error Create( Exception e, string? title, string? instance, in StringTags details = default, Status? status = null, string? type = null )
     {
         string classType = e.GetType().Name;

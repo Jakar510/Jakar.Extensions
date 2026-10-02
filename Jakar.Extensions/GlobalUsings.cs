@@ -47,7 +47,6 @@ global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Linq.JsonPath;
 global using Nito.Collections;
 global using JetBrains.Annotations;
-global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;

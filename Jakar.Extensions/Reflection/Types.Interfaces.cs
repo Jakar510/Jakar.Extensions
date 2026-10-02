@@ -8,9 +8,16 @@ public static partial class Types
         public bool HasInterface<TValue>()
         {
             ReadOnlySpan<Type> interfaces = type.GetInterfaces();
-            if ( interfaces.Contains(typeof(TValue)) ) { return true; }
 
-            return interfaces.Any(static t => t == typeof(TValue) || ( t.IsGenericType && t.GetGenericTypeDefinition() == typeof(TValue) ));
+            // A plain loop rather than a lambda: a lambda inside this DynamicallyAccessedMembers-annotated extension block is IL2111.
+            foreach ( Type t in interfaces )
+            {
+                if ( t == typeof(TValue) ) { return true; }
+
+                if ( t.IsGenericType && t.GetGenericTypeDefinition() == typeof(TValue) ) { return true; }
+            }
+
+            return false;
         }
 
         public bool HasInterface( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type interfaceType )
