@@ -95,13 +95,14 @@ public partial class IniConfig
 
         #region Gets
 
-        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
+        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value ) => ValueAs(key, Json.GetTypeInfo<TValue>(), out value);
+        public bool ValueAs<TValue>( string key, JsonTypeInfo<TValue> info, [NotNullWhen(true)] out TValue? value )
         {
             string? s = this[key];
 
             value = string.IsNullOrEmpty(s)
                         ? default
-                        : s.FromJson<TValue>();
+                        : s.FromJson(info);
 
             return value is not null;
         }
@@ -163,8 +164,9 @@ public partial class IniConfig
 
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
-        public void AddJson<TValue>( string key, TValue                      value )                    => this[key] = value.ToJson();
-        public void Add<TValue>( string     key, params ReadOnlySpan<TValue> values )                   => this[key] = values.ToJson();
+        public void AddJson<TValue>( string key, TValue                      value )                    => this[key] = Json.Serialize(value, false);
+        public void AddJson<TValue>( string key, TValue                      value, JsonTypeInfo<TValue> info ) => this[key] = JsonModel.ToJson(value, info, false);
+        public void Add<TValue>( string     key, params ReadOnlySpan<TValue> values )                   => this[key] = Json.Serialize(values, false);
         public void Add( string             key, IEnumerable<string>         values, char   separator ) => this[key] = string.Join(separator, values);
         public void Add( string             key, IEnumerable<string>         values, string separator ) => this[key] = string.Join(separator, values);
         public void Add( string             key, TimeSpan                    value ) => this[key] = value.ToString();

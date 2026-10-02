@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> Inspired by <see cref="ValueOf{TValue,TThis}"/> </summary>
+/// <summary> Inspired by the ValueOf package's <c> ValueOf&lt;TValue, TThis&gt; </c>. </summary>
 /// <typeparam name="TValue"> </typeparam>
 /// <typeparam name="TSelf"> </typeparam>
 [SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]

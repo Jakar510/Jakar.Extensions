@@ -5,7 +5,7 @@ using System.Linq;
 
 
 
-namespace Jakar.Extensions.Tests.Json;
+namespace Jakar.Extensions.Tests.Serialization;
 
 
 /// <summary> Regression tests for bugs found while planning the System.Text.Json migration (AOT-plan.md §2.14). </summary>
@@ -20,7 +20,7 @@ public sealed class JsonSpan_Tests : Assert
     {
         // ArrayPool.Shared.Rent(3) returns a 16-element array; the old implementation serialized all 16.
         ReadOnlySpan<int> values = [1, 2, 3];
-        Assert.That(Compact(values.ToJson()), Is.EqualTo("[1,2,3]"));
+        Assert.That(Compact(Json.Serialize(values)), Is.EqualTo("[1,2,3]"));
     }
 
 
@@ -28,7 +28,7 @@ public sealed class JsonSpan_Tests : Assert
     public void ToJson_EmptySpan_WritesEmptyArray()
     {
         ReadOnlySpan<string> values = [];
-        Assert.That(Compact(values.ToJson()), Is.EqualTo("[]"));
+        Assert.That(Compact(Json.Serialize(values)), Is.EqualTo("[]"));
     }
 
 

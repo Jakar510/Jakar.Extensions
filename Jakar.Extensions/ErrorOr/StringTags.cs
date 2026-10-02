@@ -11,9 +11,10 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Empty))]
-[MsJsonConverter(typeof(StringTagsMsJsonConverter))]
+[JsonConverter(typeof(StringTagsJsonConverter))]
 [method: JsonConstructor]
-public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
 {
     public static readonly StringTags Empty   = new();
     public readonly        Pair[]     Tags    = tags;

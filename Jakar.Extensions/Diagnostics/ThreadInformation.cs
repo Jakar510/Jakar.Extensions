@@ -11,7 +11,8 @@ namespace Jakar.Extensions;
 [Serializable]
 [StructLayout(LayoutKind.Auto)]
 [method: JsonConstructor]
-public readonly struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture ) : IJsonModel<ThreadInformation>
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture ) : IJsonModel<ThreadInformation>
 {
     public ThreadInformation() : this(Thread.CurrentThread) { }
     public ThreadInformation( Thread                          thread ) : this(thread.Name ?? EMPTY, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }
@@ -29,25 +30,6 @@ public readonly struct ThreadInformation( string name, int managedThreadID, Lang
     public LogEventProperty GetProperty()       => new(nameof(ThreadInformation), GetStructureValue());
 
 
-    public static bool TryFromJson( string? json, out ThreadInformation result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = default;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = default;
-        return false;
-    }
-    public static ThreadInformation FromJson( string json ) => json.FromJson<ThreadInformation>();
 
 
     public int CompareTo( object? other ) => other is ThreadInformation info

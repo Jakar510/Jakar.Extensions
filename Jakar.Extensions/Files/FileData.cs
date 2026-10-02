@@ -234,7 +234,8 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 [Serializable]
 [SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: JsonConstructor]
-public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
     [StringLength(DESCRIPTION)] public string?   FileDescription { get; set; }  = fileDescription;
     [StringLength(NAME)]        public string?   FileName        { get; init; } = fileName;
@@ -244,7 +245,7 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
 
     public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)
     {
-        if ( value.AdditionalData is not null ) { AdditionalData = new JObject(value.AdditionalData); }
+        AdditionalData = Json.Merge(null, value.AdditionalData);
     }
     public FileMetaData( LocalFile value ) : this(value.Name, value.ContentType, value.Mime) { }
 

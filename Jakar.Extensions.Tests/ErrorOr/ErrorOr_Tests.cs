@@ -7,10 +7,6 @@
 //      which refuses to WRITE a null - so Error.Validation( description:, title: ) could not serialize.
 //   3) LoginRequest could not be constructed by System.Text.Json ( Minimal API body binding ).
 
-using Newtonsoft.Json;
-
-
-
 namespace Jakar.Extensions.Tests;
 
 
@@ -175,16 +171,16 @@ public class ErrorOr_Tests : Assert
     }
 
 
-    // ─── Serialization : Newtonsoft ( the path Jakar's ToJson uses ) ──────────
+    // ─── Serialization : source-generated ( the path Jakar's ToJson uses ) ───
 
     [Test]
-    public void Error_NewtonsoftRoundTrip()
+    public void Error_JakarJsonRoundTrip()
     {
         Error  error = CreateValidationError();
-        string json  = JsonConvert.SerializeObject(error);
+        string json  = Json.Serialize(error);
         this.NotNull(json);
 
-        Error? back = JsonConvert.DeserializeObject<Error>(json);
+        Error? back = json.FromJson<Error>();
         this.NotNull(back);
         this.AreEqual(DESCRIPTION,        back!.Description);
         this.AreEqual(TITLE,              back.Title);
@@ -193,20 +189,20 @@ public class ErrorOr_Tests : Assert
     }
 
     [Test]
-    public void Errors_NewtonsoftRoundTrip()
+    public void Errors_JakarJsonRoundTrip()
     {
         Errors errors = CreateValidationError();
         string json   = errors.ToJson();
         this.NotNull(json);
 
-        Errors? back = JsonConvert.DeserializeObject<Errors>(json);
+        Errors? back = Errors.FromJson(json);
         this.NotNull(back);
         this.IsTrue(back!.IsValid);
         this.AreEqual(1, back.Details.Length);
     }
 
     [Test]
-    public void Errors_WithNullAlert_NewtonsoftSerializes()
+    public void Errors_WithNullAlert_Serializes()
     {
         Errors errors = Errors.Create(CreateValidationError(), CreateValidationError());
         this.IsNull(errors.Alert);
@@ -270,7 +266,7 @@ public class ErrorOr_Tests : Assert
     }
 
     [Test]
-    public void StringTags_SystemTextJsonReadsNewtonsoftShape()
+    public void StringTags_ReflectionSerializerReadsTheGeneratedShape()
     {
         StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(CreateTags().ToJson());
         this.AreEqual(2,     back.Tags.Length);
@@ -314,10 +310,10 @@ public class ErrorOr_Tests : Assert
     }
 
     [Test]
-    public void Error_NewtonsoftKeepsDetails()
+    public void Error_JakarJsonKeepsDetails()
     {
         Error  error = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
-        Error? back  = JsonConvert.DeserializeObject<Error>(JsonConvert.SerializeObject(error));
+        Error? back  = Json.Serialize(error).FromJson<Error>();
         this.NotNull(back);
         this.AreEqual(2,     back!.Details.Tags.Length);
         this.AreEqual(FIELD, back.Details.Tags[0].Key);
@@ -351,11 +347,11 @@ public class ErrorOr_Tests : Assert
     }
 
     [Test]
-    public void LoginRequest_NewtonsoftRoundTripStillWorks()
+    public void LoginRequest_JakarJsonRoundTrip()
     {
         LoginRequest  request = new("tyler", "hunter2");
-        string        json    = JsonConvert.SerializeObject(request);
-        LoginRequest? back    = JsonConvert.DeserializeObject<LoginRequest>(json);
+        string        json    = request.ToJson();
+        LoginRequest? back    = LoginRequest.FromJson(json);
         this.NotNull(back);
         this.AreEqual("tyler",   back!.UserLogin);
         this.AreEqual("hunter2", back.UserPassword);

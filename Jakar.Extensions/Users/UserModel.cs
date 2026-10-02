@@ -215,13 +215,9 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         Rights            = value.Rights.Value;
         return With(value.AdditionalData);
     }
-    public TSelf With( JObject? data )
+    public TSelf With( IReadOnlyDictionary<string, JsonElement>? data )
     {
-        if ( data?.Count is null or 0 ) { return (TSelf)this; }
-
-        JObject dict = AdditionalData ??= new JObject();
-        foreach ( ( string key, JToken? jToken ) in data ) { dict[key] = jToken; }
-
+        AdditionalData = Json.Merge(AdditionalData, data);
         return (TSelf)this;
     }
 

@@ -4,9 +4,10 @@
 namespace Jakar.Extensions;
 
 
-[MsJsonConverter(typeof(PairMsJsonConverter))]
+[JsonConverter(typeof(PairJsonConverter))]
 [method: JsonConstructor]
-public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable, ISpanFormattable
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable, ISpanFormattable
 {
     public readonly string  Key   = key;
     public readonly string? Value = value;

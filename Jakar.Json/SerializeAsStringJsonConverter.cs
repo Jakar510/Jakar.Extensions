@@ -77,9 +77,15 @@ public sealed class SerializeAsStringJsonConverter<T> : JsonConverter<T>
         Span<char> text = stackalloc char[utf8.Length];
         for ( int i = 0; i < utf8.Length; i++ ) { text[i] = (char)utf8[i]; }
 
-        return T.TryParse(text, CultureInfo.InvariantCulture, out T? result)
-                   ? result
-                   : throw new JsonException($"'{text}' is not a valid {typeof(T).Name}.");
+        return Parse(text);
+    }
+
+
+    /// <summary> <see cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider)"/>, not TryParse: a type's TryParse may validate more strictly than its Parse (e.g. Email). </summary>
+    private static T Parse( ReadOnlySpan<char> text )
+    {
+        try { return T.Parse(text, CultureInfo.InvariantCulture); }
+        catch ( Exception e ) when ( e is FormatException or ArgumentException or OverflowException ) { throw new JsonException($"'{text}' is not a valid {typeof(T).Name}.", e); }
     }
 
 
@@ -106,9 +112,7 @@ public sealed class SerializeAsStringJsonConverter<T> : JsonConverter<T>
                            : default;
             }
 
-            return T.TryParse(text, CultureInfo.InvariantCulture, out T? result)
-                       ? result
-                       : throw new JsonException($"'{text}' is not a valid {typeof(T).Name}.");
+            return Parse(text);
         }
         finally
         {

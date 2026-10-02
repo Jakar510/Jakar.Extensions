@@ -12,7 +12,8 @@ namespace Jakar.Extensions;
 [Serializable]
 [DefaultValue(nameof(Invalid))]
 [method: JsonConstructor]
-public readonly struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName ) : IJsonModel<AppInformation>
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName ) : IJsonModel<AppInformation>
 {
     public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, EMPTY, null);
     public readonly        AppVersion     Version     = version;
@@ -25,25 +26,6 @@ public readonly struct AppInformation( AppVersion version, Guid appID, string ap
     public LogEventProperty GetProperty()       => new(nameof(AppInformation), GetStructureValue());
 
 
-    public static bool TryFromJson( string? json, out AppInformation result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = default;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = default;
-        return false;
-    }
-    public static AppInformation FromJson( string json ) => json.FromJson<AppInformation>();
 
 
     public int CompareTo( object? other ) => other is AppInformation app

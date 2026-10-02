@@ -12,7 +12,8 @@ namespace Jakar.Extensions;
 [Serializable]
 [DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
 {
     private static readonly Error[] __details = [];
     public static readonly Errors Empty = new()

@@ -174,10 +174,10 @@ public static partial class Types
         public bool IsEqualType<TValue>( TValue _ )           => typeof(TValue) == self;
         public bool IsEqualType<TValue>()                     => typeof(TValue) == self;
         public bool IsOneOf( ReadOnlySpan<Type>       types ) => types.Any(self.IsEqualType);
-        public bool IsGenericType( ReadOnlySpan<Type> types ) => self.IsAnyBuiltInType() || self.IsOneOf(types) || self.IsJToken();
+        public bool IsGenericType( ReadOnlySpan<Type> types ) => self.IsAnyBuiltInType() || self.IsOneOf(types) || self.IsJsonNode();
         public bool IsNullableType()                          => self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>);
         public bool IsAnyBuiltInType()                        => self.IsGenericType && ( self.IsBuiltInType() || self.IsBuiltInNullableType() );
-        public bool IsJToken()                                => self.IsAssignableTo(typeof(JToken));
+        public bool IsJsonNode()                              => self.IsAssignableTo(typeof(JsonNode)) || self == typeof(JsonElement) || self == typeof(JsonDocument);
     }
 
 

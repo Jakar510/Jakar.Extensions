@@ -5,11 +5,11 @@
 public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
     protected bool     _disposed;
-    protected JObject? _additionalData;
+    protected Dictionary<string, JsonElement>? _additionalData;
 
 
-    /// <summary> <see cref="JObject"/> is a Newtonsoft type and its <c> [JsonExtensionData] </c> attribute is Newtonsoft's, so System.Text.Json would otherwise try to bind this bag as an ordinary dictionary property - which it cannot construct. Hiding it from STJ is what lets these models cross Minimal API's serializer. </summary>
-    [JsonExtensionData] [MsJsonIgnore] public virtual JObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    /// <summary> JSON members this type doesn't declare, kept so they survive a round trip. </summary>
+    [JsonExtensionData] public virtual Dictionary<string, JsonElement>? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -96,36 +96,21 @@ public abstract class BaseClass<TSelf> : BaseClass, IEquatable<TSelf>, IComparab
     public override int  GetHashCode()           => RuntimeHelpers.GetHashCode(this);
 
 
-    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TSelf? result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = null;
-                return false;
-            }
+    public static TSelf FromJson( string             json )     => JsonModel.FromJson(json,     TSelf.JsonTypeInfo);
+    public static TSelf FromJson( ReadOnlySpan<byte> utf8Json ) => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
+    public static bool TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(json,     TSelf.JsonTypeInfo, out result);
+    public static bool TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
+    public static ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
 
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
 
-        result = null;
-        return false;
-    }
-    public static   TSelf  FromJson( string json ) => json.FromJson<TSelf>();
-    public override string ToString()              => this.ToJson();
+    /// <summary> The JSON of this instance (source-generated metadata, no reflection). </summary>
+    public override string ToString() => ( (TSelf)this ).ToJson();
 
 
     public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
-    public virtual TSelf WithAdditionalData( JObject? additionalData )
+    public virtual TSelf WithAdditionalData( IReadOnlyDictionary<string, JsonElement>? additionalData )
     {
-        if ( additionalData is null ) { return (TSelf)this; }
-
-        JObject json = _additionalData ??= new JObject();
-        foreach ( ( string key, JToken? jToken ) in additionalData ) { json[key] = jToken; }
-
+        _additionalData = Json.Merge(_additionalData, additionalData);
         return (TSelf)this;
     }
 }

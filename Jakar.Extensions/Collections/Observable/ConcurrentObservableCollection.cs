@@ -15,7 +15,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
+public sealed partial class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
     public ConcurrentObservableCollection() : base() { }
@@ -59,7 +59,7 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
 
 
 [Serializable]
-public abstract class ConcurrentObservableCollection<TSelf, TValue> : ObservableCollection<TSelf, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
+public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : ObservableCollection<TSelf, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
     where TSelf : ConcurrentObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
     where TValue : IEquatable<TValue>
 {

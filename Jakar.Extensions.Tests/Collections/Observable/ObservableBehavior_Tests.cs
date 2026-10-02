@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions.Tests
+﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 // 10/01/2026
 
 using System.Collections;
@@ -447,6 +447,8 @@ public sealed class ObservableBehavior_Tests : Assert
 
     private sealed class Recording() : ObservableCollection<Recording, int>(Comparer<int>.Default), ICollectionAlerts<Recording, int>
     {
+        public static System.Text.Json.Serialization.Metadata.JsonTypeInfo<Recording> JsonTypeInfo => Json.GetTypeInfo<Recording>();
+
         public readonly List<NotifyCollectionChangedAction> Actions = [];
 
 

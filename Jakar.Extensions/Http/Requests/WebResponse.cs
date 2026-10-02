@@ -131,7 +131,7 @@ public sealed class WebResponse<TValue>
 
         static Errors fromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
         static Errors fromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
-        static Errors fromNode( WebResponse<TValue>   response, JToken     node )   => fromString(response, node.ToJson());
+        static Errors fromNode( WebResponse<TValue>   response, JsonNode   node )   => fromString(response, node.ToJson());
         static Errors fromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Error.Create(response.StatusCode), ..errors.Details]);
     }
     public string ErrorMessage() => StatusCode.GetErrorTitle();

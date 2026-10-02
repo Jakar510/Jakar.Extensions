@@ -1,10 +1,11 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
-    [JsonIgnore] public readonly Exception?        Value;
-    public                       JToken?           Data            { get; init; }
+    [JsonIgnore] public          Exception?        Value           { get; private init; }
+    public                       JsonObject?       Data            { get; init; }
     public                       string?           HelpLink        { get; init; }
     public                       int               HResult         { get; init; }
     public                       ExceptionDetails? Inner           { get; init; }
@@ -20,40 +21,38 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public ExceptionDetails( Exception exception, bool includeMethodInfo = true )
+    /// <remarks> A factory rather than a constructor: System.Text.Json's generated metadata reflects over the constructors, and this one needs method metadata (<see cref="RequiresUnreferencedCodeAttribute"/>). </remarks>
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    public static ExceptionDetails Create( Exception exception, bool includeMethodInfo = true )
     {
-        Value   = exception ?? throw new ArgumentNullException(nameof(exception));
-        Message = exception.Message;
-        HResult = exception.HResult;
+        ArgumentNullException.ThrowIfNull(exception);
 
-        Type = exception.GetType().FullName;
-
-        HelpLink = exception.HelpLink;
-        Source   = exception.Source;
-
-        StackTrace = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
-
-        MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}";
-        Data            = exception.GetData();
-        Str             = exception.ToString();
-
-        if ( includeMethodInfo ) { TargetSite = exception.MethodInfo(); }
-
-        Inner = exception.InnerException is null
-                    ? null
-                    : new ExceptionDetails(exception.InnerException);
+        return new ExceptionDetails
+               {
+                   Value           = exception,
+                   Message         = exception.Message,
+                   HResult         = exception.HResult,
+                   Type            = exception.GetType().FullName,
+                   HelpLink        = exception.HelpLink,
+                   Source          = exception.Source,
+                   StackTrace      = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [],
+                   MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}",
+                   Data            = exception.GetData(),
+                   Str             = exception.ToString(),
+                   TargetSite      = includeMethodInfo
+                                         ? exception.MethodInfo()
+                                         : null,
+                   Inner = exception.InnerException is null
+                               ? null
+                               : Create(exception.InnerException, includeMethodInfo)
+               };
     }
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
     public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    private static ExceptionDetails Create( Exception exception ) => new(exception);
-
-
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     private static ExceptionDetails? TryCreate( [NotNullIfNotNull(nameof(exception))] Exception? exception ) => exception is not null
                                                                                                                     ? Create(exception)
                                                                                                                     : null;

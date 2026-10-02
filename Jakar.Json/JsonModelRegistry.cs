@@ -27,6 +27,23 @@ public static class JsonModelRegistry
     public static bool IsRegistered<T>() => __factories.ContainsKey(typeof(T));
 
 
+    public static bool TryGet( Type type, [NotNullWhen(true)] out JsonTypeInfo? info )
+    {
+        ArgumentNullException.ThrowIfNull(type);
+
+        if ( __resolved.TryGetValue(type, out info) ) { return true; }
+
+        if ( __factories.TryGetValue(type, out Func<JsonTypeInfo>? factory) )
+        {
+            info = __resolved.GetOrAdd(type, factory());
+            return true;
+        }
+
+        info = null;
+        return false;
+    }
+
+
     public static bool TryGet<T>( [NotNullWhen(true)] out JsonTypeInfo<T>? info )
     {
         if ( __resolved.TryGetValue(typeof(T), out JsonTypeInfo? cached) )

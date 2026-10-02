@@ -3,10 +3,10 @@
 
 /// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
 [Serializable]
-[JsonConverter(typeof(AppVersionJsonConverter))]
-[MsJsonConverter(typeof(AppVersionMsJsonConverter))]
+[JsonConverter(typeof(SerializeAsStringJsonConverter<AppVersion>))]
 [TypeConverter(typeof(AppVersionTypeConverter))]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char       SEPARATOR = '.';
     public static readonly AppVersion Default   = new(0);
@@ -408,25 +408,6 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     public override int  GetHashCode()         => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags);
 
 
-    public static bool TryFromJson( string? json, [NotNullWhen(true)] out AppVersion? result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = null;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = null;
-        return false;
-    }
-    public static AppVersion FromJson( string json ) => json.FromJson<AppVersion>();
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -454,10 +435,6 @@ public enum AppVersionFormat
     /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
     Complete = 6
 }
-
-
-
-public sealed class AppVersionJsonConverter : SerializeAsStringJsonConverter<AppVersionJsonConverter, AppVersion>;
 
 
 

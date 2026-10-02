@@ -1,0 +1,51 @@
+{
+  "Alert": {
+    "IsNotValid": false,
+    "IsValid": true,
+    "Message": "Something happened",
+    "Title": "Heads up",
+    "TTL": "00:00:30"
+  },
+  "Description": "• Validation\n    -must be 5 characters or fewer\n    -required\n    -notes\nBad Request\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+  "Details": [
+    {
+      "Description": "must be 5 characters or fewer",
+      "Details": {
+        "Tags": [
+          {
+            "Key": "field",
+            "Value": "notes",
+            "HasValue": true
+          },
+          {
+            "Key": "nullable",
+            "Value": null,
+            "HasValue": false
+          }
+        ],
+        "Entries": [
+          "must be 5 characters or fewer",
+          "required"
+        ],
+        "IsEmpty": false
+      },
+      "Instance": "/items/1",
+      "StatusCode": 400,
+      "Title": "Validation",
+      "Type": "Client.BadRequest"
+    },
+    {
+      "Description": "second",
+      "Details": {
+        "Tags": null,
+        "Entries": null,
+        "IsEmpty": true
+      },
+      "Instance": null,
+      "StatusCode": 400,
+      "Title": "Bad Request",
+      "Type": "Client.BadRequest"
+    }
+  ],
+  "IsValid": true
+}

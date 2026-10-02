@@ -10,8 +10,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-[JsonObject]
-public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
+[JsonConverter(typeof(LocalDirectoryJsonConverter))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;

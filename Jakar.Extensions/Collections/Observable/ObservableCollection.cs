@@ -18,7 +18,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
+public sealed partial class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
     public ObservableCollection() : this(Comparer<TValue>.Default) { }
@@ -61,7 +61,7 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
 
 
 [Serializable]
-public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
     where TValue : IEquatable<TValue>
     where TSelf : ObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {

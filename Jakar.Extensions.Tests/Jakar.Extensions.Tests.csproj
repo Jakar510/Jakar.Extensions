@@ -22,6 +22,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="Golden\v10\*.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="JetBrains.DotMemoryUnit" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
@@ -36,6 +40,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
+		<!-- Consumers get the [JsonModel] generator from the Jakar.Json package; a ProjectReference needs it explicitly. -->
+		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

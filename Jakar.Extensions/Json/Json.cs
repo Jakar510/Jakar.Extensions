@@ -1,83 +1,151 @@
-﻿// Jakar.Extensions :: Jakar.Extensions
+// Jakar.Extensions :: Jakar.Extensions
 // 11/29/2023  1:49 PM
 
 namespace Jakar.Extensions;
 
 
-public static class Json
+/// <summary>
+///     System.Text.Json helpers. Everything is AOT-safe: metadata comes from source-generated contexts, never from reflection.
+///     <para> Two tiers: members that take a <see cref="JsonTypeInfo{T}"/> (compile-time checked), and members without one that resolve it through <see cref="GetTypeInfo{T}"/>: a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. Those throw <see cref="NotSupportedException"/> naming the type when it isn't registered. </para>
+///     <para> <see cref="IJsonModel{TSelf}"/> types also get <c> value.ToJson() </c> / <c> T.FromJson(json) </c> from Jakar.Json. </para>
+/// </summary>
+public static partial class Json
 {
-    public const  string                 AOT_WARNING  = "Newtonsoft.Json relies on dynamically creating types that may not be available with Ahead of Time compilation.";
-    public const  string                 TRIM_WARNING = "Newtonsoft.Json relies on reflection over types that may be removed when trimming.";
-    public static JsonLoadSettings       LoadSettings { get; set; } = new();
-    public static JsonSerializerSettings Settings     { get; set; } = new();
+    private static readonly Lock                         __lock      = new();
+    private static readonly List<IJsonTypeInfoResolver> __resolvers = [];
+    private static          JsonSerializerOptions?       __options;
 
 
-    public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey(key) ?? false;
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData().ContainsKey(key);
+    /// <summary>
+    ///     Options for the tier without <see cref="JsonTypeInfo{T}"/>. Matches <see cref="JakarExtensionsContext"/>'s settings: lenient reading (case-insensitive names, numbers in strings,
+    ///     comments, trailing commas, public fields) so JSON written by Jakar.Extensions 10.x (Newtonsoft) still reads, PascalCase names, and indented output.
+    ///     <para> Frozen on first use; register resolvers before that with <see cref="AddResolver"/>. </para>
+    /// </summary>
+    public static JsonSerializerOptions Options => Volatile.Read(ref __options) ?? CreateOptions();
 
 
-    public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()[key];
-
-
-    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static JToken? ToToken<TValue>( [NotNullIfNotNull(nameof(value))] this TValue? value )
+    /// <summary> Adds a source-generated context (or any resolver) to <see cref="Options"/>. Resolvers added later are consulted first, so an app can override library metadata. Call at startup, before any serialization. </summary>
+    /// <exception cref="InvalidOperationException"> <see cref="Options"/> is already in use. </exception>
+    public static void AddResolver( IJsonTypeInfoResolver resolver )
     {
-        JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
-        using JTokenWriter jsonWriter     = new();
+        ArgumentNullException.ThrowIfNull(resolver);
 
-        jsonSerializer.Serialize(jsonWriter, value);
-        JToken element = jsonWriter.Token!;
-        return element;
-    }
-
-
-    public static void SetAdditionalData( this IJsonStringModel model, JObject? data ) => model.AdditionalData = data?.ToJson();
-
-
-    public static string ToJson( this         JToken value ) => value.ToString(Formatting.Indented);
-    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static string ToJson<TValue>( this TValue value ) => JsonConvert.SerializeObject(value, Formatting.Indented);
-
-
-    /// <summary> Asynchronously load and return JToken values from a stream containing a JSON array. The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
-    private static async IAsyncEnumerable<JToken> LoadAsyncEnumerable( this JsonTextReader reader, JsonLoadSettings loadSettings, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        ( await reader.MoveToContentAndAssertAsync(token).ConfigureAwait(false) ).AssertTokenType(JsonToken.StartArray);
-
-        token.ThrowIfCancellationRequested();
-
-        while ( ( await reader.ReadToContentAndAssert(token).ConfigureAwait(false) ).TokenType != JsonToken.EndArray )
+        lock ( __lock )
         {
-            token.ThrowIfCancellationRequested();
+            if ( __options is not null ) { throw new InvalidOperationException($"{nameof(Json)}.{nameof(Options)} is already in use; call {nameof(AddResolver)} at startup, before any serialization."); }
 
-            yield return await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
+            if ( !__resolvers.Contains(resolver) ) { __resolvers.Insert(0, resolver); }
         }
-
-        token.ThrowIfCancellationRequested();
     }
 
 
-    /// <remarks> Serializes exactly <paramref name="values"/>. (It used to rent a pooled array and serialize the whole rental, which is usually longer than the span.) </remarks>
-    [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public static string ToJson<TValue>( this scoped in ReadOnlySpan<TValue> values ) => values.ToArray().ToJson();
-
-
-
-    extension( PropertyInfo self )
+    private static JsonSerializerOptions CreateOptions()
     {
-        public bool   GetJsonIsRequired() => self.GetCustomAttribute<JsonRequiredAttribute>() is not null;
-        public string GetJsonKey()        => self.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? self.Name;
+        lock ( __lock )
+        {
+            if ( __options is not null ) { return __options; }
+
+            JsonSerializerOptions options = new(JakarExtensionsContext.Default.Options) { TypeInfoResolver = JsonTypeInfoResolver.Combine([.. __resolvers, JakarExtensionsContext.Default, UserGuid.UserGuidJsonContext.Default, UserLong.UserLongJsonContext.Default]) };
+            options.MakeReadOnly();
+            Volatile.Write(ref __options, options);
+            return options;
+        }
     }
 
 
+    /// <summary> Metadata for <typeparamref name="T"/>: a [JsonModel] registration first (<see cref="JsonModelRegistry"/>), then <see cref="Options"/>' resolver chain. Cached per type. </summary>
+    /// <exception cref="NotSupportedException"> <typeparamref name="T"/> isn't registered anywhere. </exception>
+    public static JsonTypeInfo<T> GetTypeInfo<T>() => TypeInfoCache<T>.Value ??= JsonModelRegistry.TryGet(out JsonTypeInfo<T>? info)
+                                                                                    ? info
+                                                                                    : Options.GetRequiredTypeInfo<T>();
+
+
+    /// <summary> Metadata for a runtime <paramref name="type"/> (e.g. the actual type behind a base-class reference): a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. </summary>
+    /// <exception cref="NotSupportedException"> <paramref name="type"/> isn't registered anywhere. </exception>
+    public static JsonTypeInfo GetTypeInfo( Type type )
+    {
+        ArgumentNullException.ThrowIfNull(type);
+        if ( JsonModelRegistry.TryGet(type, out JsonTypeInfo? info) || Options.TryGetTypeInfo(type, out info) ) { return info; }
+
+        throw new NotSupportedException($"No JSON metadata is registered for '{type.Name}'. Add [JsonSerializable(typeof({type.Name}))] to a JsonSerializerContext and register it with Json.AddResolver(...) at startup, or put [JsonModel] on the type.");
+    }
+
+
+    public static bool TryGetTypeInfo<T>( [NotNullWhen(true)] out JsonTypeInfo<T>? info )
+    {
+        try
+        {
+            info = GetTypeInfo<T>();
+            return true;
+        }
+        catch ( NotSupportedException )
+        {
+            info = null;
+            return false;
+        }
+    }
+
+
+
+    private static class TypeInfoCache<T>
+    {
+        // Benign race: concurrent first calls resolve the same metadata. Not a static readonly initializer, so a missing registration
+        // surfaces as NotSupportedException rather than TypeInitializationException.
+        public static JsonTypeInfo<T>? Value;
+    }
+
+
+
+    // ─── Serialize ────────────────────────────────────────────────────────────
+
+    /// <summary> Serializes with <see cref="GetTypeInfo{T}"/>. For <see cref="IJsonModel{TSelf}"/> types prefer <c> value.ToJson() </c>. </summary>
+    public static string Serialize<T>( T value, bool? indented = null ) => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
+    public static byte[]   SerializeToUtf8Bytes<T>( T value )                                                    => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
+    public static JsonNode? SerializeToNode<T>( T     value )                                                    => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
+    public static JsonElement SerializeToElement<T>( T value )                                                   => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
+    public static string Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented = null ) => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static string Serialize<T>( IEnumerable<T>         values, bool? indented = null ) => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static Task SerializeAsync<T>( Stream stream, T value, CancellationToken token = default ) => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
+
+
+    public static string ToJson( this JsonNode node, bool indented = true ) => node.ToJsonString(Options.GetIndented(indented));
+    public static string ToJson( this JsonElement element, bool indented = true )
+    {
+        if ( !indented ) { return element.GetRawText(); }
+
+        ArrayBufferWriter<byte> buffer = new(256);
+        using ( Utf8JsonWriter writer = new(buffer, Options.GetWriterOptions(true)) ) { element.WriteTo(writer); }
+
+        return Encoding.UTF8.GetString(buffer.WrittenSpan);
+    }
+
+
+    private static JsonSerializerOptions? __compact;
+
+    private static JsonSerializerOptions GetIndented( this JsonSerializerOptions options, bool indented )
+    {
+        if ( indented == options.WriteIndented ) { return options; }
+
+        JsonSerializerOptions? compact = Volatile.Read(ref __compact);
+        if ( compact is not null ) { return compact; }
+
+        compact = new JsonSerializerOptions(options) { WriteIndented = indented };
+        compact.MakeReadOnly();
+        return Interlocked.CompareExchange(ref __compact, compact, null) ?? compact;
+    }
+
+
+
+    // ─── Deserialize ──────────────────────────────────────────────────────────
 
     extension( string? self )
     {
-        public JToken? TryFromJson()
+        /// <summary> Parses JSON into a <see cref="JsonNode"/>; <see langword="null"/> for blank input or invalid JSON. </summary>
+        public JsonNode? TryFromJson()
         {
-            try
-            {
-                return self is not null
-                           ? JToken.Parse(self)
-                           : null;
-            }
+            if ( string.IsNullOrWhiteSpace(self) ) { return null; }
+
+            try { return JsonNode.Parse(self, NodeOptions, DocumentOptions); }
             catch ( JsonException e )
             {
                 SelfLogger.WriteLine("Json parsing error: {Error}", e);
@@ -86,291 +154,67 @@ public static class Json
         }
 
 
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? TryFromJson<TValue>()
-        {
-            try
-            {
-                return self is not null
-                           ? JsonConvert.DeserializeObject<TValue>(self, Settings)
-                           : default;
-            }
-            catch ( JsonException e )
-            {
-                SelfLogger.WriteLine("Json parsing error: {Error}", e);
-                return default;
-            }
-        }
+        /// <summary> Deserializes with <see cref="GetTypeInfo{T}"/>; <c> default </c> for blank input, invalid JSON, or a JSON <c> null </c> root. </summary>
+        public TValue? TryFromJson<TValue>() => self.TryFromJson(GetTypeInfo<TValue>());
+
+
+        public TValue? TryFromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.TryFromJson(self, info, out TValue? result)
+                                                                               ? result
+                                                                               : default;
     }
 
 
 
     extension( string self )
     {
-        public JToken FromJson()         => ThrowIfNull(JToken.Parse(self));
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue FromJson<TValue>() => ThrowIfNull(JsonConvert.DeserializeObject<TValue>(self, Settings));
+        /// <exception cref="JsonException"> Invalid JSON or a JSON <c> null </c> root. </exception>
+        public JsonNode FromJson() => JsonNode.Parse(self, NodeOptions, DocumentOptions) ?? throw new JsonException("The JSON root is null.");
 
+        /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
+        public TValue FromJson<TValue>() => JsonModel.FromJson(self, GetTypeInfo<TValue>());
 
-        public JObject? GetAdditionalData()
-        {
-            if ( string.IsNullOrWhiteSpace(self) ) { return null; }
-
-            return JObject.Parse(self);
-        }
-    }
-
-
-
-    extension( IJsonModel self )
-    {
-        public bool Remove( string key )
-        {
-            JObject dict = self.GetAdditionalData();
-            return dict.Remove(key);
-        }
-        public bool Remove( string key, out JToken? value )
-        {
-            JObject dict = self.GetAdditionalData();
-            dict.TryGetValue(key, out value);
-            return dict.Remove(key);
-        }
-    }
-
-
-
-    extension( IJsonStringModel self )
-    {
-        public bool Remove( string key )
-        {
-            JObject additionalData = self.GetAdditionalData();
-            bool    result         = additionalData.Remove(key);
-            self.SetAdditionalData(additionalData);
-            return result;
-        }
-        public bool Remove( string key, out JToken? value )
-        {
-            JObject dict = self.GetAdditionalData();
-            dict.TryGetValue(key, out value);
-            bool result = dict.Remove(key);
-            self.SetAdditionalData(dict);
-            return result;
-        }
-
-        [Pure] public JObject GetAdditionalData() => self.AdditionalData?.GetAdditionalData() ?? new JObject();
-    }
-
-
-
-    extension( IJsonModel model )
-    {
-        public JObject GetAdditionalData() => model.AdditionalData ??= new JObject();
-        public JToken? Get( string key )   => model.AdditionalData?[key];
-    }
-
-
-
-    extension( IJsonModel self )
-    {
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? Get<TValue>( string key )
-        {
-            JToken? token = self.Get(key);
-            if ( token is null ) { return default; }
-
-            return token.ToObject<TValue>();
-        }
-    }
-
-
-
-    extension( IJsonStringModel self )
-    {
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public TValue? Get<TValue>( string key )
-        {
-            JToken? token = self.Get(key);
-            if ( token is null ) { return default; }
-
-            return token.ToObject<TValue>();
-        }
-    }
-
-
-
-    extension( IJsonModel self )
-    {
-        public void Add( string key, bool value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, byte value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, short value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, int value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, long value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, float value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, double value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, decimal value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, string value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, DateTime value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, DateTimeOffset value )
-        {
-            JToken element = value;
-            self.Add(key, element);
-        }
-        public void Add( string key, TimeSpan value )
-        {
-            JToken? element = value;
-            self.Add(key, element);
-        }
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public void Add<TValue>( string key, TValue value )
-        {
-            JsonSerializer     jsonSerializer = JsonSerializer.Create(Settings);
-            using JTokenWriter jsonWriter     = new();
-
-            jsonSerializer.Serialize(jsonWriter, value);
-            JToken element = jsonWriter.Token!;
-            self.Add(key, element);
-        }
-        public void Add( string                 key, JToken? element ) => self.GetAdditionalData()[key] = element;
-        public void SetAdditionalData( JObject? data ) => self.AdditionalData = data;
+        /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
+        public TValue FromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.FromJson(self, info);
     }
 
 
 
     extension( Stream self )
     {
-        public async ValueTask<JToken> FromJson( CancellationToken token = default )
-        {
-            JsonLoadSettings           loadSettings = LoadSettings;
-            using StreamReader         textReader   = new(self, leaveOpen: true); // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            await using JsonTextReader reader       = new(textReader) { CloseInput = false };
+        /// <summary> Reads a JSON document. The caller owns (and disposes) the stream. </summary>
+        public async ValueTask<JsonNode> FromJson( CancellationToken token = default ) => await JsonNode.ParseAsync(self, NodeOptions, DocumentOptions, token).ConfigureAwait(false) ?? throw new JsonException("The JSON root is null.");
 
-            JToken jToken = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
+        public ValueTask<T> FromJson<T>( CancellationToken token = default ) => JsonModel.FromJsonAsync(self, GetTypeInfo<T>(), token);
 
-            return jToken;
-        }
-
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public async ValueTask<T> FromJson<T>( CancellationToken token = default )
-        {
-            JsonLoadSettings loadSettings = LoadSettings;
-            JsonSerializer   serializer   = JsonSerializer.Create(Settings);
-
-            // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            using StreamReader         textReader = new(self, leaveOpen: true);
-            await using JsonTextReader reader     = new(textReader) { CloseInput = false };
-            JToken                     jToken     = await JToken.LoadAsync(reader, loadSettings, token).ConfigureAwait(false);
-
-            return ThrowIfNull(jToken.ToObject<T>(serializer));
-        }
+        public ValueTask<T> FromJson<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonModel.FromJsonAsync(self, info, token);
 
 
-        /// <summary> Asynchronously load and synchronously deserialize values from a stream containing a JSON array.  The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
-        [RequiresUnreferencedCode(TRIM_WARNING)] [RequiresDynamicCode(AOT_WARNING)] public async IAsyncEnumerable<T?> FromJsonAsync<T>( [EnumeratorCancellation] CancellationToken token = default )
-        {
-            JsonLoadSettings loadSettings = LoadSettings;
-            JsonSerializer   serializer   = JsonSerializer.Create(Settings);
+        /// <summary> Streams the elements of a root-level JSON array, deserializing each as it arrives. </summary>
+        public IAsyncEnumerable<T?> FromJsonAsync<T>( CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, GetTypeInfo<T>(), token);
 
-            // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            using StreamReader textReader = new(self, leaveOpen: true);
+        /// <inheritdoc cref="FromJsonAsync{T}(Stream, CancellationToken)"/>
+        public IAsyncEnumerable<T?> FromJsonAsync<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, info, token);
 
-            await using ( JsonTextReader reader = new(textReader) { CloseInput = false } )
-            {
-                await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken.ToObject<T>(serializer); }
-            }
-        }
-
-        /// <summary> Asynchronously load and return JToken values from a stream containing a JSON array.  The root object of the JSON stream must in fact be an array, or an exception is thrown </summary>
-        public async IAsyncEnumerable<JToken> FromJsonAsync( [EnumeratorCancellation] CancellationToken token = default )
-        {
-            JsonLoadSettings loadSettings = LoadSettings;
-
-            // StreamReader and JsonTextReader do not implement IAsyncDisposable so let the caller dispose the stream.
-            using StreamReader         textReader = new(self, leaveOpen: true);
-            await using JsonTextReader reader     = new(textReader) { CloseInput = false };
-
-            await foreach ( JToken jToken in reader.LoadAsyncEnumerable(loadSettings, token).ConfigureAwait(false) ) { yield return jToken; }
-        }
+        /// <summary> Streams the elements of a root-level JSON array as <see cref="JsonNode"/>s. </summary>
+        public IAsyncEnumerable<JsonNode?> FromJsonAsync( CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, JakarExtensionsContext.Default.JsonNode, token);
     }
 
 
+    /// <summary> A JSON <c> null </c> element (a <see langword="default"/> <see cref="JsonElement"/> is <see cref="JsonValueKind.Undefined"/> and can't be serialized). </summary>
+    public static JsonElement NullElement { get; } = JsonDocument.Parse("null").RootElement.Clone();
 
-    extension( JsonReader self )
+
+    /// <summary> Case-insensitive property lookup, like the serializer options. </summary>
+    public static JsonNodeOptions NodeOptions { get; } = new() { PropertyNameCaseInsensitive = true };
+
+    /// <summary> Comments and trailing commas allowed, like the serializer options. </summary>
+    public static JsonDocumentOptions DocumentOptions { get; } = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+
+
+
+    extension( PropertyInfo self )
     {
-        public JsonReader AssertTokenType( JsonToken tokenType ) => self.TokenType == tokenType
-                                                                        ? self
-                                                                        : throw new JsonSerializationException($"Unexpected token {self.TokenType}, expected {tokenType}");
-
-        public async ValueTask<JsonReader> ReadToContentAndAssert( CancellationToken token = default ) =>
-            await ( await self.ReadAndAssertAsync(token).ConfigureAwait(false) ).MoveToContentAndAssertAsync(token).ConfigureAwait(false);
-
-
-        public async ValueTask<JsonReader> MoveToContentAndAssertAsync( CancellationToken token = default )
-        {
-            if ( self.TokenType is JsonToken.None ) // Skip past beginning of stream.
-            {
-                await self.ReadAndAssertAsync(token).ConfigureAwait(false);
-            }
-
-            while ( self.TokenType is JsonToken.Comment ) // Skip past comments.
-            {
-                await self.ReadAndAssertAsync(token).ConfigureAwait(false);
-            }
-
-            return self;
-        }
-        public async ValueTask<JsonReader> ReadAndAssertAsync( CancellationToken token = default )
-        {
-            if ( !await self.ReadAsync(token).ConfigureAwait(false) ) { throw new JsonReaderException("Unexpected end of JSON stream."); }
-
-            return self;
-        }
+        public bool   GetJsonIsRequired() => self.GetCustomAttribute<JsonRequiredAttribute>() is not null;
+        public string GetJsonKey()        => self.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? self.Name;
     }
-}
-
-
-
-public interface IJsonModel
-{
-    [JsonExtensionData] public JObject? AdditionalData { get; set; }
-}
-
-
-
-public interface IJsonStringModel
-{
-    public string? AdditionalData { get; set; }
 }

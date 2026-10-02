@@ -11,7 +11,8 @@ namespace Jakar.Extensions;
 
 [Serializable]
 [method: JsonConstructor]
-public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, in GcMemoryInformation info ) : IJsonModel<GcInfo>
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, in GcMemoryInformation info ) : IJsonModel<GcInfo>
 {
     public readonly long                TotalMemory                    = totalMemory;
     public readonly TimeSpan            TotalPauseDuration             = totalPauseDuration;
@@ -31,25 +32,6 @@ public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long 
                                                                         MemoryInfo.GetProperty(nameof(MemoryInfo))
                                                                     ]));
 
-    public static bool TryFromJson( string? json, out GcInfo result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = default;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = default;
-        return false;
-    }
-    public static GcInfo FromJson( string json ) => json.FromJson<GcInfo>();
 
 
     public int CompareTo( object? other ) => other is GcInfo app

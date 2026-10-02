@@ -43,6 +43,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- Jakar.Json flows to consumers with its [JsonModel] generator (PrivateAssets="none" keeps analyzers in the packed dependency). -->
+		<ProjectReference Include="..\Jakar.Json\Jakar.Json.csproj" PrivateAssets="none" />
+		<!-- Package analyzers don't apply through a ProjectReference, so the library's own [JsonModel] types need the generator explicitly. -->
+		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
 		<InternalsVisibleTo Include="Jakar.Extensions.Tests" />
 	</ItemGroup>
@@ -88,7 +95,6 @@
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
-		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />

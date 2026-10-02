@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions.Tests
+﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 
 using System.IO;
 using System.Text;
@@ -10,7 +10,7 @@ namespace Jakar.Extensions.Tests;
 
 [TestFixture]
 [TestOf(typeof(Base64))]
-public class Base64_Tests : Assert
+public partial class Base64_Tests : Assert
 {
     private const string HELLO_WORLD      = "Hello, World!";
     private const string HELLO_WORLD_B64  = "SGVsbG8sIFdvcmxkIQ=="; // Base64 of UTF-8 "Hello, World!"
@@ -154,5 +154,6 @@ public class Base64_Tests : Assert
     }
 
 
-    private sealed record SampleRecord( string Name, int Age );
+    [JsonModel(typeof(TestJsonContext))]
+    internal sealed partial record SampleRecord( string Name, int Age );
 }

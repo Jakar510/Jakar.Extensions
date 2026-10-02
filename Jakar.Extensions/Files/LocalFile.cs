@@ -12,7 +12,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
+[JsonConverter(typeof(LocalFileJsonConverter))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     [JsonIgnore] public readonly FileInfo Info         = info;

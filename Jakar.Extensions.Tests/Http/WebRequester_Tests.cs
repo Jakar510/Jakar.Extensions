@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions.Tests
+﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 
 
@@ -19,7 +18,7 @@ namespace Jakar.Extensions.Tests;
 
 [TestFixture]
 [TestOf(typeof(WebRequester))]
-public class WebRequester_Tests : Assert
+public partial class WebRequester_Tests : Assert
 {
     private static readonly Uri                      __host  = new("https://example.test/api/");
     private static readonly WebRequester.RetryPolicy __retry = WebRequester.RetryPolicy.Create(TimeSpan.Zero, TimeSpan.Zero, 3);
@@ -30,11 +29,13 @@ public class WebRequester_Tests : Assert
 
 
 
-    public sealed record Item( string Name, int Count );
+    [JsonModel(typeof(TestJsonContext))]
+    public sealed partial record Item( string Name, int Count );
 
 
 
-    public sealed class JsonItem( string text ) : BaseClass
+    [JsonModel(typeof(TestJsonContext))]
+    public sealed partial class JsonItem( string text ) : BaseClass
     {
         public string Text { get; set; } = text;
     }
@@ -71,11 +72,13 @@ public class WebRequester_Tests : Assert
         StubHandler  handler   = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, """{"Name":"widget","Count":3}"""));
         WebRequester requester = Create(handler);
 
-        WebResponse<Item>   typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
-        WebResponse<JToken> token = await requester.Get("item").AsJson(CancellationToken.None);
+        WebResponse<Item>                        typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
+        WebResponse<Item>                        info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
+        WebResponse<System.Text.Json.Nodes.JsonNode> token = await requester.Get("item").AsJson(CancellationToken.None);
 
         this.AreEqual(new Item("widget", 3), typed.Payload);
-        this.AreEqual(3,                     token.Payload!["Count"]!.Value<int>());
+        this.AreEqual(new Item("widget", 3), info.Payload);
+        this.AreEqual(3,                     token.Payload!["Count"]!.GetValue<int>());
     }
 
     [Test]
@@ -314,8 +317,8 @@ public class WebRequester_Tests : Assert
 
         this.AreEqual(encoding.WebName, content.Headers.ContentType!.CharSet);
         this.IsTrue(bom.Length == 0 || !bytes.AsSpan().StartsWith(bom));
-        this.AreEqual(TEXT, Newtonsoft.Json.JsonConvert.DeserializeObject<Item>(encoding.GetString(bytes))!.Name);
-        this.AreEqual(TEXT, Newtonsoft.Json.JsonConvert.DeserializeObject<Item>(await content.ReadAsStringAsync())!.Name); // decoded via the declared charset
+        this.AreEqual(TEXT, Item.FromJson(encoding.GetString(bytes)).Name);
+        this.AreEqual(TEXT, Item.FromJson(await content.ReadAsStringAsync()).Name); // decoded via the declared charset
     }
 
     [Test]
@@ -335,7 +338,9 @@ public class WebRequester_Tests : Assert
         await utf16.Post("items", new JsonItem(TEXT)).AsString(CancellationToken.None);
 
         this.AreEqual("utf-16",                       handler.Requests[0].Content!.Headers.ContentType!.CharSet);
-        this.AreEqual($$"""{"Text":"{{TEXT}}"}""",    handler.Bodies[0]); // the stub reads the body via the declared charset
+        // The stub reads the body via the declared charset. Compare decoded values: System.Text.Json \u-escapes characters outside the BMP (😀), Newtonsoft didn't.
+        this.AreEqual(TEXT, JsonItem.FromJson(handler.Bodies[0]).Text);
+        this.IsTrue(handler.Bodies[0].Contains("日本語", StringComparison.Ordinal)); // BMP text is written as-is (relaxed escaping)
     }
 
 
@@ -350,7 +355,7 @@ public class WebRequester_Tests : Assert
         this.IsFalse(bytes.AsSpan().StartsWith(Encoding.UTF8.GetPreamble()));
 
         // A receiver decoding with the declared charset gets every character back.
-        this.AreEqual(TEXT, Newtonsoft.Json.JsonConvert.DeserializeObject<Item>(await content.ReadAsStringAsync())!.Name);
+        this.AreEqual(TEXT, Item.FromJson(await content.ReadAsStringAsync()).Name);
 
         // UTF-8 -> UTF-16 (Encoding.Unicode) -> UTF-8 is lossless, and Encoding.Default reads the same bytes on .NET.
         byte[] utf16 = Encoding.Convert(Encoding.UTF8, Encoding.Unicode, bytes);
