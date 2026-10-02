@@ -6,11 +6,11 @@ namespace Jakar.Permissions.Generator;
 
 internal static class Constants
 {
-    public const string App         = "App";
-    public const string Attribute   = $"{NAME_SPACE}.{nameof(PermissionGenOptionsAttribute)}";
+    public const string APP         = "App";
+    public const string ATTRIBUTE   = $"{NAME_SPACE}.{nameof(PermissionGenOptionsAttribute)}";
     public const string FILE_NAME   = "permissions.json";
     public const string NAME_SPACE  = "Jakar.Permissions.Generator";
-    public const string Permissions = "Permissions";
+    public const string PERMISSIONS = "Permissions";
 
 
     public static string[] Candidates =

@@ -12,38 +12,10 @@ public interface IUserID
 
 
 
-public interface IUserData : IUserName, IUserID, IUserRights, IValidator, IJsonModel
+public interface IUserData : IUserName, IUserID, IUserRights, INotifyValidator, IJsonModel
 {
-    public                string            Company             { get; set; }
-    public                string            Department          { get; set; }
-    public                string            Description         { get; set; }
-    [EmailAddress] public string            Email               { get; set; }
-    public                string            Ext                 { get; set; }
-    [Required] public     string            FirstName           { get; set; }
-    public                string            FullName            { get; set; }
-    public                string            Gender              { get; set; }
-    [Required] public     string            LastName            { get; set; }
-    [Phone]    public     string            PhoneNumber         { get; set; }
-    [Required] public     SupportedLanguage PreferredLanguage   { get; set; }
-    public                DateTimeOffset?   SubscriptionExpires { get; }
-    public                string            Title               { get; set; }
-    [Url] public          string            Website             { get; set; }
-
-
-    public static string GetFullName( IUserData    data ) => $"{data.FirstName} {data.LastName}".Trim();
-    public static string GetDescription( IUserData data ) => GetDescription(data.Department, data.Title, data.Company);
-    public static string GetDescription( scoped in ReadOnlySpan<char> department, scoped in ReadOnlySpan<char> title, scoped in ReadOnlySpan<char> company )
-    {
-        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return EMPTY; }
-
-        if ( !department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
-
-        if ( !department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && !company.IsNullOrWhiteSpace() ) { return $"{department} at {company}"; }
-
-        if ( department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && !company.IsNullOrWhiteSpace() ) { return $"{title} at {company}"; }
-
-        return $"{department}, {title} at {company}";
-    }
+    [Required] public SupportedLanguage PreferredLanguage   { get; set; }
+    public            DateTimeOffset?   SubscriptionExpires { get; }
 }
 
 
@@ -75,7 +47,6 @@ public interface IImageID<TID>
 public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>, ICreatedByUser<TID>, IEscalateToUser<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    public void   With( IUserData<TID> value );
     public string GetDescription();
 }
 
@@ -109,17 +80,20 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : class, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
 {
+    public TSelf With<TValue>( TValue value )
+        where TValue : IUserData<TID>, IUserDetails;
+    public TSelf With( IUserData<TID>                   value );
     public TSelf With( IEnumerable<TAddress>            values );
     public TSelf With( params ReadOnlySpan<TAddress>    values );
     public TSelf With( IEnumerable<TGroupModel>         values );
     public TSelf With( params ReadOnlySpan<TGroupModel> values );
     public TSelf With( IEnumerable<TRoleModel>          values );
     public TSelf With( params ReadOnlySpan<TRoleModel>  values );
-    public TSelf With( JObject?                      data );
-    public TSelf With<TValue>( TValue value )
-        where TValue : IUserData<TID>;
+    public TSelf With( JObject?                         data );
 
 
+    public abstract static TSelf Create<TValue>( TValue value )
+        where TValue : IUserData<TID>, IUserDetails;
     public abstract static TSelf            Create( IUserData<TID>      model, IEnumerable<TAddress>            addresses, IEnumerable<TGroupModel>            groups, IEnumerable<TRoleModel>            roles );
     public abstract static TSelf            Create( IUserData<TID>      model, scoped in ReadOnlySpan<TAddress> addresses, scoped in ReadOnlySpan<TGroupModel> groups, scoped in ReadOnlySpan<TRoleModel> roles );
     public abstract static ValueTask<TSelf> CreateAsync( IUserData<TID> model, IAsyncEnumerable<TAddress>       addresses, IAsyncEnumerable<TGroupModel>       groups, IAsyncEnumerable<TRoleModel>       roles, CancellationToken token = default );
@@ -139,35 +113,4 @@ public interface ICreateUserModel<TSelf, TID> : IUserData<TID>, IJsonModel<TSelf
 public interface IIsVendor
 {
     public bool IsVendor { get; set; }
-}
-
-
-
-public interface IUserDetailsModel<TID> : IUserData<TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public int?            BadLogins              { get; set; }
-    public DateTimeOffset  DateCreated            { get; }
-    public bool            IsDisabled             { get; set; }
-    public bool            IsEmailConfirmed       { get; set; }
-    public bool            IsLocked               { get; set; }
-    public bool            IsPhoneNumberConfirmed { get; set; }
-    public bool            IsTwoFactorEnabled     { get; set; }
-    public DateTimeOffset? LastBadAttempt         { get; set; }
-    public DateTimeOffset? LastLogin              { get; set; }
-    public DateTimeOffset? LockDate               { get; set; }
-}
-
-
-
-public interface IUserRecord<TID> : IUserDetailsModel<TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    /// <summary> A random value that must change whenever a user is persisted to the store </summary>
-    public string ConcurrencyStamp { get; set; }
-
-    public bool            IsActive       { get; set; }
-    public DateTimeOffset? LastModified   { get; set; }
-    public string          PasswordHash   { get; set; }
-    public TID?            SubscriptionID { get; set; }
 }

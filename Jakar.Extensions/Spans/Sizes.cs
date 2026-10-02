@@ -41,14 +41,10 @@ public static class Sizes
                                                                           [typeof(DateTimeOffset)]  = 75,
                                                                           [typeof(DateTimeOffset?)] = 75,
                                                                           [typeof(AppVersion)]      = 200,
-                                                                          [typeof(Int128)] = Int128.MaxValue.ToString()
-                                                                                                   .Length,
-                                                                          [typeof(UInt128)] = UInt128.MaxValue.ToString()
-                                                                                                     .Length,
-                                                                          [typeof(Int128?)] = Int128.MaxValue.ToString()
-                                                                                                    .Length,
-                                                                          [typeof(UInt128?)] = UInt128.MaxValue.ToString()
-                                                                                                      .Length
+                                                                          [typeof(Int128)]          = Int128.MaxValue.ToString().Length,
+                                                                          [typeof(UInt128)]         = UInt128.MaxValue.ToString().Length,
+                                                                          [typeof(Int128?)]         = Int128.MaxValue.ToString().Length,
+                                                                          [typeof(UInt128?)]        = UInt128.MaxValue.ToString().Length
                                                                       };
 
 

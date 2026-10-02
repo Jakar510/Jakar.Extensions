@@ -14,8 +14,7 @@ public static partial class WpfApi
 
         if ( startDate.HasValue && dt < startDate.Value ) { picker.SelectedDate = dt = startDate.Value.Date; }
 
-        return dt.AddTicks(MaxTime)
-                 .ToUniversalTime();
+        return dt.AddTicks(MaxTime).ToUniversalTime();
     }
 
 

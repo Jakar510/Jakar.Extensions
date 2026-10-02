@@ -2,13 +2,17 @@
 // 09/19/2025  12:55
 
 
+using ZLinq;
+
+
+
 namespace Jakar.Extensions;
 
 
 #pragma warning disable CS1066, CS1584
 /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
 [NotSerializable]
-public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>, IEqualComparable<LocalFileWatcher>
+public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>
 {
     private FileSystemWatcher? __watcher;
 
@@ -41,8 +45,7 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
             __watcher.EnableRaisingEvents =  true;
             Clear();
 
-            Add(value.GetFiles()
-                     .AsSpan());
+            Add(value.GetFiles());
         }
     }
     public bool EnableRaisingEvents
@@ -50,7 +53,7 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
         get => __watcher?.EnableRaisingEvents is true;
         set
         {
-            if ( __watcher is not null ) { __watcher.EnableRaisingEvents = value; }
+            __watcher?.EnableRaisingEvents = value;
 
             OnPropertyChanged();
         }

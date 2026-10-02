@@ -3,15 +3,13 @@
 
 public static class PathExtensions
 {
-    extension( DirectoryInfo    root )
+    extension( DirectoryInfo root )
     {
-        public string[] Directories() => Directory.GetDirectories(root.FullName);
-        public string[] FilePaths()   => Directory.GetFiles(root.FullName);
-        public string[] SubFolderNames() => root.EnumerateDirectories()
-                                                .Select(static x => x.Name)
-                                                .ToArray();
-        public string Combine( string                      fileName )   => Path.Combine(root.FullName, fileName);
-        public string Combine( params ReadOnlySpan<string> subFolders ) => root.FullName.Combine(subFolders);
+        public string[] Directories()                                     => Directory.GetDirectories(root.FullName);
+        public string[] FilePaths()                                       => Directory.GetFiles(root.FullName);
+        public string[] SubFolderNames()                                  => root.EnumerateDirectories().Select(static x => x.Name).ToArray();
+        public string   Combine( string                      fileName )   => Path.Combine(root.FullName, fileName);
+        public string   Combine( params ReadOnlySpan<string> subFolders ) => root.FullName.Combine(subFolders);
     }
 
 

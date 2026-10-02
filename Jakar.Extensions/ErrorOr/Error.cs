@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/26/2024  13:04
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -17,12 +13,13 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     [JsonIgnore] public readonly StringTags details;
 
 
-    [JsonRequired] public string?    Description { get;            init; }
+    /// <summary> Every RFC 7807 member except <see cref="StatusCode"/> is optional, so the nullable ones must NOT be marked <c> [JsonRequired] </c> : Newtonsoft maps that to <c> Required.Always </c> , which rejects a <see langword="null"/> on write as well as on read - which is what made every factory-built error throw on serialization. </summary>
+    public                string?    Description { get;            init; }
     [JsonRequired] public StringTags Details     { get => details; init => details = value; }
-    [JsonRequired] public string?    Instance    { get;            init; }
+    public                string?    Instance    { get;            init; }
     [JsonRequired] public Status     StatusCode  { get;            init; }
-    [JsonRequired] public string?    Title       { get;            init; }
-    [JsonRequired] public string?    Type        { get;            init; }
+    public                string?    Title       { get;            init; }
+    public                string?    Type        { get;            init; }
 
 
     public Error() : base() { }
@@ -56,18 +53,16 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), in details, status, type);
     public static Error Create( Exception e, string? title, string? instance, in StringTags details = default, Status? status = null, string? type = null )
     {
-        string classType = e.GetType()
-                            .Name;
+        string classType = e.GetType().Name;
 
-        return new Error(statusCode: status ?? Statuses.GetStatusFromException(e),
-                         description: e.Message,
-                         instance: instance,
-                         details: e.GetTags()
-                                   .With(in details),
-                         title: title,
-                         type: type is null
-                                   ? classType
-                                   : $"{type}.{classType}");
+        return new Error(status ?? Statuses.GetStatusFromException(e),
+                         e.Message,
+                         instance,
+                         e.GetTags().With(in details),
+                         title,
+                         type is null
+                             ? classType
+                             : $"{type}.{classType}");
     }
     public static bool TryCreate<TValue>( WebResponse<TValue> response, string? title, [NotNullWhen(true)] out Error? error )
     {

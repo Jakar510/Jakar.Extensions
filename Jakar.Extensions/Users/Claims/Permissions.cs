@@ -1,0 +1,306 @@
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 10/14/2025  22:34
+
+using ZLinq;
+
+
+
+namespace Jakar.Extensions;
+
+
+public readonly record struct Right( int Index, bool Value )
+{
+    public readonly bool Value = Value;
+    public readonly int  Index = Index;
+}
+
+
+
+public readonly struct Permissions<TEnum> : IDisposable
+    where TEnum : unmanaged, Enum
+{
+    private static   TEnum[]?            __enumValues;
+    private readonly UserRights?         __rights;
+    private readonly bool[]              __array;
+    internal         Span<bool>          Span        => new(__array, 0, EnumValues.Length);
+    public static    char                ValidChar   { get; set; } = '+';
+    public static    char                InvalidChar { get; set; } = '.';
+    public static    Permissions<TEnum>  Default     { [MustDisposeResource] get => new(); }
+    public static    int                 Count       => EnumValues.Length;
+    public static    ReadOnlySpan<TEnum> EnumValues  => new(__enumValues ??= Enum.GetValues<TEnum>());
+    public           Enumerable          Rights      => new(this);
+
+
+    static Permissions()
+    {
+        if ( Enum.GetUnderlyingType(typeof(TEnum)) != typeof(int) ) { throw new InvalidOperationException($"{typeof(TEnum).Name} must have an underlying type of int."); }
+
+        TEnum first = EnumValues[0];
+        if ( first.AsULong() != 0 ) { throw new InvalidOperationException($"{typeof(TEnum).Name} enum values must start at 0."); }
+
+        if ( !IsContiguous() ) { throw new InvalidOperationException($"{typeof(TEnum).Name} enum values must be contiguous."); }
+    }
+    [MustDisposeResource] public Permissions() : this(null) { }
+    [MustDisposeResource] public Permissions( UserRights? rights )
+    {
+        __rights = rights;
+        __array  = ArrayPool<bool>.Shared.Rent(Count);
+        Span.Fill(false);
+    }
+    public void Dispose()
+    {
+        __rights?.SetRights(this);
+        ArrayPool<bool>.Shared.Return(__array);
+    }
+
+
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( UserRights?         rights ) => Create(rights);
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( ReadOnlySpan<TEnum> rights ) => Create(rights);
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( TEnum               rights ) => Create(rights);
+
+
+    [HandlesResourceDisposal] public string ToStringAndDispose()
+    {
+        try { return ToString(); }
+        finally { Dispose(); }
+    }
+    public override string ToString()
+    {
+        using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(Count);
+        // Rent returns a buffer of AT LEAST Count chars (usually larger, bucket-rounded); slice to Count so the un-filled tail is not serialized as embedded '\0'.
+        Span<char> chars = owner.Memory.Span[..Count];
+
+        for ( int i = 0; i < chars.Length; i++ )
+        {
+            chars[i] = Has(EnumValues[i])
+                           ? ValidChar
+                           : InvalidChar;
+        }
+
+        return new string(chars);
+    }
+
+
+    [MustDisposeResource] public static Permissions<TEnum> Create( IUserRights? rights ) => Create(rights?.Rights);
+    [MustDisposeResource] public static Permissions<TEnum> Create( IEnumerable<IUserRights> values )
+    {
+        Permissions<TEnum> permissions = Default;
+
+        foreach ( IUserRights user in values )
+        {
+            using Permissions<TEnum> aggregate = Create(user);
+            permissions.Or(aggregate);
+        }
+
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> Create( IEnumerable<IEnumerable<IUserRights>> values )
+    {
+        Permissions<TEnum> permissions = Default;
+
+        foreach ( IEnumerable<IUserRights> users in values )
+        {
+            using Permissions<TEnum> usersRights = Create(users);
+            permissions.Or(usersRights);
+        }
+
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights?               rights ) => Create(rights, rights?.Value);
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<char> span )   => Create(null,   span);
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<char> span )
+    {
+        Permissions<TEnum> permissions = new(rights);
+        if ( span.IsNullOrWhiteSpace() ) { return permissions; }
+
+        for ( int i = 0; i < span.Length && i < Count; i++ )
+        {
+            char v = span[i];
+
+            if ( v      == ValidChar ) { permissions.Grant(EnumValues[i]); }
+            else if ( v == InvalidChar ) { permissions.Revoke(EnumValues[i]); }
+            else { throw new FormatException($"Invalid character '{v}' at position {i}. Expected '{ValidChar}' or '{InvalidChar}'."); }
+        }
+
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<bool> span ) => Create(null, span);
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<bool> span )
+    {
+        Permissions<TEnum>  permissions = new(rights);
+        ReadOnlySpan<TEnum> values      = EnumValues;
+        if ( span.IsEmpty ) { return permissions; }
+
+        for ( int i = 0; i < span.Length; i++ ) { permissions.Set(values[i], span[i]); }
+
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<TEnum> values ) => Create(null, values);
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<TEnum> span )
+    {
+        Permissions<TEnum> permissions = new(rights);
+        if ( span.IsEmpty ) { return permissions; }
+
+        foreach ( ref readonly TEnum t in span ) { permissions.Set(t, true); }
+
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> SA( UserRights? rights = null ) => Create(rights, EnumValues);
+
+
+    private Permissions<TEnum> Set( TEnum index, bool value )
+    {
+        int i = index.AsInt();
+        Span[i] = value;
+        return this;
+    }
+
+
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool Has( TEnum index )
+    {
+        int i = index.AsInt();
+        return Span[i];
+    }
+
+
+    public Permissions<TEnum> Grant( TEnum index ) => Set(index, true);
+    public Permissions<TEnum> Grant( params ReadOnlySpan<TEnum> permissions )
+    {
+        foreach ( TEnum index in permissions ) { Grant(index); }
+
+        return this;
+    }
+
+
+    public Permissions<TEnum> Revoke( TEnum index ) => Set(index, false);
+    public Permissions<TEnum> Revoke( params ReadOnlySpan<TEnum> permissions )
+    {
+        foreach ( TEnum index in permissions ) { Revoke(index); }
+
+        return this;
+    }
+
+
+    public Permissions<TEnum> Or( Permissions<TEnum> other )
+    {
+        Span<bool> buffer      = Span;
+        Span<bool> otherBuffer = other.Span;
+        for ( int i = 0; i < buffer.Length; i++ ) { buffer[i] |= otherBuffer[i]; }
+
+        return this;
+    }
+    public Permissions<TEnum> And( Permissions<TEnum> other )
+    {
+        Span<bool> buffer      = Span;
+        Span<bool> otherBuffer = other.Span;
+        for ( int i = 0; i < buffer.Length; i++ ) { buffer[i] &= otherBuffer[i]; }
+
+        return this;
+    }
+    public Permissions<TEnum> Xor( Permissions<TEnum> other )
+    {
+        Span<bool> buffer      = Span;
+        Span<bool> otherBuffer = other.Span;
+        for ( int i = 0; i < buffer.Length; i++ ) { buffer[i] ^= otherBuffer[i]; }
+
+        return this;
+    }
+    public Permissions<TEnum> Not()
+    {
+        Span<bool> buffer = Span;
+        for ( int i = 0; i < buffer.Length; i++ ) { buffer[i] = !buffer[i]; }
+
+        return this;
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Permissions<TEnum> operator |( Permissions<TEnum> x, Permissions<TEnum> y ) => x.Or(y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Permissions<TEnum> operator &( Permissions<TEnum> x, Permissions<TEnum> y ) => x.And(y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Permissions<TEnum> operator ^( Permissions<TEnum> x, Permissions<TEnum> y ) => x.Xor(y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Permissions<TEnum> operator ~( Permissions<TEnum> x ) => x.Not();
+
+
+    public static bool IsContiguous()
+    {
+        ReadOnlySpan<TEnum> span = EnumValues;
+
+        for ( int i = 0; i < span.Length; i++ )
+        {
+            TEnum value = span[i];
+            if ( i != value.AsInt() ) { return false; }
+        }
+
+        return true;
+    }
+
+
+
+    public ref struct Enumerable( Permissions<TEnum> permissions ) : IValueEnumerator<Right<TEnum>>
+    {
+        private readonly Permissions<TEnum>             __rights = permissions;
+        private          ReadOnlySpan<TEnum>.Enumerator __enums  = EnumValues.GetEnumerator();
+        private          Right<TEnum>                   __current;
+
+        public ref readonly Right<TEnum> Current => ref Unsafe.AsRef(ref __current);
+
+        public bool MoveNext()
+        {
+            if ( __enums.MoveNext() )
+            {
+                TEnum e = __enums.Current;
+                __current = new Right<TEnum>(e, __rights.Has(e));
+                return true;
+            }
+
+            __current = default;
+            return false;
+        }
+        public void       Dispose()       => this = default;
+        public Enumerable GetEnumerator() => this;
+
+
+        public bool TryGetNext( out Right<TEnum> current )
+        {
+            bool result = MoveNext();
+            current = __current;
+            return result;
+        }
+        public bool TryGetNonEnumeratedCount( out int count )
+        {
+            count = Count;
+            return true;
+        }
+        public bool TryGetSpan( out ReadOnlySpan<Right<TEnum>> span )
+        {
+            Right<TEnum>[] rights = GC.AllocateUninitializedArray<Right<TEnum>>(Count);
+            int            i      = 0;
+            foreach ( ref readonly TEnum e in EnumValues ) { rights[i++] = new Right<TEnum>(e, __rights.Has(e)); }
+
+            span = rights;
+            return true;
+        }
+        public bool TryCopyTo( scoped Span<Right<TEnum>> destination, Index offset )
+        {
+            using ArrayBuffer<Right<TEnum>> rights = new(Count);
+
+            foreach ( ref readonly TEnum e in EnumValues )
+            {
+                Right<TEnum> right = new(e, __rights.Has(e));
+                rights.Add(in right);
+            }
+
+            rights.Values[offset..].CopyTo(destination[offset..]);
+
+            return true;
+        }
+    }
+}
+
+
+
+public readonly record struct Right<TEnum>( TEnum Index, bool Value )
+    where TEnum : unmanaged, Enum
+{
+    public readonly bool  Value = Value;
+    public readonly TEnum Index = Index;
+}

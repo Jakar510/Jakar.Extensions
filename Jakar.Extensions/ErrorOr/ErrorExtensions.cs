@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/03/2025  13:03
 
-using System.Linq;
 using ZLinq;
 
 
@@ -42,9 +41,7 @@ public static class ErrorExtensions
 
     public static string GetMessage( this Errors errors )
     {
-        using PooledArray<string> array = errors.Details.AsValueEnumerable()
-                                                .Select(GetMessage)
-                                                .ToArrayPool();
+        using PooledArray<string> array = errors.Details.AsValueEnumerable().Select(GetMessage).ToArrayPool();
 
         return string.Join('\n', array.Span);
     }
@@ -64,29 +61,20 @@ public static class ErrorExtensions
         return sb.ToString();
     }
 
-    public static string GetMessage( this Error error ) => GetMessage(error.Title, in error.details);
+    public static string GetMessage( this Error error ) => error.Title.GetMessage(in error.details);
     public static string GetMessage( this string? title, ref readonly StringTags tags )
     {
         if ( tags.IsEmpty ) { return title ?? EMPTY; }
 
         using ValueStringBuilder builder = new(4096);
 
-        builder.Append(BULLET)
-               .Append(title ?? EMPTY);
+        builder.Append(BULLET).Append(title ?? EMPTY);
 
-        foreach ( string value in tags.Entries.AsSpan() )
-        {
-            builder.Append(SPACER)
-                   .Append(value);
-        }
+        foreach ( string value in tags.Entries.AsSpan() ) { builder.Append(SPACER).Append(value); }
 
         foreach ( ref readonly Pair value in tags.Tags.AsSpan() )
         {
-            if ( value.Value is not null )
-            {
-                builder.Append(SPACER)
-                       .Append(value.Value);
-            }
+            if ( value.Value is not null ) { builder.Append(SPACER).Append(value.Value); }
         }
 
         return builder.ToString();
@@ -97,7 +85,7 @@ public static class ErrorExtensions
     public static Status GetStatus( this Error[]? errors, Status status )
     {
         ReadOnlySpan<Error> span = errors;
-        return GetStatus(in span, status);
+        return span.GetStatus(status);
     }
     public static Status GetStatus( this in ReadOnlySpan<Error> errors, Status minStatus )
     {

@@ -1,0 +1,89 @@
+﻿// Jakar.Extensions :: Jakar.Database
+// 02/19/2023  7:25 PM
+
+namespace Jakar.Extensions;
+
+
+public interface IUserRights<out TValue, TEnum> : IUserRights
+    where TEnum : unmanaged, Enum
+    where TValue : IUserRights<TValue, TEnum>
+{
+    public TValue WithRights( Permissions<TEnum> rights );
+}
+
+
+
+public interface IUserRights
+{
+    public UserRights Rights { get; set; }
+}
+
+
+
+public class UserRights : BaseClass, IEqualComparable<UserRights>
+{
+    protected string _rights = EMPTY;
+
+
+    [StringLength(RIGHTS)] public virtual string Value { get => _rights; set => SetProperty(ref _rights, value); }
+
+
+    public UserRights() { }
+    public UserRights( string                          value ) => Value = value;
+    public static implicit operator UserRights( string rights ) => new(rights);
+
+
+    public override string ToString() => Value;
+    public static UserRights Create<TEnum>( string rights )
+        where TEnum : unmanaged, Enum
+    {
+        using Permissions<TEnum> value = Permissions<TEnum>.Create(null, rights);
+        return new UserRights(value.ToString());
+    }
+    public static UserRights Create<TEnum>( Permissions<TEnum> rights )
+        where TEnum : unmanaged, Enum => new(rights.ToString());
+
+
+    public virtual void SetRights<TEnum>( Permissions<TEnum> permissions )
+        where TEnum : unmanaged, Enum => Value = permissions.ToString();
+    public void SetRights<TEnum>( params ReadOnlySpan<TEnum> values )
+        where TEnum : unmanaged, Enum
+    {
+        using Permissions<TEnum> permissions = Edit<TEnum>();
+        permissions.Grant(values);
+        Value = permissions.ToString();
+    }
+
+
+    [MustDisposeResource] public virtual Permissions<TEnum> Edit<TEnum>()
+        where TEnum : unmanaged, Enum => Permissions<TEnum>.Create(this);
+
+
+    public int CompareTo( object? other ) => other is UserRights rights
+                                                 ? CompareTo(rights)
+                                                 : throw new ExpectedValueTypeException(other, typeof(UserRights));
+    public int CompareTo( UserRights? other )
+    {
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        if ( other is null ) { return 1; }
+
+        return string.Compare(_rights, other._rights, StringComparison.Ordinal);
+    }
+    public bool Equals( UserRights? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return string.Equals(_rights, other._rights, StringComparison.Ordinal);
+    }
+    public override bool Equals( object? obj )                              => ReferenceEquals(this, obj) || ( obj is UserRights other && Equals(other) );
+    public override int  GetHashCode()                                      => _rights.GetHashCode();
+    public static   bool operator <( UserRights?  left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) < 0;
+    public static   bool operator >( UserRights?  left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) > 0;
+    public static   bool operator <=( UserRights? left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) <= 0;
+    public static   bool operator >=( UserRights? left, UserRights? right ) => Comparer<UserRights>.Default.Compare(left, right) >= 0;
+    public static   bool operator ==( UserRights? left, UserRights? right ) => Equals(left, right);
+    public static   bool operator !=( UserRights? left, UserRights? right ) => !Equals(left, right);
+}

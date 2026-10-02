@@ -73,7 +73,6 @@ public sealed class MudServices( CookieThemeService           cookieTheme,
                                  IScrollManager               scrollManager,
                                  IScrollSpyFactory            scrollSpyFactory,
                                  IScrollListenerFactory       scrollListenerFactory,
-                                 IEventListenerFactory        eventListenerFactory,
                                  ILocalizationInterceptor     localizationInterceptor,
                                  ILocalizationEnumInterceptor localizationEnumInterceptor,
                                  IPopoverService              popover )
@@ -81,7 +80,6 @@ public sealed class MudServices( CookieThemeService           cookieTheme,
     public readonly CookieThemeService           cookieTheme                 = cookieTheme;
     public readonly IBrowserViewportService      browserViewport             = browserViewport;
     public readonly IDialogService               mudDialogs                  = mudDialogs;
-    public readonly IEventListenerFactory        eventListenerFactory        = eventListenerFactory;
     public readonly IJsApiService                jsApi                       = jsApi;
     public readonly IJsEventFactory              jsEventFactory              = jsEventFactory;
     public readonly IKeyInterceptorService       keyInterceptor              = keyInterceptor;
@@ -107,7 +105,6 @@ public sealed class MudServices( CookieThemeService           cookieTheme,
                                                                          provider.GetRequiredService<IScrollManager>(),
                                                                          provider.GetRequiredService<IScrollSpyFactory>(),
                                                                          provider.GetRequiredService<IScrollListenerFactory>(),
-                                                                         provider.GetRequiredService<IEventListenerFactory>(),
                                                                          provider.GetRequiredService<ILocalizationInterceptor>(),
                                                                          provider.GetRequiredService<ILocalizationEnumInterceptor>(),
                                                                          provider.GetRequiredService<IPopoverService>());

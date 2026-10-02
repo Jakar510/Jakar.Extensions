@@ -22,7 +22,7 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
                                           };
 
 
-    [JsonRequired] public required Alert?  Alert       { get; init; }
+    public                required Alert?  Alert       { get; init; }
     public                         string  Description => Details.GetMessage();
     [JsonRequired] public required Error[] Details     { get; init; }
     public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
@@ -41,7 +41,7 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
             e = e.InnerException;
         }
 
-        return Create(errors.ToArray());
+        return Create([.. errors]);
     }
     public static Errors Create( Alert? alert, params Error[]? details ) => new()
                                                                             {

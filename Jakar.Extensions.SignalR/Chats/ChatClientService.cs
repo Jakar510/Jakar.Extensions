@@ -1,11 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/21/2025  16:51
 
-using System.Runtime.CompilerServices;
-using Jakar.Extensions.UserGuid;
 using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ZLinq;
 
 
 
@@ -23,12 +22,11 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     where TChatRoom : ChatRooms<TChatRoom, TRoom>, ICollectionAlerts<TChatRoom, TRoom>
     where TRoom : IChatRoom<TRoom>
 {
-    protected readonly Disposables      _disposables       = [];
-    protected readonly WeakEventManager _onMessageReceived = new();
-    protected          bool             _isDisposed;
-    protected          ChatUser         _user = ChatUser.Empty;
-    protected          HubConnection?   _connection; // SignalR.Client
-    protected          SessionToken?    _tokens;
+    protected readonly Disposables    _disposables = [];
+    protected          bool           _isDisposed;
+    protected          ChatUser       _user = ChatUser.Empty;
+    protected          HubConnection? _connection; // SignalR.Client
+    protected          SessionToken?  _tokens;
 
 
     public abstract Uri       HostInfo { get; }
@@ -41,48 +39,17 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
             if ( _user.Equals(value) ) { return; }
 
             _user = value;
-            OnPropertyChanged();
+            OnUserChanged?.Invoke(this, _user);
         }
     }
-    public virtual Uri TargetHost => new(HostInfo, IChatClientService.PATH);
-    public long UnreadChats
-    {
-        get
-        {
-            ReadOnlySpan<TRoom> span = Rooms.AsSpan();
-            return span.Sum(static room => room.UnreadChats);
-        }
-    }
+    public virtual Uri  TargetHost  => new(HostInfo, IChatClientService.PATH);
+    public         long UnreadChats => Rooms.AsValueEnumerable().Sum(static room => room.UnreadChats);
 
 
-    public event Func<Exception?, Task>? Reconnecting
-    {
-        add
-        {
-            if ( _connection is not null ) { _connection.Reconnecting += value; }
-        }
-        remove
-        {
-            if ( _connection is not null ) { _connection.Reconnecting -= value; }
-        }
-    }
-
-    public event Func<string?, Task>? Reconnected
-    {
-        add
-        {
-            if ( _connection is not null ) { _connection.Reconnected += value; }
-        }
-        remove
-        {
-            if ( _connection is not null ) { _connection.Reconnected -= value; }
-        }
-    }
-    public event EventHandler<HubEvent>?      OnEvent;
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-
-    public event Action? OnMessageReceived { add => _onMessageReceived.AddEventHandler(value); remove => _onMessageReceived.RemoveEventHandler(value); }
+    public event Func<Exception?, Task>? Reconnecting { add => _connection?.Reconnecting += value; remove => _connection?.Reconnecting -= value; }
+    public event Func<string?, Task>?    Reconnected  { add => _connection?.Reconnected += value;  remove => _connection?.Reconnected -= value; }
+    public event EventHandler<HubEvent>? OnEvent;
+    public event EventHandler<ChatUser>? OnUserChanged;
 
 
     public override void Dispose()
@@ -93,7 +60,6 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     }
 
 
-    protected void OnPropertyChanged( [CallerMemberName] string? propertyName = null ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     public HubEvent GetHubEvent( TRoom room, HubEventType type, InstantMessage? message = null )
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
@@ -111,7 +77,7 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
             _connection = null;
         }
 
-        IOptions<HttpConnectionOptions> options;
+        // IOptions<HttpConnectionOptions> options;
         await StopAsync(token);
         _connection = CreateConnection();
 
@@ -133,11 +99,8 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     }
 
 
-    protected virtual void ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;
-    protected virtual HubConnection CreateConnection() => new HubConnectionBuilder().AddJsonProtocol()
-                                                                                    .WithAutomaticReconnect()
-                                                                                    .WithUrl(TargetHost, ConfigureHttpConnection)
-                                                                                    .Build();
+    protected virtual  void          ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;
+    protected virtual  HubConnection CreateConnection()                                       => new HubConnectionBuilder().AddJsonProtocol().WithAutomaticReconnect().WithUrl(TargetHost, ConfigureHttpConnection).Build();
     protected abstract Task<string?> OptionsAccessTokenProvider();
 
 

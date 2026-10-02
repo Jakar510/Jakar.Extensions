@@ -85,7 +85,7 @@ public class FilePaths : BaseClass, IDisposable
 
         _additionalFiles.Clear();
         _additionalFiles = null;
-    } 
+    }
 
 
     public void ClearCache()
@@ -163,8 +163,7 @@ public class FilePaths : BaseClass, IDisposable
         yield return AppCacheZipFile.FullPath;
         yield return CrashFile.FullPath;
 
-        yield return GetScreenshotFile()
-           .FullPath;
+        yield return GetScreenshotFile().FullPath;
     }
     public virtual IEnumerable<LocalFile> GetFiles()
     {

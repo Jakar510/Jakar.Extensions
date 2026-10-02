@@ -14,30 +14,22 @@ public interface ICascadingValueName
 public sealed class NotifyPropertyChangedCascadingValueSource<TValue> : CascadingValueSource<TValue>, IDisposable
     where TValue : INotifyPropertyChanged
 {
-    public readonly  TValue                                                     Value;
     private readonly ILogger<NotifyPropertyChangedCascadingValueSource<TValue>> __logger;
+    public readonly  TValue                                                     Value;
 
 
     public NotifyPropertyChangedCascadingValueSource( TValue value, ILogger<NotifyPropertyChangedCascadingValueSource<TValue>> logger ) : base(value, true)
     {
         value.PropertyChanged += OnValueOnPropertyChanged;
-        Value                =  value;
-        __logger               =  logger;
+        Value                 =  value;
+        __logger              =  logger;
     }
-    public void Dispose() => Value.PropertyChanged -= OnValueOnPropertyChanged;
-    private void OnValueOnPropertyChanged( object? sender, PropertyChangedEventArgs args )
-    {
-        NotifyChangedAsync()
-           .SafeFireAndForget(__logger);
-    }
+    public  void Dispose()                                                                 => Value.PropertyChanged -= OnValueOnPropertyChanged;
+    private void OnValueOnPropertyChanged( object? sender, PropertyChangedEventArgs args ) { NotifyChangedAsync().SafeFireAndForget(__logger); }
 
 
-    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider, TValue value ) => new(value,
-                                                                                                                             provider.GetRequiredService<ILoggerFactory>()
-                                                                                                                                     .CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
-    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider ) => new(provider.GetRequiredService<TValue>(),
-                                                                                                               provider.GetRequiredService<ILoggerFactory>()
-                                                                                                                       .CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
+    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider, TValue value ) => new(value, provider.GetRequiredService<ILoggerFactory>().CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
+    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider ) => new(provider.GetRequiredService<TValue>(), provider.GetRequiredService<ILoggerFactory>().CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
 }
 
 
@@ -45,30 +37,22 @@ public sealed class NotifyPropertyChangedCascadingValueSource<TValue> : Cascadin
 public sealed class NotifyPropertyChangedCascadingValueNamedSource<TValue> : CascadingValueSource<TValue>, IDisposable
     where TValue : INotifyPropertyChanged, ICascadingValueName
 {
-    public readonly  TValue                                                     Value;
     private readonly ILogger<NotifyPropertyChangedCascadingValueSource<TValue>> __logger;
+    public readonly  TValue                                                     Value;
 
 
     public NotifyPropertyChangedCascadingValueNamedSource( TValue value, ILogger<NotifyPropertyChangedCascadingValueSource<TValue>> logger ) : base(TValue.CascadingName, value, true)
     {
         value.PropertyChanged += OnValueOnPropertyChanged;
-        Value                =  value;
-        __logger               =  logger;
+        Value                 =  value;
+        __logger              =  logger;
     }
-    public void Dispose() => Value.PropertyChanged -= OnValueOnPropertyChanged;
-    private void OnValueOnPropertyChanged( object? sender, PropertyChangedEventArgs args )
-    {
-        NotifyChangedAsync()
-           .SafeFireAndForget(__logger);
-    }
+    public  void Dispose()                                                                 => Value.PropertyChanged -= OnValueOnPropertyChanged;
+    private void OnValueOnPropertyChanged( object? sender, PropertyChangedEventArgs args ) { NotifyChangedAsync().SafeFireAndForget(__logger); }
 
 
-    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider, TValue value ) => new(value,
-                                                                                                                             provider.GetRequiredService<ILoggerFactory>()
-                                                                                                                                     .CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
-    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider ) => new(provider.GetRequiredService<TValue>(),
-                                                                                                               provider.GetRequiredService<ILoggerFactory>()
-                                                                                                                       .CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
+    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider, TValue value ) => new(value, provider.GetRequiredService<ILoggerFactory>().CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
+    public static NotifyPropertyChangedCascadingValueSource<TValue> Create( IServiceProvider provider ) => new(provider.GetRequiredService<TValue>(), provider.GetRequiredService<ILoggerFactory>().CreateLogger<NotifyPropertyChangedCascadingValueSource<TValue>>());
 }
 
 
