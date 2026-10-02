@@ -35,6 +35,40 @@ Alternatively, you can use the NuGet Package Manager in Visual Studio.
 - `FixedSizedDeque` : A fixed-size deque.
 - `FixedSizedQueue` : A fixed-size queue.
 
+### JSON (System.Text.Json, Native AOT)
+
+Since 11.0 the library uses **System.Text.Json with source-generated metadata only** (no Newtonsoft.Json, no reflection-based serialization), and it is trim / Native AOT clean.
+
+- Models are `IJsonModel<TSelf>` types: put `[JsonModel(typeof(YourContext))]` on a `partial` class, record or struct and register it in your `JsonSerializerContext`. The `[JsonModel]` generator ships with the `Jakar.Json` dependency.
+
+  ```csharp
+  [JsonSerializable(typeof(Invoice))]
+  public sealed partial class AppJsonContext : JsonSerializerContext;
+
+  [JsonModel(typeof(AppJsonContext))]
+  public sealed partial class Invoice : BaseClass<Invoice>
+  {
+      public decimal Total { get; init; }
+  }
+
+  Invoice invoice = Invoice.FromJson(json);
+  string  text    = invoice.ToJson();
+  ```
+
+- Types that aren't `[JsonModel]` types: register their context once at startup with `Json.AddResolver(AppJsonContext.Default)`, then use `Json.Serialize(value)` / `json.FromJson<T>()`, or pass a `JsonTypeInfo<T>` explicitly.
+- Root-level JSON arrays never need a collection registered: `JsonModel.FromJsonList(json, Invoice.JsonTypeInfo)`, `invoices.ToJson()`, `WebHandler.AsJsonList(Invoice.JsonTypeInfo, token)`.
+- `JsonNode` / `JsonElement` helpers: `Get<T>`, `TryGet<T>`, `GetOrDefault<T>`, `TryAdd`, `TryUpdate`, `Set`, `Remove`.
+- JSON written by 10.x (Newtonsoft) still reads: property names are case-insensitive, numbers in strings, comments and trailing commas are accepted.
+
+### Migrating from 10.x
+
+- `JToken` / `JObject` / `JValue` are gone: `AdditionalData` is `Dictionary<string, JsonElement>?`; `ErrorResponse`, `WebHandler.AsJson()` and `FeedBackTrackerException` use `JsonNode`; `ExceptionDetails.Data` is a `JsonObject`; `LoginRequestValue.Data` is a `JsonElement`.
+- `value.ToJson()` works for `IJsonModel<TSelf>` types and arrays/lists/spans of them; for anything else use `Json.Serialize(value)`.
+- Your own `IJsonModel<TSelf>` types must provide `static JsonTypeInfo<TSelf> JsonTypeInfo`: add `[JsonModel]` (diagnostic JAKAR_JSON006 has a code fix).
+- `PreferenceFile<TSelf>` stores `{TSelf}.json` (typed properties); an existing `{TSelf}.ini` is imported on first load.
+- Observable collections serialize their unfiltered contents. On `net10.0`, for STJ to do the same when such a collection is a model *property*, register the closed converter in your context: `Converters = [typeof(ObservableCollectionJsonConverter<Address>)]`.
+- `Json.Settings` / `Json.LoadSettings` are replaced by `Json.Options` and `Json.AddResolver`.
+
 ### HTTP
 
 - `WebRequester` : A wrapper for `System.Net.Http.HttpClient` that simplifies the process of making HTTP requests and accepts an `IHostInfo` object to provide the base Uri. Also supports automatic retries.
