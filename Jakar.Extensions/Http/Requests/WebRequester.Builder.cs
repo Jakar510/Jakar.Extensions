@@ -50,7 +50,7 @@ public partial class WebRequester
         private          TimeSpan?                       __timeout;
         private          DecompressionMethods            __automaticDecompression = DecompressionMethods.All;
         private readonly Lock                            __lock                   = new();
-        private          HttpMessageHandler?             __handler;
+        private          SharedHandler?                  __handler;
         private          ILoggerFactory?                 __factory;
 
         /// <summary> Default <see cref="SocketsHttpHandler.PooledConnectionLifetime"/>: connections are recycled so DNS changes are picked up by long-lived clients. </summary>
@@ -66,30 +66,36 @@ public partial class WebRequester
         [Pure] public Builder Reset() => Create(hostInfo);
 
 
-        /// <summary> Any configuration change invalidates the shared handler, so the next client gets one built from the new settings. </summary>
+        /// <summary> Any configuration change invalidates the shared handler, so the next client gets one built from the new settings. Clients already built keep using (and keep alive) the previous one. </summary>
         private Builder Changed()
         {
-            lock ( __lock ) { __handler = null; }
-
-            return this;
-        }
-        /// <summary> One handler (connection pool) shared by every client this builder creates, built on first use. </summary>
-        private HttpMessageHandler GetSharedHandler()
-        {
-            lock ( __lock ) { return __handler ??= GetHandler(); }
-        }
-        /// <summary> Disposes the shared handler (and with it every connection of clients created by this builder). </summary>
-        public void Dispose()
-        {
-            HttpMessageHandler? handler;
+            SharedHandler? previous;
 
             lock ( __lock )
             {
-                handler   = __handler;
+                previous  = __handler;
                 __handler = null;
             }
 
-            handler?.Dispose();
+            previous?.Release();
+            return this;
+        }
+        /// <summary> A lease on the handler (connection pool) shared by every client this builder creates, built on first use. </summary>
+        private HttpMessageHandler LeaseSharedHandler()
+        {
+            lock ( __lock )
+            {
+                __handler ??= new SharedHandler(GetHandler());
+                return __handler.Lease();
+            }
+        }
+        /// <summary>
+        ///     Releases the builder's reference to the shared handler. Clients already built keep working: the handler (and its connections) is disposed only once the builder
+        ///     <i>and</i> every client built from it have been disposed.
+        /// </summary>
+        public void Dispose()
+        {
+            Changed();
             GC.SuppressFinalize(this);
         }
 
@@ -97,7 +103,7 @@ public partial class WebRequester
         /// <summary> A client over the builder's shared handler, so clients reuse pooled connections instead of each opening (and leaking) their own. </summary>
         protected virtual HttpClient GetClient()
         {
-            HttpClient client = new(GetSharedHandler(), false);
+            HttpClient client = new(LeaseSharedHandler(), true); // disposing the client returns its lease
             foreach ( ( string key, IEnumerable<string> value ) in __headers ) { client.DefaultRequestHeaders.Add(key, value); }
 
             client.DefaultRequestHeaders.Authorization = __authenticationHeader;
@@ -157,6 +163,52 @@ public partial class WebRequester
         }
         public WebRequester Build()                     => new(GetClient(), hostInfo, __factory?.CreateLogger<WebRequester>() ?? __logger, __encoding) { Retries = __retryPolicy };
         public HttpClient   CreateClient( string name ) => GetClient();
+
+
+        /// <summary> Applies every setting in <paramref name="options"/> that is set (unset values keep the current configuration), then <see cref="WebRequesterOptions.ConfigureBuilder"/>. </summary>
+        /// <exception cref="OptionsValidationException"> <paramref name="options"/> is invalid. </exception>
+        public Builder Apply( WebRequesterOptions options )
+        {
+            ArgumentNullException.ThrowIfNull(options);
+
+            List<string> errors = options.Validate().ToList();
+            if ( errors.Count > 0 ) { throw new OptionsValidationException(nameof(WebRequesterOptions), typeof(WebRequesterOptions), errors); }
+
+            if ( options.Timeout is { } timeout ) { With_Timeout(timeout); }
+
+            if ( options.ConnectTimeout is { } connectTimeout ) { With_ConnectTimeout(connectTimeout); }
+
+            if ( options.PooledConnectionLifetime is { } lifetime ) { With_PooledConnectionLifetime(lifetime); }
+
+            if ( options.PooledConnectionIdleTimeout is { } idle ) { With_PooledConnectionIdleTimeout(idle); }
+
+            if ( options.MaxConnectionsPerServer is { } connections ) { With_MaxConnectionsPerServer(connections); }
+
+            if ( options.MaxAutomaticRedirections is { } redirects ) { With_MaxRedirects(redirects); }
+
+            if ( options.MaxResponseContentBufferSize is { } bufferSize ) { With_MaxResponseContentBufferSize(bufferSize); }
+
+            if ( options.MaxResponseHeadersLength is { } headersLength ) { With_MaxResponseHeadersLength(headersLength); }
+
+            if ( options.AutomaticDecompression is { } decompression ) { With_AutomaticDecompression(decompression); }
+
+            if ( !string.IsNullOrWhiteSpace(options.Encoding) ) { With_Encoding(options.GetEncoding()); }
+
+            if ( options.Retry is { } retry ) { With_Retry(retry.ToPolicy()); }
+
+            if ( options.UseCookies is { } useCookies )
+            {
+                __useCookies = useCookies;
+                Changed();
+            }
+
+            if ( options.KeepAlivePingDelay is { } pingDelay && options.KeepAlivePingTimeout is { } pingTimeout ) { With_KeepAlive(pingDelay, pingTimeout, options.KeepAlivePingPolicy ?? HttpKeepAlivePingPolicy.WithActiveRequests); }
+
+            foreach ( ( string name, string value ) in options.DefaultHeaders ) { With_Header(name, value); }
+
+            options.ConfigureBuilder?.Invoke(this);
+            return this;
+        }
 
 
         public Builder With_Logger( ILoggerFactory factory )
@@ -438,6 +490,41 @@ public partial class WebRequester
         {
             __responseDrainTimeout = value;
             return Changed();
+        }
+
+
+
+        /// <summary> A handler shared by several clients: the builder holds one reference and each client holds a lease; the inner handler is disposed when the last one is released. </summary>
+        private sealed class SharedHandler( HttpMessageHandler inner )
+        {
+            private int __references = 1; // the builder's
+
+            public HttpMessageHandler Inner { get; } = inner;
+
+            public HttpMessageHandler Lease()
+            {
+                Interlocked.Increment(ref __references);
+                return new LeasedHandler(this);
+            }
+            public void Release()
+            {
+                if ( Interlocked.Decrement(ref __references) == 0 ) { Inner.Dispose(); }
+            }
+        }
+
+
+
+        /// <summary> One client's lease on a <see cref="SharedHandler"/>: forwards requests to it, and on disposal releases the lease instead of disposing the shared handler. </summary>
+        private sealed class LeasedHandler( SharedHandler shared ) : DelegatingHandler(shared.Inner)
+        {
+            private int __released;
+
+            protected override void Dispose( bool disposing )
+            {
+                if ( disposing && Interlocked.Exchange(ref __released, 1) == 0 ) { shared.Release(); }
+
+                base.Dispose(false); // DelegatingHandler.Dispose(true) would dispose the shared inner handler
+            }
         }
 
 

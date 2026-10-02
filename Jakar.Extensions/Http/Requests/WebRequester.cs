@@ -64,18 +64,38 @@ public class TelemetryHttpClientHandler : HttpClientHandler
 
 
 
+/// <remarks>
+///     A requester created from DI (<see cref="Create(IServiceProvider, string)"/>) reloads when its <see cref="WebRequesterOptions"/> change (e.g. <c>appsettings.json</c> edited with
+///     <c>reloadOnChange</c>): a new client is built and swapped in atomically, so each request uses one consistent configuration. Requests already running finish on the previous
+///     client, which is not disposed (that would cancel them); its idle connections close after the idle timeout and it is collected once unreferenced.
+/// </remarks>
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) : IAsyncDisposable, IDisposable
+public sealed partial class WebRequester : IAsyncDisposable, IDisposable
 {
-    public readonly   Encoding   Encoding = encoding ?? Encoding.Default;
-    internal readonly HttpClient Client   = client;
-    internal readonly IHostInfo  Host     = host;
-    internal readonly ILogger?   Logger   = logger;
+    private State        __state;
+    private IDisposable? __subscription;
 
 
+    public   Encoding   Encoding => Volatile.Read(ref __state).Encoding;
+    internal HttpClient Client   => Volatile.Read(ref __state).Client;
+    internal IHostInfo  Host     => Volatile.Read(ref __state).Host;
+    internal ILogger?   Logger   => Volatile.Read(ref __state).Logger;
+
+
+    /// <summary> Headers of the current client. Changes made here are lost when the options reload. </summary>
     public HttpRequestHeaders DefaultRequestHeaders => Client.DefaultRequestHeaders;
-    public RetryPolicy?       Retries               { get;                   set; }
-    public TimeSpan           Timeout               { get => Client.Timeout; set => Client.Timeout = value; }
+
+    /// <summary> Retry policy. A value set here is replaced when the options reload. </summary>
+    public RetryPolicy? Retries { get; set; }
+
+    public TimeSpan Timeout { get => Client.Timeout; set => Client.Timeout = value; }
+
+
+    /// <summary> Raised after the configuration was reloaded from changed <see cref="WebRequesterOptions"/>. </summary>
+    public event Action<WebRequester>? Reloaded;
+
+
+    public WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => __state = new State(client, host, logger, encoding ?? Encoding.Default);
 
 
     public ValueTask DisposeAsync()
@@ -83,20 +103,64 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
         Dispose();
         return ValueTask.CompletedTask;
     }
-    public void Dispose() => Client.Dispose();
-
-
-    public static  IServiceCollection AddSingleton( IServiceCollection       collection )                                                                 => collection.AddSingleton(Create);
-    public static  IServiceCollection AddScoped( IServiceCollection          collection )                                                                 => collection.AddScoped(Create);
-    public static  WebRequester       Get( IServiceProvider                  provider )                                                                   => provider.GetRequiredService<WebRequester>();
-    public static  WebRequester       Create( IHttpClientFactory             factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(nameof(WebRequester)), host,                    logger, encoding);
-    public static  WebRequester       Create( HttpClient                     client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
-    public static WebRequester Create( IServiceProvider provider )
+    public void Dispose()
     {
-        using Builder builder = new(provider.GetRequiredService<IHostInfo>());
-        builder.With_Logger(provider.GetRequiredService<ILoggerFactory>());
-        builder.With_Retry();
-        return builder.Build();
+        Interlocked.Exchange(ref __subscription, null)?.Dispose();
+        Client.Dispose();
+    }
+
+
+    /// <summary> Rebuilds the client from <paramref name="options"/> and swaps it in. On failure (e.g. invalid options) the error is logged and the current configuration is kept. </summary>
+    private void Reload( IServiceProvider provider, WebRequesterOptions options )
+    {
+        try
+        {
+            WebRequester fresh = Build(provider, options);
+            Volatile.Write(ref __state, fresh.__state);
+            Retries = fresh.Retries;
+            Reloaded?.Invoke(this);
+        }
+        catch ( Exception e ) { Logger?.LogError(e, "Reloading {Options} failed; keeping the previous configuration", nameof(WebRequesterOptions)); }
+    }
+
+
+    public static IServiceCollection AddSingleton( IServiceCollection collection )                                                                 => collection.AddSingleton(Create);
+    public static IServiceCollection AddScoped( IServiceCollection    collection )                                                                 => collection.AddScoped(Create);
+    public static WebRequester       Get( IServiceProvider            provider )                                                                   => provider.GetRequiredService<WebRequester>();
+    public static WebRequester       Create( IHttpClientFactory       factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(nameof(WebRequester)), host, logger, encoding);
+    public static WebRequester       Create( HttpClient               client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
+    /// <summary>
+    ///     Builds a requester from DI: the default (or, for the overload taking a name, the named) <see cref="WebRequesterOptions"/> (see <see cref="WebRequesterServiceCollectionExtensions.AddWebRequester(IServiceCollection, Action{WebRequesterOptions})"/>),
+    ///     the registered <see cref="ILoggerFactory"/> (if any), and <see cref="WebRequesterOptions.BaseAddress"/> or else the registered <see cref="IHostInfo"/>.
+    ///     Requests are not retried unless <see cref="WebRequesterOptions.Retry"/> is set.
+    /// </summary>
+    /// <exception cref="OptionsValidationException"> The options are invalid. </exception>
+    public static WebRequester       Create( IServiceProvider         provider ) => Create(provider, Options.DefaultName);
+    /// <remarks> When an <see cref="IOptionsMonitor{TOptions}"/> is registered, the requester reloads whenever the named options change (see <see cref="WebRequester"/>). </remarks>
+    public static WebRequester Create( IServiceProvider provider, string name )
+    {
+        IOptionsMonitor<WebRequesterOptions>? monitor   = provider.GetService<IOptionsMonitor<WebRequesterOptions>>();
+        WebRequester                          requester = Build(provider, monitor?.Get(name) ?? WebRequesterOptions.Default);
+
+        if ( monitor is not null ) { requester.__subscription = monitor.OnChange(listener); }
+
+        return requester;
+
+        void listener( WebRequesterOptions options, string? changed )
+        {
+            if ( string.Equals(changed ?? Options.DefaultName, name, StringComparison.Ordinal) ) { requester.Reload(provider, options); }
+        }
+    }
+    private static WebRequester Build( IServiceProvider provider, WebRequesterOptions options )
+    {
+        IHostInfo host = options.BaseAddress is { } address
+                             ? new Builder.HostHolder(address)
+                             : provider.GetRequiredService<IHostInfo>();
+
+        using Builder builder = new(host);
+        if ( provider.GetService<ILoggerFactory>() is { } factory ) { builder.With_Logger(factory); }
+
+        return builder.Apply(options).Build(); // the requester's client keeps the shared handler alive after the builder is disposed
     }
 
 
@@ -112,7 +176,11 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
         MemoryStream stream = new(); // its buffer is handed to the content; nothing to dispose
 
         using ( StreamWriter writer = new(stream, encoding, 1024, true) )
-        using ( JsonTextWriter json = new(writer) { Formatting = Formatting.None } ) { JsonSerializer.CreateDefault().Serialize(json, value); }
+        using ( JsonTextWriter json = new(writer) { Formatting = Formatting.None } )
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(Json.Settings);
+            jsonSerializer.Serialize(json, value);
+        }
 
         // StreamWriter writes the encoding's preamble (BOM) first; start the content after it instead of copying.
         byte[]             buffer   = stream.GetBuffer();
@@ -209,4 +277,15 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
         where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, Encoding));
     public WebHandler Put<TValue>( string relativePath, IEnumerable<TValue> value )
         where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, Encoding));
+
+
+
+    /// <summary> The parts of the configuration that are replaced together on reload. </summary>
+    private sealed class State( HttpClient client, IHostInfo host, ILogger? logger, Encoding encoding )
+    {
+        public readonly HttpClient Client   = client;
+        public readonly IHostInfo  Host     = host;
+        public readonly ILogger?   Logger   = logger;
+        public readonly Encoding   Encoding = encoding;
+    }
 }

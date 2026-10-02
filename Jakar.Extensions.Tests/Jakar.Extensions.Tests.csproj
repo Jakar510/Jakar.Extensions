@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -24,6 +24,7 @@
 	<ItemGroup>
 		<PackageReference Include="JetBrains.DotMemoryUnit" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="NUnit" />
 		<PackageReference Include="NUnit3TestAdapter" />

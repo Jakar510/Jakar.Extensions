@@ -377,6 +377,64 @@ public class WebRequester_Tests : Assert
     }
 
     [Test]
+    public async Task Builder_DisposedAfterBuild_TheRequesterKeepsWorking()
+    {
+        await using LoopbackServer server = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
+        WebRequester requester;
+
+        // The WebRequester.Create(IServiceProvider) pattern: build, then dispose the builder.
+        using ( WebRequester.Builder builder = WebRequester.Builder.Create(server.Url) )
+        {
+            builder.With_Retry();
+            requester = builder.Build();
+        }
+
+        HttpMessageHandler shared = HandlerOf(requester.Client);
+        this.AreEqual("ok", ( await requester.Get("x").AsString(CancellationToken.None) ).Payload);
+        this.IsFalse(await IsDisposed(shared, server.Url));
+
+        requester.Dispose(); // last owner: now the shared handler is disposed
+        this.IsTrue(await IsDisposed(shared, server.Url));
+    }
+
+    [Test]
+    public async Task SharedHandler_LivesUntilTheBuilderAndEveryClientAreDisposed()
+    {
+        await using LoopbackServer server  = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
+        WebRequester.Builder       builder = WebRequester.Builder.Create(server.Url);
+        HttpClient                 first   = builder.CreateClient("a");
+        HttpClient                 second  = builder.CreateClient("b");
+        HttpMessageHandler         shared  = HandlerOf(first);
+
+        builder.Dispose();
+        first.Dispose();
+        this.AreEqual("ok", await second.GetStringAsync(server.Url));
+
+        second.Dispose();
+        this.IsTrue(await IsDisposed(shared, server.Url));
+    }
+
+    [Test]
+    public async Task ConfigurationChange_KeepsExistingClientsWorking_AndReleasesTheOldHandlerWithThem()
+    {
+        await using LoopbackServer server  = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
+        using WebRequester.Builder builder = WebRequester.Builder.Create(server.Url);
+        HttpClient                 before  = builder.CreateClient("a");
+        HttpMessageHandler         old     = HandlerOf(before);
+
+        builder.With_MaxConnectionsPerServer(4); // new handler for clients created from now on
+        using HttpClient after = builder.CreateClient("b");
+
+        Assert.AreNotSame(old, HandlerOf(after));
+        this.AreEqual("ok", await before.GetStringAsync(server.Url));
+
+        before.Dispose(); // the old handler's only remaining owner
+        this.IsTrue(await IsDisposed(old, server.Url));
+        this.AreEqual("ok", await after.GetStringAsync(server.Url));
+    }
+
+
+    [Test]
     public void Builder_Defaults_And_Timeouts()
     {
         using WebRequester.Builder builder = WebRequester.Builder.Create(__host).With_Timeout(TimeSpan.FromSeconds(30)).With_ConnectTimeout(TimeSpan.FromSeconds(3));
@@ -428,5 +486,20 @@ public class WebRequester_Tests : Assert
     }
 
 
-    private static HttpMessageHandler HandlerOf( HttpClient client ) => (HttpMessageHandler)typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(client)!;
+    /// <summary> The handler doing the work: builder clients hold a lease (a <see cref="DelegatingHandler"/>) on the shared one. </summary>
+    private static HttpMessageHandler HandlerOf( HttpClient client )
+    {
+        HttpMessageHandler handler = (HttpMessageHandler)typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(client)!;
+        return handler is DelegatingHandler { InnerHandler: { } inner } ? inner : handler;
+    }
+    private static async Task<bool> IsDisposed( HttpMessageHandler handler, Uri url )
+    {
+        try
+        {
+            using HttpClient probe = new(handler, false);
+            await probe.GetStringAsync(url);
+            return false;
+        }
+        catch ( ObjectDisposedException ) { return true; }
+    }
 }

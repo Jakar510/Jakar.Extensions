@@ -35,6 +35,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<IsAotCompatible>true</IsAotCompatible>
 		<EnablePackageValidation>true</EnablePackageValidation>
+		<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
