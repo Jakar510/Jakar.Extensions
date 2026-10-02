@@ -105,6 +105,29 @@ public static partial class JsonModel
 
 
 
+    /// <summary>
+    ///     Copies every property System.Text.Json reads and writes (including the extension-data bag) from <paramref name="source"/> to <paramref name="destination"/>,
+    ///     through the metadata's source-generated getters and setters: no reflection. Properties without a setter are skipped.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"> <typeparamref name="T"/> isn't serialized as a JSON object (e.g. it has a custom converter). </exception>
+    public static void CopyProperties<T>( T source, T destination, JsonTypeInfo<T> info )
+        where T : class
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(info);
+        if ( info.Kind != JsonTypeInfoKind.Object ) { throw new InvalidOperationException($"{typeof(T).GetDisplayName()} isn't serialized as a JSON object ({info.Kind}), so it has no property metadata to copy."); }
+
+        foreach ( JsonPropertyInfo property in info.Properties )
+        {
+            if ( property.Get is null || property.Set is null ) { continue; }
+
+            property.Set(destination, property.Get(source));
+        }
+    }
+
+
+
     // ─── Options bridging ─────────────────────────────────────────────────────
 
     extension( JsonSerializerOptions options )

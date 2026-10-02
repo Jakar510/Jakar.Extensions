@@ -12,13 +12,13 @@ namespace Jakar.Extensions;
 [Serializable]
 [method: JsonConstructor]
 [JsonModel(typeof(JakarExtensionsContext))]
-public readonly partial struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, in GcMemoryInformation info ) : IJsonModel<GcInfo>
+public readonly partial struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, GcMemoryInformation memoryInfo ) : IJsonModel<GcInfo>
 {
     public readonly long                TotalMemory                    = totalMemory;
     public readonly TimeSpan            TotalPauseDuration             = totalPauseDuration;
     public readonly long                TotalAllocatedBytes            = totalAllocatedBytes;
     public readonly long                AllocatedBytesForCurrentThread = allocatedBytesForCurrentThread;
-    public readonly GcMemoryInformation MemoryInfo                     = info;
+    public readonly GcMemoryInformation MemoryInfo                     = memoryInfo; // the parameter name must match for System.Text.Json
 
 
     public GcInfo() : this(GC.GetTotalMemory(false), GC.GetTotalAllocatedBytes(), GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalPauseDuration(), GC.GetGCMemoryInfo()) { }

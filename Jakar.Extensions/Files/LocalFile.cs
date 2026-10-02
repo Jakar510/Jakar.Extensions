@@ -639,11 +639,9 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
-        using ArrayBuffer<char>  owner         = new(payload.Length);
 
-        payload.CopyTo(owner.Span);
-
-        await writer.WriteAsync(owner.Memory, token).ConfigureAwait(false);
+        // (It used to copy into an ArrayBuffer<char> and write its Memory, which is Length-long, and Length was never set: every file came out empty.)
+        await writer.WriteAsync(payload.AsMemory(), token).ConfigureAwait(false);
 
         Info.Refresh();
     }

@@ -96,7 +96,7 @@ public static partial class Json
 
         public void SetAdditionalData( IReadOnlyDictionary<string, JsonElement>? data ) => self.AdditionalData = data is null || data.Count == 0
                                                                                                                       ? null
-                                                                                                                      : JsonSerializer.Serialize(Merge(null, data), JakarExtensionsContext.Default.DictionaryStringJsonElement);
+                                                                                                                      : JsonModel.ToJson(Merge(null, data), JakarExtensionsContext.Default.DictionaryStringJsonElement, false);
 
         public bool Contains( string key ) => self.GetAdditionalData().ContainsKey(key);
 

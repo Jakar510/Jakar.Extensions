@@ -102,6 +102,20 @@ public sealed class JsonModel_Tests
     }
 
 
+    [Test]
+    public void CopyProperties_UsesTheGeneratedAccessors()
+    {
+        Bag source      = Bag.FromJson("""{"Name":"n","Extra":5}""");
+        Bag destination = new();
+
+        JsonModel.CopyProperties(source, destination, Bag.JsonTypeInfo);
+
+        Assert.That(destination.Name,                              Is.EqualTo("n"));
+        Assert.That(destination.AdditionalData!["Extra"].GetInt32(), Is.EqualTo(5), "the extension-data bag is copied too");
+        Assert.That(() => JsonModel.CopyProperties("a", "b", TestJsonContext.Default.String), Throws.InvalidOperationException, "not an object contract");
+    }
+
+
     // ─── Lookup ───────────────────────────────────────────────────────────────
 
     [Test]
