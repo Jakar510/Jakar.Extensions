@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!-- Analyzers must target netstandard2.0 to load in every compiler host (dotnet build, Visual Studio, Rider). -->
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<RootNamespace>Jakar.Json.Generator</RootNamespace>
+		<!-- RS2008: analyzer release tracking files. -->
+		<NoWarn>$(NoWarn);RS2008</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Pinned to an older Roslyn on purpose: the generator then loads in any compiler at least this new (.NET 9 SDK / VS 17.12+). -->
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="4.12.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Json.Generator.Tests" />
+	</ItemGroup>
+</Project>
