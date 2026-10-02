@@ -21,9 +21,9 @@ public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqu
     public ExceptionDetails() { }
 
 
-    /// <remarks> A factory rather than a constructor: System.Text.Json's generated metadata reflects over the constructors, and this one needs method metadata (<see cref="RequiresUnreferencedCodeAttribute"/>). </remarks>
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static ExceptionDetails Create( Exception exception, bool includeMethodInfo = true )
+    /// <summary> Trim/AOT-safe: everything except <see cref="TargetSite"/>; <see cref="MethodSignature"/> is <see langword="null"/> when the method metadata isn't available. </summary>
+    /// <remarks> Factories rather than constructors: System.Text.Json's generated metadata reflects over the constructors, and the method-info variant needs method metadata. </remarks>
+    public static ExceptionDetails Create( Exception exception )
     {
         ArgumentNullException.ThrowIfNull(exception);
 
@@ -36,23 +36,45 @@ public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqu
                    HelpLink        = exception.HelpLink,
                    Source          = exception.Source,
                    StackTrace      = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [],
-                   MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}",
+                   MethodSignature = exception.TryGetMethodSignature(),
                    Data            = exception.GetData(),
                    Str             = exception.ToString(),
-                   TargetSite      = includeMethodInfo
-                                         ? exception.MethodInfo()
-                                         : null,
                    Inner = exception.InnerException is null
                                ? null
-                               : Create(exception.InnerException, includeMethodInfo)
+                               : Create(exception.InnerException)
                };
     }
+
+
+    /// <summary> Also fills <see cref="TargetSite"/> (parameters, attributes), which needs method metadata the trimmer may remove. </summary>
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    public static ExceptionDetails CreateWithMethodInfo( Exception exception )
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+        ExceptionDetails details = Create(exception);
+
+        return new ExceptionDetails
+               {
+                   Value           = details.Value,
+                   Message         = details.Message,
+                   HResult         = details.HResult,
+                   Type            = details.Type,
+                   HelpLink        = details.HelpLink,
+                   Source          = details.Source,
+                   StackTrace      = details.StackTrace,
+                   MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}",
+                   Data            = details.Data,
+                   Str             = details.Str,
+                   TargetSite      = exception.MethodInfo(),
+                   Inner = exception.InnerException is null
+                               ? null
+                               : CreateWithMethodInfo(exception.InnerException)
+               };
+    }
     public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
     public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     private static ExceptionDetails? TryCreate( [NotNullIfNotNull(nameof(exception))] Exception? exception ) => exception is not null
                                                                                                                     ? Create(exception)
                                                                                                                     : null;

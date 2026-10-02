@@ -4,7 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
-		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
+		<WarningsAsErrors>Nullable;CS0114;CS9113;IL2026;IL2046;IL2057;IL2067;IL2070;IL2072;IL2075;IL2087;IL2091;IL2111;IL3050;IL3051</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Version>10.11.0</Version>
 		<Title>Jakar.Extensions</Title>

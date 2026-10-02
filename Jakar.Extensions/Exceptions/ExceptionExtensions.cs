@@ -124,10 +124,10 @@ public static class ExceptionExtensions
 
             return dictionary;
         }
+        /// <summary> Trim/AOT-safe details (no <see cref="ExceptionDetails.TargetSite"/>); see <see cref="FullDetails"/>. </summary>
+        public ExceptionDetails Details() => ExceptionDetails.Create(e);
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public ExceptionDetails Details() => ExceptionDetails.Create(e, false);
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public ExceptionDetails FullDetails() => ExceptionDetails.Create(e);
+        public ExceptionDetails FullDetails() => ExceptionDetails.CreateWithMethodInfo(e);
     }
 
 

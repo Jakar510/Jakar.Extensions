@@ -17,6 +17,7 @@
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="AotCompatibility.TestApp/AotCompatibility.TestApp.csproj" />
   <Project Path="Jakar.Extensions.Blazor.Syncfusion/Jakar.Extensions.Blazor.Syncfusion.csproj" />
   <Project Path="Jakar.Extensions.Blazor/Jakar.Extensions.Blazor.csproj" />
   <Project Path="Jakar.Extensions.Bogus/Jakar.Extensions.Bogus.csproj" />
