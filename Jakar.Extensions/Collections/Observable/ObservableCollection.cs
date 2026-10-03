@@ -101,7 +101,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
     }
 
 
-    public virtual TValue[] ToArray() => buffer.ToArray();
+    public virtual TValue[] ToArray() => [.. buffer];
 
 
     // ─── Change notifications ────────────────────────────────────────────────
