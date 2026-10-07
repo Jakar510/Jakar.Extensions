@@ -11,8 +11,7 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Randoms))]
 public class Randoms_Tests : Assert
 {
-    [Test]
-    public void RandomString_IsUppercaseLatin_WithTheRequestedLength()
+    [Test] public void RandomString_IsUppercaseLatin_WithTheRequestedLength()
     {
         string value = Randoms.RandomString(4096);
 
@@ -21,8 +20,7 @@ public class Randoms_Tests : Assert
         this.AreEqual(26, value.Distinct().Count()); // every letter (including 'I') is reachable
     }
 
-    [Test]
-    public void RandomString_WithConverter_AppliesIt()
+    [Test] public void RandomString_WithConverter_AppliesIt()
     {
         string value = Randoms.RandomString(512, static c => c);
 
@@ -31,6 +29,5 @@ public class Randoms_Tests : Assert
         this.IsTrue(Randoms.RandomString(64, char.ToUpperInvariant).All(static c => c is >= 'A' and <= 'Z'));
     }
 
-    [Test]
-    public void RandomString_Empty() => this.AreEqual("", Randoms.RandomString(0));
+    [Test] public void RandomString_Empty() => this.AreEqual("", Randoms.RandomString(0));
 }

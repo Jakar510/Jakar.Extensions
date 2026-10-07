@@ -62,7 +62,7 @@ public class StringCollectionBenchmarks
         {
             field    = value;
             __values = GetArray(10000);
-            __array  = [..__values];
+            __array  = [.. __values];
             __memory = __values;
         }
     }

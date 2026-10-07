@@ -12,6 +12,7 @@ namespace Jakar.Extensions.UserGuid
                                  IncludeFields = true,
                                  NumberHandling = JsonNumberHandling.AllowReadingFromString,
                                  UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+
                                  // net10.0 can't attach a converter to the open generic ObservableCollection<T>, so register the closed ones the models use:
                                  // they serialize the unfiltered contents and read with one bulk insert (AOT-plan §2.13).
                                  Converters = [typeof(EncodingConverter), typeof(ObservableCollectionJsonConverter<UserAddress>), typeof(ObservableCollectionJsonConverter<GroupModel>), typeof(ObservableCollectionJsonConverter<RoleModel>)])]
@@ -41,6 +42,7 @@ namespace Jakar.Extensions.UserLong
                                  IncludeFields = true,
                                  NumberHandling = JsonNumberHandling.AllowReadingFromString,
                                  UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+
                                  // net10.0 can't attach a converter to the open generic ObservableCollection<T>, so register the closed ones the models use:
                                  // they serialize the unfiltered contents and read with one bulk insert (AOT-plan §2.13).
                                  Converters = [typeof(EncodingConverter), typeof(ObservableCollectionJsonConverter<UserAddress>), typeof(ObservableCollectionJsonConverter<GroupModel>), typeof(ObservableCollectionJsonConverter<RoleModel>)])]

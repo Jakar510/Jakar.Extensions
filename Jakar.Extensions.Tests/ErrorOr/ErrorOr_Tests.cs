@@ -24,8 +24,7 @@ public class ErrorOr_Tests : Assert
 
     // ─── Errors container ────────────────────────────────────────────────────
 
-    [Test]
-    public void FactoryError_ProducesValidErrors()
+    [Test] public void FactoryError_ProducesValidErrors()
     {
         Errors errors = CreateValidationError();
         this.IsTrue(errors.IsValid);
@@ -35,8 +34,7 @@ public class ErrorOr_Tests : Assert
 
     // ─── ErrorOrResult<TValue> : value-type TValue is the regression ──────────
 
-    [Test]
-    public void Generic_ValueType_Bool_ReportsErrors()
+    [Test] public void Generic_ValueType_Bool_ReportsErrors()
     {
         ErrorOrResult<bool> result = CreateValidationError();
         this.IsTrue(result.HasErrors);
@@ -46,8 +44,7 @@ public class ErrorOr_Tests : Assert
         this.IsTrue(errors!.IsValid);
     }
 
-    [Test]
-    public void Generic_ValueType_Int_ReportsErrors()
+    [Test] public void Generic_ValueType_Int_ReportsErrors()
     {
         ErrorOrResult<int> result = CreateValidationError();
         this.IsTrue(result.HasErrors);
@@ -56,8 +53,7 @@ public class ErrorOr_Tests : Assert
         this.NotNull(errors);
     }
 
-    [Test]
-    public void Generic_ValueType_Struct_ReportsErrors()
+    [Test] public void Generic_ValueType_Struct_ReportsErrors()
     {
         ErrorOrResult<Success> result = CreateValidationError();
         this.IsTrue(result.HasErrors);
@@ -66,8 +62,7 @@ public class ErrorOr_Tests : Assert
         this.NotNull(errors);
     }
 
-    [Test]
-    public void Generic_ReferenceType_ReportsErrors()
+    [Test] public void Generic_ReferenceType_ReportsErrors()
     {
         ErrorOrResult<string> result = CreateValidationError();
         this.IsTrue(result.HasErrors);
@@ -76,8 +71,7 @@ public class ErrorOr_Tests : Assert
         this.NotNull(errors);
     }
 
-    [Test]
-    public void Generic_ValuePath_ValueType()
+    [Test] public void Generic_ValuePath_ValueType()
     {
         ErrorOrResult<int> result = ErrorOrResult<int>.Create(7);
         this.IsFalse(result.HasErrors);
@@ -87,8 +81,7 @@ public class ErrorOr_Tests : Assert
         this.IsNull(errors);
     }
 
-    [Test]
-    public void Generic_ValuePath_ValueType_DefaultValueStillCountsAsValue()
+    [Test] public void Generic_ValuePath_ValueType_DefaultValueStillCountsAsValue()
     {
         ErrorOrResult<int> result = ErrorOrResult<int>.Create(0);
         this.IsFalse(result.HasErrors);
@@ -97,8 +90,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual(0, value);
     }
 
-    [Test]
-    public void Generic_ValuePath_ReferenceType()
+    [Test] public void Generic_ValuePath_ReferenceType()
     {
         ErrorOrResult<string> result = ErrorOrResult<string>.Create("ok");
         this.IsFalse(result.HasErrors);
@@ -108,8 +100,7 @@ public class ErrorOr_Tests : Assert
         this.IsNull(errors);
     }
 
-    [Test]
-    public void Generic_ErrorsOnlyOverload()
+    [Test] public void Generic_ErrorsOnlyOverload()
     {
         ErrorOrResult<bool> failed = CreateValidationError();
         this.IsTrue(failed.TryGetValue(out Errors? errors));
@@ -120,15 +111,13 @@ public class ErrorOr_Tests : Assert
         this.IsFalse(none?.IsValid is true);
     }
 
-    [Test]
-    public void Generic_Match_TakesErrorBranch()
+    [Test] public void Generic_Match_TakesErrorBranch()
     {
         ErrorOrResult<int> result = CreateValidationError();
         this.AreEqual("error", result.Match(static ( int _ ) => "value", static ( Errors _ ) => "error"));
     }
 
-    [Test]
-    public void Generic_GetStatus_IsBadRequestForValidation()
+    [Test] public void Generic_GetStatus_IsBadRequestForValidation()
     {
         ErrorOrResult<bool> result = CreateValidationError();
         this.AreEqual(Status.BadRequest, result.GetStatus());
@@ -137,8 +126,7 @@ public class ErrorOr_Tests : Assert
 
     // ─── ErrorOrResult ( non-generic ) ────────────────────────────────────────
 
-    [Test]
-    public void NonGeneric_ReportsErrors()
+    [Test] public void NonGeneric_ReportsErrors()
     {
         ErrorOrResult result = CreateValidationError();
         this.IsTrue(result.HasErrors);
@@ -150,8 +138,7 @@ public class ErrorOr_Tests : Assert
         this.NotNull(only);
     }
 
-    [Test]
-    public void NonGeneric_ValuePath()
+    [Test] public void NonGeneric_ValuePath()
     {
         ErrorOrResult result = ErrorOrResult.Create(true);
         this.IsFalse(result.HasErrors);
@@ -161,8 +148,7 @@ public class ErrorOr_Tests : Assert
         this.IsNull(errors);
     }
 
-    [Test]
-    public void NonGeneric_Deconstruct_KeepsErrors()
+    [Test] public void NonGeneric_Deconstruct_KeepsErrors()
     {
         ErrorOrResult result = CreateValidationError();
         result.Deconstruct(out bool passed, out Errors? errors);
@@ -173,8 +159,7 @@ public class ErrorOr_Tests : Assert
 
     // ─── Serialization : source-generated ( the path Jakar's ToJson uses ) ───
 
-    [Test]
-    public void Error_JakarJsonRoundTrip()
+    [Test] public void Error_JakarJsonRoundTrip()
     {
         Error  error = CreateValidationError();
         string json  = Json.Serialize(error);
@@ -182,14 +167,13 @@ public class ErrorOr_Tests : Assert
 
         Error? back = json.FromJson<Error>();
         this.NotNull(back);
-        this.AreEqual(DESCRIPTION,        back!.Description);
-        this.AreEqual(TITLE,              back.Title);
-        this.AreEqual(Status.BadRequest,  back.StatusCode);
+        this.AreEqual(DESCRIPTION,       back!.Description);
+        this.AreEqual(TITLE,             back.Title);
+        this.AreEqual(Status.BadRequest, back.StatusCode);
         this.IsNull(back.Instance);
     }
 
-    [Test]
-    public void Errors_JakarJsonRoundTrip()
+    [Test] public void Errors_JakarJsonRoundTrip()
     {
         Errors errors = CreateValidationError();
         string json   = errors.ToJson();
@@ -201,8 +185,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual(1, back.Details.Length);
     }
 
-    [Test]
-    public void Errors_WithNullAlert_Serializes()
+    [Test] public void Errors_WithNullAlert_Serializes()
     {
         Errors errors = Errors.Create(CreateValidationError(), CreateValidationError());
         this.IsNull(errors.Alert);
@@ -210,8 +193,7 @@ public class ErrorOr_Tests : Assert
         this.NotNull(json);
     }
 
-    [Test]
-    public void Error_SystemTextJsonRoundTrip()
+    [Test] public void Error_SystemTextJsonRoundTrip()
     {
         Error  error = CreateValidationError();
         string json  = System.Text.Json.JsonSerializer.Serialize(error);
@@ -232,25 +214,23 @@ public class ErrorOr_Tests : Assert
     private static StringTags CreateTags() => new([new Pair(FIELD, "notes"), new Pair("nullable", null)], [DESCRIPTION, "required"]);
 
 
-    [Test]
-    public void StringTags_SystemTextJsonRoundTrip()
+    [Test] public void StringTags_SystemTextJsonRoundTrip()
     {
         StringTags tags = CreateTags();
         string     json = System.Text.Json.JsonSerializer.Serialize(tags);
         this.NotNull(json);
 
         StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(json);
-        this.AreEqual(2,           back.Tags.Length);
-        this.AreEqual(2,           back.Entries.Length);
-        this.AreEqual(FIELD,       back.Tags[0].Key);
-        this.AreEqual("notes",     back.Tags[0].Value);
+        this.AreEqual(2,       back.Tags.Length);
+        this.AreEqual(2,       back.Entries.Length);
+        this.AreEqual(FIELD,   back.Tags[0].Key);
+        this.AreEqual("notes", back.Tags[0].Value);
         this.IsNull(back.Tags[1].Value);
         this.AreEqual(DESCRIPTION, back.Entries[0]);
         this.IsFalse(back.IsEmpty);
     }
 
-    [Test]
-    public void StringTags_SystemTextJsonRoundTrip_WebDefaults()
+    [Test] public void StringTags_SystemTextJsonRoundTrip_WebDefaults()
     {
         // Minimal API uses JsonSerializerDefaults.Web ( camelCase ) - the converter must follow the naming policy.
         System.Text.Json.JsonSerializerOptions options = new(System.Text.Json.JsonSerializerDefaults.Web);
@@ -265,8 +245,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual("notes", back.Tags[0].Value);
     }
 
-    [Test]
-    public void StringTags_ReflectionSerializerReadsTheGeneratedShape()
+    [Test] public void StringTags_ReflectionSerializerReadsTheGeneratedShape()
     {
         StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(CreateTags().ToJson());
         this.AreEqual(2,     back.Tags.Length);
@@ -274,16 +253,14 @@ public class ErrorOr_Tests : Assert
         this.AreEqual(FIELD, back.Tags[0].Key);
     }
 
-    [Test]
-    public void StringTags_SystemTextJsonToleratesMissingAndNullMembers()
+    [Test] public void StringTags_SystemTextJsonToleratesMissingAndNullMembers()
     {
         this.IsTrue(System.Text.Json.JsonSerializer.Deserialize<StringTags>("{}").IsEmpty);
         this.IsTrue(System.Text.Json.JsonSerializer.Deserialize<StringTags>("""{"Tags":null,"Entries":null}""").IsEmpty);
         this.AreEqual(1, System.Text.Json.JsonSerializer.Deserialize<StringTags>("""{"Unknown":{"nested":[1,2]},"Entries":["x"]}""").Entries.Length);
     }
 
-    [Test]
-    public void Error_SystemTextJsonKeepsDetails()
+    [Test] public void Error_SystemTextJsonKeepsDetails()
     {
         Error  error = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
         string json  = System.Text.Json.JsonSerializer.Serialize(error);
@@ -295,8 +272,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual(FIELD, back.Details.Tags[0].Key);
     }
 
-    [Test]
-    public void Errors_SystemTextJsonRoundTrip()
+    [Test] public void Errors_SystemTextJsonRoundTrip()
     {
         Errors errors = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
         string json   = System.Text.Json.JsonSerializer.Serialize(errors);
@@ -309,8 +285,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual(FIELD, back.Details[0].Details.Tags[0].Key);
     }
 
-    [Test]
-    public void Error_JakarJsonKeepsDetails()
+    [Test] public void Error_JakarJsonKeepsDetails()
     {
         Error  error = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
         Error? back  = Json.Serialize(error).FromJson<Error>();
@@ -322,8 +297,7 @@ public class ErrorOr_Tests : Assert
 
     // ─── LoginRequest must survive System.Text.Json model binding ─────────────
 
-    [Test]
-    public void LoginRequest_SystemTextJsonRoundTrip()
+    [Test] public void LoginRequest_SystemTextJsonRoundTrip()
     {
         LoginRequest request = new("tyler", "hunter2");
         string       json    = System.Text.Json.JsonSerializer.Serialize(request);
@@ -335,8 +309,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual("hunter2", back.UserPassword);
     }
 
-    [Test]
-    public void LoginRequest_SystemTextJsonBindsRawBody()
+    [Test] public void LoginRequest_SystemTextJsonBindsRawBody()
     {
         const string BODY = """{"UserLogin":"tyler","UserPassword":"hunter2"}""";
 
@@ -346,8 +319,7 @@ public class ErrorOr_Tests : Assert
         this.AreEqual("hunter2", back.UserPassword);
     }
 
-    [Test]
-    public void LoginRequest_JakarJsonRoundTrip()
+    [Test] public void LoginRequest_JakarJsonRoundTrip()
     {
         LoginRequest  request = new("tyler", "hunter2");
         string        json    = request.ToJson();

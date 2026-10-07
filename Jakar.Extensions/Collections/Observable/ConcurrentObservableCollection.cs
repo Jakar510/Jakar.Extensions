@@ -546,7 +546,6 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : Ob
     }
 
 
-
     public override TValue[] ToArray()
     {
         using ( AcquireLock() ) { return [.. buffer]; }

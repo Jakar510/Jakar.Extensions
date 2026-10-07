@@ -52,8 +52,8 @@ internal static class ObservableJson
 {
     /// <summary> The element's metadata: from the serializer's own options when they have it (inside a converter), otherwise <see cref="Json.GetTypeInfo{T}"/>. </summary>
     public static JsonTypeInfo<TValue> ElementInfo<TValue>( JsonSerializerOptions? options = null ) => options is not null && options.TryGetTypeInfo(typeof(TValue), out JsonTypeInfo? info) && info is JsonTypeInfo<TValue> typed
-                                                                                                          ? typed
-                                                                                                          : Json.GetTypeInfo<TValue>();
+                                                                                                           ? typed
+                                                                                                           : Json.GetTypeInfo<TValue>();
 
 
     public static TSelf FromJson<TSelf, TValue>( string json )
@@ -118,6 +118,8 @@ internal static class ObservableJson
 
 // ─── Array-shaped bases: unfiltered contents ──────────────────────────────────
 
+
+
 public abstract partial class ObservableCollection<TSelf, TValue> : IJsonArraySource<TValue>
 {
     /// <summary> Writes the unfiltered backing list. </summary>
@@ -174,11 +176,11 @@ public sealed partial class ObservableCollection<TValue>
     /// <summary> Runtime lookup (an open generic can't be source generated): register <c> ObservableCollection&lt;TValue&gt; </c> in a context if STJ handles it as a root. <c> FromJson </c>/<c> ToJson </c> don't need it. </summary>
     public static JsonTypeInfo<ObservableCollection<TValue>> JsonTypeInfo => Json.GetTypeInfo<ObservableCollection<TValue>>();
 
-    public new static ObservableCollection<TValue>            FromJson( string             json )                                                                                          => ObservableJson.FromJson<ObservableCollection<TValue>, TValue>(json);
-    public new static ObservableCollection<TValue>            FromJson( ReadOnlySpan<byte> utf8Json )                                                                                      => ObservableJson.FromJson<ObservableCollection<TValue>, TValue>(utf8Json);
-    public new static bool                                    TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ObservableCollection<TValue>? result )        => ObservableJson.TryFromJson<ObservableCollection<TValue>, TValue>(json,     out result);
-    public new static bool                                    TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ObservableCollection<TValue>? result )        => ObservableJson.TryFromJson<ObservableCollection<TValue>, TValue>(utf8Json, out result);
-    public new static ValueTask<ObservableCollection<TValue>> FromJsonAsync( Stream stream, CancellationToken token = default )                                                            => ObservableJson.FromJsonAsync<ObservableCollection<TValue>, TValue>(stream, token);
+    public new static ObservableCollection<TValue>            FromJson( string                         json )                                                                            => ObservableJson.FromJson<ObservableCollection<TValue>, TValue>(json);
+    public new static ObservableCollection<TValue>            FromJson( ReadOnlySpan<byte>             utf8Json )                                                                        => ObservableJson.FromJson<ObservableCollection<TValue>, TValue>(utf8Json);
+    public new static bool                                    TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ObservableCollection<TValue>? result )          => ObservableJson.TryFromJson<ObservableCollection<TValue>, TValue>(json,     out result);
+    public new static bool                                    TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ObservableCollection<TValue>? result )          => ObservableJson.TryFromJson<ObservableCollection<TValue>, TValue>(utf8Json, out result);
+    public new static ValueTask<ObservableCollection<TValue>> FromJsonAsync( Stream                    stream,   CancellationToken                                     token = default ) => ObservableJson.FromJsonAsync<ObservableCollection<TValue>, TValue>(stream, token);
 }
 
 
@@ -191,11 +193,11 @@ public sealed partial class ConcurrentObservableCollection<TValue>
     /// <inheritdoc cref="ObservableCollection{TValue}.JsonTypeInfo"/>
     public static JsonTypeInfo<ConcurrentObservableCollection<TValue>> JsonTypeInfo => Json.GetTypeInfo<ConcurrentObservableCollection<TValue>>();
 
-    public new static ConcurrentObservableCollection<TValue>            FromJson( string             json )                                                                                      => ObservableJson.FromJson<ConcurrentObservableCollection<TValue>, TValue>(json);
-    public new static ConcurrentObservableCollection<TValue>            FromJson( ReadOnlySpan<byte> utf8Json )                                                                                  => ObservableJson.FromJson<ConcurrentObservableCollection<TValue>, TValue>(utf8Json);
-    public new static bool                                              TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ConcurrentObservableCollection<TValue>? result ) => ObservableJson.TryFromJson<ConcurrentObservableCollection<TValue>, TValue>(json,     out result);
-    public new static bool                                              TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ConcurrentObservableCollection<TValue>? result ) => ObservableJson.TryFromJson<ConcurrentObservableCollection<TValue>, TValue>(utf8Json, out result);
-    public new static ValueTask<ConcurrentObservableCollection<TValue>> FromJsonAsync( Stream stream, CancellationToken token = default )                                                        => ObservableJson.FromJsonAsync<ConcurrentObservableCollection<TValue>, TValue>(stream, token);
+    public new static ConcurrentObservableCollection<TValue>            FromJson( string                         json )                                                                                      => ObservableJson.FromJson<ConcurrentObservableCollection<TValue>, TValue>(json);
+    public new static ConcurrentObservableCollection<TValue>            FromJson( ReadOnlySpan<byte>             utf8Json )                                                                                  => ObservableJson.FromJson<ConcurrentObservableCollection<TValue>, TValue>(utf8Json);
+    public new static bool                                              TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ConcurrentObservableCollection<TValue>? result )          => ObservableJson.TryFromJson<ConcurrentObservableCollection<TValue>, TValue>(json,     out result);
+    public new static bool                                              TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ConcurrentObservableCollection<TValue>? result )          => ObservableJson.TryFromJson<ConcurrentObservableCollection<TValue>, TValue>(utf8Json, out result);
+    public new static ValueTask<ConcurrentObservableCollection<TValue>> FromJsonAsync( Stream                    stream,   CancellationToken                                               token = default ) => ObservableJson.FromJsonAsync<ConcurrentObservableCollection<TValue>, TValue>(stream, token);
 }
 
 
@@ -208,16 +210,18 @@ public partial class ObservableHashSet<TValue>
     /// <inheritdoc cref="ObservableCollection{TValue}.JsonTypeInfo"/>
     public static JsonTypeInfo<ObservableHashSet<TValue>> JsonTypeInfo => Json.GetTypeInfo<ObservableHashSet<TValue>>();
 
-    public new static ObservableHashSet<TValue>            FromJson( string             json )                                                                                   => ObservableJson.FromJson<ObservableHashSet<TValue>, TValue>(json);
-    public new static ObservableHashSet<TValue>            FromJson( ReadOnlySpan<byte> utf8Json )                                                                               => ObservableJson.FromJson<ObservableHashSet<TValue>, TValue>(utf8Json);
-    public new static bool                                 TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ObservableHashSet<TValue>? result )        => ObservableJson.TryFromJson<ObservableHashSet<TValue>, TValue>(json,     out result);
-    public new static bool                                 TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ObservableHashSet<TValue>? result )        => ObservableJson.TryFromJson<ObservableHashSet<TValue>, TValue>(utf8Json, out result);
-    public new static ValueTask<ObservableHashSet<TValue>> FromJsonAsync( Stream stream, CancellationToken token = default )                                                     => ObservableJson.FromJsonAsync<ObservableHashSet<TValue>, TValue>(stream, token);
+    public new static ObservableHashSet<TValue>            FromJson( string                         json )                                                                         => ObservableJson.FromJson<ObservableHashSet<TValue>, TValue>(json);
+    public new static ObservableHashSet<TValue>            FromJson( ReadOnlySpan<byte>             utf8Json )                                                                     => ObservableJson.FromJson<ObservableHashSet<TValue>, TValue>(utf8Json);
+    public new static bool                                 TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out ObservableHashSet<TValue>? result )          => ObservableJson.TryFromJson<ObservableHashSet<TValue>, TValue>(json,     out result);
+    public new static bool                                 TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out ObservableHashSet<TValue>? result )          => ObservableJson.TryFromJson<ObservableHashSet<TValue>, TValue>(utf8Json, out result);
+    public new static ValueTask<ObservableHashSet<TValue>> FromJsonAsync( Stream                    stream,   CancellationToken                                  token = default ) => ObservableJson.FromJsonAsync<ObservableHashSet<TValue>, TValue>(stream, token);
 }
 
 
 
 // ─── Dictionaries: object-shaped, metadata only ───────────────────────────────
+
+
 
 public sealed partial class ObservableDictionary<TKey, TValue>
 {

@@ -20,16 +20,14 @@ public class SafeFireAndForget_Tests : Assert
 
     // ─── Task ────────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Task_CompletedSuccessfully_CallsNothing()
+    [Test] public void Task_CompletedSuccessfully_CallsNothing()
     {
         int errors = 0;
         Task.CompletedTask.SafeFireAndForget(_ => errors++);
         this.AreEqual(0, errors);
     }
 
-    [Test]
-    public void Task_AlreadyFaulted_HandlesSynchronously_WithOriginalException()
+    [Test] public void Task_AlreadyFaulted_HandlesSynchronously_WithOriginalException()
     {
         InvalidOperationException error    = new("boom");
         Exception?                received = null;
@@ -39,19 +37,17 @@ public class SafeFireAndForget_Tests : Assert
         Assert.AreSame(error, received);
     }
 
-    [Test]
-    public void Task_AlreadyCancelled_PassesCancellation()
+    [Test] public void Task_AlreadyCancelled_PassesCancellation()
     {
         Exception? received = null;
         Task.FromCanceled(new CancellationToken(true)).SafeFireAndForget(e => received = e);
         Assert.IsInstanceOf<TaskCanceledException>(received);
     }
 
-    [Test]
-    public async Task Task_CancelledByOperationCanceledException_PassesTheSameExceptionAwaitWould()
+    [Test] public async Task Task_CancelledByOperationCanceledException_PassesTheSameExceptionAwaitWould()
     {
-        using CancellationTokenSource cts    = new();
-        OperationCanceledException    thrown = new(cts.Token);
+        using CancellationTokenSource   cts      = new();
+        OperationCanceledException      thrown   = new(cts.Token);
         TaskCompletionSource<Exception> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         Task task = @throw();
@@ -67,8 +63,7 @@ public class SafeFireAndForget_Tests : Assert
         }
     }
 
-    [Test]
-    public async Task Task_Pending_HandlesFailureOnce_OnCompletion()
+    [Test] public async Task Task_Pending_HandlesFailureOnce_OnCompletion()
     {
         TaskCompletionSource            source   = new(TaskCreationOptions.RunContinuationsAsynchronously);
         TaskCompletionSource<Exception> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -89,22 +84,21 @@ public class SafeFireAndForget_Tests : Assert
         this.AreEqual(1, calls);
     }
 
-    [Test]
-    public async Task Task_AsyncErrorHandler_IsAwaited()
+    [Test] public async Task Task_AsyncErrorHandler_IsAwaited()
     {
         TaskCompletionSource handled = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        Task.FromException(new InvalidOperationException()).SafeFireAndForget((Func<Exception, Task>)(async _ =>
-                                                                               {
-                                                                                   await Task.Yield();
-                                                                                   handled.TrySetResult();
-                                                                               }));
+        Task.FromException(new InvalidOperationException())
+            .SafeFireAndForget((Func<Exception, Task>)( async _ =>
+                                                        {
+                                                            await Task.Yield();
+                                                            handled.TrySetResult();
+                                                        } ));
 
         await handled.Task.WaitAsync(__timeout);
     }
 
-    [Test]
-    public void Task_EachCall_HandlesItsTaskOnce()
+    [Test] public void Task_EachCall_HandlesItsTaskOnce()
     {
         int  calls = 0;
         Task task  = Task.FromException(new InvalidOperationException());
@@ -115,17 +109,14 @@ public class SafeFireAndForget_Tests : Assert
         this.AreEqual(2, calls);
     }
 
-    [Test]
-    public void Task_ThrowingErrorHandler_GoesToSelfLogger_AndDoesNotThrow()
+    [Test] public void Task_ThrowingErrorHandler_GoesToSelfLogger_AndDoesNotThrow()
     {
-        string? output = Capture(static () => Task.FromException(new InvalidOperationException("original"))
-                                                 .SafeFireAndForget((Action<Exception>)( static _ => throw new ArgumentException("handler failed") )));
+        string? output = Capture(static () => Task.FromException(new InvalidOperationException("original")).SafeFireAndForget((Action<Exception>)( static _ => throw new ArgumentException("handler failed") )));
 
         this.IsTrue(output!.Contains("handler failed", StringComparison.Ordinal));
     }
 
-    [Test]
-    public async Task Task_FaultedAsyncErrorHandler_GoesToSelfLogger()
+    [Test] public async Task Task_FaultedAsyncErrorHandler_GoesToSelfLogger()
     {
         TaskCompletionSource<string> output = new(TaskCreationOptions.RunContinuationsAsynchronously);
         SelfLogger.Enable(m => output.TrySetResult(m));
@@ -134,38 +125,35 @@ public class SafeFireAndForget_Tests : Assert
         {
             Task.FromException(new InvalidOperationException("original"))
                 .SafeFireAndForget((Func<Exception, Task>)( static async _ =>
-                                   {
-                                       await Task.Yield();
-                                       throw new ArgumentException("async handler failed");
-                                   } ));
+                                                            {
+                                                                await Task.Yield();
+                                                                throw new ArgumentException("async handler failed");
+                                                            } ));
 
             this.IsTrue(( await output.Task.WaitAsync(__timeout) ).Contains("async handler failed", StringComparison.Ordinal));
         }
         finally { SelfLogger.Disable(); }
     }
 
-    [Test]
-    public void Task_NoHandler_LogsToSelfLogger()
+    [Test] public void Task_NoHandler_LogsToSelfLogger()
     {
         string? output = Capture(static () => Task.FromException(new InvalidOperationException("unhandled")).SafeFireAndForget());
         this.IsTrue(output!.Contains("unhandled", StringComparison.Ordinal));
     }
 
-    [Test]
-    public void Task_Logger_LogsOnce_WithCallerAndVariable()
+    [Test] public void Task_Logger_LogsOnce_WithCallerAndVariable()
     {
         CountingLogger logger = new();
         Task           work   = Task.FromException(new InvalidOperationException("logged"));
 
         work.SafeFireAndForget(logger);
 
-        this.AreEqual(1, logger.Count);
-        this.AreEqual("logged", logger.Exception?.Message);
+        this.AreEqual(1,                                                                      logger.Count);
+        this.AreEqual("logged",                                                               logger.Exception?.Message);
         this.AreEqual($"{nameof(Task_Logger_LogsOnce_WithCallerAndVariable)}.{nameof(work)}", logger.Message);
     }
 
-    [Test]
-    public void NullArguments_ThrowAtTheCallSite()
+    [Test] public void NullArguments_ThrowAtTheCallSite()
     {
         Throws<ArgumentNullException>(static () => ( (Task)null! ).SafeFireAndForget());
         Throws<ArgumentNullException>(static () => Task.CompletedTask.SafeFireAndForget((Action<Exception>)null!));
@@ -176,59 +164,56 @@ public class SafeFireAndForget_Tests : Assert
 
     // ─── Task<T> ─────────────────────────────────────────────────────────────
 
-    [Test]
-    public void TaskOfT_Completed_RunsNextSynchronously()
+    [Test] public void TaskOfT_Completed_RunsNextSynchronously()
     {
         int received = 0;
         Task.FromResult(5).SafeFireAndForget(static _ => Fail("no error expected"), x => received = x);
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public void TaskOfT_Faulted_SkipsNext_AndHandlesOnce()
+    [Test] public void TaskOfT_Faulted_SkipsNext_AndHandlesOnce()
     {
-        int  nextCalls = 0, errorCalls = 0;
+        int nextCalls = 0, errorCalls = 0;
         Task.FromException<int>(new InvalidOperationException()).SafeFireAndForget(_ => errorCalls++, _ => nextCalls++);
 
         this.AreEqual(0, nextCalls);
         this.AreEqual(1, errorCalls);
     }
 
-    [Test]
-    public void TaskOfT_ThrowingNext_GoesToErrorHandlerOnce()
+    [Test] public void TaskOfT_ThrowingNext_GoesToErrorHandlerOnce()
     {
         ArgumentException error    = new("next failed");
         Exception?        received = null;
         int               calls    = 0;
 
-        Task.FromResult(5).SafeFireAndForget(e =>
-                                             {
-                                                 calls++;
-                                                 received = e;
-                                             },
-                                             (Action<int>)( _ => throw error ));
+        Task.FromResult(5)
+            .SafeFireAndForget(e =>
+                               {
+                                   calls++;
+                                   received = e;
+                               },
+                               (Action<int>)( _ => throw error ));
 
         Assert.AreSame(error, received);
         this.AreEqual(1, calls);
     }
 
-    [Test]
-    public async Task TaskOfT_FaultedAsyncNext_GoesToErrorHandler()
+    [Test] public async Task TaskOfT_FaultedAsyncNext_GoesToErrorHandler()
     {
         TaskCompletionSource<Exception> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        Task.FromResult(5).SafeFireAndForget(e => received.TrySetResult(e),
-                                             (Func<int, Task>)( static async _ =>
-                                             {
-                                                 await Task.Yield();
-                                                 throw new ArgumentException("async next failed");
-                                             } ));
+        Task.FromResult(5)
+            .SafeFireAndForget(e => received.TrySetResult(e),
+                               (Func<int, Task>)( static async _ =>
+                                                  {
+                                                      await Task.Yield();
+                                                      throw new ArgumentException("async next failed");
+                                                  } ));
 
         this.AreEqual("async next failed", ( await received.Task.WaitAsync(__timeout) ).Message);
     }
 
-    [Test]
-    public async Task TaskOfT_Pending_RunsNextOnce()
+    [Test] public async Task TaskOfT_Pending_RunsNextOnce()
     {
         TaskCompletionSource<int> source   = new(TaskCreationOptions.RunContinuationsAsynchronously);
         TaskCompletionSource<int> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -251,16 +236,14 @@ public class SafeFireAndForget_Tests : Assert
 
     // ─── ValueTask / ValueTask<T> ────────────────────────────────────────────
 
-    [Test]
-    public void ValueTask_Default_CallsNothing()
+    [Test] public void ValueTask_Default_CallsNothing()
     {
         int errors = 0;
         default(ValueTask).SafeFireAndForget(_ => errors++);
         this.AreEqual(0, errors);
     }
 
-    [Test]
-    public async Task ValueTask_PooledSource_IsConsumedExactlyOnce( [Values] bool completeFirst, [Values] bool fail )
+    [Test] public async Task ValueTask_PooledSource_IsConsumedExactlyOnce( [Values] bool completeFirst, [Values] bool fail )
     {
         CountingSource<int>  source = new();
         TaskCompletionSource done   = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -281,11 +264,14 @@ public class SafeFireAndForget_Tests : Assert
 
         await Task.Delay(50);
         this.AreEqual(1, source.GetResultCalls);
-        this.AreEqual(fail ? 1 : 0, errors);
+
+        this.AreEqual(fail
+                          ? 1
+                          : 0,
+                      errors);
     }
 
-    [Test]
-    public async Task ValueTaskOfT_PooledSource_IsConsumedExactlyOnce_AndRunsNextOnce( [Values] bool completeFirst )
+    [Test] public async Task ValueTaskOfT_PooledSource_IsConsumedExactlyOnce_AndRunsNextOnce( [Values] bool completeFirst )
     {
         CountingSource<int>       source   = new();
         TaskCompletionSource<int> received = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -308,14 +294,12 @@ public class SafeFireAndForget_Tests : Assert
         this.AreEqual(1, calls);
     }
 
-    [Test]
-    public void ValueTaskOfT_Faulted_HandlesOnce()
+    [Test] public void ValueTaskOfT_Faulted_HandlesOnce()
     {
         int errors = 0;
         ValueTask.FromException<int>(new InvalidOperationException()).SafeFireAndForget(_ => errors++, static _ => Fail("next must not run"));
         this.AreEqual(1, errors);
     }
-
 
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -336,7 +320,7 @@ public class SafeFireAndForget_Tests : Assert
     /// <summary> A pooled-style source that fails loudly if a ValueTask over it is consumed more than once. </summary>
     private sealed class CountingSource<T> : IValueTaskSource<T>, IValueTaskSource
     {
-        private          ManualResetValueTaskSourceCore<T> __core = new() { RunContinuationsAsynchronously = true };
+        private          ManualResetValueTaskSourceCore<T> __core     = new() { RunContinuationsAsynchronously = true };
         private readonly TaskCompletionSource              __consumed = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private          int                               __getResultCalls;
 
@@ -357,9 +341,9 @@ public class SafeFireAndForget_Tests : Assert
             __consumed.TrySetResult();
             return __core.GetResult(token);
         }
-        void IValueTaskSource.GetResult( short token ) => GetResult(token);
-        public ValueTaskSourceStatus GetStatus( short token ) => __core.GetStatus(token);
-        public void OnCompleted( Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags ) => __core.OnCompleted(continuation, state, token, flags);
+        void IValueTaskSource.       GetResult( short             token )                                                                           => GetResult(token);
+        public ValueTaskSourceStatus GetStatus( short             token )                                                                           => __core.GetStatus(token);
+        public void                  OnCompleted( Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags ) => __core.OnCompleted(continuation, state, token, flags);
     }
 
 

@@ -16,8 +16,7 @@ public static class JsonModelRegistry
 
 
     /// <summary> Called by generated code. The first registration of a type wins. </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void Register<T>( Func<JsonTypeInfo<T>> factory )
+    [EditorBrowsable(EditorBrowsableState.Never)] public static void Register<T>( Func<JsonTypeInfo<T>> factory )
     {
         ArgumentNullException.ThrowIfNull(factory);
         __factories.TryAdd(typeof(T), factory);

@@ -37,8 +37,7 @@ public sealed class JsonModelGenerator : IIncrementalGenerator
     {
         IncrementalValuesProvider<ModelInfo> models = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_MODEL_ATTRIBUTE, static ( node, _ ) => node is TypeDeclarationSyntax, static ( ctx, token ) => ModelExtractor.Extract(ctx, token));
 
-        IncrementalValueProvider<ImmutableArray<ContextInfo>> contexts = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_SERIALIZABLE_ATTRIBUTE, static ( node, _ ) => node is ClassDeclarationSyntax, static ( ctx, token ) => ContextExtractor.Extract(ctx, token))
-                                                                                .Collect();
+        IncrementalValueProvider<ImmutableArray<ContextInfo>> contexts = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_SERIALIZABLE_ATTRIBUTE, static ( node, _ ) => node is ClassDeclarationSyntax, static ( ctx, token ) => ContextExtractor.Extract(ctx, token)).Collect();
 
         IncrementalValueProvider<DefaultContextInfo> defaultContext = context.CompilationProvider.Select(static ( compilation, _ ) => ContextExtractor.GetDefault(compilation));
 
@@ -46,10 +45,7 @@ public sealed class JsonModelGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(combined, static ( spc, pair ) => Emitter.EmitModel(spc, pair.Model, pair.Lookup.Contexts, pair.Lookup.Default));
 
-        IncrementalValueProvider<ImmutableArray<RegistrationEntry>> registrations = combined.Select(static ( pair, _ ) => Emitter.GetRegistration(pair.Model, pair.Lookup.Contexts, pair.Lookup.Default))
-                                                                                            .Where(static entry => entry.HasValue)
-                                                                                            .Select(static ( entry, _ ) => entry!.Value)
-                                                                                            .Collect();
+        IncrementalValueProvider<ImmutableArray<RegistrationEntry>> registrations = combined.Select(static ( pair, _ ) => Emitter.GetRegistration(pair.Model, pair.Lookup.Contexts, pair.Lookup.Default)).Where(static entry => entry.HasValue).Select(static ( entry, _ ) => entry!.Value).Collect();
 
         context.RegisterSourceOutput(registrations, static ( spc, entries ) => Emitter.EmitRegistrations(spc, entries));
     }
@@ -61,11 +57,11 @@ internal static class ModelExtractor
 {
     public static ModelInfo Extract( GeneratorAttributeSyntaxContext ctx, CancellationToken token )
     {
-        INamedTypeSymbol      symbol      = (INamedTypeSymbol)ctx.TargetSymbol;
-        TypeDeclarationSyntax declaration = (TypeDeclarationSyntax)ctx.TargetNode;
-        AttributeData         attribute   = ctx.Attributes[0];
-        LocationInfo? attributeLocation = LocationInfo.From(attribute.ApplicationSyntaxReference?.GetSyntax(token).GetLocation() ?? declaration.Identifier.GetLocation());
-        string        displayName       = symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        INamedTypeSymbol      symbol            = (INamedTypeSymbol)ctx.TargetSymbol;
+        TypeDeclarationSyntax declaration       = (TypeDeclarationSyntax)ctx.TargetNode;
+        AttributeData         attribute         = ctx.Attributes[0];
+        LocationInfo?         attributeLocation = LocationInfo.From(attribute.ApplicationSyntaxReference?.GetSyntax(token).GetLocation() ?? declaration.Identifier.GetLocation());
+        string                displayName       = symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         List<DiagnosticInfo> diagnostics = [];
         bool                 fatal       = false;
@@ -127,10 +123,12 @@ internal static class ModelExtractor
 
         return new ModelInfo
                {
-                   Name                    = symbol.Name,
-                   FullyQualifiedName      = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                   MetadataName            = GetMetadataName(symbol),
-                   Namespace               = symbol.ContainingNamespace is { IsGlobalNamespace: false } ns ? ns.ToDisplayString() : null,
+                   Name               = symbol.Name,
+                   FullyQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                   MetadataName       = GetMetadataName(symbol),
+                   Namespace = symbol.ContainingNamespace is { IsGlobalNamespace: false } ns
+                                   ? ns.ToDisplayString()
+                                   : null,
                    ContainingTypes         = new EquatableArray<TypeDeclInfo>(GetContainingTypes(symbol, token)),
                    Self                    = GetDeclInfo(symbol, token),
                    IsValueType             = symbol.IsValueType,
@@ -138,10 +136,10 @@ internal static class ModelExtractor
                    ExplicitContext         = explicitContext,
                    ExplicitContextMetadata = explicitContextMetadata,
                    EmitJsonTypeInfo        = !handWritten,
-                   EmitFromJsonString      = !HasMethod(symbol, "FromJson",    IsString),
-                   EmitFromJsonUtf8        = !HasMethod(symbol, "FromJson",    IsByteSpan),
-                   EmitTryFromJsonString   = !HasMethod(symbol, "TryFromJson", IsString),
-                   EmitTryFromJsonUtf8     = !HasMethod(symbol, "TryFromJson", IsByteSpan),
+                   EmitFromJsonString      = !HasMethod(symbol, "FromJson",      IsString),
+                   EmitFromJsonUtf8        = !HasMethod(symbol, "FromJson",      IsByteSpan),
+                   EmitTryFromJsonString   = !HasMethod(symbol, "TryFromJson",   IsString),
+                   EmitTryFromJsonUtf8     = !HasMethod(symbol, "TryFromJson",   IsByteSpan),
                    EmitFromJsonAsync       = !HasMethod(symbol, "FromJsonAsync", IsStream),
                    EmitToString            = generateToString && !OverridesToString(symbol),
                    AttributeLocation       = attributeLocation,
@@ -278,7 +276,7 @@ internal static class ContextExtractor
 {
     public static ContextInfo Extract( GeneratorAttributeSyntaxContext ctx, CancellationToken token )
     {
-        INamedTypeSymbol    symbol        = (INamedTypeSymbol)ctx.TargetSymbol;
+        INamedTypeSymbol   symbol        = (INamedTypeSymbol)ctx.TargetSymbol;
         List<Registration> registrations = [];
 
         // All [JsonSerializable] attributes on the symbol, across every partial declaration.
@@ -305,12 +303,12 @@ internal static class ContextExtractor
 
     /// <summary> The property name System.Text.Json generates when <c> TypeInfoPropertyName </c> isn't set: the type name, <c> ElementArray </c> for arrays, <c> ListInvoice </c> for generics. </summary>
     internal static string GetDefaultPropertyName( ITypeSymbol type ) => type switch
-                                                                        {
-                                                                            IArrayTypeSymbol array                                                       => $"{GetDefaultPropertyName(array.ElementType)}Array",
-                                                                            INamedTypeSymbol { IsGenericType: true, OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable => $"Nullable{GetDefaultPropertyName(nullable.TypeArguments[0])}",
-                                                                            INamedTypeSymbol { IsGenericType: true } generic                             => generic.Name + string.Concat(generic.TypeArguments.Select(GetDefaultPropertyName)),
-                                                                            _                                                                            => type.Name
-                                                                        };
+                                                                         {
+                                                                             IArrayTypeSymbol array                                                                                           => $"{GetDefaultPropertyName(array.ElementType)}Array",
+                                                                             INamedTypeSymbol { IsGenericType: true, OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable => $"Nullable{GetDefaultPropertyName(nullable.TypeArguments[0])}",
+                                                                             INamedTypeSymbol { IsGenericType: true } generic                                                                 => generic.Name + string.Concat(generic.TypeArguments.Select(GetDefaultPropertyName)),
+                                                                             _                                                                                                                => type.Name
+                                                                         };
 
 
     public static DefaultContextInfo GetDefault( Compilation compilation )
@@ -322,8 +320,8 @@ internal static class ContextExtractor
             if ( attribute.ConstructorArguments.Length == 1 && attribute.ConstructorArguments[0].Value is INamedTypeSymbol context )
             {
                 return ModelExtractor.DerivesFrom(context, JsonModelGenerator.JSON_SERIALIZER_CONTEXT)
-                           ? new DefaultContextInfo(context.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), ModelExtractor.GetMetadataName(context), true, null)
-                           : new DefaultContextInfo(null, null, false, context.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+                           ? new DefaultContextInfo(context.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), ModelExtractor.GetMetadataName(context), true,  null)
+                           : new DefaultContextInfo(null,                                                              null,                                    false, context.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             }
 
             return new DefaultContextInfo(null, null, false, "null");

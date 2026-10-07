@@ -30,8 +30,6 @@ public readonly partial struct ThreadInformation( string name, int managedThread
     public LogEventProperty GetProperty()       => new(nameof(ThreadInformation), GetStructureValue());
 
 
-
-
     public int CompareTo( object? other ) => other is ThreadInformation info
                                                  ? CompareTo(info)
                                                  : throw new ExpectedValueTypeException(other, typeof(ThreadInformation));

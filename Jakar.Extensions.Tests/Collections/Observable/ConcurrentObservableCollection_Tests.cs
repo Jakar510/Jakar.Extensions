@@ -102,7 +102,7 @@ public class ConcurrentObservableCollection_Tests : Assert
 
     [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
@@ -118,7 +118,7 @@ public class ConcurrentObservableCollection_Tests : Assert
 
     [Test] public async Task SortAsync()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 

@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions
+// Jakar.Spans (moved from Jakar.Extensions)
 // 06/07/2022  3:25 PM
 
 
@@ -324,17 +324,56 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
     // ─── AppendJoin ──────────────────────────────────────────────────────────
 
-    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")] [UnscopedRef]
-    public ref ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
+    /// <remarks> Arrays and lists are joined from their storage; any other sequence is enumerated once. No reflection. </remarks>
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetInternalArray();
-        return ref AppendJoin(separator, span);
+        if ( TryGetSpan(enumerable, out ReadOnlySpan<string> span) ) { return ref AppendJoin(separator, span); }
+
+        bool first = true;
+
+        foreach ( string value in enumerable )
+        {
+            if ( !first ) { Append(separator); }
+
+            first = false;
+            Append(value);
+        }
+
+        return ref this;
     }
-    [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")] [UnscopedRef]
-    public ref ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
+    /// <inheritdoc cref="AppendJoin(char, IEnumerable{string})"/>
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.GetInternalArray();
-        return ref AppendJoin(separator, span);
+        if ( TryGetSpan(enumerable, out ReadOnlySpan<string> span) ) { return ref AppendJoin(separator, span); }
+
+        bool first = true;
+
+        foreach ( string value in enumerable )
+        {
+            if ( !first ) { Append(separator); }
+
+            first = false;
+            Append(value);
+        }
+
+        return ref this;
+    }
+    private static bool TryGetSpan( IEnumerable<string> enumerable, out ReadOnlySpan<string> span )
+    {
+        switch ( enumerable )
+        {
+            case string[] array:
+                span = array;
+                return true;
+
+            case List<string> list:
+                span = CollectionsMarshal.AsSpan(list);
+                return true;
+
+            default:
+                span = default;
+                return false;
+        }
     }
 
 
@@ -377,7 +416,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
     }
 
 
-    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, scoped ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         for ( int i = 0; i < enumerable.Length; i++ )
@@ -389,7 +428,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
         return ref this;
     }
-    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, scoped ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         for ( int i = 0; i < enumerable.Length; i++ )
@@ -401,7 +440,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
         return ref this;
     }
-    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, scoped ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         bool first = true;
@@ -416,7 +455,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
         return ref this;
     }
-    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, scoped ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         bool first = true;
@@ -434,7 +473,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
 
     /// <summary> Formats <paramref name="value"/> directly into the builder, growing as needed (no intermediate string). </summary>
-    [UnscopedRef] public ref ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+    [UnscopedRef] public ref ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, scoped ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
         AppendFormatted(value, format, provider);
@@ -647,13 +686,13 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
     // ─── Internals ───────────────────────────────────────────────────────────
 
     /// <summary> Formats <paramref name="value"/> into the free space; if it doesn't fit, grows and retries instead of allocating a string. </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void AppendFormatted<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void AppendFormatted<TValue>( TValue value, scoped ReadOnlySpan<char> format, IFormatProvider? provider )
         where TValue : ISpanFormattable
     {
         if ( value.TryFormat(__chars[__length..], out int charsWritten, format, provider) ) { __length += charsWritten; }
         else { AppendFormattedSlow(value, format, provider); }
     }
-    [MethodImpl(MethodImplOptions.NoInlining)] private void AppendFormattedSlow<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider )
+    [MethodImpl(MethodImplOptions.NoInlining)] private void AppendFormattedSlow<TValue>( TValue value, scoped ReadOnlySpan<char> format, IFormatProvider? provider )
         where TValue : ISpanFormattable
     {
         while ( __chars.Length - __length < MAX_FORMAT_GROWTH )

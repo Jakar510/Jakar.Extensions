@@ -13,16 +13,14 @@ public class FixedSizedDeque_Tests : Assert
 {
     // ─── Basic state ──────────────────────────────────────────────────────────
 
-    [Test]
-    public void IsEmpty_OnConstruction()
+    [Test] public void IsEmpty_OnConstruction()
     {
         FixedSizedDeque<int> q = new(5);
         this.IsTrue(q.IsEmpty);
         this.AreEqual(0, q.Count);
     }
 
-    [Test]
-    public void Length_MatchesConstructorArgument()
+    [Test] public void Length_MatchesConstructorArgument()
     {
         FixedSizedDeque<int> q = new(10);
         this.AreEqual(10, q.Length);
@@ -31,8 +29,7 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Enqueue / Count ──────────────────────────────────────────────────────
 
-    [Test]
-    public void Enqueue_SingleItem_CountIsOne()
+    [Test] public void Enqueue_SingleItem_CountIsOne()
     {
         FixedSizedDeque<int> q = new(5);
         q.Enqueue(42);
@@ -40,8 +37,7 @@ public class FixedSizedDeque_Tests : Assert
         this.IsFalse(q.IsEmpty);
     }
 
-    [Test]
-    public void Enqueue_UpToCapacity_CountEqualsCapacity()
+    [Test] public void Enqueue_UpToCapacity_CountEqualsCapacity()
     {
         FixedSizedDeque<int> q = new(3);
         q.Enqueue(1);
@@ -50,8 +46,7 @@ public class FixedSizedDeque_Tests : Assert
         this.AreEqual(3, q.Count);
     }
 
-    [Test]
-    public void Enqueue_BeyondCapacity_CountDoesNotExceedLength()
+    [Test] public void Enqueue_BeyondCapacity_CountDoesNotExceedLength()
     {
         FixedSizedDeque<int> q = new(3);
         q.Enqueue(1);
@@ -65,8 +60,7 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Dequeue ──────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Dequeue_ReturnsItem()
+    [Test] public void Dequeue_ReturnsItem()
     {
         FixedSizedDeque<int> q = new(5);
         q.Enqueue(100);
@@ -75,8 +69,7 @@ public class FixedSizedDeque_Tests : Assert
         this.AreEqual(0,   q.Count);
     }
 
-    [Test]
-    public void Dequeue_AfterManyEnqueues_CountDecreases()
+    [Test] public void Dequeue_AfterManyEnqueues_CountDecreases()
     {
         FixedSizedDeque<int> q = new(5);
         q.Enqueue(1);
@@ -89,24 +82,21 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Contains ─────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Contains_ExistingItem_ReturnsTrue()
+    [Test] public void Contains_ExistingItem_ReturnsTrue()
     {
         FixedSizedDeque<string> q = new(5);
         q.Enqueue("hello");
         this.IsTrue(q.Contains("hello"));
     }
 
-    [Test]
-    public void Contains_MissingItem_ReturnsFalse()
+    [Test] public void Contains_MissingItem_ReturnsFalse()
     {
         FixedSizedDeque<string> q = new(5);
         q.Enqueue("hello");
         this.IsFalse(q.Contains("world"));
     }
 
-    [Test]
-    public void Contains_AfterDequeue_ReturnsFalse()
+    [Test] public void Contains_AfterDequeue_ReturnsFalse()
     {
         FixedSizedDeque<string> q = new(5);
         q.Enqueue("hello");
@@ -117,16 +107,14 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Async variants ───────────────────────────────────────────────────────
 
-    [Test]
-    public async Task EnqueueAsync_AddsItem()
+    [Test] public async Task EnqueueAsync_AddsItem()
     {
         FixedSizedDeque<int> q = new(5);
         await q.EnqueueAsync(77).ConfigureAwait(false);
         this.AreEqual(1, q.Count);
     }
 
-    [Test]
-    public async Task DequeueAsync_ReturnsItem()
+    [Test] public async Task DequeueAsync_ReturnsItem()
     {
         FixedSizedDeque<int> q = new(5);
         await q.EnqueueAsync(99).ConfigureAwait(false);
@@ -134,8 +122,7 @@ public class FixedSizedDeque_Tests : Assert
         this.AreEqual(99, value);
     }
 
-    [Test]
-    public async Task ContainsAsync_ExistingItem_ReturnsTrue()
+    [Test] public async Task ContainsAsync_ExistingItem_ReturnsTrue()
     {
         FixedSizedDeque<int> q = new(5);
         q.Enqueue(55);
@@ -146,8 +133,7 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Thread safety (smoke test) ───────────────────────────────────────────
 
-    [Test]
-    public void ConcurrentEnqueue_DoesNotExceedCapacity()
+    [Test] public void ConcurrentEnqueue_DoesNotExceedCapacity()
     {
         const int CAPACITY  = 5;
         const int ADDITIONS = 50;
@@ -162,8 +148,7 @@ public class FixedSizedDeque_Tests : Assert
 
     // ─── Edge cases ───────────────────────────────────────────────────────────
 
-    [Test]
-    public void Enqueue_CapacityOne_ReplacesOnOverflow()
+    [Test] public void Enqueue_CapacityOne_ReplacesOnOverflow()
     {
         FixedSizedDeque<int> q = new(1);
         q.Enqueue(1);

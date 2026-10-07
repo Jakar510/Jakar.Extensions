@@ -1,7 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 
 
-
 namespace Jakar.Extensions.Tests;
 
 
@@ -14,8 +13,7 @@ public class Guids_Tests : Assert
 
     // ─── AsGuid (string) ──────────────────────────────────────────────────────
 
-    [Test]
-    public void AsGuid_String_KnownGuid()
+    [Test] public void AsGuid_String_KnownGuid()
     {
         string input  = __sample_GUID.ToString();
         Guid?  result = input.AsGuid();
@@ -23,25 +21,23 @@ public class Guids_Tests : Assert
         this.AreEqual(__sample_GUID, result!.Value);
     }
 
-    [Test]
-    public void AsGuid_String_InvalidReturnsEmpty()
+    [Test] public void AsGuid_String_InvalidReturnsEmpty()
     {
         Guid? result = "not-a-guid".AsGuid();
+
         // Invalid strings that aren't valid base64-encoded GUIDs return Guid.Empty
         this.NotNull(result);
         this.AreEqual(Guid.Empty, result!.Value);
     }
 
-    [Test]
-    public void AsGuid_EmptyString_ReturnsEmpty()
+    [Test] public void AsGuid_EmptyString_ReturnsEmpty()
     {
         Guid? result = string.Empty.AsGuid();
         this.NotNull(result);
         this.AreEqual(Guid.Empty, result!.Value);
     }
 
-    [Test]
-    public void TryAsGuid_ValidString_ReturnsTrue()
+    [Test] public void TryAsGuid_ValidString_ReturnsTrue()
     {
         string input   = __sample_GUID.ToString();
         bool   success = input.TryAsGuid(out Guid? result);
@@ -53,8 +49,7 @@ public class Guids_Tests : Assert
 
     // ─── ToBase64 / AsGuid roundtrip ─────────────────────────────────────────
 
-    [Test]
-    public void ToBase64_Roundtrip()
+    [Test] public void ToBase64_Roundtrip()
     {
         Guid   original = Guid.NewGuid();
         string b64      = original.ToBase64();
@@ -67,23 +62,20 @@ public class Guids_Tests : Assert
         this.AreEqual(original, recovered!.Value);
     }
 
-    [Test]
-    public void NewBase64_ProducesNonEmptyString()
+    [Test] public void NewBase64_ProducesNonEmptyString()
     {
         string result = Guids.NewBase64();
         this.IsTrue(result.Length > 0);
     }
 
-    [Test]
-    public void NewBase64_ProducesUniqueValues()
+    [Test] public void NewBase64_ProducesUniqueValues()
     {
         string first  = Guids.NewBase64();
         string second = Guids.NewBase64();
         this.NotEqual(first, second);
     }
 
-    [Test]
-    public void NewBase64_SpecificGuid_Roundtrip()
+    [Test] public void NewBase64_SpecificGuid_Roundtrip()
     {
         string b64  = __sample_GUID.NewBase64();
         Guid?  back = b64.AsGuid();
@@ -94,20 +86,16 @@ public class Guids_Tests : Assert
 
     // ─── ToHex ────────────────────────────────────────────────────────────────
 
-    [Test]
-    public void ToHex_ProducesHexString()
+    [Test] public void ToHex_ProducesHexString()
     {
         string hex = __sample_GUID.ToHex();
         this.IsTrue(hex.Length > 0);
+
         // Hex strings consist only of 0-9 and A-F
-        foreach ( char c in hex )
-        {
-            this.IsTrue(char.IsAsciiHexDigit(c));
-        }
+        foreach ( char c in hex ) { this.IsTrue(char.IsAsciiHexDigit(c)); }
     }
 
-    [Test]
-    public void ToHex_DifferentGuids_DifferentHex()
+    [Test] public void ToHex_DifferentGuids_DifferentHex()
     {
         Guid   g1   = Guid.NewGuid();
         Guid   g2   = Guid.NewGuid();
@@ -119,17 +107,15 @@ public class Guids_Tests : Assert
 
     // ─── AsLong / AsULong roundtrips ──────────────────────────────────────────
 
-    [Test]
-    public void AsLong_Roundtrip()
+    [Test] public void AsLong_Roundtrip()
     {
-        Guid                    original        = Guid.NewGuid();
-        (long Lower, long Upper) pair           = original.AsLong();
-        Guid                    recovered       = pair.AsGuid();
+        Guid                     original  = Guid.NewGuid();
+        (long Lower, long Upper) pair      = original.AsLong();
+        Guid                     recovered = pair.AsGuid();
         this.AreEqual(original, recovered);
     }
 
-    [Test]
-    public void AsULong_Roundtrip()
+    [Test] public void AsULong_Roundtrip()
     {
         Guid                       original  = Guid.NewGuid();
         (ulong Lower, ulong Upper) pair      = original.AsULong();
@@ -137,18 +123,17 @@ public class Guids_Tests : Assert
         this.AreEqual(original, recovered);
     }
 
-    [Test]
-    public void AsLong_KnownGuid_OutParams()
+    [Test] public void AsLong_KnownGuid_OutParams()
     {
         bool success = __sample_GUID.AsLong(out long lower, out long upper);
         this.IsTrue(success);
+
         // Reconstruct and verify roundtrip
         Guid recovered = ( lower, upper ).AsGuid();
         this.AreEqual(__sample_GUID, recovered);
     }
 
-    [Test]
-    public void AsLong_ULong_OutParams_Roundtrip()
+    [Test] public void AsLong_ULong_OutParams_Roundtrip()
     {
         Guid original = Guid.NewGuid();
         bool success  = original.AsLong(out ulong lower, out ulong upper);
@@ -160,8 +145,7 @@ public class Guids_Tests : Assert
 
     // ─── Int128 / UInt128 roundtrips ──────────────────────────────────────────
 
-    [Test]
-    public void AsInt128_Roundtrip()
+    [Test] public void AsInt128_Roundtrip()
     {
         Guid   original  = Guid.NewGuid();
         Int128 int128    = original.AsInt128();
@@ -169,8 +153,7 @@ public class Guids_Tests : Assert
         this.AreEqual(original, recovered);
     }
 
-    [Test]
-    public void AsUInt128_Roundtrip()
+    [Test] public void AsUInt128_Roundtrip()
     {
         Guid    original  = Guid.NewGuid();
         UInt128 uint128   = original.AsUInt128();
@@ -181,19 +164,17 @@ public class Guids_Tests : Assert
 
     // ─── long → Guid ─────────────────────────────────────────────────────────
 
-    [Test] [TestCase(0L)] [TestCase(1L)] [TestCase(long.MaxValue)] [TestCase(long.MinValue)]
-    public void Long_AsGuid_DoesNotThrow( long value ) => DoesNotThrow(() => _ = value.AsGuid());
+    [Test] [TestCase(0L)] [TestCase(1L)] [TestCase(long.MaxValue)] [TestCase(long.MinValue)] public void Long_AsGuid_DoesNotThrow( long value ) => DoesNotThrow(() => _ = value.AsGuid());
 
-    [Test] [TestCase(0UL)] [TestCase(1UL)] [TestCase(ulong.MaxValue)]
-    public void ULong_AsGuid_DoesNotThrow( ulong value ) => DoesNotThrow(() => _ = value.AsGuid());
+    [Test] [TestCase(0UL)] [TestCase(1UL)] [TestCase(ulong.MaxValue)] public void ULong_AsGuid_DoesNotThrow( ulong value ) => DoesNotThrow(() => _ = value.AsGuid());
 
 
     // ─── TryWriteBytes ────────────────────────────────────────────────────────
 
-    [Test]
-    public void TryWriteBytes_ReturnsBuffer()
+    [Test] public void TryWriteBytes_ReturnsBuffer()
     {
         bool success = __sample_GUID.TryWriteBytes(out Buffer<byte> buffer);
+
         using ( buffer )
         {
             this.IsTrue(success);

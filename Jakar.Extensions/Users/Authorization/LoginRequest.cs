@@ -114,9 +114,9 @@ public abstract class LoginRequest<TSelf>( string userLogin, string userPassword
     where TSelf : LoginRequest<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     [JsonIgnore] public virtual bool       IsValid      => this.IsValid();
-    [Required]                  public         string     UserLogin    { get; init; } = userLogin;
-    [Required]                  public         string     UserPassword { get; init; } = userPassword;
-    public                                     AppVersion Version      { get; init; } = AppVersion.Default;
+    [Required]   public         string     UserLogin    { get; init; } = userLogin;
+    [Required]   public         string     UserPassword { get; init; } = userPassword;
+    public                      AppVersion Version      { get; init; } = AppVersion.Default;
 
 
     protected LoginRequest() : this(EMPTY, EMPTY) { }
@@ -142,7 +142,7 @@ public abstract class LoginRequest<TSelf>( string userLogin, string userPassword
 public abstract class LoginRequest<TSelf, TValue>( string userName, string password, TValue data ) : LoginRequest<TSelf>(userName, password), ILoginRequest<TValue>
     where TSelf : LoginRequest<TSelf, TValue>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
-    [Required]                  public          TValue Data    { get; init; } = data;
+    [Required]   public          TValue Data    { get; init; } = data;
     [JsonIgnore] public override bool   IsValid => this.IsValid();
 
 

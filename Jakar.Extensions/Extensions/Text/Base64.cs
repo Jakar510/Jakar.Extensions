@@ -62,7 +62,7 @@ public static class Base64
 
     extension( string b64 )
     {
-        public TValue JsonFromBase64String<TValue>() => b64.JsonFromBase64String<TValue>(Encoding.Default);
+        public TValue JsonFromBase64String<TValue>()                    => b64.JsonFromBase64String<TValue>(Encoding.Default);
         public TValue JsonFromBase64String<TValue>( Encoding encoding ) => b64.JsonFromBase64String(Json.GetTypeInfo<TValue>(), encoding);
         public TValue JsonFromBase64String<TValue>( JsonTypeInfo<TValue> info, Encoding? encoding = null )
         {

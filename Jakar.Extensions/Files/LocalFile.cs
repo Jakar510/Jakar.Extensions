@@ -255,7 +255,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
     /// <returns>
     ///     <see cref="FileStream"/>
     /// </returns>
-    public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
+    public FileStream OpenRead( int       bufferSize = 4096, bool useAsync   = true )                       => Open(FileMode.Open, FileAccess.Read,  FileShare.Read, bufferSize, useAsync);
     /// <summary> Opens file for write only actions. If it doesn't exist, file will be created. </summary>
     /// <param name="mode"> </param>
     /// <param name="bufferSize"> </param>
@@ -274,7 +274,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
     /// <returns>
     ///     <see cref="FileStream"/>
     /// </returns>
-    public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open(mode, FileAccess.Write, FileShare.None, bufferSize, useAsync);
+    public FileStream OpenWrite( FileMode mode,              int  bufferSize = 4096, bool useAsync = true ) => Open(mode,          FileAccess.Write, FileShare.None, bufferSize, useAsync);
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -307,9 +307,9 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
 
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public string Hash_MD5() => Hash(MD5.Create());
+    public string Hash_MD5()    => Hash(MD5.Create());
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public string Hash_SHA1() => Hash(SHA1.Create());
+    public string Hash_SHA1()   => Hash(SHA1.Create());
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public string Hash_SHA256() => Hash(SHA256.Create());
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
@@ -870,9 +870,9 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
 
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public ValueTask<string> HashAsync_MD5() => HashAsync(MD5.Create());
+    public ValueTask<string> HashAsync_MD5()    => HashAsync(MD5.Create());
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public ValueTask<string> HashAsync_SHA1() => HashAsync(SHA1.Create());
+    public ValueTask<string> HashAsync_SHA1()   => HashAsync(SHA1.Create());
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public ValueTask<string> HashAsync_SHA256() => HashAsync(SHA256.Create());
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
@@ -904,7 +904,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         /// <returns>
         ///     <see cref="byte[]"/>
         /// </returns>
-        ValueTask<byte[]> AsBytes( CancellationToken token = default );
+        ValueTask<byte[]>        AsBytes( CancellationToken token = default );
 
         ValueTask<MemoryStream> AsStream( CancellationToken token = default );
 

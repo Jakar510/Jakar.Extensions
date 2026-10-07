@@ -111,7 +111,8 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
     {
         switch ( count )
         {
-            case <= 0: return;
+            case <= 0:
+                return;
 
             case 1:
                 Added(in CollectionsMarshal.AsSpan(buffer)[index], index);
@@ -241,7 +242,8 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
 
         switch ( count )
         {
-            case 0: return;
+            case 0:
+                return;
 
             case 1:
                 InternalRemoveAt(start, out _);
@@ -470,13 +472,13 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
 
 
     /// <summary> First index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
-    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 ) => FindIndex(match, start, buffer.Count - 1);
+    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 )               => FindIndex(match, start, buffer.Count - 1);
     /// <summary> First index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindIndexCore(match, start, endInclusive);
 
 
     /// <summary> Last index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
-    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 ) => FindLastIndex(match, start, buffer.Count - 1);
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 )               => FindLastIndex(match, start, buffer.Count - 1);
     /// <summary> Last index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindLastIndexCore(match, start, endInclusive);
 
@@ -738,9 +740,9 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
     void IList.Remove( object?   value ) => Remove(Cast(value));
     int IList. Add( object?      value ) => AddAndGetIndex(Cast(value));
     bool IList.Contains( object? value ) => value is TValue x && Contains(x);
-    int IList. IndexOf( object?  value ) => value is TValue x
-                                                ? IndexOf(x)
-                                                : NOT_FOUND;
+    int IList.IndexOf( object? value ) => value is TValue x
+                                              ? IndexOf(x)
+                                              : NOT_FOUND;
     void IList.Insert( int index, object? value ) => Insert(index, Cast(value));
     /// <summary> Adds <paramref name="value"/> and returns its index (<see cref="IList.Add"/>). </summary>
     protected virtual int AddAndGetIndex( TValue value )

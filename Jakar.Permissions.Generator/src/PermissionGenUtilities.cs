@@ -26,7 +26,7 @@ internal static class PermissionGenUtilities
     {
         bool                          includeDocs     = true;
         bool                          includeDebugger = true;
-        string                        nameSpace      = Constants.APP;
+        string                        nameSpace       = Constants.APP;
         string                        root            = Constants.PERMISSIONS;
         ImmutableArray<AttributeData> attributes      = compilation.Assembly.GetAttributes();
 
@@ -95,7 +95,7 @@ internal static class PermissionGenUtilities
         string projectDir = Directory.GetCurrentDirectory();
         if ( string.IsNullOrEmpty(projectDir) ) { return ImmutableArray<AdditionalText>.Empty; }
 
-        ImmutableArray<AdditionalText> found = [..Constants.Candidates.Select(name => Path.Combine(projectDir, name)).Where(File.Exists).Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))];
+        ImmutableArray<AdditionalText> found = [.. Constants.Candidates.Select(name => Path.Combine(projectDir, name)).Where(File.Exists).Select(static AdditionalText ( path ) => new AutoDiscoveredFile(path))];
 
         return found;
     }

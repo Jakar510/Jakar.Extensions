@@ -8,15 +8,15 @@ namespace Jakar.Extensions;
 [JsonModel(typeof(JakarExtensionsContext))]
 public readonly partial struct ErrorResponse( string? text ) : IParsable<ErrorResponse>, IJsonModel<ErrorResponse>, IEquatable<ErrorResponse>
 {
-    public static readonly         ErrorResponse Empty        = new(null);
-    public static readonly         ErrorResponse UnknownError = new(UNKNOWN_ERROR);
-    public readonly                string?       Text         = text;
+    public static readonly ErrorResponse Empty        = new(null);
+    public static readonly ErrorResponse UnknownError = new(UNKNOWN_ERROR);
+    public readonly        string?       Text         = text;
 
 
     public bool HasValue { [MemberNotNullWhen(true, nameof(Text))] get => !string.IsNullOrWhiteSpace(Text); }
 
 
-    public static implicit operator ErrorResponse( JsonNode     input ) => From(input);
+    public static implicit operator ErrorResponse( JsonNode   input ) => From(input);
     public static implicit operator ErrorResponse( string     input ) => From(input);
     public static implicit operator ErrorResponse( Errors     input ) => From(input);
     public static implicit operator ErrorResponse( StringTags input ) => From(input);
@@ -26,7 +26,7 @@ public readonly partial struct ErrorResponse( string? text ) : IParsable<ErrorRe
     public static ErrorResponse From( string     input ) => new(input);
     public static ErrorResponse From( Errors     input ) => new(input.ToJson());
     public static ErrorResponse From( StringTags input ) => new(input.ToJson());
-    public static ErrorResponse From( JsonNode     input ) => new(input.ToJsonString());
+    public static ErrorResponse From( JsonNode   input ) => new(input.ToJsonString());
 
 
     public StringTags? AsTags() => Text?.TryFromJson<StringTags>();
@@ -61,11 +61,8 @@ public readonly partial struct ErrorResponse( string? text ) : IParsable<ErrorRe
 
         if ( AsErrors(out Errors? errors)      && f2 is not null ) { f2(errors); }
         else if ( AsTags(out StringTags? tags) && f3 is not null ) { f3(tags.Value); }
-        else if ( AsJson(out JsonNode? jToken)   && f0 is not null ) { f0(jToken); }
-        else
-        {
-            f1?.Invoke(Text);
-        }
+        else if ( AsJson(out JsonNode? jToken) && f0 is not null ) { f0(jToken); }
+        else { f1?.Invoke(Text); }
     }
 
 
@@ -174,7 +171,6 @@ public readonly partial struct ErrorResponse( string? text ) : IParsable<ErrorRe
         result = Parse(error, provider);
         return true;
     }
-
 
 
     public          int  CompareTo( ErrorResponse other ) => string.Compare(Text, other.Text, StringComparison.InvariantCulture);

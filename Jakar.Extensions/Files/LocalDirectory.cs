@@ -20,11 +20,11 @@ public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryConte
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
-    public DateTime               CreationTimeUtc { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public bool                   DoesNotExist    => !Exists;
-    public bool                   Exists          => Info.Exists;
-    public IEnumerable<LocalFile> Files           { [Pure] get => GetFiles(); }
+    public static LocalDirectory         CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
+    public        DateTime               CreationTimeUtc  { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public        bool                   DoesNotExist     => !Exists;
+    public        bool                   Exists           => Info.Exists;
+    public        IEnumerable<LocalFile> Files            { [Pure] get => GetFiles(); }
     [JsonIgnore] public DirectoryInfo Info
     {
         get
@@ -176,8 +176,8 @@ public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryConte
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory(Path.Combine(paths));
-    protected virtual LocalDirectory? GetParent() => TryCreate(Info.Parent);
+    public            LocalDirectory  CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory(Path.Combine(paths));
+    protected virtual LocalDirectory? GetParent()                                             => TryCreate(Info.Parent);
 
 
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>

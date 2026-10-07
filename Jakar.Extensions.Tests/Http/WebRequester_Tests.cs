@@ -29,8 +29,7 @@ public partial class WebRequester_Tests : Assert
 
 
 
-    [JsonModel(typeof(TestJsonContext))]
-    public sealed partial record Item( string Name, int Count );
+    [JsonModel(typeof(TestJsonContext))] public sealed partial record Item( string Name, int Count );
 
 
 
@@ -41,22 +40,21 @@ public partial class WebRequester_Tests : Assert
     }
 
 
+
     // ─── Basic responses ─────────────────────────────────────────────────────
 
-    [Test]
-    public async Task Get_AsString_Success()
+    [Test] public async Task Get_AsString_Success()
     {
-        StubHandler            handler  = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "hello"));
-        WebResponse<string>    response = await Create(handler).Get("items").AsString(CancellationToken.None);
+        StubHandler         handler  = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "hello"));
+        WebResponse<string> response = await Create(handler).Get("items").AsString(CancellationToken.None);
 
         this.IsTrue(response.IsSuccessStatusCode);
-        this.AreEqual("hello", response.Payload);
+        this.AreEqual("hello",                          response.Payload);
         this.AreEqual("https://example.test/api/items", handler.Requests[0].RequestUri!.ToString());
         this.IsFalse(response.Errors.HasValue); // no "unknown error" on success
     }
 
-    [Test]
-    public async Task ErrorStatus_ReturnsTheBodyAsTheError()
+    [Test] public async Task ErrorStatus_ReturnsTheBodyAsTheError()
     {
         StubHandler         handler  = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.NotFound, "nope"));
         WebResponse<string> response = await Create(handler).Get("missing").AsString(CancellationToken.None);
@@ -66,14 +64,13 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual("nope",          response.Errors.Text);
     }
 
-    [Test]
-    public async Task AsJson_Typed_And_Token()
+    [Test] public async Task AsJson_Typed_And_Token()
     {
         StubHandler  handler   = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, """{"Name":"widget","Count":3}"""));
         WebRequester requester = Create(handler);
 
-        WebResponse<Item>                        typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
-        WebResponse<Item>                        info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
+        WebResponse<Item>                            typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
+        WebResponse<Item>                            info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
         WebResponse<System.Text.Json.Nodes.JsonNode> token = await requester.Get("item").AsJson(CancellationToken.None);
 
         this.AreEqual(new Item("widget", 3), typed.Payload);
@@ -81,11 +78,10 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(3,                     token.Payload!["Count"]!.GetValue<int>());
     }
 
-    [Test]
-    public async Task Bytes_Memory_Stream_ReturnTheBody()
+    [Test] public async Task Bytes_Memory_Stream_ReturnTheBody()
     {
         byte[]       body      = [.. Enumerable.Range(0, 5000).Select(static i => (byte)i)];
-        StubHandler  handler   = new((_, _) => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) });
+        StubHandler  handler   = new(( _, _ ) => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) });
         WebRequester requester = Create(handler);
 
         WebResponse<byte[]>               bytes  = await requester.Get("b").AsBytes(CancellationToken.None);
@@ -98,12 +94,11 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(0L,   stream.Payload.Position);
     }
 
-    [Test]
-    public async Task AsFile_LocalFile_WritesTheBodyToThatFile()
+    [Test] public async Task AsFile_LocalFile_WritesTheBodyToThatFile()
     {
-        string       path    = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.txt");
-        StubHandler  handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "file contents"));
-        LocalFile    target  = new(path);
+        string      path    = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.txt");
+        StubHandler handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "file contents"));
+        LocalFile   target  = new(path);
 
         try
         {
@@ -115,8 +110,7 @@ public partial class WebRequester_Tests : Assert
         finally { File.Delete(path); }
     }
 
-    [Test]
-    public async Task NoResponse_SuccessAndFailure()
+    [Test] public async Task NoResponse_SuccessAndFailure()
     {
         WebRequester ok     = Create(new StubHandler(static ( _, _ ) => new HttpResponseMessage(HttpStatusCode.NoContent)));
         WebRequester failed = Create(new StubHandler(static ( _, _ ) => throw new HttpRequestException("down")));
@@ -128,8 +122,7 @@ public partial class WebRequester_Tests : Assert
 
     // ─── Failures become responses ───────────────────────────────────────────
 
-    [Test]
-    public async Task NetworkFailure_ReturnsAFailedResponse()
+    [Test] public async Task NetworkFailure_ReturnsAFailedResponse()
     {
         StubHandler         handler  = new(static ( _, _ ) => throw new HttpRequestException("connection refused"));
         WebResponse<string> response = await Create(handler).Get("x").AsString(CancellationToken.None);
@@ -140,8 +133,7 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual("https://example.test/api/x", response.URL!.ToString());
     }
 
-    [Test]
-    public async Task Timeout_ReturnsRequestTimeout()
+    [Test] public async Task Timeout_ReturnsRequestTimeout()
     {
         StubHandler         handler  = new(static ( _, _ ) => throw new TaskCanceledException("timed out"));
         WebResponse<string> response = await Create(handler).Get("x").AsString(CancellationToken.None);
@@ -149,8 +141,7 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(Status.RequestTimeout, response.StatusCode);
     }
 
-    [Test]
-    public async Task CallerCancellation_StillThrows()
+    [Test] public async Task CallerCancellation_StillThrows()
     {
         StubHandler                   handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "x"));
         using CancellationTokenSource cts     = new();
@@ -159,8 +150,7 @@ public partial class WebRequester_Tests : Assert
         await ThrowsAsync<TaskCanceledException>(async () => await Create(handler).Get("x").AsString(cts.Token));
     }
 
-    [Test]
-    public async Task RealConnectionRefused_ReturnsAFailedResponse()
+    [Test] public async Task RealConnectionRefused_ReturnsAFailedResponse()
     {
         using HttpClient    client    = new();
         WebRequester        requester = new(client, new WebRequester.Builder.HostHolder(LoopbackServer.UnusedUrl()));
@@ -173,8 +163,7 @@ public partial class WebRequester_Tests : Assert
 
     // ─── Retries ─────────────────────────────────────────────────────────────
 
-    [Test]
-    public async Task TransientStatus_IsRetried_WithAFreshRequestAndTheSameBody()
+    [Test] public async Task TransientStatus_IsRetried_WithAFreshRequestAndTheSameBody()
     {
         StubHandler handler = new(static ( _, i ) => i < 2
                                                          ? StubHandler.Text(HttpStatusCode.ServiceUnavailable, "busy")
@@ -184,15 +173,14 @@ public partial class WebRequester_Tests : Assert
         request.Headers.Add("X-Trace", "abc");
         WebResponse<string> response = await request.AsString(CancellationToken.None);
 
-        this.AreEqual("done", response.Payload);
-        this.AreEqual(3,      handler.Count);
+        this.AreEqual("done",                                    response.Payload);
+        this.AreEqual(3,                                         handler.Count);
         this.AreEqual(new[] { "payload", "payload", "payload" }, handler.Bodies.ToArray());
-        this.AreEqual(3, handler.Requests.Distinct().Count()); // a message can only be sent once
+        this.AreEqual(3,                                         handler.Requests.Distinct().Count()); // a message can only be sent once
         this.IsTrue(handler.Requests.All(static r => r.Headers.GetValues("X-Trace").Single() == "abc"));
     }
 
-    [Test]
-    public async Task NetworkFailure_IsRetried()
+    [Test] public async Task NetworkFailure_IsRetried()
     {
         StubHandler handler = new(static ( _, i ) => i == 0
                                                          ? throw new HttpRequestException("reset")
@@ -204,8 +192,7 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(2,    handler.Count);
     }
 
-    [Test]
-    public async Task RetriesExhausted_ReturnsTheLastResponse()
+    [Test] public async Task RetriesExhausted_ReturnsTheLastResponse()
     {
         StubHandler         handler  = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.BadGateway, "bad"));
         WebResponse<string> response = await Create(handler, __retry).Get("x").AsString(CancellationToken.None);
@@ -214,24 +201,21 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(4,                 handler.Count); // 1 + 3 retries
     }
 
-    [Test]
-    public async Task NonTransientStatus_IsNotRetried()
+    [Test] public async Task NonTransientStatus_IsNotRetried()
     {
         StubHandler handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.BadRequest, "bad"));
         await Create(handler, __retry).Get("x").AsString(CancellationToken.None);
         this.AreEqual(1, handler.Count);
     }
 
-    [Test]
-    public async Task StreamBody_IsNotRetried()
+    [Test] public async Task StreamBody_IsNotRetried()
     {
         StubHandler handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.ServiceUnavailable, "busy"));
         await Create(handler, __retry).Post("x", new MemoryStream([1, 2, 3])).AsString(CancellationToken.None);
         this.AreEqual(1, handler.Count);
     }
 
-    [Test]
-    public async Task RetryAfter_TooLong_IsNotWaitedFor()
+    [Test] public async Task RetryAfter_TooLong_IsNotWaitedFor()
     {
         StubHandler handler = new(static ( _, _ ) =>
                                   {
@@ -246,8 +230,7 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(1,                      handler.Count);
     }
 
-    [Test]
-    public async Task RetryAfter_Short_IsHonoured()
+    [Test] public async Task RetryAfter_Short_IsHonoured()
     {
         StubHandler handler = new(static ( _, i ) =>
                                   {
@@ -264,8 +247,7 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(2,    handler.Count);
     }
 
-    [Test]
-    public async Task RealServer_RetryResendsTheJsonBody()
+    [Test] public async Task RealServer_RetryResendsTheJsonBody()
     {
         await using LoopbackServer server = new(static ( _, i ) => i == 0
                                                                        ? LoopbackServer.Response.Of(503, "busy")
@@ -276,8 +258,8 @@ public partial class WebRequester_Tests : Assert
 
         WebResponse<string> response = await requester.Post("items", WebRequester.CreateJsonContent(new Item("a", 1))).AsString(CancellationToken.None);
 
-        this.AreEqual("created", response.Payload);
-        this.AreEqual(2,         server.Requests.Count);
+        this.AreEqual("created",                    response.Payload);
+        this.AreEqual(2,                            server.Requests.Count);
         this.AreEqual("""{"Name":"a","Count":1}""", server.Requests[0].Text);
         this.AreEqual(server.Requests[0].Text,      server.Requests[1].Text);
     }
@@ -285,24 +267,20 @@ public partial class WebRequester_Tests : Assert
 
     // ─── Request bodies ──────────────────────────────────────────────────────
 
-    [Test]
-    public async Task JsonContent_IsCompactUtf8()
+    [Test] public async Task JsonContent_IsCompactUtf8()
     {
         using ByteArrayContent content = WebRequester.CreateJsonContent(new Item("ü", 2));
 
-        this.AreEqual("application/json", content.Headers.ContentType!.MediaType);
-        this.AreEqual("utf-8",            content.Headers.ContentType.CharSet);
+        this.AreEqual("application/json",           content.Headers.ContentType!.MediaType);
+        this.AreEqual("utf-8",                      content.Headers.ContentType.CharSet);
         this.AreEqual("""{"Name":"ü","Count":2}""", Encoding.UTF8.GetString(await content.ReadAsByteArrayAsync()));
     }
 
 
-    [TestCase("Default")]
-    [TestCase("UTF8")]
-    [TestCase("Unicode")]
-    [TestCase("UTF32")]
-    public async Task JsonContent_InEachEncoding_DeclaresItsCharset_HasNoBom_AndRoundTrips( string name )
+    [TestCase("Default")] [TestCase("UTF8")] [TestCase("Unicode")] [TestCase("UTF32")] public async Task JsonContent_InEachEncoding_DeclaresItsCharset_HasNoBom_AndRoundTrips( string name )
     {
         const string TEXT = "héllo 日本語 中文 العربية Ελληνικά 😀🚀   �";
+
         Encoding encoding = name switch
                             {
                                 "Default" => Encoding.Default,
@@ -321,15 +299,13 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(TEXT, Item.FromJson(await content.ReadAsStringAsync()).Name); // decoded via the declared charset
     }
 
-    [Test]
-    public void JsonContent_DefaultsToEncodingDefault()
+    [Test] public void JsonContent_DefaultsToEncodingDefault()
     {
         using ByteArrayContent content = WebRequester.CreateJsonContent(new Item("a", 1));
         this.AreEqual(Encoding.Default.WebName, content.Headers.ContentType!.CharSet);
     }
 
-    [Test]
-    public async Task JsonBodies_UseTheRequesterEncoding()
+    [Test] public async Task JsonBodies_UseTheRequesterEncoding()
     {
         const string TEXT    = "日本語 😀";
         StubHandler  handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "ok"));
@@ -337,15 +313,15 @@ public partial class WebRequester_Tests : Assert
 
         await utf16.Post("items", new JsonItem(TEXT)).AsString(CancellationToken.None);
 
-        this.AreEqual("utf-16",                       handler.Requests[0].Content!.Headers.ContentType!.CharSet);
+        this.AreEqual("utf-16", handler.Requests[0].Content!.Headers.ContentType!.CharSet);
+
         // The stub reads the body via the declared charset. Compare decoded values: System.Text.Json \u-escapes characters outside the BMP (😀), Newtonsoft didn't.
         this.AreEqual(TEXT, JsonItem.FromJson(handler.Bodies[0]).Text);
         this.IsTrue(handler.Bodies[0].Contains("日本語", StringComparison.Ordinal)); // BMP text is written as-is (relaxed escaping)
     }
 
 
-    [Test]
-    public async Task JsonContent_HasNoBom_AndRoundTripsAllOfUnicode()
+    [Test] public async Task JsonContent_HasNoBom_AndRoundTripsAllOfUnicode()
     {
         const string           TEXT    = "héllo 日本語 中文 العربية Ελληνικά 😀🚀 \u0000 �";
         using ByteArrayContent content = WebRequester.CreateJsonContent(new Item(TEXT, 1));
@@ -358,8 +334,8 @@ public partial class WebRequester_Tests : Assert
         this.AreEqual(TEXT, Item.FromJson(await content.ReadAsStringAsync()).Name);
 
         // UTF-8 -> UTF-16 (Encoding.Unicode) -> UTF-8 is lossless, and Encoding.Default reads the same bytes on .NET.
-        byte[] utf16 = Encoding.Convert(Encoding.UTF8, Encoding.Unicode, bytes);
-        this.AreEqual(bytes,                         Encoding.Convert(Encoding.Unicode, Encoding.UTF8, utf16));
+        byte[] utf16 = Encoding.Convert(Encoding.UTF8,                                   Encoding.Unicode, bytes);
+        this.AreEqual(bytes,                          Encoding.Convert(Encoding.Unicode, Encoding.UTF8,    utf16));
         this.AreEqual(Encoding.UTF8.GetString(bytes), Encoding.Unicode.GetString(utf16));
         this.AreEqual(Encoding.UTF8.GetString(bytes), Encoding.Default.GetString(bytes));
     }
@@ -367,8 +343,7 @@ public partial class WebRequester_Tests : Assert
 
     // ─── Builder ─────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Builder_SharesOneHandler_UntilTheConfigurationChanges()
+    [Test] public void Builder_SharesOneHandler_UntilTheConfigurationChanges()
     {
         using WebRequester.Builder builder = WebRequester.Builder.Create(__host);
 
@@ -381,11 +356,10 @@ public partial class WebRequester_Tests : Assert
         Assert.AreNotSame(HandlerOf(first), HandlerOf(third));
     }
 
-    [Test]
-    public async Task Builder_DisposedAfterBuild_TheRequesterKeepsWorking()
+    [Test] public async Task Builder_DisposedAfterBuild_TheRequesterKeepsWorking()
     {
         await using LoopbackServer server = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
-        WebRequester requester;
+        WebRequester               requester;
 
         // The WebRequester.Create(IServiceProvider) pattern: build, then dispose the builder.
         using ( WebRequester.Builder builder = WebRequester.Builder.Create(server.Url) )
@@ -402,8 +376,7 @@ public partial class WebRequester_Tests : Assert
         this.IsTrue(await IsDisposed(shared, server.Url));
     }
 
-    [Test]
-    public async Task SharedHandler_LivesUntilTheBuilderAndEveryClientAreDisposed()
+    [Test] public async Task SharedHandler_LivesUntilTheBuilderAndEveryClientAreDisposed()
     {
         await using LoopbackServer server  = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
         WebRequester.Builder       builder = WebRequester.Builder.Create(server.Url);
@@ -419,8 +392,7 @@ public partial class WebRequester_Tests : Assert
         this.IsTrue(await IsDisposed(shared, server.Url));
     }
 
-    [Test]
-    public async Task ConfigurationChange_KeepsExistingClientsWorking_AndReleasesTheOldHandlerWithThem()
+    [Test] public async Task ConfigurationChange_KeepsExistingClientsWorking_AndReleasesTheOldHandlerWithThem()
     {
         await using LoopbackServer server  = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
         using WebRequester.Builder builder = WebRequester.Builder.Create(server.Url);
@@ -439,21 +411,19 @@ public partial class WebRequester_Tests : Assert
     }
 
 
-    [Test]
-    public void Builder_Defaults_And_Timeouts()
+    [Test] public void Builder_Defaults_And_Timeouts()
     {
         using WebRequester.Builder builder = WebRequester.Builder.Create(__host).With_Timeout(TimeSpan.FromSeconds(30)).With_ConnectTimeout(TimeSpan.FromSeconds(3));
         using HttpClient           client  = builder.CreateClient("x");
         SocketsHttpHandler         handler = (SocketsHttpHandler)HandlerOf(client);
 
-        this.AreEqual(TimeSpan.FromSeconds(30),                           client.Timeout);
-        this.AreEqual(TimeSpan.FromSeconds(3),                            handler.ConnectTimeout);
-        this.AreEqual(DecompressionMethods.All,                           handler.AutomaticDecompression);
+        this.AreEqual(TimeSpan.FromSeconds(30),                             client.Timeout);
+        this.AreEqual(TimeSpan.FromSeconds(3),                              handler.ConnectTimeout);
+        this.AreEqual(DecompressionMethods.All,                             handler.AutomaticDecompression);
         this.AreEqual(WebRequester.Builder.DefaultPooledConnectionLifetime, handler.PooledConnectionLifetime);
     }
 
-    [Test]
-    public async Task Builder_DecompressesGzipResponses()
+    [Test] public async Task Builder_DecompressesGzipResponses()
     {
         byte[] compressed;
 
@@ -464,7 +434,7 @@ public partial class WebRequester_Tests : Assert
             compressed = buffer.ToArray();
         }
 
-        await using LoopbackServer server = new((_, _) => new LoopbackServer.Response(200, compressed, new Dictionary<string, string> { ["Content-Encoding"] = "gzip" }));
+        await using LoopbackServer server    = new(( _, _ ) => new LoopbackServer.Response(200, compressed, new Dictionary<string, string> { ["Content-Encoding"] = "gzip" }));
         using WebRequester.Builder builder   = WebRequester.Builder.Create(server.Url);
         WebRequester               requester = builder.Build();
 
@@ -474,13 +444,12 @@ public partial class WebRequester_Tests : Assert
         this.IsTrue(server.Requests[0].Headers["Accept-Encoding"].Contains("gzip"));
     }
 
-    [Test]
-    public async Task RealServer_AsFile_StreamsALargeBodyToDisk()
+    [Test] public async Task RealServer_AsFile_StreamsALargeBodyToDisk()
     {
         byte[] body = new byte[1 << 20];
         new Random(1).NextBytes(body);
 
-        await using LoopbackServer server = new((_, _) => new LoopbackServer.Response(200, body));
+        await using LoopbackServer server    = new(( _, _ ) => new LoopbackServer.Response(200, body));
         using HttpClient           client    = new();
         WebRequester               requester = new(client, new WebRequester.Builder.HostHolder(server.Url));
 
@@ -495,7 +464,10 @@ public partial class WebRequester_Tests : Assert
     private static HttpMessageHandler HandlerOf( HttpClient client )
     {
         HttpMessageHandler handler = (HttpMessageHandler)typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(client)!;
-        return handler is DelegatingHandler { InnerHandler: { } inner } ? inner : handler;
+
+        return handler is DelegatingHandler { InnerHandler: { } inner }
+                   ? inner
+                   : handler;
     }
     private static async Task<bool> IsDisposed( HttpMessageHandler handler, Uri url )
     {

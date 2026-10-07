@@ -271,7 +271,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         OnPropertyChanged(__countArgs);
 
         // IsEmpty / IsNotEmpty only change when the collection goes from empty to non-empty or back. (last < 0: the previous count is unknown, so raise them.)
-        bool wasEmpty = last == 0;
+        bool wasEmpty = last  == 0;
         bool isEmpty  = count == 0;
         if ( last >= 0 && wasEmpty == isEmpty ) { return; }
 

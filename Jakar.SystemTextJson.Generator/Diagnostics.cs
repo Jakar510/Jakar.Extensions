@@ -30,60 +30,30 @@ public static class JsonModelDiagnostics
 
 
     public static readonly DiagnosticDescriptor NotRegistered = new(NOT_REGISTERED,
-                                                                   "Type isn't registered in its JsonSerializerContext",
-                                                                   "'{0}' isn't registered in '{1}': add [JsonSerializable(typeof({0}))] to the context",
-                                                                   CATEGORY,
-                                                                   DiagnosticSeverity.Error,
-                                                                   true,
-                                                                   "The System.Text.Json source generator can't see this generator's output, so a [JsonModel] type must also be registered in its context by hand.",
-                                                                   HELP);
-
-    public static readonly DiagnosticDescriptor NotPartial = new(NOT_PARTIAL,
-                                                                "[JsonModel] type must be partial",
-                                                                "'{0}' must be partial (and so must every type containing it) for [JsonModel] to implement IJsonModel",
-                                                                CATEGORY,
-                                                                DiagnosticSeverity.Error,
-                                                                true,
-                                                                helpLinkUri: HELP);
-
-    public static readonly DiagnosticDescriptor OpenGeneric = new(OPEN_GENERIC,
-                                                                 "[JsonModel] can't be used on an open generic type",
-                                                                 "'{0}' is generic; System.Text.Json can't source-generate open generic types. Put [JsonModel] on the closed derived type, or implement JsonTypeInfo with JsonModel.GetRequiredTypeInfo<T>().",
-                                                                 CATEGORY,
-                                                                 DiagnosticSeverity.Error,
-                                                                 true,
-                                                                 helpLinkUri: HELP);
-
-    public static readonly DiagnosticDescriptor InvalidContext = new(INVALID_CONTEXT,
-                                                                    "[JsonModel] needs a JsonSerializerContext",
-                                                                    "{0}",
+                                                                    "Type isn't registered in its JsonSerializerContext",
+                                                                    "'{0}' isn't registered in '{1}': add [JsonSerializable(typeof({0}))] to the context",
                                                                     CATEGORY,
                                                                     DiagnosticSeverity.Error,
                                                                     true,
-                                                                    helpLinkUri: HELP);
+                                                                    "The System.Text.Json source generator can't see this generator's output, so a [JsonModel] type must also be registered in its context by hand.",
+                                                                    HELP);
 
-    public static readonly DiagnosticDescriptor HandWritten = new(HAND_WRITTEN,
-                                                                 "Type already implements JsonTypeInfo",
-                                                                 "'{0}' declares JsonTypeInfo itself, so [JsonModel] won't generate it",
-                                                                 CATEGORY,
-                                                                 DiagnosticSeverity.Warning,
-                                                                 true,
-                                                                 helpLinkUri: HELP);
+    public static readonly DiagnosticDescriptor NotPartial = new(NOT_PARTIAL, "[JsonModel] type must be partial", "'{0}' must be partial (and so must every type containing it) for [JsonModel] to implement IJsonModel", CATEGORY, DiagnosticSeverity.Error, true, helpLinkUri: HELP);
 
-    public static readonly DiagnosticDescriptor MissingAttribute = new(MISSING_ATTRIBUTE,
-                                                                      "IJsonModel<T> without [JsonModel]",
-                                                                      "'{0}' lists IJsonModel<{0}> but has no [JsonModel] and doesn't implement JsonTypeInfo; add [JsonModel] to generate the implementation",
-                                                                      CATEGORY,
-                                                                      DiagnosticSeverity.Error,
-                                                                      true,
-                                                                      helpLinkUri: HELP);
+    public static readonly DiagnosticDescriptor OpenGeneric = new(OPEN_GENERIC, "[JsonModel] can't be used on an open generic type", "'{0}' is generic; System.Text.Json can't source-generate open generic types. Put [JsonModel] on the closed derived type, or implement JsonTypeInfo with JsonModel.GetRequiredTypeInfo<T>().", CATEGORY, DiagnosticSeverity.Error, true, helpLinkUri: HELP);
+
+    public static readonly DiagnosticDescriptor InvalidContext = new(INVALID_CONTEXT, "[JsonModel] needs a JsonSerializerContext", "{0}", CATEGORY, DiagnosticSeverity.Error, true, helpLinkUri: HELP);
+
+    public static readonly DiagnosticDescriptor HandWritten = new(HAND_WRITTEN, "Type already implements JsonTypeInfo", "'{0}' declares JsonTypeInfo itself, so [JsonModel] won't generate it", CATEGORY, DiagnosticSeverity.Warning, true, helpLinkUri: HELP);
+
+    public static readonly DiagnosticDescriptor MissingAttribute = new(MISSING_ATTRIBUTE, "IJsonModel<T> without [JsonModel]", "'{0}' lists IJsonModel<{0}> but has no [JsonModel] and doesn't implement JsonTypeInfo; add [JsonModel] to generate the implementation", CATEGORY, DiagnosticSeverity.Error, true, helpLinkUri: HELP);
 
     public static readonly DiagnosticDescriptor MissingExtensionData = new(MISSING_EXTENSIONDATA,
-                                                                          "AdditionalData needs [JsonExtensionData]",
-                                                                          "'{0}.AdditionalData' implements IJsonModel.AdditionalData without [JsonExtensionData], so System.Text.Json drops unknown members instead of keeping them",
-                                                                          CATEGORY,
-                                                                          DiagnosticSeverity.Warning,
-                                                                          true,
-                                                                          "System.Text.Json reads attributes from the implementing property, not from the interface.",
-                                                                          HELP);
+                                                                           "AdditionalData needs [JsonExtensionData]",
+                                                                           "'{0}.AdditionalData' implements IJsonModel.AdditionalData without [JsonExtensionData], so System.Text.Json drops unknown members instead of keeping them",
+                                                                           CATEGORY,
+                                                                           DiagnosticSeverity.Warning,
+                                                                           true,
+                                                                           "System.Text.Json reads attributes from the implementing property, not from the interface.",
+                                                                           HELP);
 }

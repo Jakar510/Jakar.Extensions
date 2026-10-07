@@ -26,8 +26,7 @@ public static partial class JsonModel
 
     /// <summary> Reads the elements of the JSON array the reader is positioned on (<see cref="JsonTokenType.StartArray"/>) and leaves it on the matching <see cref="JsonTokenType.EndArray"/>, as a <see cref="JsonConverter{T}.Read"/> implementation must. </summary>
     /// <exception cref="JsonException"> The reader isn't on a JSON array, or an element is invalid. </exception>
-    [MustDisposeResource]
-    public static RentedArray<T> ReadArrayElements<T>( ref Utf8JsonReader reader, JsonTypeInfo<T> info )
+    [MustDisposeResource] public static RentedArray<T> ReadArrayElements<T>( ref Utf8JsonReader reader, JsonTypeInfo<T> info )
     {
         ArgumentNullException.ThrowIfNull(info);
         if ( reader.TokenType != JsonTokenType.StartArray ) { throw new JsonException($"Expected a JSON array, but found {reader.TokenType}."); }
@@ -54,8 +53,7 @@ public static partial class JsonModel
 
     /// <summary> Reads a root-level JSON array into a pooled buffer, using only <paramref name="info"/> (the element's metadata). Dispose the result when done. </summary>
     /// <exception cref="JsonException"> A JSON <c> null </c> root, a non-array root, an invalid element, or trailing content. </exception>
-    [MustDisposeResource]
-    public static RentedArray<T> FromJsonArrayPooled<T>( ReadOnlySpan<byte> utf8Json, JsonTypeInfo<T> info )
+    [MustDisposeResource] public static RentedArray<T> FromJsonArrayPooled<T>( ReadOnlySpan<byte> utf8Json, JsonTypeInfo<T> info )
     {
         ArgumentNullException.ThrowIfNull(info);
         Utf8JsonReader reader = new(SkipBom(utf8Json), info.Options.GetReaderOptions());
@@ -78,16 +76,14 @@ public static partial class JsonModel
     }
 
     /// <inheritdoc cref="FromJsonArrayPooled{T}(ReadOnlySpan{byte}, JsonTypeInfo{T})"/>
-    [MustDisposeResource]
-    public static RentedArray<T> FromJsonArrayPooled<T>( string json, JsonTypeInfo<T> info )
+    [MustDisposeResource] public static RentedArray<T> FromJsonArrayPooled<T>( string json, JsonTypeInfo<T> info )
     {
         ArgumentNullException.ThrowIfNull(json);
         return FromJsonArrayPooled(json.AsSpan(), info);
     }
 
     /// <inheritdoc cref="FromJsonArrayPooled{T}(ReadOnlySpan{byte}, JsonTypeInfo{T})"/>
-    [MustDisposeResource]
-    public static RentedArray<T> FromJsonArrayPooled<T>( ReadOnlySpan<char> json, JsonTypeInfo<T> info )
+    [MustDisposeResource] public static RentedArray<T> FromJsonArrayPooled<T>( ReadOnlySpan<char> json, JsonTypeInfo<T> info )
     {
         byte[] utf8 = ArrayPool<byte>.Shared.Rent(Encoding.UTF8.GetMaxByteCount(json.Length));
 
@@ -100,8 +96,7 @@ public static partial class JsonModel
     }
 
     /// <inheritdoc cref="FromJsonArrayPooled{T}(ReadOnlySpan{byte}, JsonTypeInfo{T})"/>
-    [MustDisposeResource]
-    public static async ValueTask<RentedArray<T>> FromJsonArrayPooledAsync<T>( Stream utf8Json, JsonTypeInfo<T> info, CancellationToken token = default )
+    [MustDisposeResource] public static async ValueTask<RentedArray<T>> FromJsonArrayPooledAsync<T>( Stream utf8Json, JsonTypeInfo<T> info, CancellationToken token = default )
     {
         ArgumentNullException.ThrowIfNull(utf8Json);
         ArgumentNullException.ThrowIfNull(info);
@@ -147,9 +142,8 @@ public static partial class JsonModel
     public static List<T> FromJsonList<T>( ReadOnlySpan<byte>  utf8Json, JsonTypeInfo<T> info ) => FromJsonArray(utf8Json, info, static List<T> ( ReadOnlySpan<T> span ) => [.. span]);
     public static List<T> FromJsonList<T>( string              json,     JsonTypeInfo<T> info ) => FromJsonArray(json,     info, static List<T> ( ReadOnlySpan<T> span ) => [.. span]);
 
-    public static ValueTask<T[]>     FromJsonArrayAsync<T>( Stream utf8Json, JsonTypeInfo<T> info, CancellationToken token = default ) => FromJsonArrayAsync(utf8Json, info, static span => span.ToArray(),                              token);
+    public static ValueTask<T[]>     FromJsonArrayAsync<T>( Stream utf8Json, JsonTypeInfo<T> info, CancellationToken token = default ) => FromJsonArrayAsync(utf8Json, info, static span => span.ToArray(),                        token);
     public static ValueTask<List<T>> FromJsonListAsync<T>( Stream  utf8Json, JsonTypeInfo<T> info, CancellationToken token = default ) => FromJsonArrayAsync(utf8Json, info, static List<T> ( ReadOnlySpan<T> span ) => [.. span], token);
-
 
 
     // ─── Writing ──────────────────────────────────────────────────────────────
@@ -234,21 +228,24 @@ public static partial class JsonModel
 
 
 
-    extension<TSelf>( ReadOnlySpan<TSelf> self ) where TSelf : IJsonModel<TSelf>
+    extension<TSelf>( ReadOnlySpan<TSelf> self )
+        where TSelf : IJsonModel<TSelf>
     {
         public string ToJson( bool? indented = null ) => ToJson(self, TSelf.JsonTypeInfo, indented);
     }
 
 
 
-    extension<TSelf>( TSelf[] self ) where TSelf : IJsonModel<TSelf>
+    extension<TSelf>( TSelf[] self )
+        where TSelf : IJsonModel<TSelf>
     {
         public string ToJson( bool? indented = null ) => ToJson(new ReadOnlySpan<TSelf>(self), TSelf.JsonTypeInfo, indented);
     }
 
 
 
-    extension<TSelf>( List<TSelf> self ) where TSelf : IJsonModel<TSelf>
+    extension<TSelf>( List<TSelf> self )
+        where TSelf : IJsonModel<TSelf>
     {
         /// <remarks> Serializes over the list's backing array. Don't modify the list while this runs: unlike enumeration, a span doesn't detect modification. </remarks>
         public string ToJson( bool? indented = null ) => ToJson(CollectionsMarshal.AsSpan(self), TSelf.JsonTypeInfo, indented);
@@ -258,7 +255,8 @@ public static partial class JsonModel
 
 
 
-    extension<TSelf>( ImmutableArray<TSelf> self ) where TSelf : IJsonModel<TSelf>
+    extension<TSelf>( ImmutableArray<TSelf> self )
+        where TSelf : IJsonModel<TSelf>
     {
         /// <remarks> No copy; a <see langword="default"/> <see cref="ImmutableArray{T}"/> writes <c> [] </c>. </remarks>
         public string ToJson( bool? indented = null ) => ToJson(self.AsSpan(), TSelf.JsonTypeInfo, indented);
@@ -266,7 +264,8 @@ public static partial class JsonModel
 
 
 
-    extension<TSelf>( IEnumerable<TSelf> self ) where TSelf : IJsonModel<TSelf>
+    extension<TSelf>( IEnumerable<TSelf> self )
+        where TSelf : IJsonModel<TSelf>
     {
         /// <inheritdoc cref="WriteArray{T}(Utf8JsonWriter, IEnumerable{T}, JsonTypeInfo{T})"/>
         public string ToJson( bool? indented = null ) => ToJson(self, TSelf.JsonTypeInfo, indented);

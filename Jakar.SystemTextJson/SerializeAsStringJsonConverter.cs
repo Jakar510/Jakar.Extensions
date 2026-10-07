@@ -92,10 +92,11 @@ public sealed class SerializeAsStringJsonConverter<T> : JsonConverter<T>
     private static T? ParseString( ref Utf8JsonReader reader, bool required )
     {
         int length = reader.HasValueSequence
-                         ? checked((int)reader.ValueSequence.Length)
+                         ? checked ((int)reader.ValueSequence.Length)
                          : reader.ValueSpan.Length; // UTF-16 chars ≤ UTF-8 bytes, and escaped length ≥ unescaped length
 
-        char[]?    rented = null;
+        char[]? rented = null;
+
         Span<char> buffer = length <= STACK_LIMIT
                                 ? stackalloc char[STACK_LIMIT]
                                 : rented = ArrayPool<char>.Shared.Rent(length);

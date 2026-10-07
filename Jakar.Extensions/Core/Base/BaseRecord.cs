@@ -29,11 +29,11 @@ public abstract record BaseRecord<TSelf> : BaseRecord, IEquatable<TSelf>, ICompa
     }
 
 
-    public static TSelf FromJson( string             json )     => JsonModel.FromJson(json,     TSelf.JsonTypeInfo);
-    public static TSelf FromJson( ReadOnlySpan<byte> utf8Json ) => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
-    public static bool TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(json,     TSelf.JsonTypeInfo, out result);
-    public static bool TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
-    public static ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
+    public static TSelf            FromJson( string                         json )                                                     => JsonModel.FromJson(json,     TSelf.JsonTypeInfo);
+    public static TSelf            FromJson( ReadOnlySpan<byte>             utf8Json )                                                 => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
+    public static bool             TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out TSelf? result )          => JsonModel.TryFromJson(json,     TSelf.JsonTypeInfo, out result);
+    public static bool             TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out TSelf? result )          => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
+    public static ValueTask<TSelf> FromJsonAsync( Stream                    stream,   CancellationToken              token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
 
 
     public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);

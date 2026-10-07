@@ -103,7 +103,7 @@ public class CollectionBenchmarks
     }
     private static KeyValuePair<int, ImmutableArray<double>> GetImmutableArray( int size )
     {
-        ImmutableArray<double> array = [..Enumerable.Range(0, size).Select(i => __random.NextDouble())];
+        ImmutableArray<double> array = [.. Enumerable.Range(0, size).Select(i => __random.NextDouble())];
 
         return new KeyValuePair<int, ImmutableArray<double>>(size, array);
     }
@@ -123,7 +123,7 @@ public class CollectionBenchmarks
 
     [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetArray()          => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
     [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetSizedArray()     => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToArray(Size);
-    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableArray<double> GetImmutableArray() => [..Enumerable.Range(0,  Size).Select(i => __random.NextDouble())];
+    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableArray<double> GetImmutableArray() => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
     [BenchmarkCategory("Construct")] [Benchmark] public ImmutableList<double>  GetImmutableList()  => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
     [BenchmarkCategory("Construct")] [Benchmark] public FrozenSet<double>      GetFrozenSet()      => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToFrozenSet();
     [BenchmarkCategory("Construct")] [Benchmark] public List<double>           GetList()           => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];

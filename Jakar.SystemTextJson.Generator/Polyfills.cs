@@ -4,6 +4,7 @@
 // Compiler support types netstandard2.0 lacks, so the generator can use records, init accessors and required members.
 
 // ReSharper disable once CheckNamespace
+
 namespace System.Runtime.CompilerServices
 {
     internal static class IsExternalInit;
@@ -28,6 +29,5 @@ namespace System.Runtime.CompilerServices
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
 {
-    [AttributeUsage(AttributeTargets.Constructor, Inherited = false)]
-    internal sealed class SetsRequiredMembersAttribute : Attribute;
+    [AttributeUsage(AttributeTargets.Constructor, Inherited = false)] internal sealed class SetsRequiredMembersAttribute : Attribute;
 }

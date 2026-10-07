@@ -15,8 +15,7 @@ public sealed class JsonSpan_Tests : Assert
     private static string Compact( string json ) => string.Concat(json.Where(static c => !char.IsWhiteSpace(c)));
 
 
-    [Test]
-    public void ToJson_Span_WritesExactlyTheSpan()
+    [Test] public void ToJson_Span_WritesExactlyTheSpan()
     {
         // ArrayPool.Shared.Rent(3) returns a 16-element array; the old implementation serialized all 16.
         ReadOnlySpan<int> values = [1, 2, 3];
@@ -24,28 +23,25 @@ public sealed class JsonSpan_Tests : Assert
     }
 
 
-    [Test]
-    public void ToJson_EmptySpan_WritesEmptyArray()
+    [Test] public void ToJson_EmptySpan_WritesEmptyArray()
     {
         ReadOnlySpan<string> values = [];
         That(Compact(Json.Serialize(values)), Is.EqualTo("[]"));
     }
 
 
-    [Test]
-    public void ObservableCollection_ImplicitFromArray_KeepsTheValues()
+    [Test] public void ObservableCollection_ImplicitFromArray_KeepsTheValues()
     {
         ObservableCollection<int> collection = new[] { 1, 2, 3 };
         That(collection.ToArray(), Is.EqualTo([1, 2, 3]));
     }
 
 
-    [Test]
-    public void ConcurrentObservableCollection_ArrayConstructorAndImplicit_KeepTheValues()
+    [Test] public void ConcurrentObservableCollection_ArrayConstructorAndImplicit_KeepTheValues()
     {
-        int[]                               values     = [1, 2, 3];
-        ConcurrentObservableCollection<int> fromCtor   = new(values);
-        ConcurrentObservableCollection<int> fromCast   = values;
+        int[]                               values   = [1, 2, 3];
+        ConcurrentObservableCollection<int> fromCtor = new(values);
+        ConcurrentObservableCollection<int> fromCast = values;
         That(fromCtor.ToArray(), Is.EqualTo(values));
         That(fromCast.ToArray(), Is.EqualTo(values));
     }

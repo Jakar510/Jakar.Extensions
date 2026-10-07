@@ -7,28 +7,28 @@ namespace Jakar.Extensions;
 public static class Statuses
 {
     private static readonly ConcurrentDictionary<Type, Status> __statusMap = new()
-                                                                            {
-                                                                                [typeof(NotImplementedException)]     = Status.NotImplemented,
-                                                                                [typeof(UnauthorizedAccessException)] = Status.Unauthorized,
-                                                                                [typeof(ValidationException)]         = Status.BadRequest,
-                                                                                [typeof(ApiDisabledException)]        = Status.Disabled,
-                                                                                [typeof(ExpectedValueTypeException)]  = Status.InternalServerError,
-                                                                                [typeof(OutOfRangeException)]         = Status.InternalServerError,
-                                                                                [typeof(ArgumentOutOfRangeException)] = Status.InternalServerError,
-                                                                                [typeof(ArgumentNullException)]       = Status.InternalServerError,
-                                                                                [typeof(ArgumentException)]           = Status.InternalServerError,
-                                                                                [typeof(InvalidOperationException)]   = Status.InternalServerError,
-                                                                                [typeof(FileLoadException)]           = Status.ServiceUnavailable,
-                                                                                [typeof(IOException)]                 = Status.ServiceUnavailable,
-                                                                                [typeof(ApiDisabledException)]        = Status.Disabled,
-                                                                                [typeof(AppOutDatedException)]        = Status.ExpectationFailed,
-                                                                                [typeof(AmbiguousMatchException)]     = Status.Conflict,
-                                                                                [typeof(DuplicateNameException)]      = Status.Conflict,
-                                                                                [typeof(AccessViolationException)]    = Status.Unauthorized,
-                                                                                [typeof(HttpRequestException)]        = Status.ServiceUnavailable,
-                                                                                [typeof(ValidationException)]         = Status.BadRequest,
-                                                                                [typeof(OperationCanceledException)]  = Status.RequestTimeout
-                                                                            };
+                                                                             {
+                                                                                 [typeof(NotImplementedException)]     = Status.NotImplemented,
+                                                                                 [typeof(UnauthorizedAccessException)] = Status.Unauthorized,
+                                                                                 [typeof(ValidationException)]         = Status.BadRequest,
+                                                                                 [typeof(ApiDisabledException)]        = Status.Disabled,
+                                                                                 [typeof(ExpectedValueTypeException)]  = Status.InternalServerError,
+                                                                                 [typeof(OutOfRangeException)]         = Status.InternalServerError,
+                                                                                 [typeof(ArgumentOutOfRangeException)] = Status.InternalServerError,
+                                                                                 [typeof(ArgumentNullException)]       = Status.InternalServerError,
+                                                                                 [typeof(ArgumentException)]           = Status.InternalServerError,
+                                                                                 [typeof(InvalidOperationException)]   = Status.InternalServerError,
+                                                                                 [typeof(FileLoadException)]           = Status.ServiceUnavailable,
+                                                                                 [typeof(IOException)]                 = Status.ServiceUnavailable,
+                                                                                 [typeof(ApiDisabledException)]        = Status.Disabled,
+                                                                                 [typeof(AppOutDatedException)]        = Status.ExpectationFailed,
+                                                                                 [typeof(AmbiguousMatchException)]     = Status.Conflict,
+                                                                                 [typeof(DuplicateNameException)]      = Status.Conflict,
+                                                                                 [typeof(AccessViolationException)]    = Status.Unauthorized,
+                                                                                 [typeof(HttpRequestException)]        = Status.ServiceUnavailable,
+                                                                                 [typeof(ValidationException)]         = Status.BadRequest,
+                                                                                 [typeof(OperationCanceledException)]  = Status.RequestTimeout
+                                                                             };
     public static Func<Exception, Status> GetStatusFromException { get; set; } = Statuses.AsStatus;
 
 

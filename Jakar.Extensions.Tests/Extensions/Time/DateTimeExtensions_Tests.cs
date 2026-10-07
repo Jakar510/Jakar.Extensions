@@ -1,7 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 
 
-
 namespace Jakar.Extensions.Tests;
 
 
@@ -11,8 +10,7 @@ public class DateTimeExtensions_Tests : Assert
 {
     // ─── DateTime → DateOnly ──────────────────────────────────────────────────
 
-    [Test]
-    public void AsDateOnly_DateTime_PreservesDate()
+    [Test] public void AsDateOnly_DateTime_PreservesDate()
     {
         DateTime dt     = new(2024, 6, 15, 10, 30, 45);
         DateOnly result = dt.AsDateOnly();
@@ -21,16 +19,14 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(15,   result.Day);
     }
 
-    [Test]
-    public void AsDateOnly_DateTime_IgnoresTime()
+    [Test] public void AsDateOnly_DateTime_IgnoresTime()
     {
-        DateTime dt1 = new(2024, 1, 1, 0,  0,  0);
+        DateTime dt1 = new(2024, 1, 1, 0, 0, 0);
         DateTime dt2 = new(2024, 1, 1, 23, 59, 59);
         this.AreEqual(dt1.AsDateOnly(), dt2.AsDateOnly());
     }
 
-    [Test]
-    public void AsDateOnly_DateTime_MinValue()
+    [Test] public void AsDateOnly_DateTime_MinValue()
     {
         DateTime dt     = DateTime.MinValue;
         DateOnly result = dt.AsDateOnly();
@@ -39,8 +35,7 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(dt.Day,   result.Day);
     }
 
-    [Test]
-    public void AsDateOnly_DateTime_MaxValue()
+    [Test] public void AsDateOnly_DateTime_MaxValue()
     {
         DateTime dt     = DateTime.MaxValue;
         DateOnly result = dt.AsDateOnly();
@@ -52,8 +47,7 @@ public class DateTimeExtensions_Tests : Assert
 
     // ─── DateTimeOffset → DateOnly ────────────────────────────────────────────
 
-    [Test]
-    public void AsDateOnly_DateTimeOffset_PreservesDate()
+    [Test] public void AsDateOnly_DateTimeOffset_PreservesDate()
     {
         DateTimeOffset dto    = new(2024, 6, 15, 10, 30, 45, TimeSpan.FromHours(5));
         DateOnly       result = dto.AsDateOnly();
@@ -62,10 +56,9 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(15,   result.Day);
     }
 
-    [Test]
-    public void AsDateOnly_DateTimeOffset_IgnoresTime()
+    [Test] public void AsDateOnly_DateTimeOffset_IgnoresTime()
     {
-        DateTimeOffset dto1 = new(2024, 3, 20, 0,  0,  0,  TimeSpan.Zero);
+        DateTimeOffset dto1 = new(2024, 3, 20, 0, 0, 0, TimeSpan.Zero);
         DateTimeOffset dto2 = new(2024, 3, 20, 23, 59, 59, TimeSpan.Zero);
         this.AreEqual(dto1.AsDateOnly(), dto2.AsDateOnly());
     }
@@ -73,8 +66,7 @@ public class DateTimeExtensions_Tests : Assert
 
     // ─── DateTime → TimeOnly ──────────────────────────────────────────────────
 
-    [Test]
-    public void AsTimeOnly_DateTime_PreservesHourMinuteSecond()
+    [Test] public void AsTimeOnly_DateTime_PreservesHourMinuteSecond()
     {
         DateTime dt     = new(2024, 6, 15, 10, 30, 45);
         TimeOnly result = dt.AsTimeOnly();
@@ -83,8 +75,7 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(45, result.Second);
     }
 
-    [Test]
-    public void AsTimeOnly_DateTime_Midnight()
+    [Test] public void AsTimeOnly_DateTime_Midnight()
     {
         DateTime dt     = new(2024, 1, 1, 0, 0, 0);
         TimeOnly result = dt.AsTimeOnly();
@@ -93,8 +84,7 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(0, result.Second);
     }
 
-    [Test]
-    public void AsTimeOnly_DateTime_EndOfDay()
+    [Test] public void AsTimeOnly_DateTime_EndOfDay()
     {
         DateTime dt     = new(2024, 1, 1, 23, 59, 59);
         TimeOnly result = dt.AsTimeOnly();
@@ -103,10 +93,9 @@ public class DateTimeExtensions_Tests : Assert
         this.AreEqual(59, result.Second);
     }
 
-    [Test]
-    public void AsTimeOnly_DateTime_IgnoresDate()
+    [Test] public void AsTimeOnly_DateTime_IgnoresDate()
     {
-        DateTime dt1 = new(2024, 1,  1,  10, 30, 45);
+        DateTime dt1 = new(2024, 1, 1, 10, 30, 45);
         DateTime dt2 = new(2025, 12, 31, 10, 30, 45);
         this.AreEqual(dt1.AsTimeOnly(), dt2.AsTimeOnly());
     }
@@ -114,8 +103,7 @@ public class DateTimeExtensions_Tests : Assert
 
     // ─── DateTimeOffset → TimeOnly ────────────────────────────────────────────
 
-    [Test]
-    public void AsTimeOnly_DateTimeOffset_PreservesHourMinuteSecond()
+    [Test] public void AsTimeOnly_DateTimeOffset_PreservesHourMinuteSecond()
     {
         DateTimeOffset dto    = new(2024, 6, 15, 10, 30, 45, TimeSpan.FromHours(-7));
         TimeOnly       result = dto.AsTimeOnly();

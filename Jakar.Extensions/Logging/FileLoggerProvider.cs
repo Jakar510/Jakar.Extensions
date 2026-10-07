@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
+
 /*
 [SuppressMessage( "ReSharper", "RedundantArgumentDefaultValue" )]
 public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> options ) : ILoggerProvider, IHostedService

@@ -4,18 +4,18 @@
 [JsonModel(typeof(JakarExtensionsContext))]
 public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
-    [JsonIgnore] public          Exception?        Value           { get; private init; }
-    public                       JsonObject?       Data            { get; init; }
-    public                       string?           HelpLink        { get; init; }
-    public                       int               HResult         { get; init; }
-    public                       ExceptionDetails? Inner           { get; init; }
-    public                       string            Message         { get; init; } = EMPTY;
-    public                       string?           MethodSignature { get; init; }
-    public                       string?           Source          { get; init; }
-    public                       string[]          StackTrace      { get; init; } = [];
-    public                       string            Str             { get; init; } = EMPTY;
-    public                       MethodDetails?    TargetSite      { get; init; }
-    public                       string?           Type            { get; init; }
+    [JsonIgnore] public Exception?        Value           { get; private init; }
+    public              JsonObject?       Data            { get; init; }
+    public              string?           HelpLink        { get; init; }
+    public              int               HResult         { get; init; }
+    public              ExceptionDetails? Inner           { get; init; }
+    public              string            Message         { get; init; } = EMPTY;
+    public              string?           MethodSignature { get; init; }
+    public              string?           Source          { get; init; }
+    public              string[]          StackTrace      { get; init; } = [];
+    public              string            Str             { get; init; } = EMPTY;
+    public              MethodDetails?    TargetSite      { get; init; }
+    public              string?           Type            { get; init; }
 
 
     public ExceptionDetails() { }
@@ -47,8 +47,7 @@ public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqu
 
 
     /// <summary> Also fills <see cref="TargetSite"/> (parameters, attributes), which needs method metadata the trimmer may remove. </summary>
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static ExceptionDetails CreateWithMethodInfo( Exception exception )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static ExceptionDetails CreateWithMethodInfo( Exception exception )
     {
         ArgumentNullException.ThrowIfNull(exception);
         ExceptionDetails details = Create(exception);
@@ -71,7 +70,7 @@ public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqu
                                : CreateWithMethodInfo(exception.InnerException)
                };
     }
-    public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
+    public static implicit operator ExceptionDetails?( Exception? e )       => TryCreate(e);
     public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 

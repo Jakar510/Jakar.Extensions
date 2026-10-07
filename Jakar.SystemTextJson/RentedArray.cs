@@ -21,10 +21,10 @@ public sealed class RentedArray<T> : IMemoryOwner<T>
     public bool IsEmpty    => Count == 0;
     public bool IsDisposed => Volatile.Read(ref _array) is null;
 
-    public Memory<T>         Memory     => new(Rented, 0, Count);
-    public Span<T>           Span       => new(Rented, 0, Count);
-    public ReadOnlySpan<T>   ReadOnly   => new(Rented, 0, Count);
-    private T[]              Rented     => Volatile.Read(ref _array) ?? throw new ObjectDisposedException(nameof(RentedArray<T>));
+    public  Memory<T>       Memory   => new(Rented, 0, Count);
+    public  Span<T>         Span     => new(Rented, 0, Count);
+    public  ReadOnlySpan<T> ReadOnly => new(Rented, 0, Count);
+    private T[]             Rented   => Volatile.Read(ref _array) ?? throw new ObjectDisposedException(nameof(RentedArray<T>));
 
 
     internal RentedArray( T[] array, int count, bool pooled )

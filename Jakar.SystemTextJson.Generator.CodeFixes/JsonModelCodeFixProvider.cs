@@ -36,10 +36,10 @@ public sealed class JsonModelCodeFixProvider : CodeFixProvider
     internal const string CONTEXT_METADATA_NAME = "ContextMetadataName";
     internal const string TYPE_NAME             = "TypeName";
 
-    private const string JSON_SERIALIZABLE    = "global::System.Text.Json.Serialization.JsonSerializable";
-    private const string JSON_SERIALIZER_CTX  = "System.Text.Json.Serialization.JsonSerializerContext";
-    private const string JSON_MODEL           = "global::Jakar.Extensions.JsonModel";
-    private const string JSON_MODEL_CONTEXT   = "Jakar.Extensions.JsonModelContextAttribute";
+    private const string JSON_SERIALIZABLE   = "global::System.Text.Json.Serialization.JsonSerializable";
+    private const string JSON_SERIALIZER_CTX = "System.Text.Json.Serialization.JsonSerializerContext";
+    private const string JSON_MODEL          = "global::Jakar.Extensions.JsonModel";
+    private const string JSON_MODEL_CONTEXT  = "Jakar.Extensions.JsonModelContextAttribute";
 
 
     public override ImmutableArray<string> FixableDiagnosticIds { get; } = [NOT_REGISTERED, MISSING_ATTRIBUTE];
@@ -75,17 +75,18 @@ public sealed class JsonModelCodeFixProvider : CodeFixProvider
 
         string display = typeName!.Replace("global::", "");
 
-        context.RegisterCodeFix(CodeAction.Create($"Add [JsonSerializable(typeof({display}))] to the context",
-                                                  token => AddSerializableAsync(context.Document.Project.Solution, context.Document.Project.Id, contextName!, typeName, token),
-                                                  $"{NOT_REGISTERED}:{contextName}:{typeName}"),
-                                diagnostic);
+        context.RegisterCodeFix(CodeAction.Create($"Add [JsonSerializable(typeof({display}))] to the context", token => AddSerializableAsync(context.Document.Project.Solution, context.Document.Project.Id, contextName!, typeName, token), $"{NOT_REGISTERED}:{contextName}:{typeName}"), diagnostic);
     }
 
 
     internal static async Task<Solution> AddSerializableAsync( Solution solution, ProjectId projectId, string contextMetadataName, string typeName, CancellationToken token )
     {
-        Project?     project     = solution.GetProject(projectId);
-        Compilation? compilation = project is null ? null : await project.GetCompilationAsync(token).ConfigureAwait(false);
+        Project? project = solution.GetProject(projectId);
+
+        Compilation? compilation = project is null
+                                       ? null
+                                       : await project.GetCompilationAsync(token).ConfigureAwait(false);
+
         if ( compilation?.GetTypeByMetadataName(contextMetadataName) is not { } contextType ) { return solution; }
 
         // Prefer the declaration that already carries [JsonSerializable] attributes.
@@ -96,13 +97,17 @@ public sealed class JsonModelCodeFixProvider : CodeFixProvider
             if ( await reference.GetSyntaxAsync(token).ConfigureAwait(false) is not ClassDeclarationSyntax declaration ) { continue; }
 
             target ??= declaration;
-            if ( declaration.AttributeLists.SelectMany(static list => list.Attributes).Any(IsJsonSerializable) ) { target = declaration; break; }
+
+            if ( declaration.AttributeLists.SelectMany(static list => list.Attributes).Any(IsJsonSerializable) )
+            {
+                target = declaration;
+                break;
+            }
         }
 
         if ( target is null || solution.GetDocument(target.SyntaxTree) is not { } document ) { return solution; }
 
-        AttributeListSyntax list = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Attribute(SyntaxFactory.ParseName(JSON_SERIALIZABLE), SyntaxFactory.ParseAttributeArgumentList($"(typeof({typeName}))"))))
-                                                .WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
+        AttributeListSyntax list = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Attribute(SyntaxFactory.ParseName(JSON_SERIALIZABLE), SyntaxFactory.ParseAttributeArgumentList($"(typeof({typeName}))")))).WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
 
         int index = target.AttributeLists.Count;
 
@@ -207,7 +212,7 @@ public sealed class JsonModelCodeFixProvider : CodeFixProvider
                                         ? SyntaxFactory.Attribute(SyntaxFactory.ParseName(JSON_MODEL))
                                         : SyntaxFactory.Attribute(SyntaxFactory.ParseName(JSON_MODEL), SyntaxFactory.ParseAttributeArgumentList($"(typeof({contextName}))"));
 
-        AttributeListSyntax list    = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute)).WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
+        AttributeListSyntax   list    = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute)).WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
         TypeDeclarationSyntax updated = declaration.WithAttributeLists(declaration.AttributeLists.Add(list));
 
         // [JsonModel] needs a partial type.

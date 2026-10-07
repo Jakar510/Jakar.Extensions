@@ -13,6 +13,7 @@ namespace Jakar.SystemTextJson.Generator;
 // Pipeline models hold no ISymbol/SyntaxNode/Compilation references, and compare by value, so the incremental generator can cache them.
 
 
+
 internal readonly record struct LocationInfo( string FilePath, TextSpan Span, LinePositionSpan LineSpan )
 {
     public Location ToLocation() => Location.Create(FilePath, Span, LineSpan);

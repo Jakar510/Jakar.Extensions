@@ -103,7 +103,7 @@ public class HeaderCollection : Dictionary<string, object>
     {
         foreach ( ( string key, object value ) in this )
         {
-            if ( !IsContentHeader(key) ) { Set(request.Headers, key, value); }
+            if ( !IsContentHeader(key) ) { Set(request.Headers,                    key, value); }
             else if ( request.Content is not null ) { Set(request.Content.Headers, key, value); }
         }
 
@@ -123,7 +123,16 @@ public class HeaderCollection : Dictionary<string, object>
     /// <summary> Headers that belong to <see cref="HttpContentHeaders"/> rather than request/response headers. </summary>
     private static readonly FrozenSet<string> __contentHeaders = new[]
                                                                  {
-                                                                     "Allow", "Content-Disposition", CONTENT_ENCODING, "Content-Language", "Content-Length", "Content-Location", "Content-MD5", "Content-Range", CONTENT_TYPE, "Expires",
+                                                                     "Allow",
+                                                                     "Content-Disposition",
+                                                                     CONTENT_ENCODING,
+                                                                     "Content-Language",
+                                                                     "Content-Length",
+                                                                     "Content-Location",
+                                                                     "Content-MD5",
+                                                                     "Content-Range",
+                                                                     CONTENT_TYPE,
+                                                                     "Expires",
                                                                      "Last-Modified"
                                                                  }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
@@ -139,9 +148,9 @@ public class HeaderCollection : Dictionary<string, object>
 
         return value switch
                {
-                   string text                  => headers.TryAddWithoutValidation(key, text),
-                   IEnumerable<string> values   => headers.TryAddWithoutValidation(key, values),
-                   _                            => headers.TryAddWithoutValidation(key, Format(value))
+                   string text                => headers.TryAddWithoutValidation(key, text),
+                   IEnumerable<string> values => headers.TryAddWithoutValidation(key, values),
+                   _                          => headers.TryAddWithoutValidation(key, Format(value))
                };
     }
     private static string? Format( object? value ) => value switch

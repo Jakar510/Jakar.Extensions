@@ -4,7 +4,7 @@
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject, IDisposable
 {
-    protected bool     _disposed;
+    protected bool                             _disposed;
     protected Dictionary<string, JsonElement>? _additionalData;
 
 
@@ -96,11 +96,11 @@ public abstract class BaseClass<TSelf> : BaseClass, IEquatable<TSelf>, IComparab
     public override int  GetHashCode()           => RuntimeHelpers.GetHashCode(this);
 
 
-    public static TSelf FromJson( string             json )     => JsonModel.FromJson(json,     TSelf.JsonTypeInfo);
-    public static TSelf FromJson( ReadOnlySpan<byte> utf8Json ) => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
-    public static bool TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(json,     TSelf.JsonTypeInfo, out result);
-    public static bool TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
-    public static ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
+    public static TSelf            FromJson( string                         json )                                                     => JsonModel.FromJson(json,     TSelf.JsonTypeInfo);
+    public static TSelf            FromJson( ReadOnlySpan<byte>             utf8Json )                                                 => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
+    public static bool             TryFromJson( [NotNullWhen(true)] string? json,     [NotNullWhen(true)] out TSelf? result )          => JsonModel.TryFromJson(json,     TSelf.JsonTypeInfo, out result);
+    public static bool             TryFromJson( ReadOnlySpan<byte>          utf8Json, [NotNullWhen(true)] out TSelf? result )          => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
+    public static ValueTask<TSelf> FromJsonAsync( Stream                    stream,   CancellationToken              token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
 
 
     /// <summary> The JSON of this instance (source-generated metadata, no reflection), or the type name when no metadata is registered for it. </summary>

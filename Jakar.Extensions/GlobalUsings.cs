@@ -57,4 +57,3 @@ global using static Jakar.Extensions.WebRequester;
 global using ErrorEventArgs = System.IO.ErrorEventArgs;
 global using ILogger = Microsoft.Extensions.Logging.ILogger;
 global using ISerilogger = Serilog.ILogger;
-

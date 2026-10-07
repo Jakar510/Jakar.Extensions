@@ -135,6 +135,7 @@ public static class WebRequesterServiceCollectionExtensions
     }
 
 
+
     /// <summary> Registers a singleton <see cref="WebRequester"/> configured by <paramref name="configure"/>. </summary>
     public static OptionsBuilder<WebRequesterOptions> AddWebRequester( this IServiceCollection services, Action<WebRequesterOptions>? configure = null ) => services.AddWebRequester(Options.DefaultName, configure);
 

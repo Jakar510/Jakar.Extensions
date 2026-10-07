@@ -45,8 +45,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
     {
         JsonArray            array = [];
         ReadOnlySpan<string> lines = e.StackTrace?.SplitAndTrimLines();
@@ -63,7 +62,7 @@ public static class ExceptionExtensions
                    [nameof(Exception.StackTrace)] = array
                };
 
-        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]          = e.MethodInfo()?.ToJsonNode(); }
+        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo()?.ToJsonNode(); }
         else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
         e.GetProperties(ref dict);
@@ -72,38 +71,39 @@ public static class ExceptionExtensions
 
     /// <summary> A JSON value for an arbitrary object without reflection-based serialization: primitives keep their JSON type, nodes are cloned, anything else becomes its <see cref="object.ToString"/>. </summary>
     public static JsonNode? ToJsonValue( object? value ) => value switch
-                                                           {
-                                                               null             => null,
-                                                               JsonNode node    => node.Parent is null ? node : node.DeepClone(),
-                                                               JsonElement e    => JsonValue.Create(e),
-                                                               string str       => JsonValue.Create(str),
-                                                               bool b           => JsonValue.Create(b),
-                                                               char c           => JsonValue.Create(c),
-                                                               byte n           => JsonValue.Create(n),
-                                                               sbyte n          => JsonValue.Create(n),
-                                                               short n          => JsonValue.Create(n),
-                                                               ushort n         => JsonValue.Create(n),
-                                                               int n            => JsonValue.Create(n),
-                                                               uint n           => JsonValue.Create(n),
-                                                               long n           => JsonValue.Create(n),
-                                                               ulong n          => JsonValue.Create(n),
-                                                               float n          => JsonValue.Create(n),
-                                                               double n         => JsonValue.Create(n),
-                                                               decimal n        => JsonValue.Create(n),
-                                                               Guid g           => JsonValue.Create(g),
-                                                               DateTime d       => JsonValue.Create(d),
-                                                               DateTimeOffset d => JsonValue.Create(d),
-                                                               Enum en          => JsonValue.Create(en.ToString()),
-                                                               IFormattable f   => JsonValue.Create(f.ToString(null, CultureInfo.InvariantCulture)),
-                                                               _                => JsonValue.Create(value.ToString())
-                                                           };
+                                                            {
+                                                                null => null,
+                                                                JsonNode node => node.Parent is null
+                                                                                     ? node
+                                                                                     : node.DeepClone(),
+                                                                JsonElement e    => JsonValue.Create(e),
+                                                                string str       => JsonValue.Create(str),
+                                                                bool b           => JsonValue.Create(b),
+                                                                char c           => JsonValue.Create(c),
+                                                                byte n           => JsonValue.Create(n),
+                                                                sbyte n          => JsonValue.Create(n),
+                                                                short n          => JsonValue.Create(n),
+                                                                ushort n         => JsonValue.Create(n),
+                                                                int n            => JsonValue.Create(n),
+                                                                uint n           => JsonValue.Create(n),
+                                                                long n           => JsonValue.Create(n),
+                                                                ulong n          => JsonValue.Create(n),
+                                                                float n          => JsonValue.Create(n),
+                                                                double n         => JsonValue.Create(n),
+                                                                decimal n        => JsonValue.Create(n),
+                                                                Guid g           => JsonValue.Create(g),
+                                                                DateTime d       => JsonValue.Create(d),
+                                                                DateTimeOffset d => JsonValue.Create(d),
+                                                                Enum en          => JsonValue.Create(en.ToString()),
+                                                                IFormattable f   => JsonValue.Create(f.ToString(null, CultureInfo.InvariantCulture)),
+                                                                _                => JsonValue.Create(value.ToString())
+                                                            };
 
 
 
     extension( Exception e )
     {
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public Dictionary<string, object?> GetInnerExceptions( ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public Dictionary<string, object?> GetInnerExceptions( ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
         {
             if ( e is null ) { throw new NullReferenceException(nameof(e)); }
 
@@ -115,8 +115,7 @@ public static class ExceptionExtensions
 
             return dict;
         }
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public Dictionary<string, object?> GetProperties()
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public Dictionary<string, object?> GetProperties()
         {
             Dictionary<string, object?> dictionary = new();
 
@@ -125,9 +124,8 @@ public static class ExceptionExtensions
             return dictionary;
         }
         /// <summary> Trim/AOT-safe details (no <see cref="ExceptionDetails.TargetSite"/>); see <see cref="FullDetails"/>. </summary>
-        public ExceptionDetails Details() => ExceptionDetails.Create(e);
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public ExceptionDetails FullDetails() => ExceptionDetails.CreateWithMethodInfo(e);
+        public                                                                                      ExceptionDetails Details()     => ExceptionDetails.Create(e);
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public ExceptionDetails FullDetails() => ExceptionDetails.CreateWithMethodInfo(e);
     }
 
 
@@ -157,15 +155,13 @@ public static class ExceptionExtensions
             return result;
         }
 
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public void Details( out Dictionary<string, string?> dict )
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public void Details( out Dictionary<string, string?> dict )
         {
             dict = new Dictionary<string, string?>(10);
             self.Details(dict);
         }
 
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public void Details<TValue>( in TValue dict )
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public void Details<TValue>( in TValue dict )
             where TValue : class, IDictionary<string, string?>
         {
             dict[nameof(Type)] = self.GetType().FullName;
@@ -179,8 +175,7 @@ public static class ExceptionExtensions
         }
 
 
-        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-        public void Details( out Dictionary<string, object?> dict, bool includeFullMethodInfo )
+        [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public void Details( out Dictionary<string, object?> dict, bool includeFullMethodInfo )
         {
             dict = new Dictionary<string, object?>
                    {
@@ -212,7 +207,7 @@ public static class ExceptionExtensions
 
             using PooledArray<Pair> array = self.Data.AsValueEnumerable<DictionaryEntry>().Select(static pair => new Pair(pair.Key.ToString() ?? EMPTY, pair.Value?.ToString())).ToArrayPool();
 
-            StringTags tags = new([type, message, source, stackTrace, methodSignature, ..array.Span], [self.ToString()]);
+            StringTags tags = new([type, message, source, stackTrace, methodSignature, .. array.Span], [self.ToString()]);
             return tags;
         }
     }

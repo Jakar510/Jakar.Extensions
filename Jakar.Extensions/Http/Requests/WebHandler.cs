@@ -18,7 +18,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     public const           string  NO_RESPONSE = "NO RESPONSE";
     public static readonly EventId EventId     = new(69420, nameof(SendAsync));
 
-    private static readonly Action<ILogger, int, string?, Exception?> __logResponse = LoggerMessage.Define<int, string?>(LogLevel.Debug, EventId, "Response StatusCode: {StatusCode} for {Uri}");
+    private static readonly Action<ILogger, int, string?, Exception?> __logResponse = LoggerMessage.Define<int, string?>(LogLevel.Debug,       EventId, "Response StatusCode: {StatusCode} for {Uri}");
     private static readonly Action<ILogger, int, string?, Exception?> __logRetry    = LoggerMessage.Define<int, string?>(LogLevel.Information, EventId, "Retry {Retry} for {Uri}");
 
 
@@ -62,11 +62,11 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         Execute(( func, arg1, arg2 ), static ( response, state, token ) => state.func(response, state.arg1, state.arg2, token), HttpCompletionOption.ResponseContentRead, token);
 
 
-    public ValueTask<WebResponse<bool>>   AsBool( CancellationToken         token ) => CreateResponse(AsBool,         token);
-    public ValueTask<WebResponse<byte[]>> AsBytes( CancellationToken        token ) => CreateResponse(AsBytes,        token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken         token ) => CreateResponse(AsJson,         token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( CancellationToken token ) => CreateResponse(AsJson<TValue>, token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJson, info, token);
+    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                         => CreateResponse(AsBool,         token);
+    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                         => CreateResponse(AsBytes,        token);
+    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken            token )                         => CreateResponse(AsJson,         token);
+    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( CancellationToken    token )                         => CreateResponse(AsJson<TValue>, token);
+    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJson,         info, token);
 
     /// <summary> A root-level JSON array, read element by element with only <paramref name="info"/> (the element's metadata): no collection type needs registering. </summary>
     public ValueTask<WebResponse<TValue[]>> AsJsonArray<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonArray, info, token);
@@ -157,7 +157,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                 }
                 finally { response?.Dispose(); }
 
-            Retry:
+                Retry:
                 retry++;
                 if ( Logger is not null ) { __logRetry(Logger, retry, request.RequestUri?.OriginalString, null); }
 

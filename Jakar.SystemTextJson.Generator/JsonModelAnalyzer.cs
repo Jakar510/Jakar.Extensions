@@ -31,11 +31,11 @@ public sealed class JsonModelAnalyzer : DiagnosticAnalyzer
 
         context.RegisterCompilationStartAction(static start =>
                                                {
-                                                   INamedTypeSymbol? jsonModel         = start.Compilation.GetTypeByMetadataName("Jakar.Extensions.IJsonModel`1");
-                                                   INamedTypeSymbol? bag               = start.Compilation.GetTypeByMetadataName("Jakar.Extensions.IJsonModel");
-                                                   INamedTypeSymbol? attribute         = start.Compilation.GetTypeByMetadataName(JsonModelGenerator.JSON_MODEL_ATTRIBUTE);
-                                                   INamedTypeSymbol? extensionData     = start.Compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonExtensionDataAttribute");
-                                                   IPropertySymbol?  additionalData    = bag?.GetMembers("AdditionalData").OfType<IPropertySymbol>().FirstOrDefault();
+                                                   INamedTypeSymbol? jsonModel      = start.Compilation.GetTypeByMetadataName("Jakar.Extensions.IJsonModel`1");
+                                                   INamedTypeSymbol? bag            = start.Compilation.GetTypeByMetadataName("Jakar.Extensions.IJsonModel");
+                                                   INamedTypeSymbol? attribute      = start.Compilation.GetTypeByMetadataName(JsonModelGenerator.JSON_MODEL_ATTRIBUTE);
+                                                   INamedTypeSymbol? extensionData  = start.Compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonExtensionDataAttribute");
+                                                   IPropertySymbol?  additionalData = bag?.GetMembers("AdditionalData").OfType<IPropertySymbol>().FirstOrDefault();
 
                                                    if ( jsonModel is not null && attribute is not null ) { start.RegisterSymbolAction(ctx => AnalyzeType(ctx, jsonModel, attribute), SymbolKind.NamedType); }
 

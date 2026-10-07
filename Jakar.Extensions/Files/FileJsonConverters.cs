@@ -32,7 +32,7 @@ public sealed class LocalFileJsonConverter : JsonConverter<LocalFile>
                     reader.Read();
 
                     if ( name.Equals(nameof(LocalFile.FullPath), StringComparison.OrdinalIgnoreCase) || name.Equals(nameof(LocalFile.PhysicalPath), StringComparison.OrdinalIgnoreCase) ) { path ??= reader.GetString(); }
-                    else if ( name.Equals(nameof(LocalFile.FileEncoding), StringComparison.OrdinalIgnoreCase) ) { encoding = EncodingConverter.Instance.Read(ref reader, typeof(Encoding), options); }
+                    else if ( name.Equals(nameof(LocalFile.FileEncoding), StringComparison.OrdinalIgnoreCase) ) { encoding                                                                       =   EncodingConverter.Instance.Read(ref reader, typeof(Encoding), options); }
                     else { reader.Skip(); }
                 }
 
@@ -50,7 +50,7 @@ public sealed class LocalFileJsonConverter : JsonConverter<LocalFile>
     public override void Write( Utf8JsonWriter writer, LocalFile value, JsonSerializerOptions options )
     {
         writer.WriteStartObject();
-        writer.WriteString(nameof(LocalFile.FullPath), value.FullPath);
+        writer.WriteString(nameof(LocalFile.FullPath),     value.FullPath);
         writer.WriteString(nameof(LocalFile.FileEncoding), value.FileEncoding.WebName);
         writer.WriteEndObject();
     }

@@ -33,22 +33,20 @@ public sealed partial class Invoice : IEquatable<Invoice>
     public string  Id    { get; init; } = "";
     public decimal Total { get; init; }
 
-    public bool          Equals( Invoice? other ) => other is not null && Id == other.Id && Total == other.Total;
+    public          bool Equals( Invoice? other ) => other is not null    && Id == other.Id && Total == other.Total;
     public override bool Equals( object?  obj )   => obj is Invoice other && Equals(other);
     public override int  GetHashCode()            => HashCode.Combine(Id, Total);
 }
 
 
 
-[JsonModel(typeof(TestJsonContext), GenerateToString = true)]
-public readonly partial record struct Point( int X, int Y );
+[JsonModel(typeof(TestJsonContext), GenerateToString = true)] public readonly partial record struct Point( int X, int Y );
 
 
 
 public static partial class Outer
 {
-    [JsonModel(typeof(TestJsonContext))]
-    public sealed partial record Note( string Text );
+    [JsonModel(typeof(TestJsonContext))] public sealed partial record Note( string Text );
 }
 
 
@@ -57,7 +55,7 @@ public static partial class Outer
 [JsonModel(typeof(TestJsonContext))]
 public sealed partial class Bag : IJsonModel
 {
-    public                        string      Name           { get; set; } = "";
+    public                     string                                            Name           { get; set; } = "";
     [JsonExtensionData] public Dictionary<string, System.Text.Json.JsonElement>? AdditionalData { get; set; }
 }
 
@@ -82,8 +80,8 @@ public readonly record struct Code( int Value ) : ISpanParsable<Code>, ISpanForm
         return ok;
     }
 
-    public string ToString( string? format, IFormatProvider? formatProvider ) => $"C-{Value}";
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => destination.TryWrite(CultureInfo.InvariantCulture, $"C-{Value}", out charsWritten);
+    public string ToString( string?     format,      IFormatProvider? formatProvider )                                                     => $"C-{Value}";
+    public bool   TryFormat( Span<char> destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => destination.TryWrite(CultureInfo.InvariantCulture, $"C-{Value}", out charsWritten);
 }
 
 
@@ -95,6 +93,6 @@ public sealed class FilteredList( IEnumerable<int> values, Func<int, bool> filte
 
     public void WriteJsonArray( System.Text.Json.Utf8JsonWriter writer, System.Text.Json.Serialization.Metadata.JsonTypeInfo<int> info ) => JsonModel.WriteArray(writer, _values, info);
 
-    public IEnumerator<int> GetEnumerator() => _values.Where(filter).GetEnumerator();
+    public IEnumerator<int>                                       GetEnumerator() => _values.Where(filter).GetEnumerator();
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 }

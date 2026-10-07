@@ -13,16 +13,14 @@ public class FixedSizedQueue_Tests : Assert
 {
     // ─── Basic state ──────────────────────────────────────────────────────────
 
-    [Test]
-    public void IsEmpty_OnConstruction()
+    [Test] public void IsEmpty_OnConstruction()
     {
         FixedSizedQueue<int> q = new(5);
         this.IsTrue(q.IsEmpty);
         this.AreEqual(0, q.Count);
     }
 
-    [Test]
-    public void Length_MatchesConstructorArgument()
+    [Test] public void Length_MatchesConstructorArgument()
     {
         FixedSizedQueue<int> q = new(10);
         this.AreEqual(10, q.Length);
@@ -31,8 +29,7 @@ public class FixedSizedQueue_Tests : Assert
 
     // ─── Enqueue / Count ──────────────────────────────────────────────────────
 
-    [Test]
-    public void Enqueue_SingleItem_CountIsOne()
+    [Test] public void Enqueue_SingleItem_CountIsOne()
     {
         FixedSizedQueue<int> q = new(5);
         q.Enqueue(42);
@@ -40,8 +37,7 @@ public class FixedSizedQueue_Tests : Assert
         this.IsFalse(q.IsEmpty);
     }
 
-    [Test]
-    public void Enqueue_UpToCapacity_CountEqualsCapacity()
+    [Test] public void Enqueue_UpToCapacity_CountEqualsCapacity()
     {
         FixedSizedQueue<int> q = new(3);
         q.Enqueue(1);
@@ -50,8 +46,7 @@ public class FixedSizedQueue_Tests : Assert
         this.AreEqual(3, q.Count);
     }
 
-    [Test]
-    public void Enqueue_BeyondCapacity_CountDoesNotExceedLength()
+    [Test] public void Enqueue_BeyondCapacity_CountDoesNotExceedLength()
     {
         FixedSizedQueue<int> q = new(3);
         q.Enqueue(1);
@@ -65,8 +60,7 @@ public class FixedSizedQueue_Tests : Assert
 
     // ─── Dequeue ──────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Dequeue_ReturnsAndRemovesItem()
+    [Test] public void Dequeue_ReturnsAndRemovesItem()
     {
         FixedSizedQueue<int> q = new(5);
         q.Enqueue(100);
@@ -75,8 +69,7 @@ public class FixedSizedQueue_Tests : Assert
         this.AreEqual(0,   q.Count);
     }
 
-    [Test]
-    public void Dequeue_AfterManyEnqueues_CountDecreases()
+    [Test] public void Dequeue_AfterManyEnqueues_CountDecreases()
     {
         FixedSizedQueue<int> q = new(5);
         q.Enqueue(1);
@@ -89,24 +82,21 @@ public class FixedSizedQueue_Tests : Assert
 
     // ─── Contains ─────────────────────────────────────────────────────────────
 
-    [Test]
-    public void Contains_ExistingItem_ReturnsTrue()
+    [Test] public void Contains_ExistingItem_ReturnsTrue()
     {
         FixedSizedQueue<string> q = new(5);
         q.Enqueue("hello");
         this.IsTrue(q.Contains("hello"));
     }
 
-    [Test]
-    public void Contains_MissingItem_ReturnsFalse()
+    [Test] public void Contains_MissingItem_ReturnsFalse()
     {
         FixedSizedQueue<string> q = new(5);
         q.Enqueue("hello");
         this.IsFalse(q.Contains("world"));
     }
 
-    [Test]
-    public void Contains_AfterDequeue_ReturnsFalse()
+    [Test] public void Contains_AfterDequeue_ReturnsFalse()
     {
         FixedSizedQueue<string> q = new(5);
         q.Enqueue("hello");
@@ -116,16 +106,14 @@ public class FixedSizedQueue_Tests : Assert
 
     // ─── Async variants ───────────────────────────────────────────────────────
 
-    [Test]
-    public async Task EnqueueAsync_AddsItem()
+    [Test] public async Task EnqueueAsync_AddsItem()
     {
         FixedSizedQueue<int> q = new(5);
         await q.EnqueueAsync(77).ConfigureAwait(false);
         this.AreEqual(1, q.Count);
     }
 
-    [Test]
-    public async Task DequeueAsync_ReturnsItem()
+    [Test] public async Task DequeueAsync_ReturnsItem()
     {
         FixedSizedQueue<int> q = new(5);
         await q.EnqueueAsync(99).ConfigureAwait(false);
@@ -133,8 +121,7 @@ public class FixedSizedQueue_Tests : Assert
         this.AreEqual(99, value);
     }
 
-    [Test]
-    public async Task ContainsAsync_ExistingItem_ReturnsTrue()
+    [Test] public async Task ContainsAsync_ExistingItem_ReturnsTrue()
     {
         FixedSizedQueue<int> q = new(5);
         q.Enqueue(55);
@@ -142,19 +129,17 @@ public class FixedSizedQueue_Tests : Assert
         this.IsTrue(result);
     }
 
-    [Test]
-    public async Task ContainsAsync_MissingItem_ReturnsFalse()
+    [Test] public async Task ContainsAsync_MissingItem_ReturnsFalse()
     {
-        FixedSizedQueue<int> q = new(5);
-        bool result = await q.ContainsAsync(55).ConfigureAwait(false);
+        FixedSizedQueue<int> q      = new(5);
+        bool                 result = await q.ContainsAsync(55).ConfigureAwait(false);
         this.IsFalse(result);
     }
 
 
     // ─── Edge cases ───────────────────────────────────────────────────────────
 
-    [Test]
-    public void Enqueue_CapacityOne_ReplacesOnOverflow()
+    [Test] public void Enqueue_CapacityOne_ReplacesOnOverflow()
     {
         FixedSizedQueue<int> q = new(1);
         q.Enqueue(1);
@@ -162,8 +147,7 @@ public class FixedSizedQueue_Tests : Assert
         this.AreEqual(1, q.Count);
     }
 
-    [Test]
-    public void Enqueue_NullableReferenceType_Accepted()
+    [Test] public void Enqueue_NullableReferenceType_Accepted()
     {
         FixedSizedQueue<string?> q = new(3);
         q.Enqueue(null);

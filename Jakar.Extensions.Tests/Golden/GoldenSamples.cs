@@ -61,24 +61,24 @@ public static class GoldenSamples
     /// <summary> File name → JSON, written with the serializer of the build this is compiled into. </summary>
     public static IEnumerable<(string Name, string Json)> All()
     {
-        yield return ( "AppVersion",          AppVersion().ToJson() );
-        yield return ( "AppInformation",      AppInformation().ToJson() );
-        yield return ( "Pair",                Pair().ToJson() );
-        yield return ( "StringTags",          StringTags().ToJson() );
-        yield return ( "Errors",              Errors().ToJson() );
-        yield return ( "Alert",               Alert().ToJson() );
-        yield return ( "ErrorResponse",       ErrorResponse().ToJson() );
-        yield return ( "FileMetaData",        FileMetaData().ToJson() );
-        yield return ( "LoginRequest",        LoginRequest().ToJson() );
+        yield return ( "AppVersion", AppVersion().ToJson() );
+        yield return ( "AppInformation", AppInformation().ToJson() );
+        yield return ( "Pair", Pair().ToJson() );
+        yield return ( "StringTags", StringTags().ToJson() );
+        yield return ( "Errors", Errors().ToJson() );
+        yield return ( "Alert", Alert().ToJson() );
+        yield return ( "ErrorResponse", ErrorResponse().ToJson() );
+        yield return ( "FileMetaData", FileMetaData().ToJson() );
+        yield return ( "LoginRequest", LoginRequest().ToJson() );
         yield return ( "LoginRequestVersion", LoginRequestVersion().ToJson() );
-        yield return ( "UserAddress",         Address().ToJson() );
-        yield return ( "GroupModel",          Group().ToJson() );
-        yield return ( "RoleModel",           Role().ToJson() );
-        yield return ( "UserModel",           User().ToJson() );
-#if LEGACY
+        yield return ( "UserAddress", Address().ToJson() );
+        yield return ( "GroupModel", Group().ToJson() );
+        yield return ( "RoleModel", Role().ToJson() );
+        yield return ( "UserModel", User().ToJson() );
+    #if LEGACY
         yield return ( "Error", Error().ToJson() );
-#else
+    #else
         yield return ( "Error", Json.Serialize(Error()) );
-#endif
+    #endif
     }
 }

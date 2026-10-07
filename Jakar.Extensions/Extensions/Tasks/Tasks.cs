@@ -101,7 +101,7 @@ public static partial class Tasks
 
         public async IAsyncEnumerable<TResult> WheneverAny( [EnumeratorCancellation] CancellationToken token = default )
         {
-            List<Task<TResult>> list = [..self];
+            List<Task<TResult>> list = [.. self];
 
             while ( token.ShouldContinue() && list.Count > 0 )
             {
@@ -140,8 +140,8 @@ public static partial class Tasks
         ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
         /// </summary>
         /// <exception cref="AggregateException"> </exception>
-        public async ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
+        public async                                              ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task      WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
     }
 
 

@@ -24,12 +24,16 @@
 		<ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
 		<!-- A ProjectReference doesn't carry package analyzers; consumers of the Jakar.SystemTextJson package get the generator automatically. -->
 		<ProjectReference Include="..\Jakar.SystemTextJson.Generator\Jakar.SystemTextJson.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\Jakar.Json\Jakar.Json.csproj" />
+		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<!-- RootLibraries=true (default): analyze the whole libraries, not just what Main touches. RootLibraries=false: trim from Main, like a real app. -->
 	<ItemGroup Condition="'$(RootLibraries)' != 'false'">
 		<TrimmerRootAssembly Include="Jakar.SystemTextJson" />
 		<TrimmerRootAssembly Include="Jakar.Extensions" />
+		<TrimmerRootAssembly Include="Jakar.Json" />
+		<TrimmerRootAssembly Include="Jakar.Spans" />
 		<!-- ILCompiler 10.0.12 crashes ("VTable of type IEquatable<ObservableCollection<string>> not computed by the IL scanner") once
 		     StringCollectionProperty<TCommand> is rooted; the same happens on Jakar.Extensions 10.x, so it isn't caused by the STJ migration.
 		     Disabling the IL scanner (ILC noscan) is the workaround the compiler suggests (the scanner is an optimization pass). Apps that use StringCollectionProperty need it too. -->

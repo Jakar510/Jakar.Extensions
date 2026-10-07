@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+
 namespace Jakar.Extensions.Tests;
 
 
@@ -15,17 +17,15 @@ public class Command_Tests : Assert
     private static readonly object __sender = new();
 
 
-    [Test]
-    public async Task Action_Invoked()
+    [Test] public async Task Action_Invoked()
     {
-        int                          calls      = 0;
-        Command<int>.Executable      executable = new Action(() => calls++);
+        int                     calls      = 0;
+        Command<int>.Executable executable = new Action(() => calls++);
         await executable.Execute(__sender, 5);
         this.AreEqual(1, calls);
     }
 
-    [Test]
-    public async Task ValueAction_ReceivesParameter()
+    [Test] public async Task ValueAction_ReceivesParameter()
     {
         int                     received   = 0;
         Command<int>.Executable executable = new Action<int>(x => received = x);
@@ -33,34 +33,36 @@ public class Command_Tests : Assert
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public async Task EventHandler_ReceivesSenderAndEmptyArgs()
+    [Test] public async Task EventHandler_ReceivesSenderAndEmptyArgs()
     {
         object?                 sender     = null;
         EventArgs?              args       = null;
-        Command<int>.Executable executable = new EventHandler(( s, e ) => (sender, args) = (s, e));
+        Command<int>.Executable executable = new EventHandler(( s, e ) => ( sender, args ) = ( s, e ));
         await executable.Execute(__sender, 5);
         Assert.AreSame(__sender,        sender);
         Assert.AreSame(EventArgs.Empty, args);
     }
 
-    [Test]
-    public async Task ValueEventHandler_ReceivesSenderAndParameter()
+    [Test] public async Task ValueEventHandler_ReceivesSenderAndParameter()
     {
         object?                 sender     = null;
         int                     received   = 0;
-        Command<int>.Executable executable = new EventHandler<int>(( s, e ) => (sender, received) = (s, e));
+        Command<int>.Executable executable = new EventHandler<int>(( s, e ) => ( sender, received ) = ( s, e ));
         await executable.Execute(__sender, 5);
         Assert.AreSame(__sender, sender);
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public async Task TaskHandler_IsAwaited()
+    [Test] public async Task TaskHandler_IsAwaited()
     {
-        TaskCompletionSource    tcs        = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        int                     received   = 0;
-        Command<int>.Executable executable = new Func<int, Task>(x => { received = x; return tcs.Task; });
+        TaskCompletionSource tcs      = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        int                  received = 0;
+
+        Command<int>.Executable executable = new Func<int, Task>(x =>
+                                                                 {
+                                                                     received = x;
+                                                                     return tcs.Task;
+                                                                 });
 
         ValueTask pending = executable.Execute(__sender, 5);
         this.AreEqual(5, received);
@@ -71,8 +73,7 @@ public class Command_Tests : Assert
         this.IsTrue(pending.IsCompletedSuccessfully);
     }
 
-    [Test]
-    public async Task TaskHandler_PropagatesException()
+    [Test] public async Task TaskHandler_PropagatesException()
     {
         Command<int>.Executable executable = new Func<int, Task>(static _ => Task.FromException(new InvalidOperationException("boom")));
         bool                    thrown     = false;
@@ -83,60 +84,71 @@ public class Command_Tests : Assert
         this.IsTrue(thrown);
     }
 
-    [Test]
-    public async Task ValueTaskHandler_ReceivesParameter()
+    [Test] public async Task ValueTaskHandler_ReceivesParameter()
     {
-        int                     received   = 0;
-        Command<int>.Executable executable = new Func<int, ValueTask>(x => { received = x; return ValueTask.CompletedTask; });
+        int received = 0;
+
+        Command<int>.Executable executable = new Func<int, ValueTask>(x =>
+                                                                      {
+                                                                          received = x;
+                                                                          return ValueTask.CompletedTask;
+                                                                      });
+
         await executable.Execute(__sender, 5);
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public async Task SenderTaskHandler_ReceivesSenderAndParameter()
+    [Test] public async Task SenderTaskHandler_ReceivesSenderAndParameter()
     {
-        object?                 sender     = null;
-        int                     received   = 0;
-        Command<int>.Executable executable = new Func<object?, int, Task>(( s, x ) => { (sender, received) = (s, x); return Task.CompletedTask; });
+        object? sender   = null;
+        int     received = 0;
+
+        Command<int>.Executable executable = new Func<object?, int, Task>(( s, x ) =>
+                                                                          {
+                                                                              ( sender, received ) = ( s, x );
+                                                                              return Task.CompletedTask;
+                                                                          });
+
         await executable.Execute(__sender, 5);
         Assert.AreSame(__sender, sender);
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public async Task SenderValueTaskHandler_ReceivesSenderAndParameter()
+    [Test] public async Task SenderValueTaskHandler_ReceivesSenderAndParameter()
     {
-        object?                 sender     = null;
-        int                     received   = 0;
-        Command<int>.Executable executable = new Func<object?, int, ValueTask>(( s, x ) => { (sender, received) = (s, x); return ValueTask.CompletedTask; });
+        object? sender   = null;
+        int     received = 0;
+
+        Command<int>.Executable executable = new Func<object?, int, ValueTask>(( s, x ) =>
+                                                                               {
+                                                                                   ( sender, received ) = ( s, x );
+                                                                                   return ValueTask.CompletedTask;
+                                                                               });
+
         await executable.Execute(__sender, 5);
         Assert.AreSame(__sender, sender);
         this.AreEqual(5, received);
     }
 
-    [Test]
-    public void Default_IsNoOp()
+    [Test] public void Default_IsNoOp()
     {
         Command<int>.Executable executable = default;
         this.IsTrue(executable.Execute(__sender, 5).IsCompletedSuccessfully);
     }
 
-    [Test]
-    public void NullHandler_IsNoOp()
+    [Test] public void NullHandler_IsNoOp()
     {
         Command<int>.Executable executable = (Func<int, ValueTask>)null!;
         this.IsTrue(executable.Execute(__sender, 5).IsCompletedSuccessfully);
     }
 
-    [Test]
-    public void SynchronousHandler_CompletesSynchronously()
+    [Test] public void SynchronousHandler_CompletesSynchronously()
     {
         Command<int>.Executable executable = new Action(static () => { });
         this.IsTrue(executable.Execute(__sender, 5).IsCompletedSuccessfully);
     }
 
-    [Test]
-    public void Equality_ComparesHandlerAndKind()
+    [Test] public void Equality_ComparesHandlerAndKind()
     {
         Action                  action = static () => { };
         Command<int>.Executable a      = action;
@@ -146,8 +158,7 @@ public class Command_Tests : Assert
 
     // ─── Cancellable handler shapes ──────────────────────────────────────────
 
-    [Test]
-    public async Task CancellableHandlers_ReceiveToken()
+    [Test] public async Task CancellableHandlers_ReceiveToken()
     {
         using CancellationTokenSource cts      = new();
         CancellationToken             expected = cts.Token;
@@ -155,10 +166,28 @@ public class Command_Tests : Assert
 
         Command<int>.Executable[] executables =
         [
-            new Func<int, CancellationToken, Task>(( x, ct ) => { check(x, ct); return Task.CompletedTask; }),
-            new Func<int, CancellationToken, ValueTask>(( x, ct ) => { check(x, ct); return ValueTask.CompletedTask; }),
-            new Func<object?, int, CancellationToken, Task>(( s, x, ct ) => { Assert.AreSame(__sender, s); check(x, ct); return Task.CompletedTask; }),
-            new Func<object?, int, CancellationToken, ValueTask>(( s, x, ct ) => { Assert.AreSame(__sender, s); check(x, ct); return ValueTask.CompletedTask; })
+            new Func<int, CancellationToken, Task>(( x, ct ) =>
+                                                   {
+                                                       check(x, ct);
+                                                       return Task.CompletedTask;
+                                                   }),
+            new Func<int, CancellationToken, ValueTask>(( x, ct ) =>
+                                                        {
+                                                            check(x, ct);
+                                                            return ValueTask.CompletedTask;
+                                                        }),
+            new Func<object?, int, CancellationToken, Task>(( s, x, ct ) =>
+                                                            {
+                                                                Assert.AreSame(__sender, s);
+                                                                check(x, ct);
+                                                                return Task.CompletedTask;
+                                                            }),
+            new Func<object?, int, CancellationToken, ValueTask>(( s, x, ct ) =>
+                                                                 {
+                                                                     Assert.AreSame(__sender, s);
+                                                                     check(x, ct);
+                                                                     return ValueTask.CompletedTask;
+                                                                 })
         ];
 
         foreach ( Command<int>.Executable executable in executables ) { await executable.Execute(__sender, 5, expected); }
@@ -168,14 +197,13 @@ public class Command_Tests : Assert
 
         void check( int x, CancellationToken ct )
         {
-            this.AreEqual(5, x);
+            this.AreEqual(5,        x);
             this.AreEqual(expected, ct);
             calls++;
         }
     }
 
-    [Test]
-    public void Executable_PreCancelledToken_DoesNotInvoke()
+    [Test] public void Executable_PreCancelledToken_DoesNotInvoke()
     {
         bool                    invoked    = false;
         Command<int>.Executable executable = new Action(() => invoked = true);
@@ -185,7 +213,6 @@ public class Command_Tests : Assert
         this.IsTrue(result.IsCanceled);
         this.IsFalse(invoked);
     }
-
 
 
     // ─── Command: one execution at a time, newest cancels the rest ───────────
@@ -203,8 +230,7 @@ public class Command_Tests : Assert
                                                        }
                                                    }));
 
-    [Test]
-    public async Task Command_Execute_RunsHandler()
+    [Test] public async Task Command_Execute_RunsHandler()
     {
         int          received = 0;
         Command<int> command  = new(new Action<int>(x => received = x));
@@ -215,8 +241,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    public async Task Command_NewExecution_CancelsPrevious()
+    [Test] public async Task Command_NewExecution_CancelsPrevious()
     {
         List<int> completed = [];
         bool      cancelled = false;
@@ -245,8 +270,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    public async Task Command_NewExecution_WaitsForPreviousThatIgnoresCancellation()
+    [Test] public async Task Command_NewExecution_WaitsForPreviousThatIgnoresCancellation()
     {
         TaskCompletionSource gate    = new(TaskCreationOptions.RunContinuationsAsynchronously);
         int                  running = 0, maxRunning = 0;
@@ -276,12 +300,11 @@ public class Command_Tests : Assert
         await Task.WhenAll(first, second).WaitAsync(__timeout);
 
         this.AreEqual(new[] { 1, 2 }, started.ToArray());
-        this.AreEqual(1, maxRunning);
+        this.AreEqual(1,              maxRunning);
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    public async Task Command_SupersededWhileWaiting_NeverRuns_AndLatestStillWaitsForOldest()
+    [Test] public async Task Command_SupersededWhileWaiting_NeverRuns_AndLatestStillWaitsForOldest()
     {
         TaskCompletionSource gate    = new(TaskCreationOptions.RunContinuationsAsynchronously);
         List<int>            started = [];
@@ -307,8 +330,7 @@ public class Command_Tests : Assert
         this.AreEqual(new[] { 1, 3 }, started.ToArray());
     }
 
-    [Test]
-    public async Task Command_Cancel_CancelsCurrent()
+    [Test] public async Task Command_Cancel_CancelsCurrent()
     {
         bool         cancelled = false;
         Command<int> command   = WaitsForCancellation(_ => cancelled = true);
@@ -321,8 +343,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    public async Task Command_Cancel_AfterCompletion_IsNoOp()
+    [Test] public async Task Command_Cancel_AfterCompletion_IsNoOp()
     {
         Command<int> command = new(new Action<int>(static _ => { }));
         await command.Execute(1);
@@ -333,8 +354,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    public async Task Command_Dispose_CancelsCurrent()
+    [Test] public async Task Command_Dispose_CancelsCurrent()
     {
         bool         cancelled = false;
         Command<int> command   = WaitsForCancellation(_ => cancelled = true);
@@ -346,8 +366,7 @@ public class Command_Tests : Assert
         this.IsTrue(cancelled);
     }
 
-    [Test]
-    public async Task Command_CallerToken_CancelsExecution()
+    [Test] public async Task Command_CallerToken_CancelsExecution()
     {
         using CancellationTokenSource cts       = new();
         bool                          cancelled = false;
@@ -360,10 +379,10 @@ public class Command_Tests : Assert
         this.IsTrue(cancelled);
     }
 
-    [Test]
-    public async Task Command_HandlerException_IsNotThrown_AndNextExecutionRuns()
+    [Test] public async Task Command_HandlerException_IsNotThrown_AndNextExecutionRuns()
     {
         int received = 0;
+
         Command<int> command = new(new Func<int, Task>(x => x == 1
                                                                 ? Task.FromException(new InvalidOperationException("boom"))
                                                                 : Task.FromResult(received = x)));
@@ -375,9 +394,7 @@ public class Command_Tests : Assert
         this.IsFalse(command.IsExecuting);
     }
 
-    [Test]
-    [Repeat(20)]
-    public async Task Command_ConcurrentCallers_NeverOverlap_AndLastOneRuns()
+    [Test] [Repeat(20)] public async Task Command_ConcurrentCallers_NeverOverlap_AndLastOneRuns()
     {
         const int CALLERS = 64;
         int       running = 0, maxRunning = 0, finished = 0;
@@ -425,6 +442,7 @@ public class Command_Tests : Assert
         static void interlockedMax( ref int target, int value )
         {
             int current;
+
             do { current = Volatile.Read(ref target); }
             while ( value > current && Interlocked.CompareExchange(ref target, value, current) != current );
         }

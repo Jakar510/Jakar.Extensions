@@ -55,6 +55,7 @@ public abstract partial class ObservableHashSet<TSelf, TValue>( HashSet<TValue> 
     public virtual bool IsSupersetOf( IEnumerable<TValue>       other ) => buffer.IsSupersetOf(other);
     public virtual bool Overlaps( IEnumerable<TValue>           other ) => buffer.Overlaps(other);
     public virtual bool SetEquals( IEnumerable<TValue>          other ) => buffer.SetEquals(other);
+
     // Except/Intersect/Union only change the set when they change its count, so unchanged sets raise nothing.
     public virtual void ExceptWith( IEnumerable<TValue> other )
     {

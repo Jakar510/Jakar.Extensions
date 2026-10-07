@@ -20,7 +20,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IRea
     private readonly T[]? _array;
 
 
-    public EquatableArray( T[] array ) => _array = array;
+    public EquatableArray( T[]            array ) => _array = array;
     public EquatableArray( IEnumerable<T> values ) => _array = [.. values];
 
 
@@ -48,7 +48,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IRea
     {
         int hash = 17;
 
-        foreach ( T value in _array ?? [] ) { hash = unchecked(hash * 31 + value.GetHashCode()); }
+        foreach ( T value in _array ?? [] ) { hash = unchecked (hash * 31 + value.GetHashCode()); }
 
         return hash;
     }

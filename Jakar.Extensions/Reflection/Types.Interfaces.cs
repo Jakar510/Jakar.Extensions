@@ -28,7 +28,7 @@ public static partial class Types
             foreach ( Type t in interfaces )
             {
                 if ( t == interfaceType ) { return true; }
-                
+
                 if ( t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType ) { return true; }
             }
 

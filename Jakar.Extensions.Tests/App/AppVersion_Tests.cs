@@ -230,7 +230,7 @@ public class AppVersion_Tests : Assert
         this.IsTrue(converter.CanConvertFrom(typeof(string)));
         this.IsTrue(converter.CanConvertTo(typeof(string)));
 
-        AppVersion expected = new(1, 2, 3);
+        AppVersion  expected = new(1, 2, 3);
         AppVersion? version  = converter.ConvertFrom("1.2.3") as AppVersion;
         this.NotNull(version);
         this.AreEqual(expected.ToString(), version!.ToString());

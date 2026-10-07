@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<!-- Jakar.Json, not Jakar.Extensions: Jakar.Extensions already has Json, IJsonModel<T> and [JsonModel] (SPEC.md §2). -->
+		<RootNamespace>Jakar.Json</RootNamespace>
+		<AssemblyName>Jakar.Json</AssemblyName>
+		<Version>1.0.0</Version>
+		<Title>Jakar.Json</Title>
+		<PackageId>Jakar.Json</PackageId>
+		<Authors>Tyler Stegmaier</Authors>
+		<Description>A reflection-free, allocation-free JSON serializer: [GenerateJson] source-generates idempotent readers and writers (UTF-16 and UTF-8) that implement ISpanFormattable / ISpanParsable, plus a zero-allocation JSON tape and a Newtonsoft-style DOM.</Description>
+		<PackageTags>json source-generator aot trimming zero-allocation utf8 ndjson</PackageTags>
+		<PackageReleaseNotes>1.0.0: initial release.</PackageReleaseNotes>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<WarningsAsErrors>Nullable;IL2026;IL2046;IL2057;IL2067;IL2070;IL2072;IL2075;IL2087;IL2091;IL2111;IL3050;IL3051</WarningsAsErrors>
+		<IsAotCompatible>true</IsAotCompatible>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Jakar.Spans\Jakar.Spans.csproj" />
+	</ItemGroup>
+
+	<!-- The generator, analyzers and code fixes ship inside this package (analyzers/dotnet/cs). -->
+	<ItemGroup>
+		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+		<ProjectReference Include="..\Jakar.Json.Generator.CodeFixes\Jakar.Json.Generator.CodeFixes.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Json.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\Jakar.Json.Generator\bin\$(Configuration)\netstandard2.0\Jakar.Json.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\Jakar.Json.Generator.CodeFixes\bin\$(Configuration)\netstandard2.0\Jakar.Json.Generator.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\images\icon.png" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+</Project>

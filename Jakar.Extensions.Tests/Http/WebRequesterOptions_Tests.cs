@@ -23,21 +23,20 @@ public class WebRequesterOptions_Tests : Assert
     private static IConfiguration Configuration( Dictionary<string, string?> values ) => new ConfigurationBuilder().AddInMemoryCollection(values).Build();
 
 
-    [Test]
-    public void BindsFromConfiguration()
+    [Test] public void BindsFromConfiguration()
     {
         IConfiguration configuration = Configuration(new Dictionary<string, string?>
                                                      {
-                                                         ["WebRequester:BaseAddress"]                = "https://api.example.test/v2/",
-                                                         ["WebRequester:Timeout"]                    = "00:00:30",
-                                                         ["WebRequester:ConnectTimeout"]             = "00:00:05",
-                                                         ["WebRequester:PooledConnectionLifetime"]   = "00:02:00",
-                                                         ["WebRequester:MaxConnectionsPerServer"]    = "16",
-                                                         ["WebRequester:MaxAutomaticRedirections"]   = "0",
-                                                         ["WebRequester:AutomaticDecompression"]     = "GZip, Brotli",
-                                                         ["WebRequester:Encoding"]                   = "utf-16",
-                                                         ["WebRequester:Retry:MaxRetries"]           = "5",
-                                                         ["WebRequester:Retry:Delay"]                = "00:00:01",
+                                                         ["WebRequester:BaseAddress"]                  = "https://api.example.test/v2/",
+                                                         ["WebRequester:Timeout"]                      = "00:00:30",
+                                                         ["WebRequester:ConnectTimeout"]               = "00:00:05",
+                                                         ["WebRequester:PooledConnectionLifetime"]     = "00:02:00",
+                                                         ["WebRequester:MaxConnectionsPerServer"]      = "16",
+                                                         ["WebRequester:MaxAutomaticRedirections"]     = "0",
+                                                         ["WebRequester:AutomaticDecompression"]       = "GZip, Brotli",
+                                                         ["WebRequester:Encoding"]                     = "utf-16",
+                                                         ["WebRequester:Retry:MaxRetries"]             = "5",
+                                                         ["WebRequester:Retry:Delay"]                  = "00:00:01",
                                                          ["WebRequester:DefaultHeaders:X-Api-Version"] = "2"
                                                      });
 
@@ -47,19 +46,18 @@ public class WebRequesterOptions_Tests : Assert
 
         WebRequesterOptions options = provider.GetRequiredService<IOptions<WebRequesterOptions>>().Value;
 
-        this.AreEqual(new Uri("https://api.example.test/v2/"),               options.BaseAddress);
-        this.AreEqual(TimeSpan.FromSeconds(30),                              options.Timeout);
-        this.AreEqual(16,                                                    options.MaxConnectionsPerServer);
+        this.AreEqual(new Uri("https://api.example.test/v2/"),                 options.BaseAddress);
+        this.AreEqual(TimeSpan.FromSeconds(30),                                options.Timeout);
+        this.AreEqual(16,                                                      options.MaxConnectionsPerServer);
         this.AreEqual(DecompressionMethods.GZip | DecompressionMethods.Brotli, options.AutomaticDecompression);
-        this.AreEqual(Encoding.Unicode.WebName,                              options.GetEncoding().WebName);
-        this.AreEqual((ushort)5,                                             options.Retry!.MaxRetries);
-        this.AreEqual(TimeSpan.FromSeconds(1),                               options.Retry.Delay);
-        this.AreEqual(WebRequester.RetryPolicy.Default.Scale,                options.Retry.Scale); // unset keeps the default
-        this.AreEqual("2",                                                   options.DefaultHeaders["x-api-version"]);
+        this.AreEqual(Encoding.Unicode.WebName,                                options.GetEncoding().WebName);
+        this.AreEqual((ushort)5,                                               options.Retry!.MaxRetries);
+        this.AreEqual(TimeSpan.FromSeconds(1),                                 options.Retry.Delay);
+        this.AreEqual(WebRequester.RetryPolicy.Default.Scale,                  options.Retry.Scale); // unset keeps the default
+        this.AreEqual("2",                                                     options.DefaultHeaders["x-api-version"]);
     }
 
-    [Test]
-    public void RequesterFromDi_AppliesTheOptions()
+    [Test] public void RequesterFromDi_AppliesTheOptions()
     {
         ServiceCollection services = new();
 
@@ -89,8 +87,7 @@ public class WebRequesterOptions_Tests : Assert
         this.AreEqual("secret",                  string.Join(",", requester.DefaultRequestHeaders.GetValues("X-Key")));
     }
 
-    [Test]
-    public void Defaults_WhenNothingIsConfigured()
+    [Test] public void Defaults_WhenNothingIsConfigured()
     {
         ServiceCollection services = new();
         services.AddSingleton<IHostInfo>(new WebRequester.Builder.HostHolder(new Uri("https://host.test/")));
@@ -101,21 +98,22 @@ public class WebRequesterOptions_Tests : Assert
         SocketsHttpHandler    handler   = HandlerOf(requester.Client);
 
         this.IsNull(requester.Retries); // no retries unless WebRequesterOptions.Retry is set
-        this.AreEqual(DecompressionMethods.All,                              handler.AutomaticDecompression);
+        this.AreEqual(DecompressionMethods.All,                             handler.AutomaticDecompression);
         this.AreEqual(WebRequester.Builder.DefaultPooledConnectionLifetime, handler.PooledConnectionLifetime);
-        this.AreEqual(Encoding.Default.WebName,                              requester.Encoding.WebName);
+        this.AreEqual(Encoding.Default.WebName,                             requester.Encoding.WebName);
     }
 
-    [Test]
-    public void NamedRequesters_AreKeyedSingletons_WithTheirOwnOptions()
+    [Test] public void NamedRequesters_AreKeyedSingletons_WithTheirOwnOptions()
     {
         ServiceCollection services = new();
         services.AddWebRequester("github", static o => o.BaseAddress = new Uri("https://api.github.test/"));
-        services.AddWebRequester("billing", static o =>
-                                            {
-                                                o.BaseAddress = new Uri("https://billing.test/");
-                                                o.Timeout     = TimeSpan.FromSeconds(3);
-                                            });
+
+        services.AddWebRequester("billing",
+                                 static o =>
+                                 {
+                                     o.BaseAddress = new Uri("https://billing.test/");
+                                     o.Timeout     = TimeSpan.FromSeconds(3);
+                                 });
 
         using ServiceProvider provider = services.BuildServiceProvider();
         WebRequester          github   = provider.GetRequiredKeyedService<WebRequester>("github");
@@ -128,8 +126,7 @@ public class WebRequesterOptions_Tests : Assert
         this.IsNull(provider.GetService<WebRequester>()); // no default requester was registered
     }
 
-    [Test]
-    public void BaseAddress_FallsBackToTheRegisteredHostInfo()
+    [Test] public void BaseAddress_FallsBackToTheRegisteredHostInfo()
     {
         ServiceCollection services = new();
         services.AddSingleton<IHostInfo>(new WebRequester.Builder.HostHolder(new Uri("https://fallback.test/")));
@@ -139,10 +136,7 @@ public class WebRequesterOptions_Tests : Assert
         this.AreEqual(new Uri("https://fallback.test/"), provider.GetRequiredService<WebRequester>().Host.HostInfo);
     }
 
-    [TestCase("BaseAddress",             "relative/path")]
-    [TestCase("Timeout",                 "-00:00:01")]
-    [TestCase("MaxConnectionsPerServer", "0")]
-    [TestCase("Encoding",                "not-a-real-encoding")]
+    [TestCase("BaseAddress", "relative/path")] [TestCase("Timeout", "-00:00:01")] [TestCase("MaxConnectionsPerServer", "0")] [TestCase("Encoding", "not-a-real-encoding")]
     public void InvalidOptions_FailValidation( string key, string value )
     {
         ServiceCollection services = new();
@@ -153,8 +147,7 @@ public class WebRequesterOptions_Tests : Assert
         Throws<OptionsValidationException>(() => provider.GetRequiredService<WebRequester>());
     }
 
-    [Test]
-    public void ConfigureBuilder_RunsLast_ForCodeOnlySettings()
+    [Test] public void ConfigureBuilder_RunsLast_ForCodeOnlySettings()
     {
         ServiceCollection services = new();
 
@@ -172,15 +165,15 @@ public class WebRequesterOptions_Tests : Assert
         this.AreEqual("yes",                    string.Join(",", requester.DefaultRequestHeaders.GetValues("X-From-Code")));
     }
 
-    [Test]
-    public async Task ConfiguredRequester_SendsItsDefaultHeaders()
+    [Test] public async Task ConfiguredRequester_SendsItsDefaultHeaders()
     {
         await using LoopbackServer server = new(static ( _, _ ) => LoopbackServer.Response.Of(200, "ok"));
 
         ServiceCollection services = new();
+
         services.AddWebRequester(o =>
                                  {
-                                     o.BaseAddress                       = server.Url;
+                                     o.BaseAddress                     = server.Url;
                                      o.DefaultHeaders["X-Api-Version"] = "2";
                                  });
 
@@ -205,15 +198,14 @@ public class WebRequesterOptions_Tests : Assert
         return ( services.BuildServiceProvider(), configuration );
     }
 
-    [Test]
-    public void ConfigurationChange_ReloadsTheSameRequesterInstance()
+    [Test] public void ConfigurationChange_ReloadsTheSameRequesterInstance()
     {
         ( ServiceProvider provider, IConfigurationRoot configuration ) = Reloadable(new Dictionary<string, string?>
-                                                                                     {
-                                                                                         ["Web:BaseAddress"]             = "https://one.test/",
-                                                                                         ["Web:Timeout"]                 = "00:00:10",
-                                                                                         ["Web:MaxConnectionsPerServer"] = "4"
-                                                                                     });
+                                                                                    {
+                                                                                        ["Web:BaseAddress"]             = "https://one.test/",
+                                                                                        ["Web:Timeout"]                 = "00:00:10",
+                                                                                        ["Web:MaxConnectionsPerServer"] = "4"
+                                                                                    });
 
         using ( provider )
         {
@@ -230,22 +222,21 @@ public class WebRequesterOptions_Tests : Assert
 
             Assert.AreSame(requester, provider.GetRequiredService<WebRequester>()); // same singleton, new configuration
             Assert.AreNotSame(before, requester.Client);
-            this.AreEqual(1,                          reloads);
+            this.AreEqual(1,                            reloads);
             this.AreEqual(new Uri("https://two.test/"), requester.Host.HostInfo);
-            this.AreEqual(TimeSpan.FromSeconds(45),   requester.Timeout);
-            this.AreEqual(9,                          HandlerOf(requester.Client).MaxConnectionsPerServer);
-            this.AreEqual((ushort)2,                  requester.Retries!.Value.MaxRetires);
+            this.AreEqual(TimeSpan.FromSeconds(45),     requester.Timeout);
+            this.AreEqual(9,                            HandlerOf(requester.Client).MaxConnectionsPerServer);
+            this.AreEqual((ushort)2,                    requester.Retries!.Value.MaxRetires);
         }
     }
 
-    [Test]
-    public void InvalidReload_IsIgnored_AndKeepsTheCurrentConfiguration()
+    [Test] public void InvalidReload_IsIgnored_AndKeepsTheCurrentConfiguration()
     {
         ( ServiceProvider provider, IConfigurationRoot configuration ) = Reloadable(new Dictionary<string, string?>
-                                                                                     {
-                                                                                         ["Web:BaseAddress"] = "https://one.test/",
-                                                                                         ["Web:Timeout"]     = "00:00:10"
-                                                                                     });
+                                                                                    {
+                                                                                        ["Web:BaseAddress"] = "https://one.test/",
+                                                                                        ["Web:Timeout"]     = "00:00:10"
+                                                                                    });
 
         using ( provider )
         {
@@ -253,21 +244,21 @@ public class WebRequesterOptions_Tests : Assert
             HttpClient   before    = requester.Client;
 
             configuration["Web:MaxConnectionsPerServer"] = "0"; // invalid
-            DoesNotThrow(configuration.Reload);           // never throws on the configuration thread
+            DoesNotThrow(configuration.Reload);                 // never throws on the configuration thread
 
             Assert.AreSame(before, requester.Client);
             this.AreEqual(TimeSpan.FromSeconds(10), requester.Timeout);
         }
     }
 
-    [Test]
-    public void NamedRequesters_ReloadOnlyForTheirOwnName()
+    [Test] public void NamedRequesters_ReloadOnlyForTheirOwnName()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
                                                                                             {
                                                                                                 ["A:BaseAddress"] = "https://a.test/",
                                                                                                 ["B:BaseAddress"] = "https://b.test/"
-                                                                                            }).Build();
+                                                                                            })
+                                                                     .Build();
 
         ServiceCollection services = new();
         services.AddWebRequester("a", configuration.GetSection("A"));
@@ -286,12 +277,11 @@ public class WebRequesterOptions_Tests : Assert
         Assert.AreNotSame(bClient, b.Client); // the whole configuration reloaded, so b rebuilt too, from its unchanged section
     }
 
-    [Test]
-    public async Task RequestInFlight_DuringReload_CompletesOnTheOldClient()
+    [Test] public async Task RequestInFlight_DuringReload_CompletesOnTheOldClient()
     {
         TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await using LoopbackServer slow = new((_, _) =>
+        await using LoopbackServer slow = new(( _, _ ) =>
                                               {
                                                   release.Task.Wait();
                                                   return LoopbackServer.Response.Of(200, "slow");
@@ -303,8 +293,8 @@ public class WebRequesterOptions_Tests : Assert
 
         using ( provider )
         {
-            WebRequester                  requester = provider.GetRequiredService<WebRequester>();
-            Task<WebResponse<string>>     inFlight  = requester.Get("x").AsString(CancellationToken.None).AsTask();
+            WebRequester              requester = provider.GetRequiredService<WebRequester>();
+            Task<WebResponse<string>> inFlight  = requester.Get("x").AsString(CancellationToken.None).AsTask();
 
             while ( slow.Requests.Count == 0 ) { await Task.Delay(10); }
 
@@ -319,8 +309,7 @@ public class WebRequesterOptions_Tests : Assert
         }
     }
 
-    [Test]
-    public void Dispose_StopsReloading()
+    [Test] public void Dispose_StopsReloading()
     {
         ( ServiceProvider provider, IConfigurationRoot configuration ) = Reloadable(new Dictionary<string, string?> { ["Web:BaseAddress"] = "https://one.test/" });
 

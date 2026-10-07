@@ -243,11 +243,8 @@ public sealed partial class FileMetaData( string? fileName, string? fileType, Mi
     public                             MimeType? MimeType        { get; init; } = mimeType;
 
 
-    public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)
-    {
-        AdditionalData = Json.Merge(null, value.AdditionalData);
-    }
-    public FileMetaData( LocalFile value ) : this(value.Name, value.ContentType, value.Mime) { }
+    public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription) { AdditionalData = Json.Merge(null, value.AdditionalData); }
+    public FileMetaData( LocalFile     value ) : this(value.Name, value.ContentType, value.Mime) { }
 
 
     public static FileMetaData Create( IFileMetaData data )                                                                            => new(data);

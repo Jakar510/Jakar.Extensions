@@ -132,10 +132,10 @@ public static class UriExtensions
     {
         text = value switch
                {
-                   null              => null,
-                   string s          => s,
-                   IFormattable f    => f.ToString(null, CultureInfo.InvariantCulture),
-                   _                 => value.ToString()
+                   null           => null,
+                   string s       => s,
+                   IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
+                   _              => value.ToString()
                };
 
         // Skip blanks and objects without a meaningful ToString (which returns the type name).

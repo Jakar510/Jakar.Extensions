@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<!-- Types stay in the Jakar.Extensions namespace, as every package split out of Jakar.Extensions does (MigrationPlan.md); Jakar.Extensions forwards them here. -->
+		<RootNamespace>Jakar.Extensions</RootNamespace>
+		<AssemblyName>Jakar.Spans</AssemblyName>
+		<Version>1.0.0</Version>
+		<Title>Jakar.Spans</Title>
+		<PackageId>Jakar.Spans</PackageId>
+		<Authors>Tyler Stegmaier</Authors>
+		<Description>Dependency-free, allocation-free span primitives: ValueStringBuilder (UTF-16), ValueUtf8Builder (UTF-8) and ValueSpanReader&lt;T&gt;.</Description>
+		<PackageTags>span stackalloc ValueStringBuilder utf8 zero-allocation aot</PackageTags>
+		<PackageReleaseNotes>1.0.0: initial release. ValueStringBuilder and Sizes moved out of Jakar.Extensions 11.0 (type-forwarded, so existing binaries keep working); new ValueUtf8Builder and ValueSpanReader&lt;T&gt;.</PackageReleaseNotes>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<WarningsAsErrors>Nullable;IL2026;IL2046;IL2057;IL2067;IL2070;IL2072;IL2075;IL2087;IL2091;IL2111;IL3050;IL3051</WarningsAsErrors>
+		<IsAotCompatible>true</IsAotCompatible>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<DefineConstants>$(DefineConstants);JETBRAINS_ANNOTATIONS</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Extensions.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\images\icon.png" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+</Project>

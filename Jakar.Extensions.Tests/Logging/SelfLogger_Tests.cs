@@ -20,27 +20,25 @@ public class SelfLogger_Tests : Assert
     [Test] public void DestructureMarkers_AreIgnored() => this.AreEqual("a b",         Body(SelfLogger.Render("{@First} {$Second}",      "a", "b")));
     [Test] public void NumericHoles_UseIndex()         => this.AreEqual("b a",         Body(SelfLogger.Render("{1} {0}",                 "a", "b")));
     [Test] public void Format_IsApplied()              => this.AreEqual("0042",        Body(SelfLogger.Render("{Value:D4}",              42)));
-    [Test] public void Alignment_IsApplied()           => this.AreEqual("   ab|",       Body(SelfLogger.Render("{Value,5}|",              "ab")));
-    [Test] public void LeftAlignment_IsApplied()       => this.AreEqual("ab   |",       Body(SelfLogger.Render("{Value,-5}|",             "ab")));
-    [Test] public void AlignmentAndFormat_AreApplied() => this.AreEqual(" 0042|",       Body(SelfLogger.Render("{Value,5:D4}|",           42)));
+    [Test] public void Alignment_IsApplied()           => this.AreEqual("   ab|",      Body(SelfLogger.Render("{Value,5}|",              "ab")));
+    [Test] public void LeftAlignment_IsApplied()       => this.AreEqual("ab   |",      Body(SelfLogger.Render("{Value,-5}|",             "ab")));
+    [Test] public void AlignmentAndFormat_AreApplied() => this.AreEqual(" 0042|",      Body(SelfLogger.Render("{Value,5:D4}|",           42)));
     [Test] public void Escapes_AreHonoured()           => this.AreEqual("{x} a }",     Body(SelfLogger.Render("{{x}} {Name} }",          "a")));
     [Test] public void MissingArgument_IsLeftAsIs()    => this.AreEqual("a {Missing}", Body(SelfLogger.Render("{Name} {Missing}",        "a")));
     [Test] public void UnclosedHole_IsLiteral()        => this.AreEqual("a {oops",     Body(SelfLogger.Render("{Name} {oops",            "a")));
     [Test] public void NullArgument_RendersEmpty()     => this.AreEqual("[]",          Body(SelfLogger.Render("[{Name}]",                (string?)null)));
     [Test] public void NoArguments_KeepsHoles()        => this.AreEqual("x {Name}",    Body(SelfLogger.Render("x {Name}")));
 
-    [Test]
-    public void EveryArgumentPosition_IsReachable()
+    [Test] public void EveryArgumentPosition_IsReachable()
     {
-        this.AreEqual("1 2 3 4 5",   Body(SelfLogger.Render("{A} {B} {C} {D} {E}", 1, 2, 3, 4, 5)));
-        this.AreEqual("5 4 3 2 1",   Body(SelfLogger.Render("{4} {3} {2} {1} {0}", 1, 2, 3, 4, 5)));
-        this.AreEqual("a b c d",     Body(SelfLogger.Render("{A} {B} {C} {D}",     "a", "b", "c", "d")));
-        this.AreEqual("c b a",       Body(SelfLogger.Render("{2} {1} {0}",         "a", "b", "c")));
-        this.AreEqual("True x 2.5",  Body(SelfLogger.Render("{A} {B} {C}",         true, 'x', 2.5m)));
+        this.AreEqual("1 2 3 4 5",  Body(SelfLogger.Render("{A} {B} {C} {D} {E}", 1,    2,   3,   4, 5)));
+        this.AreEqual("5 4 3 2 1",  Body(SelfLogger.Render("{4} {3} {2} {1} {0}", 1,    2,   3,   4, 5)));
+        this.AreEqual("a b c d",    Body(SelfLogger.Render("{A} {B} {C} {D}",     "a",  "b", "c", "d")));
+        this.AreEqual("c b a",      Body(SelfLogger.Render("{2} {1} {0}",         "a",  "b", "c")));
+        this.AreEqual("True x 2.5", Body(SelfLogger.Render("{A} {B} {C}",         true, 'x', 2.5m)));
     }
 
-    [Test]
-    public void ManyDistinctFormats_BeyondTheCacheLimit_StillRender()
+    [Test] public void ManyDistinctFormats_BeyondTheCacheLimit_StillRender()
     {
         for ( int width = 1; width <= 300; width++ )
         {
@@ -50,8 +48,7 @@ public class SelfLogger_Tests : Assert
         }
     }
 
-    [Test]
-    public void Prefix_IsRoundTripUtcTimestamp()
+    [Test] public void Prefix_IsRoundTripUtcTimestamp()
     {
         string rendered = SelfLogger.Render("x");
         string stamp    = rendered[..rendered.IndexOf(' ')];
@@ -59,8 +56,7 @@ public class SelfLogger_Tests : Assert
         this.AreEqual(DateTimeKind.Utc, parsed.Kind);
     }
 
-    [Test]
-    public void WriteLine_WithNamedHoles_DoesNotThrow()
+    [Test] public void WriteLine_WithNamedHoles_DoesNotThrow()
     {
         string? output = Capture(static () => SelfLogger.WriteLine("{Error} \n {StackTrace}", "message", "trace"));
 
@@ -68,8 +64,7 @@ public class SelfLogger_Tests : Assert
         this.IsTrue(output!.EndsWith("message \n trace", StringComparison.Ordinal));
     }
 
-    [Test]
-    public void FailureListener_MessageWithBraces_DoesNotThrow()
+    [Test] public void FailureListener_MessageWithBraces_DoesNotThrow()
     {
         InvalidOperationException error = new("bad {json}");
 
@@ -80,10 +75,18 @@ public class SelfLogger_Tests : Assert
         this.IsTrue(withoutException!.EndsWith("failed {x} (Kind)", StringComparison.Ordinal));
     }
 
-    [Test]
-    public void FailureListener_WithEvents_ReportsCount()
+    [Test] public void FailureListener_WithEvents_ReportsCount()
     {
-        string? counted = Capture(() => SelfLogger.FailureListener.OnLoggingFailed(this, 3, "failed", new List<int> { 1, 2 }, null));
+        string? counted = Capture(() => SelfLogger.FailureListener.OnLoggingFailed(this,
+                                                                                   3,
+                                                                                   "failed",
+                                                                                   new List<int>
+                                                                                   {
+                                                                                       1,
+                                                                                       2
+                                                                                   },
+                                                                                   null));
+
         string? unknown = Capture(() => SelfLogger.FailureListener.OnLoggingFailed<int, int>(this, 3, "failed", null, new InvalidOperationException("boom")));
 
         this.IsTrue(counted!.EndsWith("failed (3, 2 events)", StringComparison.Ordinal));

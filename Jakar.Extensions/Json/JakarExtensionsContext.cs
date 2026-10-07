@@ -12,15 +12,7 @@ namespace Jakar.Extensions;
 ///     </para>
 ///     <para> <see cref="Json.Options"/> chains this context after any resolvers the app registers with <see cref="Json.AddResolver"/>. The user models have their own contexts (<c> UserGuid.UserGuidJsonContext </c>, <c> UserLong.UserLongJsonContext </c>). </para>
 /// </summary>
-[JsonSourceGenerationOptions(JsonSerializerDefaults.General,
-                             WriteIndented = true,
-                             AllowTrailingCommas = true,
-                             ReadCommentHandling = JsonCommentHandling.Skip,
-                             PropertyNameCaseInsensitive = true,
-                             IncludeFields = true,
-                             NumberHandling = JsonNumberHandling.AllowReadingFromString,
-                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
-                             Converters = [typeof(EncodingConverter)])]
+[JsonSourceGenerationOptions(JsonSerializerDefaults.General, WriteIndented = true, AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip, PropertyNameCaseInsensitive = true, IncludeFields = true, NumberHandling = JsonNumberHandling.AllowReadingFromString, UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode, Converters = [typeof(EncodingConverter)])]
 
 // ─── Built-in shapes ──────────────────────────────────────────────────────────
 [JsonSerializable(typeof(bool))]

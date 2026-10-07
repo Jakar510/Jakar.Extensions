@@ -11,9 +11,9 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Json
 {
-    private static readonly Lock                         __lock      = new();
+    private static readonly Lock                        __lock      = new();
     private static readonly List<IJsonTypeInfoResolver> __resolvers = [];
-    private static          JsonSerializerOptions?       __options;
+    private static          JsonSerializerOptions?      __options;
 
 
     /// <summary>
@@ -56,8 +56,8 @@ public static partial class Json
     /// <summary> Metadata for <typeparamref name="T"/>: a [JsonModel] registration first (<see cref="JsonModelRegistry"/>), then <see cref="Options"/>' resolver chain. Cached per type. </summary>
     /// <exception cref="NotSupportedException"> <typeparamref name="T"/> isn't registered anywhere. </exception>
     public static JsonTypeInfo<T> GetTypeInfo<T>() => TypeInfoCache<T>.Value ??= JsonModelRegistry.TryGet(out JsonTypeInfo<T>? info)
-                                                                                    ? info
-                                                                                    : Options.GetRequiredTypeInfo<T>();
+                                                                                     ? info
+                                                                                     : Options.GetRequiredTypeInfo<T>();
 
 
     /// <summary> Metadata for a runtime <paramref name="type"/> (e.g. the actual type behind a base-class reference): a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. </summary>
@@ -99,13 +99,13 @@ public static partial class Json
     // ─── Serialize ────────────────────────────────────────────────────────────
 
     /// <summary> Serializes with <see cref="GetTypeInfo{T}"/>. For <see cref="IJsonModel{TSelf}"/> types prefer <c> value.ToJson() </c>. </summary>
-    public static string Serialize<T>( T value, bool? indented = null ) => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
-    public static byte[]   SerializeToUtf8Bytes<T>( T value )                                                    => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
-    public static JsonNode? SerializeToNode<T>( T     value )                                                    => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
-    public static JsonElement SerializeToElement<T>( T value )                                                   => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
-    public static string Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented = null ) => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
-    public static string Serialize<T>( IEnumerable<T>         values, bool? indented = null ) => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
-    public static Task SerializeAsync<T>( Stream stream, T value, CancellationToken token = default ) => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
+    public static string      Serialize<T>( T                      value, bool? indented = null ) => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
+    public static byte[]      SerializeToUtf8Bytes<T>( T           value )                                                  => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
+    public static JsonNode?   SerializeToNode<T>( T                value )                                                  => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
+    public static JsonElement SerializeToElement<T>( T             value )                                                  => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
+    public static string      Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented                       = null )    => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static string      Serialize<T>( IEnumerable<T>         values, bool? indented                       = null )    => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static Task        SerializeAsync<T>( Stream            stream, T     value, CancellationToken token = default ) => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
 
 
     public static string ToJson( this JsonNode node, bool indented = true ) => node.ToJsonString(Options.GetIndented(indented));
@@ -135,8 +135,9 @@ public static partial class Json
     }
 
 
-
     // ─── Deserialize ──────────────────────────────────────────────────────────
+
+
 
     extension( string? self )
     {
@@ -200,6 +201,7 @@ public static partial class Json
     }
 
 
+
     /// <summary> A JSON <c> null </c> element (a <see langword="default"/> <see cref="JsonElement"/> is <see cref="JsonValueKind.Undefined"/> and can't be serialized). </summary>
     public static JsonElement NullElement { get; } = JsonDocument.Parse("null").RootElement.Clone();
 
@@ -208,7 +210,11 @@ public static partial class Json
     public static JsonNodeOptions NodeOptions { get; } = new() { PropertyNameCaseInsensitive = true };
 
     /// <summary> Comments and trailing commas allowed, like the serializer options. </summary>
-    public static JsonDocumentOptions DocumentOptions { get; } = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+    public static JsonDocumentOptions DocumentOptions { get; } = new()
+                                                                 {
+                                                                     AllowTrailingCommas = true,
+                                                                     CommentHandling     = JsonCommentHandling.Skip
+                                                                 };
 
 
 

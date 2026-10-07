@@ -62,9 +62,9 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                           set => SetProperty(ref _email,      value); }
-    public                                            TID?    EscalateTo  { get => _escalateTo;                      set => SetProperty(ref _escalateTo, value); }
-    [StringLength(PHONE_EXT)] public                  string? Ext         { get => _ext;                             set => SetProperty(ref _ext,        value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                            set => SetProperty(ref _email,       value); }
+    public                                            TID?    EscalateTo  { get => _escalateTo;                       set => SetProperty(ref _escalateTo,  value); }
+    [StringLength(PHONE_EXT)] public                  string? Ext         { get => _ext;                              set => SetProperty(ref _ext,         value); }
 
     [Required] [StringLength(FIRST_NAME)] public string? FirstName
     {
@@ -79,10 +79,10 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(FULL_NAME)] public string?                           FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public string?                           Gender             { get => _gender;                    set => SetProperty(ref _gender,  value); }
+    [StringLength(GENDER)]    public string?                           Gender             { get => _gender;                     set => SetProperty(ref _gender,   value); }
     public                           ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
     public                           TID                               ID                 { get => _id;                         init => _id = value; }
-    public                           TID?                              ImageID            { get => _imageID;                   set => SetProperty(ref _imageID, value); }
+    public                           TID?                              ImageID            { get => _imageID;                    set => SetProperty(ref _imageID, value); }
     [JsonIgnore] public virtual      bool                              IsValid            => IsValidEmail                      && IsValidName && IsValidUserName;
     [JsonIgnore] public virtual      bool                              IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
     [JsonIgnore] public virtual      bool                              IsValidName        => !string.IsNullOrWhiteSpace(FullName);
@@ -105,8 +105,8 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     [Phone] [StringLength(PHONE)]             public string?                          PhoneNumber         { get => _phoneNumber;       set => SetProperty(ref _phoneNumber,       value); }
     [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => _preferredLanguage; set => SetProperty(ref _preferredLanguage, value); }
     [StringLength(RIGHTS)]                    public UserRights                       Rights              { get => _rights;            set => SetProperty(ref _rights,            value); }
-    public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
-    public                                           DateTimeOffset?                  SubscriptionExpires { get;                        init; }
+    public                                           ObservableCollection<TRoleModel> Roles               { get;                       init; } = [];
+    public                                           DateTimeOffset?                  SubscriptionExpires { get;                       init; }
 
     [StringLength(TITLE)] public string? Title
     {
@@ -284,17 +284,17 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
                _title             == other._title              &&
                _userName          == other._userName           &&
                _website           == other._website            &&
-               _description        == other._description         &&
-               _fullName           == other._fullName            &&
+               _description       == other._description        &&
+               _fullName          == other._fullName           &&
                _preferredLanguage == other._preferredLanguage  &&
                Nullable.Equals(_createdBy,  other._createdBy)  &&
                Nullable.Equals(_escalateTo, other._escalateTo) &&
                Nullable.Equals(_imageID,    other._imageID)    &&
-               Equals(UserID, other.UserID)                      &&
-               Addresses.Equals(other.Addresses)                 &&
-               Groups.Equals(other.Groups)                       &&
-               ID.Equals(other.ID)                               &&
-               Roles.Equals(other.Roles)                         &&
+               Equals(UserID, other.UserID)                    &&
+               Addresses.Equals(other.Addresses)               &&
+               Groups.Equals(other.Groups)                     &&
+               ID.Equals(other.ID)                             &&
+               Roles.Equals(other.Roles)                       &&
                Nullable.Equals(SubscriptionExpires, other.SubscriptionExpires);
     }
     public override int GetHashCode()

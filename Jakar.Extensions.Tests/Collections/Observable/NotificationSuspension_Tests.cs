@@ -150,10 +150,11 @@ public sealed class NotificationSuspension_Tests : Assert
 
         using ( collection.SuspendNotifications() )
         {
-            await Task.WhenAll(Enumerable.Range(0, 8).Select(t => Task.Run(() =>
-                                                                           {
-                                                                               for ( int i = 0; i < 250; i++ ) { collection.Add(t * 1000 + i); }
-                                                                           })));
+            await Task.WhenAll(Enumerable.Range(0, 8)
+                                         .Select(t => Task.Run(() =>
+                                                               {
+                                                                   for ( int i = 0; i < 250; i++ ) { collection.Add(t * 1000 + i); }
+                                                               })));
         }
 
         this.AreEqual(2000, collection.Count);

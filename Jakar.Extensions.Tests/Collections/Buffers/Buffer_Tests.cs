@@ -13,8 +13,7 @@ namespace Jakar.Extensions.Tests;
 [TestOf(typeof(Buffer<>))]
 public class Buffer_Tests : Assert
 {
-    [Test]
-    public void Add_GrowsPastCapacity_KeepingContentAndLength()
+    [Test] public void Add_GrowsPastCapacity_KeepingContentAndLength()
     {
         Buffer<int> buffer = new(2);
 
@@ -22,42 +21,61 @@ public class Buffer_Tests : Assert
         {
             for ( int i = 0; i < 1000; i++ ) { buffer.Add(i); }
 
-            this.AreEqual(1000, buffer.Length);
+            this.AreEqual(1000,                                buffer.Length);
             this.AreEqual(Enumerable.Range(0, 1000).ToArray(), buffer.Values.ToArray());
         }
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void AddSpan_AddCount_AddRange_Grow()
+    [Test] public void AddSpan_AddCount_AddRange_Grow()
     {
         Buffer<int> buffer = new(1);
 
         try
         {
             buffer.Add(1, 2, 3);
-            buffer.Add(9,         3);
-            buffer.AddRange(new List<int> { 4, 5 });
+            buffer.Add(9, 3);
+
+            buffer.AddRange(new List<int>
+                            {
+                                4,
+                                5
+                            });
+
             buffer.AddRange(new HashSet<int> { 6 });
             buffer.AddRange([7]);
             buffer.AddRange(Enumerable.Range(8, 2));
 
-            this.AreEqual(new[] { 1, 2, 3, 9, 9, 9, 4, 5, 6, 7, 8, 9 }, buffer.Values.ToArray());
+            this.AreEqual(new[]
+                          {
+                              1,
+                              2,
+                              3,
+                              9,
+                              9,
+                              9,
+                              4,
+                              5,
+                              6,
+                              7,
+                              8,
+                              9
+                          },
+                          buffer.Values.ToArray());
         }
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void Insert_ShiftsUp_AtStartMiddleAndEnd()
+    [Test] public void Insert_ShiftsUp_AtStartMiddleAndEnd()
     {
         Buffer<char> buffer = new(2);
 
         try
         {
             buffer.Add("ace".AsSpan());
-            buffer.Insert(1, 'b');
-            buffer.Insert(3, "d".AsSpan());
-            buffer.Insert(0, '>', 2);
+            buffer.Insert(1,             'b');
+            buffer.Insert(3,             "d".AsSpan());
+            buffer.Insert(0,             '>', 2);
             buffer.Insert(buffer.Length, '!');
 
             this.AreEqual(">>abcde!", buffer.Values.ToString());
@@ -65,8 +83,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void RemoveAt_IncludingTheLastElement()
+    [Test] public void RemoveAt_IncludingTheLastElement()
     {
         Buffer<string> buffer = new(4);
 
@@ -87,8 +104,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void Trim_RemovesOnlyTheMatchingEnds()
+    [Test] public void Trim_RemovesOnlyTheMatchingEnds()
     {
         Buffer<char> buffer = new("  ab  ".AsSpan());
         buffer.Length = 6;
@@ -113,8 +129,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void Searches_OnAnEmptyBuffer_ReturnNotFound()
+    [Test] public void Searches_OnAnEmptyBuffer_ReturnNotFound()
     {
         Buffer<int> buffer = new(4);
 
@@ -131,8 +146,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void Searches_FindTheRightIndices()
+    [Test] public void Searches_FindTheRightIndices()
     {
         Buffer<char>   chars   = new("abcabc".AsSpan());
         Buffer<int>    ints    = new(5, 6, 7, 5);
@@ -149,9 +163,9 @@ public class Buffer_Tests : Assert
             this.AreEqual(2,  ints.IndexOf(7, 1, 3));
             this.AreEqual(1,  longs.IndexOf(2L));
             this.AreEqual(2,  strings.LastIndexOf("x"));
-            this.AreEqual(2,  ints.FindIndex(static x => x > 6));
+            this.AreEqual(2,  ints.FindIndex(static x => x     > 6));
             this.AreEqual(3,  ints.FindLastIndex(static x => x == 5));
-            this.AreEqual(7,  ints.Find(static x => x > 6));
+            this.AreEqual(7,  ints.Find(static x => x          > 6));
         }
         finally
         {
@@ -162,8 +176,7 @@ public class Buffer_Tests : Assert
         }
     }
 
-    [Test]
-    public void FindAll_IncludesTheEndOfTheRange()
+    [Test] public void FindAll_IncludesTheEndOfTheRange()
     {
         Buffer<int> buffer = new(1, 2, 3, 4);
 
@@ -178,8 +191,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void Dispose_IsIdempotent_AndDefaultIsSafe()
+    [Test] public void Dispose_IsIdempotent_AndDefaultIsSafe()
     {
         const int SIZE = 2500; // a bucket no other test uses
 
@@ -203,8 +215,7 @@ public class Buffer_Tests : Assert
         }
     }
 
-    [Test]
-    public void BufferWriter_ExposesFreeSpace()
+    [Test] public void BufferWriter_ExposesFreeSpace()
     {
         Buffer<byte> buffer = new(4);
 
@@ -227,8 +238,7 @@ public class Buffer_Tests : Assert
         finally { buffer.Dispose(); }
     }
 
-    [Test]
-    public void AddingToAPreSizedBuffer_AllocatesNothing()
+    [Test] public void AddingToAPreSizedBuffer_AllocatesNothing()
     {
         fill();
 

@@ -163,7 +163,7 @@ public static partial class AsyncLinq
 
             await foreach ( TElement element in self.WithCancellation(token).ConfigureAwait(false) ) { list.Add(element); }
 
-            return [..list];
+            return [.. list];
         }
     }
 

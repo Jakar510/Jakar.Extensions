@@ -35,7 +35,7 @@ public class ObservableCollection_Tests : Assert
 
     [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 

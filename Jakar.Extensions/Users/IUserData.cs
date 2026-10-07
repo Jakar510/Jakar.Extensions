@@ -82,13 +82,13 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
 {
     public TSelf With<TValue>( TValue value )
         where TValue : IUserData<TID>, IUserDetails;
-    public TSelf With( IUserData<TID>                   value );
-    public TSelf With( IEnumerable<TAddress>            values );
-    public TSelf With( params ReadOnlySpan<TAddress>    values );
-    public TSelf With( IEnumerable<TGroupModel>         values );
-    public TSelf With( params ReadOnlySpan<TGroupModel> values );
-    public TSelf With( IEnumerable<TRoleModel>          values );
-    public TSelf With( params ReadOnlySpan<TRoleModel>  values );
+    public TSelf With( IUserData<TID>                            value );
+    public TSelf With( IEnumerable<TAddress>                     values );
+    public TSelf With( params ReadOnlySpan<TAddress>             values );
+    public TSelf With( IEnumerable<TGroupModel>                  values );
+    public TSelf With( params ReadOnlySpan<TGroupModel>          values );
+    public TSelf With( IEnumerable<TRoleModel>                   values );
+    public TSelf With( params ReadOnlySpan<TRoleModel>           values );
     public TSelf With( IReadOnlyDictionary<string, JsonElement>? data );
 
 

@@ -23,7 +23,7 @@ public sealed partial class Errors() : BaseClass<Errors>, IEqualComparable<Error
                                           };
 
 
-    public                required Alert?  Alert       { get; init; }
+    public required                Alert?  Alert       { get; init; }
     public                         string  Description => Details.GetMessage();
     [JsonRequired] public required Error[] Details     { get; init; }
     public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );

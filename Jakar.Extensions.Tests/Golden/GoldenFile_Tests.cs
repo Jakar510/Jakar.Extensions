@@ -61,8 +61,7 @@ public sealed class GoldenFile_Tests
     public static IEnumerable<string> Files() => __readers.Keys;
 
 
-    [TestCaseSource(nameof(Files))]
-    public void Reads10xJson( string name )
+    [TestCaseSource(nameof(Files))] public void Reads10xJson( string name )
     {
         string legacy = File.ReadAllText(Path.Combine(__directory, $"{name}.json"));
         string again  = __readers[name](legacy);
@@ -70,8 +69,7 @@ public sealed class GoldenFile_Tests
     }
 
 
-    [TestCaseSource(nameof(Files))]
-    public void WritesThe10xShape( string name )
+    [TestCaseSource(nameof(Files))] public void WritesThe10xShape( string name )
     {
         string legacy  = File.ReadAllText(Path.Combine(__directory, $"{name}.json"));
         string current = GoldenSamples.All().Single(x => x.Name == name).Json;

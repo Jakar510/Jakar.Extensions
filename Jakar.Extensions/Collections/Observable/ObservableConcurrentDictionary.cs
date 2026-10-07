@@ -176,7 +176,8 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         // items may be added while enumerating, so the buffer grows when needed (previously it overflowed)
-        ArrayBuffer<KeyValuePair<TKey, TValue>>     values = new(buffer.Count + 4);
+        ArrayBuffer<KeyValuePair<TKey, TValue>> values = new(buffer.Count + 4);
+
         FilterDelegate<KeyValuePair<TKey, TValue>>? filter = HasFilter
                                                                  ? GetFilter()
                                                                  : null;

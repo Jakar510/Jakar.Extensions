@@ -1,27 +1,11 @@
-﻿Console.WriteLine(DateTimeOffset.UtcNow.ToString());
+// dotnet run -c Release -- --bench [BenchmarkDotNet arguments, e.g. --filter *JakarJson*]
 
-ReadOnlySpan<string> span = ["one", "two", "three"];
+if ( args.Length > 0 && args[0] == "--bench" )
+{
+    BenchmarkSwitcher.FromAssembly(typeof(JakarJson_Benchmarks).Assembly).Run(args[1..]);
+    return;
+}
 
-ReadOnlySpan<int> numbers =
-[
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10
-];
-
-
-span.Hash().WriteToConsole();
-
-span.Hash128().WriteToConsole();
-
-
-numbers.Hash().WriteToConsole();
-
-numbers.Hash128().WriteToConsole();
+UserModel user = new();
+string    json = user.ToJson();
+Console.WriteLine(json);

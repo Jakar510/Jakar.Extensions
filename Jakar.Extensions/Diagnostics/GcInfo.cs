@@ -33,7 +33,6 @@ public readonly partial struct GcInfo( long totalMemory, long totalAllocatedByte
                                                                     ]));
 
 
-
     public int CompareTo( object? other ) => other is GcInfo app
                                                  ? CompareTo(app)
                                                  : throw new ExpectedValueTypeException(other, typeof(GcInfo));

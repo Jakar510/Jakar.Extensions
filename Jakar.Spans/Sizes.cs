@@ -1,12 +1,15 @@
-﻿namespace Jakar.Extensions;
+// Jakar.Spans (moved from Jakar.Extensions)
+
+namespace Jakar.Extensions;
 
 
+/// <summary> Maximum formatted lengths per type, used to pre-size span buffers. Libraries register their own types (Jakar.Extensions registers <c>AppVersion</c>). </summary>
 public static class Sizes
 {
-    private const int DEFAULT_SIZE = 500;
+    private const int DEFAULT_SIZE = 256;
 
 
-    private static readonly ConcurrentDictionary<Type, int> __sizes = new(Environment.ProcessorCount, DEFAULT_CAPACITY, TypeEqualityComparer.Instance)
+    private static readonly ConcurrentDictionary<Type, int> __sizes = new(Environment.ProcessorCount, 64)
                                                                       {
                                                                           [typeof(byte)]            = 3,
                                                                           [typeof(byte?)]           = 3,
@@ -40,7 +43,6 @@ public static class Sizes
                                                                           [typeof(DateTime?)]       = 50,
                                                                           [typeof(DateTimeOffset)]  = 75,
                                                                           [typeof(DateTimeOffset?)] = 75,
-                                                                          [typeof(AppVersion)]      = 200,
                                                                           [typeof(Int128)]          = Int128.MaxValue.ToString().Length,
                                                                           [typeof(UInt128)]         = UInt128.MaxValue.ToString().Length,
                                                                           [typeof(Int128?)]         = Int128.MaxValue.ToString().Length,
@@ -48,9 +50,12 @@ public static class Sizes
                                                                       };
 
 
-    public static bool Register( Type           type, int size ) => __sizes.TryAdd(type, size);
-    public static bool Register<TValue>( int    size )        => Register(typeof(TValue), size);
-    public static bool Register<TValue>( TValue _, int size ) => Register<TValue>(size);
+    public static bool TryRegister( Type           type, int size ) => __sizes.TryAdd(type, size);
+    public static bool TryRegister<TValue>( int    size )           => TryRegister(typeof(TValue), size);
+    public static bool TryRegister<TValue>( TValue _,    int size ) => TryRegister<TValue>(size);
+    public static void Register( Type              type, int size ) => __sizes[type] = size;
+    public static void Register<TValue>( int       size )        => Register(typeof(TValue), size);
+    public static void Register<TValue>( TValue    _, int size ) => Register<TValue>(size);
 
 
     public static int GetBufferSize<TValue>( int         defaultSize           = DEFAULT_SIZE ) => __sizes.GetValueOrDefault(typeof(TValue), defaultSize);

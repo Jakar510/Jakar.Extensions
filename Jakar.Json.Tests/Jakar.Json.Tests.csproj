@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+		<RootNamespace>Jakar.Json.Tests</RootNamespace>
+		<WarningsAsErrors>Nullable</WarningsAsErrors>
+		<!-- Inspect what the generator emits: obj/Generated. -->
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!-- Allocation tests (AllocationTests.cs) need fully optimized code from the first call: tier-0 code can allocate where tier-1 doesn't. -->
+		<TieredCompilation>false</TieredCompilation>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="NUnit" />
+		<PackageReference Include="NUnit3TestAdapter" />
+		<PackageReference Include="NUnit.Analyzers">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Jakar.Json\Jakar.Json.csproj" />
+		<!-- End-to-end: the real generator runs on the test models. -->
+		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+</Project>

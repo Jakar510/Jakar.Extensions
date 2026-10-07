@@ -164,7 +164,7 @@ public partial class IniConfig
 
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
-        public void AddJson<TValue>( string key, TValue                      value )                    => this[key] = Json.Serialize(value, false);
+        public void AddJson<TValue>( string key, TValue                      value )                            => this[key] = Json.Serialize(value, false);
         public void AddJson<TValue>( string key, TValue                      value, JsonTypeInfo<TValue> info ) => this[key] = JsonModel.ToJson(value, info, false);
         public void Add<TValue>( string     key, params ReadOnlySpan<TValue> values )                   => this[key] = Json.Serialize(values, false);
         public void Add( string             key, IEnumerable<string>         values, char   separator ) => this[key] = string.Join(separator, values);

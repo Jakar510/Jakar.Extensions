@@ -50,12 +50,7 @@ public partial class WebRequester
 
 
         /// <summary> Status codes worth retrying: 408, 429, 500, 502, 503, 504. </summary>
-        public static bool IsTransient( HttpStatusCode status ) => status is HttpStatusCode.RequestTimeout
-                                                                       or HttpStatusCode.TooManyRequests
-                                                                       or HttpStatusCode.InternalServerError
-                                                                       or HttpStatusCode.BadGateway
-                                                                       or HttpStatusCode.ServiceUnavailable
-                                                                       or HttpStatusCode.GatewayTimeout;
+        public static bool IsTransient( HttpStatusCode status ) => status is HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests or HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
 
 
         /// <summary> Network failures and timeouts. Cancellation requested through <paramref name="token"/> is not a failure. </summary>

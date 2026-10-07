@@ -22,16 +22,9 @@ public sealed class CodeFix_Tests
     private static (AdhocWorkspace Workspace, Project Project) CreateProject( params (string Name, string Source)[] documents )
     {
         AdhocWorkspace workspace = new();
-        Project project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(),
-                                                                  VersionStamp.Create(),
-                                                                  "TestProject",
-                                                                  "TestAssembly",
-                                                                  LanguageNames.CSharp,
-                                                                  compilationOptions: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable),
-                                                                  parseOptions: TestParseOptions,
-                                                                  metadataReferences: CreateCompilation().References));
+        Project project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(), "TestProject", "TestAssembly", LanguageNames.CSharp, compilationOptions: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable), parseOptions: TestParseOptions, metadataReferences: CreateCompilation().References));
 
-        foreach ( (string name, string source) in documents ) { project = project.AddDocument(name, SourceText.From(source), filePath: name).Project; }
+        foreach ( ( string name, string source ) in documents ) { project = project.AddDocument(name, SourceText.From(source), filePath: name).Project; }
 
         workspace.TryApplyChanges(project.Solution);
         return ( workspace, workspace.CurrentSolution.GetProject(project.Id)! );
@@ -57,22 +50,23 @@ public sealed class CodeFix_Tests
     }
 
 
-    [Test]
-    public async Task JAKAR_JSON001_AddsTheRegistration()
+    [Test] public async Task JAKAR_JSON001_AddsTheRegistration()
     {
-        const string model = PRELUDE + """
-                                       namespace App;
-                                       [JsonModel(typeof(AppContext))]
-                                       public partial class Invoice;
-                                       """;
+        const string model = PRELUDE +
+                             """
+                             namespace App;
+                             [JsonModel(typeof(AppContext))]
+                             public partial class Invoice;
+                             """;
 
-        const string context = PRELUDE + """
-                                         namespace App;
-                                         [JsonSerializable(typeof(string))]
-                                         public sealed partial class AppContext : JsonSerializerContext;
-                                         """;
+        const string context = PRELUDE +
+                               """
+                               namespace App;
+                               [JsonSerializable(typeof(string))]
+                               public sealed partial class AppContext : JsonSerializerContext;
+                               """;
 
-        (AdhocWorkspace workspace, Project project) = CreateProject(("Invoice.cs", model), ("AppContext.cs", context));
+        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "Invoice.cs", model ), ( "AppContext.cs", context ));
         using AdhocWorkspace disposeWorkspace = workspace;
 
         Compilation compilation = ( await project.GetCompilationAsync() )!;
@@ -82,21 +76,24 @@ public sealed class CodeFix_Tests
         Solution fixedSolution = await ApplyAsync(project, diagnostic);
         string   text          = ( await fixedSolution.GetProject(project.Id)!.Documents.Single(static d => d.Name == "AppContext.cs").GetTextAsync() ).ToString();
 
-        Assert.That(text, Does.Contain("[JsonSerializable(typeof(string))]"));
-        Assert.That(text, Does.Contain("[JsonSerializable(typeof(Invoice))]"));
+        Assert.That(text,                                                      Does.Contain("[JsonSerializable(typeof(string))]"));
+        Assert.That(text,                                                      Does.Contain("[JsonSerializable(typeof(Invoice))]"));
         Assert.That(text.IndexOf("typeof(Invoice)", StringComparison.Ordinal), Is.GreaterThan(text.IndexOf("typeof(string)", StringComparison.Ordinal)), "added after the existing registrations");
     }
 
 
-    [Test]
-    public async Task JAKAR_JSON006_AddsJsonModelWithTheRegisteringContext()
+    [Test] public async Task JAKAR_JSON006_AddsJsonModelWithTheRegisteringContext()
     {
-        string source = PRELUDE + """
-                                  namespace App;
-                                  public class Invoice : IJsonModel<Invoice>;
-                                  """ + "namespace App { " + Context("AppContext", ("Invoice", "Invoice", null)) + " }";
+        string source = PRELUDE                                               +
+                        """
+                        namespace App;
+                        public class Invoice : IJsonModel<Invoice>;
+                        """                                                   +
+                        "namespace App { "                                    +
+                        Context("AppContext", ( "Invoice", "Invoice", null )) +
+                        " }";
 
-        (AdhocWorkspace workspace, Project project) = CreateProject(("Invoice.cs", source.Replace("namespace App;", "")));
+        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "Invoice.cs", source.Replace("namespace App;", "") ));
         using AdhocWorkspace disposeWorkspace = workspace;
 
         Compilation                compilation = ( await project.GetCompilationAsync() )!;

@@ -26,8 +26,6 @@ public readonly partial struct AppInformation( AppVersion version, Guid appID, s
     public LogEventProperty GetProperty()       => new(nameof(AppInformation), GetStructureValue());
 
 
-
-
     public int CompareTo( object? other ) => other is AppInformation app
                                                  ? CompareTo(app)
                                                  : throw new ExpectedValueTypeException(other, typeof(AppInformation));

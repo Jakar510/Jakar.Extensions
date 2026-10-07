@@ -385,10 +385,10 @@ public static class Strings
             int removed = self.AsSpan(first).Count(old);
 
             return string.Create(self.Length - removed,
-                                 (Value: self, Old: old),
+                                 ( Value: self, Old: old ),
                                  static ( span, state ) =>
                                  {
-                                     ReadOnlySpan<char> source = state.Value;
+                                     ReadOnlySpan<char> source  = state.Value;
                                      int                written = 0;
                                      int                index;
 
@@ -425,7 +425,7 @@ public static class Strings
 
             if ( self.Length == 1 ) { return new string(self[0], count); }
 
-            return string.Create(checked(self.Length * count),
+            return string.Create(checked (self.Length * count),
                                  self,
                                  static ( span, value ) =>
                                  {

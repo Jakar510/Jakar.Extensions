@@ -27,10 +27,10 @@ public static class PathExtensions
         }
         /// <summary> extension method for <see cref="Path.GetExtension(string)"/> </summary>
         /// <returns> </returns>
-        public string GetExtension() => Path.GetExtension(path);
+        public string GetExtension()                => Path.GetExtension(path);
         /// <summary> extension method for <see cref="Path.GetFileName(string)"/> </summary>
         /// <returns> </returns>
-        public string GetFileName() => Path.GetFileName(path);
+        public string GetFileName()                 => Path.GetFileName(path);
         /// <summary> extension method for <see cref="Path.GetFileNameWithoutExtension(string)"/> </summary>
         /// <returns> </returns>
         public string GetFileNameWithoutExtension() => Path.GetFileNameWithoutExtension(path);

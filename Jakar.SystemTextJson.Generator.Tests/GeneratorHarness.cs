@@ -16,11 +16,7 @@ internal static class GeneratorHarness
 {
     public static readonly CSharpParseOptions TestParseOptions = new(LanguageVersion.Latest);
 
-    private static readonly ImmutableArray<MetadataReference> __references = [
-        .. ( (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")! ).Split(Path.PathSeparator)
-                                                                       .Where(static path => !string.IsNullOrEmpty(path))
-                                                                       .Select(static path => MetadataReference.CreateFromFile(path))
-    ];
+    private static readonly ImmutableArray<MetadataReference> __references = [.. ( (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")! ).Split(Path.PathSeparator).Where(static path => !string.IsNullOrEmpty(path)).Select(static path => MetadataReference.CreateFromFile(path))];
 
 
     /// <summary> Usings plus a hand-written stand-in for a source-generated context (System.Text.Json's generator doesn't run here). </summary>
@@ -64,13 +60,11 @@ internal static class GeneratorHarness
 
 
     public static CSharpCompilation CreateCompilation( params string[] sources ) =>
-        CSharpCompilation.Create("TestAssembly",
-                                 sources.Select(static (source, i) => CSharpSyntaxTree.ParseText(source, TestParseOptions, $"Source{i}.cs")),
-                                 __references,
-                                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+        CSharpCompilation.Create("TestAssembly", sources.Select(static ( source, i ) => CSharpSyntaxTree.ParseText(source, TestParseOptions, $"Source{i}.cs")), __references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
 
 
     public static GeneratorDriver CreateDriver() => CSharpGeneratorDriver.Create([new JsonModelGenerator().AsSourceGenerator()], parseOptions: TestParseOptions, driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true));
+
 
 
     public sealed record Result( Compilation Output, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<Diagnostic> CompileErrors, ImmutableDictionary<string, string> Sources )
@@ -83,6 +77,7 @@ internal static class GeneratorHarness
 
         public IEnumerable<string> Ids => GeneratorDiagnostics.Select(static d => d.Id);
     }
+
 
 
     public static Result Run( params string[] sources )

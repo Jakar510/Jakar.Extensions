@@ -16,10 +16,12 @@ public sealed partial class TestPreferences : PreferenceFile<TestPreferences>, I
     public ServerSection  Server  { get; set => SetProperty(ref field, value); } = new();
 
 
-    public override bool Equals( TestPreferences?    other ) => ReferenceEquals(this, other);
-    public override int  CompareTo( TestPreferences? other ) => ReferenceEquals(this, other) ? 0 : 1;
-    public override bool Equals( object?             other ) => ReferenceEquals(this, other);
-    public override int  GetHashCode()                       => base.GetHashCode();
+    public override bool Equals( TestPreferences? other ) => ReferenceEquals(this, other);
+    public override int CompareTo( TestPreferences? other ) => ReferenceEquals(this, other)
+                                                                   ? 0
+                                                                   : 1;
+    public override bool Equals( object? other ) => ReferenceEquals(this, other);
+    public override int  GetHashCode()           => base.GetHashCode();
 
     public static bool operator ==( TestPreferences? left, TestPreferences? right ) => ReferenceEquals(left, right);
     public static bool operator !=( TestPreferences? left, TestPreferences? right ) => !ReferenceEquals(left, right);
