@@ -119,7 +119,7 @@ public class ValueStringBuilder_Tests : Assert
     [Test]
     public void Insert_OutOfRange_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(static () =>
+        Throws<ArgumentOutOfRangeException>(static () =>
                                                    {
                                                        using ValueStringBuilder sb = new(8);
                                                        sb.Append("ab").Insert(3, 'x');
@@ -197,14 +197,14 @@ public class ValueStringBuilder_Tests : Assert
     [TestCase("{x}")]
     [TestCase("{0,}")]
     [TestCase("{0:{}")]
-    public void AppendFormat_InvalidFormat_Throws( string format ) => Assert.Throws<FormatException>(() =>
+    public void AppendFormat_InvalidFormat_Throws( string format ) => Throws<FormatException>(() =>
                                                                                                      {
                                                                                                          using ValueStringBuilder sb = new(16);
                                                                                                          sb.AppendFormat(format, 1);
                                                                                                      });
 
     [Test]
-    public void AppendFormat_IndexOutOfRange_Throws() => Assert.Throws<FormatException>(static () =>
+    public void AppendFormat_IndexOutOfRange_Throws() => Throws<FormatException>(static () =>
                                                                                          {
                                                                                              using ValueStringBuilder sb = new(16);
                                                                                              sb.AppendFormat("{1}", 1);

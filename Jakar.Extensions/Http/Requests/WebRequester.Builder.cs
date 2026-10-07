@@ -171,7 +171,7 @@ public partial class WebRequester
         {
             ArgumentNullException.ThrowIfNull(options);
 
-            List<string> errors = options.Validate().ToList();
+            List<string> errors = [.. options.Validate()];
             if ( errors.Count > 0 ) { throw new OptionsValidationException(nameof(WebRequesterOptions), typeof(WebRequesterOptions), errors); }
 
             if ( options.Timeout is { } timeout ) { With_Timeout(timeout); }

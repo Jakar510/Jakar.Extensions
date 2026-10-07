@@ -222,7 +222,7 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
         using ( Utf8JsonWriter writer = new(buffer, writerOptions) ) { write(writer, state); }
 
         byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
-                          ? buffer.WrittenSpan.ToArray()
+                          ? [.. buffer.WrittenSpan]
                           : encoding.GetBytes(Encoding.UTF8.GetString(buffer.WrittenSpan)); // GetBytes never writes a preamble
 
         ByteArrayContent content = new(body);

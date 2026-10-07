@@ -561,7 +561,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
             if ( match(in value) ) { values.Add(in value); }
         }
 
-        return values.ToArray();
+        return [.. values];
     }
     private int FindIndexCore( RefCheck<TValue> match, int start, int endInclusive )
     {

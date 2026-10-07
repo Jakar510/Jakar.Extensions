@@ -84,7 +84,7 @@ public readonly partial struct StringTags( Pair[] tags, string[] entries ) : IVa
     {
         ReadOnlySpan<Pair>   tags    = Tags;
         ReadOnlySpan<string> entries = Entries;
-        return GetBufferLength() + ( format.Length * ( tags.Length + entries.Length ) );
+        return GetBufferLength() + format.Length * ( tags.Length + entries.Length );
     }
 
 

@@ -24,7 +24,7 @@ public sealed class ObservableBehavior_Tests : Assert
     {
         List<NotifyCollectionChangedEventArgs> changes    = [];
         List<string?>                          properties = [];
-        collection.CollectionChanged                         += ( _, e ) => changes.Add(e);
+        collection.CollectionChanged                           += ( _, e ) => changes.Add(e);
         ( (INotifyPropertyChanged)collection ).PropertyChanged += ( _, e ) => properties.Add(e.PropertyName);
         return ( changes, properties );
     }
@@ -36,13 +36,13 @@ public sealed class ObservableBehavior_Tests : Assert
     {
         int[]                     values     = [1, 2, 3];
         ObservableCollection<int> collection = new(values);
-        Assert.That(collection.ToArray(), Is.EqualTo(values));
+        That(collection.ToArray(), Is.EqualTo(values));
     }
 
     [Test] public void ConcurrentEnumerableComparerConstructor_KeepsTheValues()
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 5), Comparer<int>.Default);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 2, 3, 4 }));
+        That(collection.ToArray(), Is.EqualTo([0, 1, 2, 3, 4]));
     }
 
 
@@ -52,22 +52,22 @@ public sealed class ObservableBehavior_Tests : Assert
     {
         ObservableCollection<int> collection = new(Enumerable.Range(0, 10));
         collection.RemoveRange(2, 5);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 7, 8, 9 }));
+        That(collection.ToArray(), Is.EqualTo([0, 1, 7, 8, 9]));
     }
 
     [Test] public void RemoveRange_ToTheEnd_IsAllowed()
     {
         ObservableCollection<int> collection = new(Enumerable.Range(0, 10));
         collection.RemoveRange(5, 5);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 2, 3, 4 }));
-        Assert.Throws<ArgumentOutOfRangeException>(() => collection.RemoveRange(3, 3));
+        That(collection.ToArray(), Is.EqualTo([0, 1, 2, 3, 4]));
+        Throws<ArgumentOutOfRangeException>(() => collection.RemoveRange(3, 3));
     }
 
     [Test] public void RemoveMatch_RemovesAllMatches()
     {
         ObservableCollection<int> collection = new(Enumerable.Range(0, 10));
         this.AreEqual(5, collection.Remove(static ( ref readonly int x ) => x % 2 == 0));
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 1, 3, 5, 7, 9 }));
+        That(collection.ToArray(), Is.EqualTo([1, 3, 5, 7, 9]));
     }
 
     [Test] public void RemoveMatch_SingleItem_RaisesRemoveWithTheItem()
@@ -110,18 +110,29 @@ public sealed class ObservableBehavior_Tests : Assert
     [Test] public void InsertSpan_InsertsInOrder()
     {
         ObservableCollection<int> collection = new(0, 1, 5);
-        collection.Insert(2, [2, 3, 4]);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 2, 3, 4, 5 }));
+        collection.Insert(2, 2, 3, 4);
+        That(collection.ToArray(), Is.EqualTo([0, 1, 2, 3, 4, 5]));
     }
 
     [Test] public void InsertRepeated_InsertsInOrder()
     {
         ObservableCollection<int> collection = new(0, 1, 5);
         collection.Insert(2, 9, 3);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 9, 9, 9, 5 }));
+        That(collection.ToArray(), Is.EqualTo([0, 1, 9, 9, 9, 5]));
 
         collection.Add(7, 2);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 1, 9, 9, 9, 5, 7, 7 }));
+
+        That(collection.ToArray(),
+             Is.EqualTo([
+                            0,
+                            1,
+                            9,
+                            9,
+                            9,
+                            5,
+                            7,
+                            7
+                        ]));
     }
 
     [Test] public void AddSingleItemSpan_RaisesAdd_ManyRaiseReset_NoneRaisesNothing()
@@ -142,20 +153,20 @@ public sealed class ObservableBehavior_Tests : Assert
     [Test] public void AddOrUpdate_DoesNotSort()
     {
         ObservableCollection<int> collection = new(3, 1, 2);
-        collection.AddOrUpdate([5, 4]);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 3, 1, 2, 5, 4 }));
+        collection.AddOrUpdate(5, 4);
+        That(collection.ToArray(), Is.EqualTo([3, 1, 2, 5, 4]));
     }
 
     [Test] public void Replace()
     {
         ObservableCollection<int> collection = new(0, 1, 2, 3);
         collection.Replace(1, [8, 9]);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 0, 8, 9, 3 }));
+        That(collection.ToArray(), Is.EqualTo([0, 8, 9, 3]));
 
         collection.Replace(0, 7, 2);
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 7, 7, 9, 3 }));
+        That(collection.ToArray(), Is.EqualTo([7, 7, 9, 3]));
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => collection.Replace(3, [1, 2]));
+        Throws<ArgumentOutOfRangeException>(() => collection.Replace(3, [1, 2]));
     }
 
 
@@ -166,9 +177,9 @@ public sealed class ObservableBehavior_Tests : Assert
         ObservableCollection<int> collection = new(Enumerable.Range(0, 10));
 
         this.AreEqual(9, collection.FindIndex(static ( ref readonly int x ) => x == 9));
-        this.AreEqual(9, collection.Find(static ( ref readonly int x ) => x == 9));
-        this.AreEqual(9, collection.FindLast(static ( ref readonly int x ) => x == 9));
-        this.AreEqual(1, collection.FindAll(static ( ref readonly int x ) => x == 9).Length);
+        this.AreEqual(9, collection.Find(static ( ref readonly      int x ) => x == 9));
+        this.AreEqual(9, collection.FindLast(static ( ref readonly  int x ) => x == 9));
+        this.AreEqual(1, collection.FindAll(static ( ref readonly   int x ) => x == 9).Length);
     }
 
     [Test] public void FindLastIndex_FindsTheLastMatch()
@@ -179,19 +190,19 @@ public sealed class ObservableBehavior_Tests : Assert
         this.AreEqual(3,         collection.FindLastIndex(static ( ref readonly int x ) => x == 2));
         this.AreEqual(2,         collection.FindLastIndex(static ( ref readonly int x ) => x == 1, 0, 3));
         this.AreEqual(NOT_FOUND, collection.FindLastIndex(static ( ref readonly int x ) => x == 7));
-        this.AreEqual(1,         collection.FindLast(static ( ref readonly int x ) => x       == 1));
+        this.AreEqual(1,         collection.FindLast(static ( ref readonly      int x ) => x == 1));
     }
 
     [Test] public void Search_OnAnEmptyCollection_ReturnsNotFound()
     {
         ObservableCollection<int> collection = new();
 
-        this.AreEqual(NOT_FOUND, collection.FindIndex(static ( ref readonly int _ ) => true));
+        this.AreEqual(NOT_FOUND, collection.FindIndex(static ( ref readonly     int _ ) => true));
         this.AreEqual(NOT_FOUND, collection.FindLastIndex(static ( ref readonly int _ ) => true));
         this.AreEqual(NOT_FOUND, collection.LastIndexOf(1, 0));
-        this.AreEqual(0,         collection.Find(static ( ref readonly int _ ) => true));
+        this.AreEqual(0,         collection.Find(static ( ref readonly    int _ ) => true));
         this.AreEqual(0,         collection.FindAll(static ( ref readonly int _ ) => true).Length);
-        this.IsFalse(collection.Exists(static ( ref readonly int _ ) => true));
+        this.IsFalse(collection.Exists(static ( ref readonly              int _ ) => true));
     }
 
     [Test] public void IndexOf_WithCount_UsesListSemantics()
@@ -218,16 +229,16 @@ public sealed class ObservableBehavior_Tests : Assert
         list.Insert(0, -1);
         list.Remove(1);
 
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { -1, 0, 2, 3 }));
+        That(collection.ToArray(), Is.EqualTo([-1, 0, 2, 3]));
         this.AreEqual(3, changes.Count);
-        Assert.Throws<ArgumentException>(() => list.Add("not an int"));
+        Throws<ArgumentException>(() => list.Add("not an int"));
     }
 
     [Test] public void NonGenericIList_RespectsReadOnly()
     {
         ObservableCollection<int> collection = new(Enumerable.Range(0, 3)) { IsReadOnly = true };
-        Assert.Throws<NotSupportedException>(() => ( (IList)collection ).Add(3));
-        Assert.Throws<NotSupportedException>(() => ( (IList)collection ).Insert(0, 3));
+        Throws<NotSupportedException>(() => ( (IList)collection ).Add(3));
+        Throws<NotSupportedException>(() => ( (IList)collection ).Insert(0, 3));
     }
 
     [Test] public void CopyTo_WithSourceAndLength()
@@ -235,7 +246,7 @@ public sealed class ObservableBehavior_Tests : Assert
         ObservableCollection<int> collection = new(0, 1, 2, 3, 4);
         int[]                     array      = new int[4];
         collection.CopyTo(array, 1, 2, 3);
-        Assert.That(array, Is.EqualTo(new[] { 0, 3, 4, 0 }));
+        That(array, Is.EqualTo([0, 3, 4, 0]));
     }
 
 
@@ -276,20 +287,20 @@ public sealed class ObservableBehavior_Tests : Assert
         collection.Add(1);
         collection.RemoveAt(0);
 
-        Assert.That(collection.Actions, Is.EqualTo(new[] { NotifyCollectionChangedAction.Add, NotifyCollectionChangedAction.Remove }));
+        That(collection.Actions, Is.EqualTo([NotifyCollectionChangedAction.Add, NotifyCollectionChangedAction.Remove]));
     }
 
     [Test] public void Filter_OverrideAndOverrideFilter_AreApplied()
     {
         Recording collection = new();
-        collection.Add([1, 2, 3, 4]);
-        Assert.That(collection.ToList(), Is.EqualTo(new[] { 2, 4 })); // overridden Filter keeps evens
+        collection.Add(1, 2, 3, 4);
+        That(collection.ToList(), Is.EqualTo([2, 4])); // overridden Filter keeps evens
 
         ObservableCollection<int> plain = new(1, 2, 3, 4);
-        Assert.That(plain.ToList(), Is.EqualTo(new[] { 1, 2, 3, 4 }));
+        That(plain.ToList(), Is.EqualTo([1, 2, 3, 4]));
 
         plain.OverrideFilter = static ( int _, ref readonly int x ) => x > 2;
-        Assert.That(plain.ToList(), Is.EqualTo(new[] { 3, 4 }));
+        That(plain.ToList(), Is.EqualTo([3, 4]));
     }
 
 
@@ -311,26 +322,31 @@ public sealed class ObservableBehavior_Tests : Assert
 
     [Test] public void Dictionary_PairOperations_MatchTheValue()
     {
-        ObservableDictionary<string, int> dictionary = new() { ["a"] = 1 };
-        ICollection<KeyValuePair<string, int>> pairs = dictionary;
+        ObservableDictionary<string, int>      dictionary = new() { ["a"] = 1 };
+        ICollection<KeyValuePair<string, int>> pairs      = dictionary;
 
-        this.IsTrue(pairs.Contains(new KeyValuePair<string, int>("a", 1)));
+        this.IsTrue(pairs.Contains(new KeyValuePair<string, int>("a",  1)));
         this.IsFalse(pairs.Contains(new KeyValuePair<string, int>("a", 2)));
-        this.IsFalse(pairs.Remove(new KeyValuePair<string, int>("a", 2)));
-        this.IsTrue(pairs.Remove(new KeyValuePair<string, int>("a", 1)));
+        this.IsFalse(pairs.Remove(new KeyValuePair<string, int>("a",   2)));
+        this.IsTrue(pairs.Remove(new KeyValuePair<string, int>("a",    1)));
         this.AreEqual(0, dictionary.Count);
     }
 
     [Test] public void Dictionary_CopyTo_HonoursTheStartIndex()
     {
-        ObservableDictionary<string, int> dictionary = new() { ["a"] = 1, ["b"] = 2 };
-        KeyValuePair<string, int>[]       array      = new KeyValuePair<string, int>[3];
+        ObservableDictionary<string, int> dictionary = new()
+                                                       {
+                                                           ["a"] = 1,
+                                                           ["b"] = 2
+                                                       };
+
+        KeyValuePair<string, int>[] array = new KeyValuePair<string, int>[3];
         dictionary.CopyTo(array, 1);
 
-        this.AreEqual(default(KeyValuePair<string, int>), array[0]);
+        this.AreEqual(default, array[0]);
         string[] keys = [array[1].Key, array[2].Key];
         Array.Sort(keys);
-        Assert.That(keys, Is.EqualTo(new[] { "a", "b" }));
+        That(keys, Is.EqualTo(["a", "b"]));
     }
 
     [Test] public void ConcurrentDictionary_Indexer_AddsThenReplaces_AndRemoveMatchesTheValue()
@@ -345,7 +361,7 @@ public sealed class ObservableBehavior_Tests : Assert
         this.AreEqual(NotifyCollectionChangedAction.Replace, changes[1].Action);
         this.IsTrue(dictionary.ContainsValue(2));
         this.IsFalse(dictionary.Remove(new KeyValuePair<string, int>("a", 1)));
-        this.IsTrue(dictionary.Remove(new KeyValuePair<string, int>("a", 2)));
+        this.IsTrue(dictionary.Remove(new KeyValuePair<string, int>("a",  2)));
 
         KeyValuePair<string, int>[] array = new KeyValuePair<string, int>[2];
         dictionary["b"] = 3;
@@ -361,17 +377,18 @@ public sealed class ObservableBehavior_Tests : Assert
 
         dictionary.CollectionChanged += ( _, e ) =>
                                         {
-                                            if ( e.Action == NotifyCollectionChangedAction.Add ) { Interlocked.Increment(ref added); }
+                                            if ( e.Action      == NotifyCollectionChangedAction.Add ) { Interlocked.Increment(ref added); }
                                             else if ( e.Action == NotifyCollectionChangedAction.Replace ) { replaced.Add(( (KeyValuePair<int, int>)e.OldItems![0]! ).Value); }
                                         };
 
-        await Task.WhenAll(Enumerable.Range(1, 8).Select(t => Task.Run(() =>
-                                                                       {
-                                                                           for ( int i = 0; i < 1000; i++ ) { dictionary[0] = ( t * 10_000 ) + i; }
-                                                                       })));
+        await Task.WhenAll(Enumerable.Range(1, 8)
+                                     .Select(t => Task.Run(() =>
+                                                           {
+                                                               for ( int i = 0; i < 1000; i++ ) { dictionary[0] = t * 10_000 + i; }
+                                                           })));
 
-        this.AreEqual(1,        added);
-        this.AreEqual(8000 - 1, replaced.Count);
+        this.AreEqual(1,              added);
+        this.AreEqual(8000 - 1,       replaced.Count);
         this.AreEqual(replaced.Count, replaced.Distinct().Count()); // every old value was replaced exactly once
     }
 
@@ -386,7 +403,7 @@ public sealed class ObservableBehavior_Tests : Assert
                                    for ( int i = 100; i < 20_000; i++ ) { dictionary[i] = i; }
                                });
 
-        while ( !writer.IsCompleted ) { Assert.DoesNotThrow(() => _ = dictionary.ToList()); }
+        while ( !writer.IsCompleted ) { DoesNotThrow(() => _ = dictionary.ToList()); }
 
         writer.Wait();
         this.AreEqual(20_000, dictionary.ToList().Count);
@@ -420,7 +437,8 @@ public sealed class ObservableBehavior_Tests : Assert
 
                                      collection.Lock.Exit();
                                      return true;
-                                 }).Result;
+                                 })
+                            .Result;
 
         this.IsTrue(acquired);
     }
@@ -429,15 +447,16 @@ public sealed class ObservableBehavior_Tests : Assert
     {
         ConcurrentObservableCollection<int> collection = new();
 
-        await Task.WhenAll(Enumerable.Range(0, 8).Select(t => Task.Run(() =>
-                                                                       {
-                                                                           for ( int i = 0; i < 500; i++ )
-                                                                           {
-                                                                               collection.Add(t, 2);
-                                                                               collection.Insert(0, -1, 2);
-                                                                               collection.Remove(static ( ref readonly int x ) => x < 0);
-                                                                           }
-                                                                       })));
+        await Task.WhenAll(Enumerable.Range(0, 8)
+                                     .Select(t => Task.Run(() =>
+                                                           {
+                                                               for ( int i = 0; i < 500; i++ )
+                                                               {
+                                                                   collection.Add(t, 2);
+                                                                   collection.Insert(0, -1, 2);
+                                                                   collection.Remove(static ( ref readonly int x ) => x < 0);
+                                                               }
+                                                           })));
 
         this.AreEqual(8 * 500 * 2, collection.Count); // every insert of -1 was removed again
         for ( int t = 0; t < 8; t++ ) { this.AreEqual(500 * 2, collection.FindCount(( ref readonly int x ) => x == t)); }
@@ -447,9 +466,8 @@ public sealed class ObservableBehavior_Tests : Assert
 
     private sealed class Recording() : ObservableCollection<Recording, int>(Comparer<int>.Default), ICollectionAlerts<Recording, int>
     {
-        public static System.Text.Json.Serialization.Metadata.JsonTypeInfo<Recording> JsonTypeInfo => Json.GetTypeInfo<Recording>();
-
-        public readonly List<NotifyCollectionChangedAction> Actions = [];
+        public static   System.Text.Json.Serialization.Metadata.JsonTypeInfo<Recording> JsonTypeInfo => Json.GetTypeInfo<Recording>();
+        public readonly List<NotifyCollectionChangedAction>                             Actions = [];
 
 
         protected override void OnChanged( NotifyCollectionChangedEventArgs e )
@@ -460,21 +478,21 @@ public sealed class ObservableBehavior_Tests : Assert
         protected override bool Filter( int index, ref readonly int value ) => value % 2 == 0;
 
 
-        public static implicit operator Recording( List<int>                  values ) => throw new NotSupportedException();
-        public static implicit operator Recording( HashSet<int>               values ) => throw new NotSupportedException();
-        public static implicit operator Recording( ConcurrentBag<int>         values ) => throw new NotSupportedException();
-        public static implicit operator Recording( System.Collections.ObjectModel.Collection<int> values ) => throw new NotSupportedException();
-        public static implicit operator Recording( int[]                      values ) => throw new NotSupportedException();
+        public static implicit operator Recording( List<int>                                        values ) => throw new NotSupportedException();
+        public static implicit operator Recording( HashSet<int>                                     values ) => throw new NotSupportedException();
+        public static implicit operator Recording( ConcurrentBag<int>                               values ) => throw new NotSupportedException();
+        public static implicit operator Recording( System.Collections.ObjectModel.Collection<int>   values ) => throw new NotSupportedException();
+        public static implicit operator Recording( int[]                                            values ) => throw new NotSupportedException();
         public static implicit operator Recording( System.Collections.Immutable.ImmutableArray<int> values ) => throw new NotSupportedException();
-        public static implicit operator Recording( ReadOnlyMemory<int>        values ) => throw new NotSupportedException();
-        public static implicit operator Recording( ReadOnlySpan<int>          values ) => throw new NotSupportedException();
-        public override int GetHashCode()                => RuntimeHelpers.GetHashCode(this);
-        public override bool Equals( object? other )    => ReferenceEquals(this, other);
-        public static bool operator ==( Recording? l, Recording? r ) => ReferenceEquals(l, r);
-        public static bool operator !=( Recording? l, Recording? r ) => !ReferenceEquals(l, r);
-        public static bool operator >( Recording   l, Recording  r ) => l.CompareTo(r) > 0;
-        public static bool operator >=( Recording  l, Recording  r ) => l.CompareTo(r) >= 0;
-        public static bool operator <( Recording   l, Recording  r ) => l.CompareTo(r) < 0;
-        public static bool operator <=( Recording  l, Recording  r ) => l.CompareTo(r) <= 0;
+        public static implicit operator Recording( ReadOnlyMemory<int>                              values ) => throw new NotSupportedException();
+        public static implicit operator Recording( ReadOnlySpan<int>                                values ) => throw new NotSupportedException();
+        public override                 int  GetHashCode()                                                   => RuntimeHelpers.GetHashCode(this);
+        public override                 bool Equals( object?         other )                                 => ReferenceEquals(this, other);
+        public static                   bool operator ==( Recording? l, Recording? r )                       => ReferenceEquals(l,    r);
+        public static                   bool operator !=( Recording? l, Recording? r )                       => !ReferenceEquals(l, r);
+        public static                   bool operator >( Recording   l, Recording  r )                       => l.CompareTo(r) > 0;
+        public static                   bool operator >=( Recording  l, Recording  r )                       => l.CompareTo(r) >= 0;
+        public static                   bool operator <( Recording   l, Recording  r )                       => l.CompareTo(r) < 0;
+        public static                   bool operator <=( Recording  l, Recording  r )                       => l.CompareTo(r) <= 0;
     }
 }

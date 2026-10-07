@@ -58,9 +58,9 @@ public sealed partial class Errors() : BaseClass<Errors>, IEqualComparable<Error
     public static implicit operator Errors( Alert                 details ) => Create(details);
     public static implicit operator Errors( Error                 details ) => Create(details);
     public static implicit operator Errors( Error[]               details ) => Create(null, details);
-    public static implicit operator Errors( List<Error>           details ) => Create(details.ToArray());
-    public static implicit operator Errors( Span<Error>           details ) => Create(details.ToArray());
-    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create(details.ToArray());
+    public static implicit operator Errors( List<Error>           details ) => Create([.. details]);
+    public static implicit operator Errors( Span<Error>           details ) => Create([.. details]);
+    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create([.. details]);
 
 
     public        ValueEnumerable<FromArray<Error>, Error> AsValueEnumerable()         => new(new FromArray<Error>(Details));

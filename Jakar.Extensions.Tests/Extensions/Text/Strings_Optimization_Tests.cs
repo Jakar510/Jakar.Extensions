@@ -15,7 +15,7 @@ public class Strings_Optimization_Tests : Assert
     [TestCase("xyz", 2, "xyzxyz")]
     public void Repeat( string value, int count, string expected ) => this.AreEqual(expected, value.Repeat(count));
 
-    [Test] public void Repeat_Negative_Throws() => Assert.Throws<ArgumentOutOfRangeException>(static () => "ab".Repeat(-1));
+    [Test] public void Repeat_Negative_Throws() => Throws<ArgumentOutOfRangeException>(static () => "ab".Repeat(-1));
 
 
     [TestCase("a-b-c",  '-', "abc")]

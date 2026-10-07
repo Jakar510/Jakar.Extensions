@@ -41,12 +41,12 @@ public class ObservableCollection_Tests : Assert
 
         ObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         collection.Clear();
         collection.Add(array.Span);
         collection.Sort(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
     private static ReadOnlyMemory<TValue> GetSorted<TValue>( scoped in ReadOnlySpan<TValue> array )
     {

@@ -589,7 +589,7 @@ public static class Hashes
 
     public static UInt128 Hash( this ref readonly ReadOnlySpan<char> data, Encoding encoding )
     {
-        int                     length = ( encoding.GetByteCount(data) );
+        int                     length = encoding.GetByteCount(data);
         using ArrayBuffer<byte> owner  = new(length);
         Span<byte>              span   = owner.Span;
         int                     size   = encoding.GetBytes(data, span);

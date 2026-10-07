@@ -154,7 +154,7 @@ public class FixedSizedDeque_Tests : Assert
 
         FixedSizedDeque<int> q = new(CAPACITY);
 
-        System.Threading.Tasks.Parallel.For(0, ADDITIONS, i => q.Enqueue(i));
+        Parallel.For(0, ADDITIONS, i => q.Enqueue(i));
 
         this.IsTrue(q.Count <= CAPACITY);
     }

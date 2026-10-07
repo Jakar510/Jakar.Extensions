@@ -35,7 +35,7 @@ public static class InstanceCreator<T1, [DynamicallyAccessedMembers(DynamicallyA
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -56,7 +56,7 @@ public static class InstanceCreator<T1, T2, [DynamicallyAccessedMembers(Dynamica
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -77,7 +77,7 @@ public static class InstanceCreator<T1, T2, T3, [DynamicallyAccessedMembers(Dyna
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, T3, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -98,7 +98,7 @@ public static class InstanceCreator<T1, T2, T3, T4, [DynamicallyAccessedMembers(
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, T3, T4, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -119,7 +119,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, [DynamicallyAccessedMemb
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, T3, T4, T5, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -140,7 +140,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, [DynamicallyAccessed
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, T3, T4, T5, T6, TInstance>>(Expression.New(constructor, args), args).Compile();
@@ -161,7 +161,7 @@ public static class InstanceCreator<T1, T2, T3, T4, T5, T6, T7, [DynamicallyAcce
         ConstructorInfo? constructor = typeof(TInstance).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, Type.DefaultBinder, argsTypes, null);
         if ( constructor is null ) { throw InstanceCreator.CreateException(argsTypes); }
 
-        ParameterExpression[] args = argsTypes.Select(Expression.Parameter).ToArray();
+        ParameterExpression[] args = [.. argsTypes.Select(Expression.Parameter)];
 
 
         return Expression.Lambda<Func<T1, T2, T3, T4, T5, T6, T7, TInstance>>(Expression.New(constructor, args), args).Compile();

@@ -48,7 +48,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IRea
     {
         int hash = 17;
 
-        foreach ( T value in _array ?? [] ) { hash = unchecked(( hash * 31 ) + value.GetHashCode()); }
+        foreach ( T value in _array ?? [] ) { hash = unchecked(hash * 31 + value.GetHashCode()); }
 
         return hash;
     }

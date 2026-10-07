@@ -546,9 +546,10 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : Ob
     }
 
 
+
     public override TValue[] ToArray()
     {
-        using ( AcquireLock() ) { return base.ToArray(); }
+        using ( AcquireLock() ) { return [.. buffer]; }
     }
     public override int IndexOf( TValue value )
     {
@@ -618,7 +619,7 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : Ob
     {
         using ( AcquireLock() ) { return base.FilteredValues(); }
     }
-    [MustDisposeResource] [MethodImpl(MethodImplOptions.AggressiveInlining)] public Lock.Scope            AcquireLock()                                  => locker.EnterScope();
+    [MustDisposeResource] [MethodImpl(MethodImplOptions.AggressiveInlining)] public Lock.Scope            AcquireLock()                               => locker.EnterScope();
     [MustDisposeResource]                                                    public LockCloser            AcquireLock( CancellationToken      token ) => LockCloser.Enter(locker, token);
     [MustDisposeResource]                                                    public ValueTask<LockCloser> AcquireLockAsync( CancellationToken token ) => LockCloser.EnterAsync(locker, token);
 
@@ -633,9 +634,9 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : Ob
     }
 
 
-    [Pure] [MustDisposeResource] protected internal ArrayBuffer<TValue> Copy() => FilteredValues();
-    [Pure] [MustDisposeResource] ArrayBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
-    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token).ConfigureAwait(false);
+    [Pure] [MustDisposeResource] protected internal ArrayBuffer<TValue>                                                                     Copy()                               => FilteredValues();
+    [Pure] [MustDisposeResource]                    ArrayBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
+    [Pure] [MustDisposeResource]                    ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token).ConfigureAwait(false);
     [Pure] [MustDisposeResource] protected async ValueTask<ArrayBuffer<TValue>> CopyAsync( CancellationToken token )
     {
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FilteredValues(); }

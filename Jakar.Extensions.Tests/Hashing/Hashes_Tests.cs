@@ -197,7 +197,7 @@ public class Hashes_Tests : Assert
     {
         string emptyHash  = EMPTY_STRING.Hash_SHA256();
         string sampleHash = SAMPLE.Hash_SHA256();
-        Assert.That(emptyHash, Is.Not.EqualTo(sampleHash));
+        That(emptyHash, Is.Not.EqualTo(sampleHash));
     }
 
 
@@ -276,5 +276,5 @@ public class Hashes_Tests : Assert
         this.AreEqual(h1, h2);
     }
 
-    private static void NotEqual<T>( T x, T y ) => Assert.That(x, Is.Not.EqualTo(y));
+    private static void NotEqual<T>( T x, T y ) => That(x, Is.Not.EqualTo(y));
 }

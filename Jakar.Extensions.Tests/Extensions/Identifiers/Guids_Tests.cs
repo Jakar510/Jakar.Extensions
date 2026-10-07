@@ -201,5 +201,5 @@ public class Guids_Tests : Assert
         }
     }
 
-    private static void NotEqual<T>( T x, T y ) => Assert.That(x, Is.Not.EqualTo(y));
+    private static void NotEqual<T>( T x, T y ) => That(x, Is.Not.EqualTo(y));
 }

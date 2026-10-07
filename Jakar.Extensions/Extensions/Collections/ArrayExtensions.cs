@@ -12,7 +12,7 @@ public static class ArrayExtensions
                                                                                                                 Collection<TElement> collection    => collection.GetInternalArray(),
                                                                                                                 IReadOnlyList<TElement> collection => collection.ToArray(collection.Count),
                                                                                                                 ICollection<TElement> collection   => collection.ToArray(collection.Count),
-                                                                                                                _                                  => values.ToArray()
+                                                                                                                _                                  => new ReadOnlySpan<TElement>([.. values])
                                                                                                             };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => list.AsSpan();

@@ -124,7 +124,7 @@ public class Numbers_Tests : Assert
     public void StringAs_Double_Valid( string value, double expected )
     {
         double result = value.As<double>(0.0);
-        Assert.That(result, Is.EqualTo(expected).Within(1e-10));
+        That(result, Is.EqualTo(expected).Within(1e-10));
     }
 
 

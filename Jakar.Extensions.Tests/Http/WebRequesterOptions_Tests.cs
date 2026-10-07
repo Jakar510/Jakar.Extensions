@@ -150,7 +150,7 @@ public class WebRequesterOptions_Tests : Assert
         services.AddWebRequester(Configuration(new Dictionary<string, string?> { [key] = value }));
 
         using ServiceProvider provider = services.BuildServiceProvider();
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<WebRequester>());
+        Throws<OptionsValidationException>(() => provider.GetRequiredService<WebRequester>());
     }
 
     [Test]
@@ -253,7 +253,7 @@ public class WebRequesterOptions_Tests : Assert
             HttpClient   before    = requester.Client;
 
             configuration["Web:MaxConnectionsPerServer"] = "0"; // invalid
-            Assert.DoesNotThrow(configuration.Reload);           // never throws on the configuration thread
+            DoesNotThrow(configuration.Reload);           // never throws on the configuration thread
 
             Assert.AreSame(before, requester.Client);
             this.AreEqual(TimeSpan.FromSeconds(10), requester.Timeout);

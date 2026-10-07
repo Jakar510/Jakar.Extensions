@@ -151,7 +151,7 @@ public readonly struct GcMemoryInformation( bool                      compacted,
                                                               data.PromotedBytes,
                                                               data.TotalAvailableMemoryBytes,
                                                               data.TotalCommittedBytes,
-                                                              data.PauseDurations.ToArray(),
+                                                              [.. data.PauseDurations],
                                                               [.. data.GenerationInfo.AsValueEnumerable().Select(static x => new GcGenerationInformation(x))]) { }
 
 

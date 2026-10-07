@@ -14,7 +14,7 @@ public static partial class Spans
         ReadOnlySpan<TValue>      span   = source;
         RemoveAll(in span, in removed, in result, out int length);
 
-        return result[..length].ToArray();
+        return new Span<TValue>([.. result[..length]]);
     }
 
 
@@ -129,14 +129,14 @@ public static partial class Spans
             Span<TValue> result = stackalloc TValue[source.Length];
             RemoveAll(in source, in c, in result, out int length);
 
-            return result[..length].ToArray();
+            return new ReadOnlySpan<TValue>([.. result[..length]]);
         }
         public ReadOnlySpan<TValue> RemoveAll( params ReadOnlySpan<TValue> removed )
         {
             Span<TValue> result = stackalloc TValue[source.Length];
             RemoveAll(in source, in removed, in result, out int length);
 
-            return result[..length].ToArray();
+            return new ReadOnlySpan<TValue>([.. result[..length]]);
         }
     }
 }

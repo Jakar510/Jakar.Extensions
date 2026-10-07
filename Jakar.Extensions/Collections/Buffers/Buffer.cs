@@ -67,7 +67,7 @@ public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
     [HandlesResourceDisposal] public TValue[] ToArray()
     {
-        TValue[] array = Values.ToArray();
+        TValue[] array = [.. Values];
         Dispose();
         return array;
     }

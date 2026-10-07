@@ -60,7 +60,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     {
         Key      = key;
         Actual   = value;
-        Expected = expected.ToArray();
+        Expected = [.. expected];
 
         Data[nameof(Key)]    = Key?.ToString();
         Data[nameof(Actual)] = Actual?.FullName;

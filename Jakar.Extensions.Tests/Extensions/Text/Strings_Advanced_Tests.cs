@@ -178,7 +178,7 @@ public class Strings_Advanced_Tests : Assert
     public void ConvertTo_Double()
     {
         double result = "3.14".ConvertTo<double>();
-        Assert.That(result, Is.EqualTo(3.14).Within(1e-10));
+        That(result, Is.EqualTo(3.14).Within(1e-10));
     }
 
     [Test]

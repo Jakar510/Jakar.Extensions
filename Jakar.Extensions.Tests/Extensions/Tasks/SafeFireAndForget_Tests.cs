@@ -167,10 +167,10 @@ public class SafeFireAndForget_Tests : Assert
     [Test]
     public void NullArguments_ThrowAtTheCallSite()
     {
-        Assert.Throws<ArgumentNullException>(static () => ( (Task)null! ).SafeFireAndForget());
-        Assert.Throws<ArgumentNullException>(static () => Task.CompletedTask.SafeFireAndForget((Action<Exception>)null!));
-        Assert.Throws<ArgumentNullException>(static () => Task.FromResult(1).SafeFireAndForget(static _ => { }, (Action<int>)null!));
-        Assert.Throws<ArgumentNullException>(static () => ValueTask.CompletedTask.SafeFireAndForget((Func<Exception, Task>)null!));
+        Throws<ArgumentNullException>(static () => ( (Task)null! ).SafeFireAndForget());
+        Throws<ArgumentNullException>(static () => Task.CompletedTask.SafeFireAndForget((Action<Exception>)null!));
+        Throws<ArgumentNullException>(static () => Task.FromResult(1).SafeFireAndForget(static _ => { }, (Action<int>)null!));
+        Throws<ArgumentNullException>(static () => ValueTask.CompletedTask.SafeFireAndForget((Func<Exception, Task>)null!));
     }
 
 

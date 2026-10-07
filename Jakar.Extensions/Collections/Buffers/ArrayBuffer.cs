@@ -88,7 +88,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
 
     [HandlesResourceDisposal] public TValue[] ToArray()
     {
-        TValue[] array = Values.ToArray();
+        TValue[] array = [.. Values];
         Dispose();
         return array;
     }

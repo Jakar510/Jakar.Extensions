@@ -439,7 +439,7 @@ public class DictionaryLookupBenchmarks
 
     [GlobalSetup] public void GlobalSetup()
     {
-        __items = Enumerable.Range(0, Items).Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7().ToString(), Random.Shared.Next())).ToArray();
+        __items = [.. Enumerable.Range(0, Items).Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7().ToString(), Random.Shared.Next()))];
 
         __firstKey = __items.First().Key;
 

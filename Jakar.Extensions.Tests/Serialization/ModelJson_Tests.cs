@@ -111,11 +111,11 @@ public sealed class ModelJson_Tests
     {
         ObservableCollection<int> collection = new(1, 2, 3, 4) { OverrideFilter = static ( int _, ref readonly int value ) => value % 2 == 0 };
 
-        Assert.That(collection.ToArray(),                                                                     Is.EqualTo(new[] { 1, 2, 3, 4 }));
-        Assert.That(collection.Where(static _ => true).ToArray(),                                              Is.EqualTo(new[] { 2, 4 }), "enumeration is filtered");
-        Assert.That(collection.ToJson(false),                                                                  Is.EqualTo("[1,2,3,4]"));
-        Assert.That(JsonModel.ToJson((IEnumerable<int>)collection, TestJsonContext.Default.Int32),            Is.EqualTo("[1,2,3,4]"));
-        Assert.That(JsonSerializer.Serialize(collection, TestJsonContext.Default.ObservableCollectionInt32),   Is.EqualTo("[1,2,3,4]"), "STJ itself, through the converter registered in the context");
+        Assert.That(collection.ToArray(),                                                                    Is.EqualTo([1, 2, 3, 4]));
+        Assert.That(collection.Where(static _ => true).ToArray(),                                            Is.EqualTo([2, 4]), "enumeration is filtered");
+        Assert.That(collection.ToJson(false),                                                                Is.EqualTo("[1,2,3,4]"));
+        Assert.That(JsonModel.ToJson((IEnumerable<int>)collection, TestJsonContext.Default.Int32),           Is.EqualTo("[1,2,3,4]"));
+        Assert.That(JsonSerializer.Serialize(collection, TestJsonContext.Default.ObservableCollectionInt32), Is.EqualTo("[1,2,3,4]"), "STJ itself, through the converter registered in the context");
     }
 
 
@@ -123,10 +123,10 @@ public sealed class ModelJson_Tests
     public void ObservableCollection_FromJson_InsertsInBulk()
     {
         ObservableCollection<int> collection = ObservableCollection<int>.FromJson("[1,2,3]");
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 1, 2, 3 }));
+        Assert.That(collection.ToArray(), Is.EqualTo([1, 2, 3]));
 
-        Assert.That(ObservableCollection<int>.TryFromJson("[1,", out _), Is.False);
-        Assert.That(ConcurrentObservableCollection<int>.FromJson("[4,5]").ToArray(), Is.EqualTo(new[] { 4, 5 }));
+        Assert.That(ObservableCollection<int>.TryFromJson("[1,", out _),             Is.False);
+        Assert.That(ConcurrentObservableCollection<int>.FromJson("[4,5]").ToArray(), Is.EqualTo([4, 5]));
         Assert.That(ObservableHashSet<int>.FromJson("[6,6,7]").Count,                Is.EqualTo(2));
     }
 

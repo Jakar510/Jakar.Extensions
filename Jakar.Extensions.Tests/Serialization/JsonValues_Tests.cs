@@ -82,9 +82,8 @@ public sealed class JsonValues_Tests
     [Test]
     public void Array_Add_Insert_Set()
     {
-        JsonArray array = new();
-        array.Add(1);
-        array.Add(3);
+        JsonArray array = [1, 3];
+
         array.Insert(1, 2);
         array.Set(0, 0);
         Assert.That(array.ToJson(false), Is.EqualTo("[0,2,3]"));

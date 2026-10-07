@@ -35,11 +35,11 @@ public class Buffer_Tests : Assert
 
         try
         {
-            buffer.Add([1, 2, 3]);
-            buffer.Add(9, 3);
+            buffer.Add(1, 2, 3);
+            buffer.Add(9,         3);
             buffer.AddRange(new List<int> { 4, 5 });
             buffer.AddRange(new HashSet<int> { 6 });
-            buffer.AddRange(new[] { 7 });
+            buffer.AddRange([7]);
             buffer.AddRange(Enumerable.Range(8, 2));
 
             this.AreEqual(new[] { 1, 2, 3, 9, 9, 9, 4, 5, 6, 7, 8, 9 }, buffer.Values.ToArray());
@@ -134,10 +134,10 @@ public class Buffer_Tests : Assert
     [Test]
     public void Searches_FindTheRightIndices()
     {
-        Buffer<char> chars = new("abcabc".AsSpan());
-        Buffer<int>  ints  = new([5, 6, 7, 5]);
-        Buffer<long> longs = new([1L, 2L, 3L]);
-        Buffer<string> strings = new(["x", "y", "x"]);
+        Buffer<char>   chars   = new("abcabc".AsSpan());
+        Buffer<int>    ints    = new(5, 6, 7, 5);
+        Buffer<long>   longs   = new(1L, 2L, 3L);
+        Buffer<string> strings = new("x", "y", "x");
 
         try
         {
@@ -165,7 +165,7 @@ public class Buffer_Tests : Assert
     [Test]
     public void FindAll_IncludesTheEndOfTheRange()
     {
-        Buffer<int> buffer = new([1, 2, 3, 4]);
+        Buffer<int> buffer = new(1, 2, 3, 4);
 
         try
         {
@@ -221,7 +221,7 @@ public class Buffer_Tests : Assert
             span[0] = 43;
             buffer.Advance(1);
 
-            this.AreEqual(new byte[] { 42, 43 }, buffer.Values.ToArray());
+            this.AreEqual([42, 43], buffer.Values.ToArray());
             Assert.IsNotNull(writer);
         }
         finally { buffer.Dispose(); }

@@ -84,7 +84,7 @@ public partial class WebRequester_Tests : Assert
     [Test]
     public async Task Bytes_Memory_Stream_ReturnTheBody()
     {
-        byte[]       body      = Enumerable.Range(0, 5000).Select(static i => (byte)i).ToArray();
+        byte[]       body      = [.. Enumerable.Range(0, 5000).Select(static i => (byte)i)];
         StubHandler  handler   = new((_, _) => new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) });
         WebRequester requester = Create(handler);
 
@@ -156,7 +156,7 @@ public partial class WebRequester_Tests : Assert
         using CancellationTokenSource cts     = new();
         cts.Cancel();
 
-        await Assert.ThrowsAsync<TaskCanceledException>(async () => await Create(handler).Get("x").AsString(cts.Token));
+        await ThrowsAsync<TaskCanceledException>(async () => await Create(handler).Get("x").AsString(cts.Token));
     }
 
     [Test]

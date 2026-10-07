@@ -108,12 +108,12 @@ public class ConcurrentObservableCollection_Tests : Assert
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         collection.Clear();
         collection.Add(array.Span);
         collection.Sort(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
 
     [Test] public async Task SortAsync()
@@ -124,12 +124,12 @@ public class ConcurrentObservableCollection_Tests : Assert
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         await collection.SortAsync();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         await collection.ClearAsync();
         collection.Add(array.Span);
         await collection.SortAsync(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
     private static ReadOnlyMemory<TValue> GetSorted<TValue>( scoped in ReadOnlySpan<TValue> array )
     {

@@ -65,7 +65,7 @@ public static partial class AsyncLinq
     {
         T value = maxValue;
 
-        await foreach ( T item in source.ConfigureAwait(false) ) { value = T.Min(value, ( item )); }
+        await foreach ( T item in source.ConfigureAwait(false) ) { value = T.Min(value, item); }
 
         return value;
     }

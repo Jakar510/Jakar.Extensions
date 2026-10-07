@@ -271,7 +271,7 @@ public class Pair_Tests : Assert
         Pair<double>                      p   = new("pi", 3.14);
         KeyValuePair<string, double> kvp = p;
         this.AreEqual("pi", kvp.Key);
-        Assert.That(kvp.Value, Is.EqualTo(3.14).Within(1e-10));
+        That(kvp.Value, Is.EqualTo(3.14).Within(1e-10));
     }
 
     [Test]

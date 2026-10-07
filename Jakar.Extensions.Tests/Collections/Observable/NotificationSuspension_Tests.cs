@@ -43,7 +43,7 @@ public sealed class NotificationSuspension_Tests : Assert
         this.IsFalse(collection.AreNotificationsSuspended);
         this.AreEqual(1,                                   changes.Count);
         this.AreEqual(NotifyCollectionChangedAction.Reset, changes[0].Action);
-        Assert.That(properties, Is.EquivalentTo(new[] { nameof(collection.Count), nameof(collection.IsEmpty), nameof(collection.IsNotEmpty) }));
+        That(properties, Is.EquivalentTo([nameof(collection.Count), nameof(collection.IsEmpty), nameof(collection.IsNotEmpty)]));
         this.AreEqual(100, collection.Count);
     }
 
@@ -119,7 +119,7 @@ public sealed class NotificationSuspension_Tests : Assert
     [Test] public void Default_IsANoOp()
     {
         NotificationSuspension scope = default;
-        Assert.DoesNotThrow(scope.Dispose);
+        DoesNotThrow(scope.Dispose);
     }
 
     [Test] public void Dictionary_And_HashSet_AreSuspended()
@@ -152,7 +152,7 @@ public sealed class NotificationSuspension_Tests : Assert
         {
             await Task.WhenAll(Enumerable.Range(0, 8).Select(t => Task.Run(() =>
                                                                            {
-                                                                               for ( int i = 0; i < 250; i++ ) { collection.Add(( t * 1000 ) + i); }
+                                                                               for ( int i = 0; i < 250; i++ ) { collection.Add(t * 1000 + i); }
                                                                            })));
         }
 

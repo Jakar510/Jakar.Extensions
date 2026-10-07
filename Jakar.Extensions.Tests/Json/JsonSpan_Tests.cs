@@ -20,7 +20,7 @@ public sealed class JsonSpan_Tests : Assert
     {
         // ArrayPool.Shared.Rent(3) returns a 16-element array; the old implementation serialized all 16.
         ReadOnlySpan<int> values = [1, 2, 3];
-        Assert.That(Compact(Json.Serialize(values)), Is.EqualTo("[1,2,3]"));
+        That(Compact(Json.Serialize(values)), Is.EqualTo("[1,2,3]"));
     }
 
 
@@ -28,7 +28,7 @@ public sealed class JsonSpan_Tests : Assert
     public void ToJson_EmptySpan_WritesEmptyArray()
     {
         ReadOnlySpan<string> values = [];
-        Assert.That(Compact(Json.Serialize(values)), Is.EqualTo("[]"));
+        That(Compact(Json.Serialize(values)), Is.EqualTo("[]"));
     }
 
 
@@ -36,7 +36,7 @@ public sealed class JsonSpan_Tests : Assert
     public void ObservableCollection_ImplicitFromArray_KeepsTheValues()
     {
         ObservableCollection<int> collection = new[] { 1, 2, 3 };
-        Assert.That(collection.ToArray(), Is.EqualTo(new[] { 1, 2, 3 }));
+        That(collection.ToArray(), Is.EqualTo([1, 2, 3]));
     }
 
 
@@ -46,7 +46,7 @@ public sealed class JsonSpan_Tests : Assert
         int[]                               values     = [1, 2, 3];
         ConcurrentObservableCollection<int> fromCtor   = new(values);
         ConcurrentObservableCollection<int> fromCast   = values;
-        Assert.That(fromCtor.ToArray(), Is.EqualTo(values));
-        Assert.That(fromCast.ToArray(), Is.EqualTo(values));
+        That(fromCtor.ToArray(), Is.EqualTo(values));
+        That(fromCast.ToArray(), Is.EqualTo(values));
     }
 }

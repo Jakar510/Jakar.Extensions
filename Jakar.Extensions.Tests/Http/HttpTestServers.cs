@@ -56,7 +56,7 @@ internal sealed class LoopbackServer : IAsyncDisposable
 {
     private readonly TcpListener                                                   __listener = new(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource                                       __cts      = new();
-    private readonly Func<LoopbackServer.Request, int, LoopbackServer.Response> __respond;
+    private readonly Func<Request, int, Response> __respond;
     private readonly Task                                                          __loop;
 
     public readonly List<Request> Requests = [];
@@ -156,7 +156,7 @@ internal sealed class LoopbackServer : IAsyncDisposable
                         pending.AddRange(chunk.AsSpan(0, read));
                     }
 
-                    byte[] body = pending.GetRange(0, length).ToArray();
+                    byte[] body = [.. pending.GetRange(0, length)];
                     pending.RemoveRange(0, length);
 
                     Request request = new(start[0], start[1], headers, body);
