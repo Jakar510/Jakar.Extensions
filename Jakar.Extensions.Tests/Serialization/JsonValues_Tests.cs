@@ -191,7 +191,7 @@ public sealed class JsonValues_Tests
 
     private sealed class Bag : IJsonModel
     {
-        public Dictionary<string, JsonElement>? AdditionalData { get; set; }
+        [System.Text.Json.Serialization.JsonExtensionData] public Dictionary<string, JsonElement>? AdditionalData { get; set; }
     }
 
 

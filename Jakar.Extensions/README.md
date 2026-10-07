@@ -39,7 +39,7 @@ Alternatively, you can use the NuGet Package Manager in Visual Studio.
 
 Since 11.0 the library uses **System.Text.Json with source-generated metadata only** (no Newtonsoft.Json, no reflection-based serialization), and it is trim / Native AOT clean.
 
-- Models are `IJsonModel<TSelf>` types: put `[JsonModel(typeof(YourContext))]` on a `partial` class, record or struct and register it in your `JsonSerializerContext`. The `[JsonModel]` generator ships with the `Jakar.Json` dependency.
+- Models are `IJsonModel<TSelf>` types: put `[JsonModel(typeof(YourContext))]` on a `partial` class, record or struct and register it in your `JsonSerializerContext`. The `[JsonModel]` generator ships with the `Jakar.SystemTextJson` dependency.
 
   ```csharp
   [JsonSerializable(typeof(Invoice))]

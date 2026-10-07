@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     System.Text.Json helpers. Everything is AOT-safe: metadata comes from source-generated contexts, never from reflection.
 ///     <para> Two tiers: members that take a <see cref="JsonTypeInfo{T}"/> (compile-time checked), and members without one that resolve it through <see cref="GetTypeInfo{T}"/>: a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. Those throw <see cref="NotSupportedException"/> naming the type when it isn't registered. </para>
-///     <para> <see cref="IJsonModel{TSelf}"/> types also get <c> value.ToJson() </c> / <c> T.FromJson(json) </c> from Jakar.Json. </para>
+///     <para> <see cref="IJsonModel{TSelf}"/> types also get <c> value.ToJson() </c> / <c> T.FromJson(json) </c> from Jakar.SystemTextJson. </para>
 /// </summary>
 public static partial class Json
 {

@@ -40,8 +40,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
-		<!-- Consumers get the [JsonModel] generator from the Jakar.Json package; a ProjectReference needs it explicitly. -->
-		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<!-- Consumers get the [JsonModel] generator from the Jakar.SystemTextJson package; a ProjectReference needs it explicitly. -->
+		<ProjectReference Include="..\Jakar.SystemTextJson.Generator\Jakar.SystemTextJson.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>
