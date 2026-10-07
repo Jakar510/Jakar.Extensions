@@ -17,7 +17,7 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class AsyncLinq
 {
-    public static AsyncEnumerator<TElement, TElement[]> AsAsyncEnumerable<TElement>( this IEnumerable<TElement>         source, CancellationToken token = default ) => new(source.ToArray(), token);
+    public static AsyncEnumerator<TElement, TElement[]> AsAsyncEnumerable<TElement>( this IEnumerable<TElement>         source, CancellationToken token = default ) => new([.. source], token);
     public static AsyncEnumerator<TElement, TElement[]> AsAsyncEnumerable<TElement>( this IReadOnlyCollection<TElement> source, CancellationToken token = default ) => new(source.ToArray(source.Count), token);
     public static AsyncEnumerator<TElement, TList> AsAsyncEnumerable<TElement, TList>( this TList source, CancellationToken token = default )
         where TList : IReadOnlyList<TElement> => new(source, token);
@@ -31,7 +31,15 @@ public static partial class AsyncLinq
     public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int initialCapacity )
     {
         List<TElement> list = new(initialCapacity);
-        list.AddRange(sequence);
+
+        // Not List.AddRange for everything: it copies an ICollection<T> with Count + CopyTo, which bypasses the collection's own enumerator
+        // (the filter of an observable collection, the snapshot of a concurrent one) and throws if a concurrent collection grows in between.
+        if ( sequence is TElement[] or List<TElement> ) { list.AddRange(sequence); }
+        else
+        {
+            foreach ( TElement element in sequence ) { list.Add(element); }
+        }
+
         return list;
     }
 
@@ -44,7 +52,7 @@ public static partial class AsyncLinq
     {
         switch ( sequence )
         {
-            case List<TElement> list: { return list.ToArray(); }
+            case List<TElement> list: { return [.. list]; }
 
             case Collection<TElement> list:
             {
@@ -60,9 +68,9 @@ public static partial class AsyncLinq
                 return array;
             }
 
-            case TElement[] sourceArray: { return sourceArray.ToArray(); }
+            case TElement[] sourceArray: { return [.. sourceArray]; }
 
-            case IReadOnlyList<TElement> collection: { return collection.ToArray(); }
+            case IReadOnlyList<TElement> collection: { return [.. collection]; }
 
             case IReadOnlyCollection<TElement> collection:
             {
@@ -137,7 +145,7 @@ public static partial class AsyncLinq
         {
             List<TElement> array = await self.ToList(initialCapacity, token).ConfigureAwait(false);
 
-            return array.ToArray();
+            return [.. array];
         }
 
         public async ValueTask<List<TElement>> ToList( int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
