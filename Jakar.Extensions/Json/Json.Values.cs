@@ -19,6 +19,8 @@ public static partial class Json
 {
     // ─── Reading: JsonNode ────────────────────────────────────────────────────
 
+
+
     extension( JsonNode? self )
     {
         public bool Contains( string key ) => self is JsonObject obj && obj.ContainsKey(key);
@@ -59,8 +61,8 @@ public static partial class Json
 
 
         public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default ) => self.TryGet(key, info, out T? value) && value is not null
-                                                                                                         ? value
-                                                                                                         : defaultValue;
+                                                                                                        ? value
+                                                                                                        : defaultValue;
 
         public T? GetOrDefault<T>( string key, T? defaultValue = default ) => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue);
 
@@ -74,6 +76,8 @@ public static partial class Json
 
 
     // ─── Writing: JsonObject / JsonArray (in place) ───────────────────────────
+
+
 
     extension( JsonObject self )
     {
@@ -127,11 +131,11 @@ public static partial class Json
 
     extension( JsonArray self )
     {
-        public void Add<T>( T     value, JsonTypeInfo<T> info ) => self.Add(ToNode(value, info));
-        public void Insert<T>( int index, T value, JsonTypeInfo<T> info ) => self.Insert(index, ToNode(value, info));
-        public void Set<T>( int    index, T value, JsonTypeInfo<T> info ) => self[index] = ToNode(value, info);
+        public void Add<T>( T      value, JsonTypeInfo<T> info )                        => self.Add(ToNode(value,           info));
+        public void Insert<T>( int index, T               value, JsonTypeInfo<T> info ) => self.Insert(index, ToNode(value, info));
+        public void Set<T>( int    index, T               value, JsonTypeInfo<T> info ) => self[index] = ToNode(value, info);
 
-        public void Add<T>( T     value ) => self.Add(value, GetTypeInfo<T>());
+        public void Add<T>( T      value )          => self.Add(value, GetTypeInfo<T>());
         public void Insert<T>( int index, T value ) => self.Insert(index, value, GetTypeInfo<T>());
         public void Set<T>( int    index, T value ) => self.Set(index, value, GetTypeInfo<T>());
     }
@@ -140,7 +144,9 @@ public static partial class Json
 
     // ─── Reading: JsonElement ─────────────────────────────────────────────────
 
-    extension( JsonElement self )
+
+
+    extension( ref readonly JsonElement self )
     {
         public bool Contains( string key, StringComparison comparison = StringComparison.Ordinal ) => self.TryFind(key, comparison, out _);
 
@@ -159,7 +165,8 @@ public static partial class Json
             value = default;
             if ( self.ValueKind != JsonValueKind.Array || (uint)index >= (uint)self.GetArrayLength() ) { return false; }
 
-            return TryConvert(self[index], info, out value);
+            JsonElement element = self[index];
+            return element.TryConvert(info, out value);
         }
 
         public bool TryGet<T>( int index, out T? value ) => self.TryGet(index, GetTypeInfo<T>(), out value);
@@ -168,15 +175,15 @@ public static partial class Json
         /// <exception cref="KeyNotFoundException"> <paramref name="key"/> is missing. </exception>
         /// <exception cref="JsonException"> The value has the wrong shape for <typeparamref name="T"/>. </exception>
         public T? Get<T>( string key, JsonTypeInfo<T> info, StringComparison comparison = StringComparison.Ordinal ) => self.TryFind(key, comparison, out JsonElement element)
-                                                                                                                          ? element.Deserialize(info)
-                                                                                                                          : throw new KeyNotFoundException(key);
+                                                                                                                            ? element.Deserialize(info)
+                                                                                                                            : throw new KeyNotFoundException(key);
 
         public T? Get<T>( string key, StringComparison comparison = StringComparison.Ordinal ) => self.Get(key, GetTypeInfo<T>(), comparison);
 
 
         public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal ) => self.TryGet(key, info, out T? value, comparison) && value is not null
-                                                                                                                                                                 ? value
-                                                                                                                                                                 : defaultValue;
+                                                                                                                                                                ? value
+                                                                                                                                                                : defaultValue;
 
         public T? GetOrDefault<T>( string key, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal ) => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue, comparison);
 
@@ -223,11 +230,37 @@ public static partial class Json
 
             return any;
         }
+        /// <summary> <paramref name="removeAt"/> &lt; 0 appends <paramref name="append"/>; otherwise removes that index. </summary>
+        private JsonElement RewriteArray( int removeAt, JsonElement? append )
+        {
+            ArrayBufferWriter<byte> buffer = new(256);
+
+            using ( Utf8JsonWriter writer = new(buffer) )
+            {
+                writer.WriteStartArray();
+                int i = 0;
+
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach ( JsonElement item in self.EnumerateArray() )
+                {
+                    if ( i++ == removeAt ) { continue; }
+
+                    item.WriteTo(writer);
+                }
+
+                append?.WriteTo(writer);
+                writer.WriteEndArray();
+            }
+
+            return Parse(buffer.WrittenSpan);
+        }
     }
 
 
 
     // ─── Writing: JsonElement (immutable, so the receiver is replaced) ────────
+
+
 
     extension( ref JsonElement self )
     {
@@ -236,7 +269,7 @@ public static partial class Json
         {
             if ( self.ValueKind != JsonValueKind.Object || self.Contains(key) ) { return false; }
 
-            self = RewriteObject(self, key, JsonSerializer.SerializeToElement(value, info));
+            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
             return true;
         }
 
@@ -245,7 +278,7 @@ public static partial class Json
         {
             if ( !self.Contains(key) ) { return false; }
 
-            self = RewriteObject(self, key, JsonSerializer.SerializeToElement(value, info));
+            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
             return true;
         }
 
@@ -255,7 +288,7 @@ public static partial class Json
         {
             if ( self.ValueKind != JsonValueKind.Object ) { throw new InvalidOperationException($"Expected a JSON object, but found {self.ValueKind}."); }
 
-            self = RewriteObject(self, key, JsonSerializer.SerializeToElement(value, info));
+            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
         }
 
         /// <summary> Removes every occurrence of <paramref name="key"/>. </summary>
@@ -263,7 +296,7 @@ public static partial class Json
         {
             if ( !self.Contains(key) ) { return false; }
 
-            self = RewriteObject(self, key, null);
+            self.RewriteObject(key, null);
             return true;
         }
 
@@ -273,14 +306,14 @@ public static partial class Json
         {
             if ( self.ValueKind != JsonValueKind.Array ) { throw new InvalidOperationException($"Expected a JSON array, but found {self.ValueKind}."); }
 
-            self = RewriteArray(self, -1, JsonSerializer.SerializeToElement(value, info));
+            self = self.RewriteArray(-1, JsonSerializer.SerializeToElement(value, info));
         }
 
         public bool RemoveAt( int index )
         {
             if ( self.ValueKind != JsonValueKind.Array || (uint)index >= (uint)self.GetArrayLength() ) { return false; }
 
-            self = RewriteArray(self, index, null);
+            self = self.RewriteArray(index, null);
             return true;
         }
 
@@ -288,64 +321,41 @@ public static partial class Json
         public bool TryUpdate<T>( string key, T value ) => self.TryUpdate(key, value, GetTypeInfo<T>());
         public void Set<T>( string       key, T value ) => self.Set(key, value, GetTypeInfo<T>());
         public void Add<T>( T            value ) => self.Add(value, GetTypeInfo<T>());
+
+
+        /// <summary> Copies every property except <paramref name="key"/>, then writes <paramref name="replacement"/> under it (or nothing, to remove). The result owns its memory. </summary>
+        private void RewriteObject( string key, JsonElement? replacement )
+        {
+            ArrayBufferWriter<byte> buffer = new(256);
+
+            using ( Utf8JsonWriter writer = new(buffer) )
+            {
+                writer.WriteStartObject();
+
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach ( JsonProperty property in self.EnumerateObject() )
+                {
+                    if ( property.NameEquals(key) ) { continue; }
+
+                    property.WriteTo(writer);
+                }
+
+                if ( replacement is { } value )
+                {
+                    writer.WritePropertyName(key);
+                    value.WriteTo(writer);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            self = Parse(buffer.WrittenSpan);
+        }
     }
 
 
 
     // ─── Internals ────────────────────────────────────────────────────────────
-
-    /// <summary> Copies every property except <paramref name="key"/>, then writes <paramref name="replacement"/> under it (or nothing, to remove). The result owns its memory. </summary>
-    private static JsonElement RewriteObject( JsonElement source, string key, JsonElement? replacement )
-    {
-        ArrayBufferWriter<byte> buffer = new(256);
-
-        using ( Utf8JsonWriter writer = new(buffer) )
-        {
-            writer.WriteStartObject();
-
-            foreach ( JsonProperty property in source.EnumerateObject() )
-            {
-                if ( property.NameEquals(key) ) { continue; }
-
-                property.WriteTo(writer);
-            }
-
-            if ( replacement is { } value )
-            {
-                writer.WritePropertyName(key);
-                value.WriteTo(writer);
-            }
-
-            writer.WriteEndObject();
-        }
-
-        return Parse(buffer.WrittenSpan);
-    }
-
-
-    /// <summary> <paramref name="removeAt"/> &lt; 0 appends <paramref name="append"/>; otherwise removes that index. </summary>
-    private static JsonElement RewriteArray( JsonElement source, int removeAt, JsonElement? append )
-    {
-        ArrayBufferWriter<byte> buffer = new(256);
-
-        using ( Utf8JsonWriter writer = new(buffer) )
-        {
-            writer.WriteStartArray();
-            int i = 0;
-
-            foreach ( JsonElement item in source.EnumerateArray() )
-            {
-                if ( i++ == removeAt ) { continue; }
-
-                item.WriteTo(writer);
-            }
-
-            append?.WriteTo(writer);
-            writer.WriteEndArray();
-        }
-
-        return Parse(buffer.WrittenSpan);
-    }
 
 
     private static JsonElement Parse( ReadOnlySpan<byte> utf8 )
@@ -385,7 +395,7 @@ public static partial class Json
     }
 
 
-    private static bool TryConvert<T>( JsonElement element, JsonTypeInfo<T> info, out T? value )
+    private static bool TryConvert<T>( this ref readonly JsonElement element, JsonTypeInfo<T> info, out T? value )
     {
         try
         {

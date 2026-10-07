@@ -12,7 +12,7 @@ public static partial class Json
 
 
     /// <summary> Copies <paramref name="source"/> into <paramref name="destination"/> (creating it if needed), replacing existing keys. <see cref="JsonElement"/>s are immutable, so nothing is cloned. </summary>
-    public static Dictionary<string, JsonElement>? Merge( Dictionary<string, JsonElement>? destination, IReadOnlyDictionary<string, JsonElement>? source )
+    public static Dictionary<string, JsonElement>? Merge( this Dictionary<string, JsonElement>? destination, IReadOnlyDictionary<string, JsonElement>? source )
     {
         if ( source is null || source.Count == 0 ) { return destination; }
 
@@ -34,7 +34,7 @@ public static partial class Json
         public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value )
         {
             value = default;
-            return self.AdditionalData?.TryGetValue(key, out JsonElement element) is true && TryConvert(element, info, out value);
+            return self.AdditionalData?.TryGetValue(key, out JsonElement element) is true && element.TryConvert(info, out value);
         }
 
         public bool TryGet<T>( string key, out T? value ) => self.TryGet(key, GetTypeInfo<T>(), out value);
@@ -75,8 +75,7 @@ public static partial class Json
     extension( IJsonStringModel self )
     {
         /// <summary> Parses the stored bag; an empty one when there's nothing stored or it isn't a JSON object. </summary>
-        [Pure]
-        public Dictionary<string, JsonElement> GetAdditionalData()
+        [Pure] public Dictionary<string, JsonElement> GetAdditionalData()
         {
             Dictionary<string, JsonElement> result = CreateAdditionalData();
             if ( string.IsNullOrWhiteSpace(self.AdditionalData) ) { return result; }
@@ -95,8 +94,8 @@ public static partial class Json
 
 
         public void SetAdditionalData( IReadOnlyDictionary<string, JsonElement>? data ) => self.AdditionalData = data is null || data.Count == 0
-                                                                                                                      ? null
-                                                                                                                      : JsonModel.ToJson(Merge(null, data), JakarExtensionsContext.Default.DictionaryStringJsonElement, false);
+                                                                                                                     ? null
+                                                                                                                     : JsonModel.ToJson(Merge(null, data), JakarExtensionsContext.Default.DictionaryStringJsonElement, false);
 
         public bool Contains( string key ) => self.GetAdditionalData().ContainsKey(key);
 
@@ -104,7 +103,7 @@ public static partial class Json
         public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value )
         {
             value = default;
-            return self.GetAdditionalData().TryGetValue(key, out JsonElement element) && TryConvert(element, info, out value);
+            return self.GetAdditionalData().TryGetValue(key, out JsonElement element) && element.TryConvert(info, out value);
         }
 
         public T? Get<T>( string key, JsonTypeInfo<T> info ) => self.TryGet(key, info, out T? value)
