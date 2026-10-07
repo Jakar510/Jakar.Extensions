@@ -128,7 +128,7 @@ public readonly struct JsonReaderCheckpoint( int position, int depth, int state 
 public interface IJsonWriter
 {
     /// <summary> Constant per implementation; branches on it are removed by the JIT. </summary>
-    static abstract bool IsUtf8 { get; }
+    abstract static bool IsUtf8 { get; }
 
     int Depth { get; }
 
@@ -172,7 +172,7 @@ public interface IJsonWriter
 public interface IJsonReader
 {
     /// <summary> <see langword="true"/> when every <see cref="JsonSpan"/> this reader hands out is UTF-8. A hint for specialization: code that matches names must still check <see cref="JsonSpan.IsUtf8"/> (a <see cref="JsonTapeReader"/> may hold either encoding). </summary>
-    static abstract bool IsUtf8 { get; }
+    abstract static bool IsUtf8 { get; }
 
     int       Depth { get; }
     JsonError Error { get; }
@@ -237,17 +237,17 @@ public enum JsonFloatRead : byte
 public interface IJsonSerializable<TSelf> : ISpanFormattable, IUtf8SpanFormattable, ISpanParsable<TSelf>, IUtf8SpanParsable<TSelf>
     where TSelf : IJsonSerializable<TSelf>
 {
-    static abstract void WriteJson<TWriter>( ref TWriter writer, scoped in TSelf value )
+    abstract static void WriteJson<TWriter>( ref TWriter writer, scoped in TSelf value )
         where TWriter : IJsonWriter, allows ref struct;
 
-    static abstract bool TryReadJson<TReader>( ref TReader reader, [MaybeNullWhen(false)] out TSelf value )
+    abstract static bool TryReadJson<TReader>( ref TReader reader, [MaybeNullWhen(false)] out TSelf value )
         where TReader : IJsonReader, allows ref struct;
 
     /// <summary> The type's resolved writer settings (indentation, escaping, depth). </summary>
-    static abstract JsonWriterOptions DefaultWriterOptions { get; }
+    abstract static JsonWriterOptions DefaultWriterOptions { get; }
 
     /// <summary> The type's resolved reader settings (comments, trailing commas, depth). </summary>
-    static abstract JsonReaderOptions DefaultReaderOptions { get; }
+    abstract static JsonReaderOptions DefaultReaderOptions { get; }
 }
 
 
@@ -258,10 +258,10 @@ public interface IJsonSerializable<TSelf> : ISpanFormattable, IUtf8SpanFormattab
 /// </summary>
 public interface IJsonConverter<T>
 {
-    static abstract void Write<TWriter>( ref TWriter writer, scoped in T value )
+    abstract static void Write<TWriter>( ref TWriter writer, scoped in T value )
         where TWriter : IJsonWriter, allows ref struct;
 
-    static abstract bool TryRead<TReader>( ref TReader reader, [MaybeNullWhen(false)] out T value )
+    abstract static bool TryRead<TReader>( ref TReader reader, [MaybeNullWhen(false)] out T value )
         where TReader : IJsonReader, allows ref struct;
 }
 
@@ -270,8 +270,8 @@ public interface IJsonConverter<T>
 /// <summary> Reads and writes <typeparamref name="T"/> as an object member name (dictionary keys). </summary>
 public interface IJsonKeyConverter<T>
 {
-    static abstract void WriteKey<TWriter>( ref TWriter writer, T key )
+    abstract static void WriteKey<TWriter>( ref TWriter writer, T key )
         where TWriter : IJsonWriter, allows ref struct;
 
-    static abstract bool TryParseKey( scoped ReadOnlySpan<char> name, [MaybeNullWhen(false)] out T key );
+    abstract static bool TryParseKey( scoped ReadOnlySpan<char> name, [MaybeNullWhen(false)] out T key );
 }

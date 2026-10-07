@@ -18,7 +18,7 @@ namespace Jakar.Json.Generator;
 internal static class Emitter
 {
     private const string J = "global::Jakar.Json.";
-    private const string C = "global::Jakar.Json.Converters.";
+    private const string C = "global::Jakar.Json.";
     private const string R = "TReader";
     private const string W = "TWriter";
 
@@ -103,9 +103,15 @@ internal static class Emitter
         EmitAccessors(code, model, members);
         EmitOptions(code, model, type);
         EmitInterfaces(code, model);
-        EmitHelpers(code, model);
 
-        if ( type.GenerateToString != Values.OFF && !model.OverridesToString ) { code.Line($"public override string ToString() => {J}JsonCodec.ToJson(this);"); }
+        // Side by side with [JsonModel] (JJSON010), Jakar.SystemTextJson owns the type's own helpers: emitting ours too would make some calls ambiguous
+        // (FromJsonAsync(stream)) and silently split the rest between the two serializers (Type.FromJson binds to one, value.ToJson() to the other).
+        if ( !model.SideBySide )
+        {
+            EmitHelpers(code, model);
+
+            if ( type.GenerateToString != Values.OFF && !model.OverridesToString ) { code.Line($"public override string ToString() => {J}JsonCodec.ToJson(this);"); }
+        }
 
         code.Close();
 

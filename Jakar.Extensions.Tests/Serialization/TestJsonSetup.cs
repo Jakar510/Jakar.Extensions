@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 
 
-namespace Jakar.Extensions.Tests.Serialization;
+namespace Jakar.Extensions.Tests;
 
 
 internal static class TestJsonSetup

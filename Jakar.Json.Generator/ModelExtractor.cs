@@ -43,12 +43,10 @@ internal static class ModelExtractor
             break;
         }
 
-        // JJSON010: Jakar.SystemTextJson's generator would emit the same helpers.
-        if ( symbol.GetAttributes().Any(static a => a.AttributeClass is not null && TypeShapes.MetadataName(a.AttributeClass) == "Jakar.Extensions.JsonModelAttribute") )
-        {
-            diagnostics.Add(DiagnosticInfo.Create(JsonDiagnostics.BothGenerators, attributeLocation, displayName));
-            fatal = true;
-        }
+        // JJSON010: side-by-side with Jakar.SystemTextJson. Generators can't see each other's output, but [JsonModel] says exactly what that generator emits,
+        // so this one stays out of its way: the static FromJson/TryFromJson/FromJsonAsync, the instance ToJson and ToString() are left to it.
+        bool sideBySide = symbol.GetAttributes().Any(static a => a.AttributeClass is not null && TypeShapes.MetadataName(a.AttributeClass) == "Jakar.Extensions.JsonModelAttribute");
+        if ( sideBySide ) { diagnostics.Add(DiagnosticInfo.Create(JsonDiagnostics.SideBySide, attributeLocation, displayName)); }
 
         if ( symbol.IsStatic || symbol.TypeKind is not (TypeKind.Class or TypeKind.Struct) || symbol.IsRefLikeType )
         {
@@ -121,6 +119,7 @@ internal static class ModelExtractor
                    HasSerializableBase = hasSerializableBase,
                    Skip                = new EquatableArray<string>(FindHandWritten(symbol, attributeLocation, diagnostics)),
                    OverridesToString   = OverridesToString(symbol),
+                   SideBySide          = sideBySide,
                    AttributeLocation   = attributeLocation,
                    Diagnostics         = new EquatableArray<DiagnosticInfo>(diagnostics),
                    IsFatal             = fatal
@@ -277,7 +276,7 @@ internal static class ModelExtractor
 
         if ( known.Implements(converter, known.Converter, memberType) ) { return name; }
 
-        if ( memberType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable && known.Implements(converter, known.Converter, nullable.TypeArguments[0]) ) { return $"global::Jakar.Json.Converters.JsonNullableConverter<{TypeShapes.Name(nullable.TypeArguments[0])}, {name}>"; }
+        if ( memberType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable && known.Implements(converter, known.Converter, nullable.TypeArguments[0]) ) { return $"global::Jakar.Json.JsonNullableConverter<{TypeShapes.Name(nullable.TypeArguments[0])}, {name}>"; }
 
         return null;
     }

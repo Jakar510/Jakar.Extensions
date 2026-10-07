@@ -1,7 +1,7 @@
 // Jakar.Json
 // 10/07/2026
 
-namespace Jakar.Json.Converters;
+namespace Jakar.Json;
 
 
 public readonly struct JsonBooleanConverter : IJsonConverter<bool>

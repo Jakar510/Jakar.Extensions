@@ -29,7 +29,7 @@ public static class Statuses
                                                                                  [typeof(ValidationException)]         = Status.BadRequest,
                                                                                  [typeof(OperationCanceledException)]  = Status.RequestTimeout
                                                                              };
-    public static Func<Exception, Status> GetStatusFromException { get; set; } = Statuses.AsStatus;
+    public static Func<Exception, Status> GetStatusFromException { get; set; } = AsStatus;
 
 
     public static void RegisterStatus<TException>( Status status )

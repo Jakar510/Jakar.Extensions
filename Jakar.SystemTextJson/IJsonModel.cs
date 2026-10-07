@@ -23,23 +23,23 @@ public interface IJsonModel<TSelf>
     ///     <para> Unconstrained on purpose: a constraint such as <c> where TOther : IEnumerable&lt;TSelf&gt; </c> can't check registration and would exclude dictionaries, TSelf? and wrappers. </para>
     /// </summary>
     /// <exception cref="NotSupportedException"> <typeparamref name="TOther"/> isn't registered in that context. </exception>
-    public static virtual JsonTypeInfo<TOther> GetTypeInfo<TOther>() => TSelf.JsonTypeInfo.Options.GetRequiredTypeInfo<TOther>();
+    public virtual static JsonTypeInfo<TOther> GetTypeInfo<TOther>() => TSelf.JsonTypeInfo.Options.GetRequiredTypeInfo<TOther>();
 
 
     /// <exception cref="JsonException"> The JSON is malformed, or its root is <c> null </c>. </exception>
-    public static virtual TSelf FromJson( string json ) => JsonModel.FromJson(json, TSelf.JsonTypeInfo);
+    public virtual static TSelf FromJson( string json ) => JsonModel.FromJson(json, TSelf.JsonTypeInfo);
 
     /// <inheritdoc cref="FromJson(string)"/>
-    public static virtual TSelf FromJson( ReadOnlySpan<byte> utf8Json ) => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
+    public virtual static TSelf FromJson( ReadOnlySpan<byte> utf8Json ) => JsonModel.FromJson(utf8Json, TSelf.JsonTypeInfo);
 
     /// <summary> <see langword="false"/> for <see langword="null"/>/blank input, malformed JSON, or a JSON <c> null </c> root. </summary>
-    public static virtual bool TryFromJson( [NotNullWhen(true)] string? json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(json, TSelf.JsonTypeInfo, out result);
+    public virtual static bool TryFromJson( [NotNullWhen(true)] string? json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(json, TSelf.JsonTypeInfo, out result);
 
     /// <inheritdoc cref="TryFromJson(string, out TSelf)"/>
-    public static virtual bool TryFromJson( ReadOnlySpan<byte> utf8Json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
+    public virtual static bool TryFromJson( ReadOnlySpan<byte> utf8Json, [NotNullWhen(true)] out TSelf? result ) => JsonModel.TryFromJson(utf8Json, TSelf.JsonTypeInfo, out result);
 
     /// <inheritdoc cref="FromJson(string)"/>
-    public static virtual ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
+    public virtual static ValueTask<TSelf> FromJsonAsync( Stream stream, CancellationToken token = default ) => JsonModel.FromJsonAsync(stream, TSelf.JsonTypeInfo, token);
 }
 
 

@@ -71,7 +71,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
         if ( e is not null )
         {
-            error = Error.Create(e, title, response.URL?.OriginalString, in StringTags.Empty, response.StatusCode);
+            error = Create(e, title, response.URL?.OriginalString, in StringTags.Empty, response.StatusCode);
             return true;
         }
 

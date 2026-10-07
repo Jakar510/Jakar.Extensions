@@ -1,7 +1,7 @@
 // Jakar.Json
 // 10/07/2026
 
-namespace Jakar.Json.Converters;
+namespace Jakar.Json;
 
 
 /// <summary> Shared array reading and writing. Reads collect elements in pooled scratch space; writes take a span whenever the collection has one, so nothing is boxed. </summary>

@@ -5,7 +5,7 @@ using System.Linq;
 
 
 
-namespace Jakar.Extensions.Tests.Serialization;
+namespace Jakar.Extensions.Tests;
 
 
 /// <summary> Regression tests for bugs found while planning the System.Text.Json migration (AOT-plan.md §2.14). </summary>

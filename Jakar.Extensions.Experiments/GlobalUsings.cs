@@ -27,7 +27,6 @@ global using BenchmarkDotNet.Running;
 global using Bogus;
 global using HashidsNet;
 global using Jakar.Extensions;
-global using Jakar.Extensions.Experiments.Benchmarks;
 global using Jakar.Extensions.UserGuid;
 global using JetBrains.Annotations;
 global using Newtonsoft.Json;

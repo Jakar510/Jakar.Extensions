@@ -311,7 +311,7 @@ public partial class WebRequester_Tests : Assert
         StubHandler  handler = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, "ok"));
         WebRequester utf16   = new(new HttpClient(handler), new WebRequester.Builder.HostHolder(__host), encoding: Encoding.Unicode);
 
-        await utf16.Post("items", new JsonItem(TEXT)).AsString(CancellationToken.None);
+        await utf16.Post<JsonItem>("items", new JsonItem(TEXT)).AsString(CancellationToken.None);
 
         this.AreEqual("utf-16", handler.Requests[0].Content!.Headers.ContentType!.CharSet);
 

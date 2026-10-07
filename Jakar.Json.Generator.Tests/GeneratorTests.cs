@@ -198,16 +198,21 @@ public sealed class GeneratorTests
         Assert.That(result.Source("B."),                                               Does.Contain("JsonNullableConverter<int, global::IntConverter>"));
     }
 
-    [Test] public void JJSON010_BothGenerators()
+    [Test] public void JJSON010_SideBySide_LeavesTheHelpersToJsonModel()
     {
         Result result = Run(PRELUDE +
                             """
                             namespace Jakar.Extensions { public sealed class JsonModelAttribute : System.Attribute { } }
 
-                            [GenerateJson, Jakar.Extensions.JsonModel] public sealed partial class A { }
+                            [GenerateJson, Jakar.Extensions.JsonModel] public sealed partial class A { public int Value { get; set; } }
                             """);
 
-        Assert.That(result.Ids, Does.Contain("JJSON010"));
+        Assert.That(result.GeneratorDiagnostics.Single(static d => d.Id == "JJSON010").Severity, Is.EqualTo(DiagnosticSeverity.Info));
+        Assert.That(result.CompileErrors,                                                     Is.Empty);
+
+        string source = result.Source("A.");
+        Assert.That(source, Does.Contain("TryReadJson").And.Contain("TryFormat").And.Contain(" Parse("), "the IJsonSerializable contract is still implemented");
+        Assert.That(source, Does.Not.Contain(" FromJson(").And.Not.Contain(" TryFromJson(").And.Not.Contain(" FromJsonAsync(").And.Not.Contain(" ToJson(").And.Not.Contain("ToString()"));
     }
 
     [Test] public void JJSON011_ComputedMember()

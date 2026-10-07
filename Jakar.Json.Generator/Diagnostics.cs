@@ -23,7 +23,7 @@ public static class JsonDiagnostics
     public const string HAND_WRITTEN         = "JJSON007";
     public const string CONTRADICTORY        = "JJSON008";
     public const string INVALID_CONVERTER    = "JJSON009";
-    public const string BOTH_GENERATORS      = "JJSON010";
+    public const string SIDE_BY_SIDE         = "JJSON010";
     public const string NOT_READ             = "JJSON011";
     public const string INVALID_MEMBER_TYPE  = "JJSON012";
     public const string DETERMINISM_WEAKENED = "JJSON013";
@@ -59,7 +59,7 @@ public static class JsonDiagnostics
 
     public static readonly DiagnosticDescriptor InvalidConverter = Create(INVALID_CONVERTER, "Converter doesn't fit the member", "Converter '{0}' on member '{1}' must implement IJsonConverter<{2}>", DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor BothGenerators = Create(BOTH_GENERATORS, "[GenerateJson] and [JsonModel] on one type", "'{0}' has both [GenerateJson] (Jakar.Json) and [JsonModel] (Jakar.SystemTextJson); both generate FromJson/ToJson and neither can see the other's output. Keep one.", DiagnosticSeverity.Error);
+    public static readonly DiagnosticDescriptor SideBySide = Create(SIDE_BY_SIDE, "[GenerateJson] side by side with [JsonModel]", "'{0}' also has Jakar.SystemTextJson's [JsonModel], so its FromJson/TryFromJson/FromJsonAsync/ToJson helpers and ToString() come from Jakar.SystemTextJson; reach Jakar.Json through JsonCodec, IJsonSerializable<T>, TryFormat or Parse", DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor NotRead = Create(NOT_READ, "Member is written but never read", "Member '{0}' has no setter and no matching constructor parameter, so it's written but ignored when reading", DiagnosticSeverity.Info);
 

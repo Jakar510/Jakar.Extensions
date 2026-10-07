@@ -21,10 +21,10 @@ public sealed class JArrayNode : JNode, IList<JNode?>, IReadOnlyList<JNode?>
 
     /// <exception cref="JsonReadException"> The JSON is malformed. </exception>
     /// <exception cref="FormatException"> The root isn't an array. </exception>
-    public static new JArrayNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
+    public new static JArrayNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
 
     /// <inheritdoc cref="Parse(string, JsonReaderOptions?)"/>
-    public static new JArrayNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
+    public new static JArrayNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
 
 
     public override JNodeKind Kind       => JNodeKind.Array;

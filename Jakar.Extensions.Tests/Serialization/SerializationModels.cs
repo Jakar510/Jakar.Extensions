@@ -1,12 +1,7 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 // 10/02/2026
 
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
-
-
-
-namespace Jakar.Extensions.Tests.Serialization;
+namespace Jakar.Extensions.Tests;
 
 
 [JsonModel(typeof(TestJsonContext))]

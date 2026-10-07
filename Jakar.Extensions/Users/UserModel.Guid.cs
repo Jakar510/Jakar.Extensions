@@ -332,6 +332,7 @@ public sealed partial class CurrentLocation : BaseClass<CurrentLocation>, ICurre
 
 
 [Serializable]
+[GenerateJson]
 [JsonModel(typeof(UserGuidJsonContext))]
 public sealed partial class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {

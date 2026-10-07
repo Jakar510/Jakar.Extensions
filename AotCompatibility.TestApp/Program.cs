@@ -123,7 +123,7 @@ Check("OTP QR code (ZXing)", () => OneTimePassword.Create("Jakar").GetContent("a
 Check("IPAddress parse",     () => IPAddress.Parse("127.0.0.1").ToString() == "127.0.0.1");
 
 // ─── Jakar.Json (reflection-free serializer) ─────────────────────────────────
-foreach ( ( string name, Func<bool> test ) in AotCompatibility.TestApp.JakarJson.JakarJsonChecks.All() ) { Check(name, test); }
+foreach ( ( string name, Func<bool> test ) in JakarJsonChecks.All() ) { Check(name, test); }
 
 
 Console.WriteLine(failures == 0

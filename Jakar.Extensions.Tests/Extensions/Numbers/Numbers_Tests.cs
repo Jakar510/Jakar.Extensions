@@ -1,10 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Numbers;
 
 
 [TestFixture]
-[TestOf(typeof(Numbers))]
+[TestOf(typeof(Jakar.Extensions.Numbers))]
 public class Numbers_Tests : Assert
 {
     // ─── Round ───────────────────────────────────────────────────────────────

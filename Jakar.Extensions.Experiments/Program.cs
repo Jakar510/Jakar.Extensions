@@ -1,11 +1,14 @@
-// dotnet run -c Release -- --bench [BenchmarkDotNet arguments, e.g. --filter *JakarJson*]
+// dotnet run -c Release -- [--bench] [BenchmarkDotNet arguments, e.g. --filter *JakarJson*]
 
-if ( args.Length > 0 && args[0] == "--bench" )
-{
-    BenchmarkSwitcher.FromAssembly(typeof(JakarJson_Benchmarks).Assembly).Run(args[1..]);
-    return;
-}
+using Experiments;
+using Experiments.Benchmarks;
 
-UserModel user = new();
-string    json = user.ToJson();
-Console.WriteLine(json);
+
+// BenchmarkSwitcher.FromAssembly(typeof(JakarJson_Benchmarks).Assembly)
+//                  .Run(args is ["--bench", ..]
+//                           ? args[1..]
+//                           : args);
+
+
+SharedUserModel model = new();
+Console.WriteLine(model.ToJson());

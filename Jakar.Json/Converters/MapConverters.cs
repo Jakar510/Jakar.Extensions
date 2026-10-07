@@ -1,7 +1,7 @@
 // Jakar.Json
 // 10/07/2026
 
-namespace Jakar.Json.Converters;
+namespace Jakar.Json;
 
 
 // ─── Keys ────────────────────────────────────────────────────────────────────
@@ -287,7 +287,7 @@ public readonly struct JsonMapConverter<TMap, TKey, TValue, TKeyConverter, TValu
 public interface IJsonMapFactory<TMap, TKey, TValue>
     where TKey : notnull
 {
-    static abstract TMap Create( Dictionary<TKey, TValue> entries );
+    abstract static TMap Create( Dictionary<TKey, TValue> entries );
 }
 
 

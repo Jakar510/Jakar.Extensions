@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Jakar.Extensions.Tests.Text;
 
 
 
@@ -21,9 +22,9 @@ namespace Jakar.Extensions.Tests;
 [JsonSerializable(typeof(WebRequester_Tests.JsonItem))]
 [JsonSerializable(typeof(List<WebRequester_Tests.Item>))]
 [JsonSerializable(typeof(Base64_Tests.SampleRecord))]
-[JsonSerializable(typeof(Serialization.TestPreferences))]
-[JsonSerializable(typeof(Serialization.Point))]
-[JsonSerializable(typeof(List<Serialization.Point>))]
+[JsonSerializable(typeof(TestPreferences))]
+[JsonSerializable(typeof(Point))]
+[JsonSerializable(typeof(List<Point>))]
 [JsonSerializable(typeof(ObservableCollection<int>))]
 [JsonSerializable(typeof(Dictionary<string, int>))]
 internal sealed partial class TestJsonContext : JsonSerializerContext;

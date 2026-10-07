@@ -73,7 +73,7 @@ public sealed class WebRequesterOptions
     public HttpKeepAlivePingPolicy? KeepAlivePingPolicy { get; set; }
 
     /// <summary> Code-only settings that configuration can't express (SSL callbacks, proxy, credentials, cookies, ...). Applied after the other options. </summary>
-    public Action<WebRequester.Builder>? ConfigureBuilder { get; set; }
+    public Action<Builder>? ConfigureBuilder { get; set; }
 
 
     /// <summary> The configured <see cref="Encoding"/>, or <see cref="System.Text.Encoding.Default"/>. </summary>
@@ -113,13 +113,13 @@ public sealed class WebRequesterOptions
     public sealed class RetryOptions
     {
         /// <summary> Retries after the first attempt. </summary>
-        public ushort MaxRetries { get; set; } = WebRequester.RetryPolicy.Default.MaxRetires;
+        public ushort MaxRetries { get; set; } = RetryPolicy.Default.MaxRetires;
 
-        public TimeSpan Delay { get; set; } = WebRequester.RetryPolicy.Default.Delay;
+        public TimeSpan Delay { get; set; } = RetryPolicy.Default.Delay;
 
-        public TimeSpan Scale { get; set; } = WebRequester.RetryPolicy.Default.Scale;
+        public TimeSpan Scale { get; set; } = RetryPolicy.Default.Scale;
 
-        public WebRequester.RetryPolicy ToPolicy() => new(Delay, Scale, MaxRetries);
+        public RetryPolicy ToPolicy() => new(Delay, Scale, MaxRetries);
     }
 }
 
@@ -169,8 +169,8 @@ public static class WebRequesterServiceCollectionExtensions
         // Validation happens in WebRequester.Builder.Apply, not as an options validator: a registered validator makes IOptionsMonitor throw while handling a configuration
         // reload (on the file-watcher thread, before any listener runs). Invalid options still throw when the requester is created; an invalid reload is logged and ignored.
 
-        if ( name == Options.DefaultName ) { services.TryAddSingleton(static provider => WebRequester.Create(provider)); }
-        else { services.TryAddKeyedSingleton(name, static ( provider, key ) => WebRequester.Create(provider, (string)key!)); }
+        if ( name == Options.DefaultName ) { services.TryAddSingleton(static provider => Create(provider)); }
+        else { services.TryAddKeyedSingleton(name, static ( provider, key ) => Create(provider, (string)key!)); }
 
         return options;
     }

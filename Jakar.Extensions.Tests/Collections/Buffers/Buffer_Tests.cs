@@ -6,7 +6,7 @@ using System.Linq;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Buffers;
 
 
 [TestFixture]

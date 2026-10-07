@@ -2,18 +2,16 @@
 // 10/02/2026
 
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 
 
-namespace Jakar.Extensions.Tests.Serialization;
+namespace Jakar.Extensions.Tests;
 
 
 /// <summary> Library models through System.Text.Json: round trips, converters, observable collections (AOT-plan §2.13), preferences (§2.10). </summary>
@@ -136,7 +134,7 @@ public sealed class ModelJson_Tests
 
     [Test] public void UserModel_ObservableProperties_RoundTrip()
     {
-        UserGuid.UserModel user = Golden.GoldenSamples.User();
+        UserGuid.UserModel user = GoldenSamples.User();
         UserGuid.UserModel back = UserGuid.UserModel.FromJson(user.ToJson());
 
         Assert.That(back.Addresses.Single().City,     Is.EqualTo("Springfield"));
@@ -179,7 +177,7 @@ public sealed class ModelJson_Tests
 
     [Test] public async Task JsonBody_UsesTheRuntimeType()
     {
-        BaseClass              model   = Golden.GoldenSamples.Alert();
+        BaseClass              model   = GoldenSamples.Alert();
         using ByteArrayContent content = WebRequester.CreateJsonContentOfRuntimeType(model);
         string                 json    = await content.ReadAsStringAsync();
 

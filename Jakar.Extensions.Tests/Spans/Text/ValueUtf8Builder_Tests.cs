@@ -6,7 +6,7 @@ using System.Text;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Text;
 
 
 [TestFixture]

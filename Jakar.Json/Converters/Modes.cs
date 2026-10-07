@@ -1,7 +1,7 @@
 // Jakar.Json
 // 10/07/2026
 
-namespace Jakar.Json.Converters;
+namespace Jakar.Json;
 
 
 // Settings that change how a value is read or written travel as type arguments (marker structs with a static property), so the
@@ -25,7 +25,7 @@ public enum JsonNumberMode : byte
 
 public interface IJsonNumberMode
 {
-    static abstract JsonNumberMode Mode { get; }
+    abstract static JsonNumberMode Mode { get; }
 }
 
 
@@ -92,7 +92,7 @@ public static class JsonNumberModes
 
 public interface IJsonDateTimeMode
 {
-    static abstract JsonLocalDateTimes Mode { get; }
+    abstract static JsonLocalDateTimes Mode { get; }
 }
 
 
@@ -128,8 +128,8 @@ public static class JsonDateTimeModes
 /// </summary>
 public interface IJsonOrder<in T>
 {
-    static abstract bool Sorted { get; }
-    static abstract int  Compare( T x, T y );
+    abstract static bool Sorted { get; }
+    abstract static int  Compare( T x, T y );
 }
 
 
@@ -170,7 +170,7 @@ public static class JsonOrders
 
     /// <summary> Enums by their numeric value. </summary>
     public readonly struct Enum<TEnum, TUnderlying> : IJsonOrder<TEnum>
-        where TEnum : struct, System.Enum
+        where TEnum : struct, Enum
         where TUnderlying : struct, IBinaryInteger<TUnderlying>
     {
         public static bool Sorted                      => true;

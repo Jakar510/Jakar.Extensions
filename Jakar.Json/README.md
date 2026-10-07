@@ -110,7 +110,7 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
 | JJSON007 | Info | A generated member was already declared by hand, so it's not generated |
 | JJSON008 | Error | Contradictory settings |
 | JJSON009 | Error | A converter doesn't fit its member |
-| JJSON010 | Error | `[GenerateJson]` and Jakar.SystemTextJson's `[JsonModel]` on one type |
+| JJSON010 | Info | Side by side with Jakar.SystemTextJson's `[JsonModel]`: the type's `FromJson`/`ToJson`/`ToString()` are Jakar.SystemTextJson's (see Notes) |
 | JJSON011 | Info | A member is written but never read (no setter, no constructor parameter) |
 | JJSON012 | Error | `object`, delegate, pointer or ref struct member |
 | JJSON013 | Warning | A setting weakens deterministic output |
@@ -119,6 +119,7 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
 
 ## Notes
 
+- **Migrating from Jakar.SystemTextJson.** A type can keep `[JsonModel]` next to `[GenerateJson]` (side-by-side mode). Its own `FromJson`/`TryFromJson`/`FromJsonAsync`/`ToJson` and `ToString()` stay System.Text.Json's. Reach Jakar.Json through `JsonCodec.ToJson(value)` / `JsonCodec.FromJson<T>(json)`, `TryFormat`, `Parse`, or generic `T : IJsonSerializable<T>` code. Remove `[JsonModel]` to finish; see SPEC.md §7.7.
 - The only reflection-adjacent code is in the BCL collections the reader creates, such as `Dictionary<TKey, TValue>` with its default comparer. Jakar.Json itself makes no reflection calls, and writing to sets and dictionaries uses comparisons chosen at compile time.
 - `byte[]` is written as a JSON array of numbers, not base64. Use a converter if you need base64.
 - Object references aren't preserved. A cyclic graph fails at `MaxDepth` with `DepthExceeded`.

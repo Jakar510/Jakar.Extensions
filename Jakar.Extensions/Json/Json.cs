@@ -45,7 +45,7 @@ public static partial class Json
         {
             if ( __options is not null ) { return __options; }
 
-            JsonSerializerOptions options = new(JakarExtensionsContext.Default.Options) { TypeInfoResolver = JsonTypeInfoResolver.Combine([.. __resolvers, JakarExtensionsContext.Default, UserGuid.UserGuidJsonContext.Default, UserLong.UserLongJsonContext.Default]) };
+            JsonSerializerOptions options = new(JakarExtensionsContext.Default.Options) { TypeInfoResolver = JsonTypeInfoResolver.Combine([.. __resolvers, JakarExtensionsContext.Default, UserGuidJsonContext.Default, UserLongJsonContext.Default]) };
             options.MakeReadOnly();
             Volatile.Write(ref __options, options);
             return options;

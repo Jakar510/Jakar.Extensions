@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 
 
-namespace Jakar.Extensions.Tests.Collections;
+namespace Jakar.Extensions.Tests.Observable;
 
 
 [TestFixture]

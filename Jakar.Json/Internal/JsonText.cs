@@ -9,7 +9,7 @@ internal static partial class JsonText
     /// <summary> Parses a value from text: a static interface, so <see cref="TryRead{TReader,T,TParser}"/> is specialized per parser with no delegate. </summary>
     public interface IParser<T>
     {
-        static abstract bool TryParse( scoped ReadOnlySpan<char> text, [MaybeNullWhen(false)] out T value );
+        abstract static bool TryParse( scoped ReadOnlySpan<char> text, [MaybeNullWhen(false)] out T value );
     }
 
 

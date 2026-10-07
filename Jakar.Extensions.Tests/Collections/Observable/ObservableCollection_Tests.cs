@@ -6,7 +6,7 @@ using System.Linq;
 
 
 
-namespace Jakar.Extensions.Tests.Collections;
+namespace Jakar.Extensions.Tests.Observable;
 
 
 [TestFixture]

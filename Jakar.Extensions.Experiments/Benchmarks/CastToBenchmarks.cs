@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 03/05/2023  11:59 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*

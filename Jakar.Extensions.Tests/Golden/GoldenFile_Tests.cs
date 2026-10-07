@@ -15,7 +15,7 @@ using Jakar.Extensions.UserGuid;
 
 
 
-namespace Jakar.Extensions.Tests.Golden;
+namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]

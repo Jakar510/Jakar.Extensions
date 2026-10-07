@@ -7,11 +7,11 @@ using Microsoft.Extensions.Logging;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Tasks;
 
 
 [TestFixture]
-[TestOf(typeof(Tasks))]
+[TestOf(typeof(Jakar.Extensions.Tasks))]
 [NonParallelizable] // some tests capture SelfLogger, which is process-wide
 public class SafeFireAndForget_Tests : Assert
 {

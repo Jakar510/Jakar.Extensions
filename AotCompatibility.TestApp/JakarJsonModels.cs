@@ -4,7 +4,7 @@ using Jakar.Json;
 
 
 
-namespace AotCompatibility.TestApp.JakarJson;
+namespace AotCompatibility.TestApp;
 
 
 public enum Stage

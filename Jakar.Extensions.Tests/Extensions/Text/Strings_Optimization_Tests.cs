@@ -1,6 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Text;
 
 
 [TestFixture]

@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Experiments
 // 09/19/2025  17:14
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 [JsonModel(typeof(ExperimentsJsonContext))]
@@ -67,7 +67,7 @@ public sealed partial record Node : BaseRecord<Node>, IJsonModel<Node>
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
 [JsonModel(typeof(ExperimentsJsonContext))]
-public sealed partial class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
+public sealed partial class TestJson : BaseClass<TestJson>
 {
     internal static readonly TestJson Debug = new()
                                               {
@@ -112,12 +112,12 @@ public sealed partial class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
     public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
 
 
-    public CreateUserModel                CreateUser { get; set; } = new();
-    public Errors                         Errors     { get; set; } = Errors.Empty;
-    public ObservableCollection<FileData> Files      { get; set; } = [];
-    public CurrentLocation                Location   { get; set; } = new();
-    public Node[]                         Nodes      { get; set; } = [];
-    public UserModel                      User       { get; set; } = new();
+    public CreateUserModel                                 CreateUser { get; set; } = new();
+    public Errors                                          Errors     { get; set; } = Errors.Empty;
+    public Jakar.Extensions.ObservableCollection<FileData> Files      { get; set; } = [];
+    public CurrentLocation                                 Location   { get; set; } = new();
+    public Node[]                                          Nodes      { get; set; } = [];
+    public UserModel                                       User       { get; set; } = new();
 
 
     public static void Print()

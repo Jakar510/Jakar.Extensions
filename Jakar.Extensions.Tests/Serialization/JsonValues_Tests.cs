@@ -2,13 +2,12 @@
 // 10/02/2026
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 
 
-namespace Jakar.Extensions.Tests.Serialization;
+namespace Jakar.Extensions.Tests;
 
 
 /// <summary> Typed get / add / update / delete helpers for JsonNode and JsonElement (AOT-plan §2.11), and the AdditionalData bag helpers. </summary>

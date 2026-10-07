@@ -228,6 +228,7 @@ internal sealed record ModelInfo
     public required bool                           HasSerializableBase { get; init; } // a base type already has generated members: hide them with 'new'
     public required EquatableArray<string>         Skip                { get; init; } // generated members the type already declares
     public required bool                           OverridesToString   { get; init; }
+    public required bool                           SideBySide          { get; init; } // [JsonModel] too: Jakar.SystemTextJson owns FromJson/ToJson/ToString(), so only the contract members are emitted
     public required LocationInfo?                  AttributeLocation   { get; init; }
     public required EquatableArray<DiagnosticInfo> Diagnostics         { get; init; }
     public required bool                           IsFatal             { get; init; }

@@ -35,7 +35,7 @@ The layout mirrors `Jakar.SystemTextJson`:
 | Project | TFM | Contents |
 |---|---|---|
 | `Jakar.Spans` | `net10.0` | `ValueStringBuilder`, `ValueUtf8Builder`, `ValueSpanReader<T>` and `Sizes`, moved out of `Jakar.Extensions` (§3.1). No dependencies. |
-| `Jakar.Json` | `net10.0` | Attributes, `IJsonWriter`/`IJsonReader`, `JsonWriter`, `JsonUtf8Writer`, `JsonReader<TChar>`, the converters (`Jakar.Json.Converters`), `JsonCodec` helpers, `JsonTape`, the `JNode` DOM and its reader/writer, errors. Packs the generator and code fixes into `analyzers/dotnet/cs`. |
+| `Jakar.Json` | `net10.0` | Attributes, `IJsonWriter`/`IJsonReader`, `JsonWriter`, `JsonUtf8Writer`, `JsonReader<TChar>`, the converters, `JsonCodec` helpers, `JsonTape`, the `JNode` DOM and its reader/writer, errors. Packs the generator and code fixes into `analyzers/dotnet/cs`. |
 | `Jakar.Json.Generator` | `netstandard2.0` | `JsonGenerator` (`IIncrementalGenerator`) and `JsonAnalyzer` (JJSON015). Pinned to Roslyn 4.12, the same as the STJ generator. |
 | `Jakar.Json.Generator.CodeFixes` | `netstandard2.0` | Code fixes: add `partial` (JJSON001), freeze the order with `[JsonMember(Order = n)]` (JJSON006), add `[GenerateJson]` (JJSON015). |
 | `Jakar.Json.Tests` | `net10.0` | Runtime, conformance, idempotency and allocation tests (§12). |
@@ -240,7 +240,7 @@ Names checked to be free of collisions with `System.Text.Json`, Newtonsoft and `
 
 ### 4.4 Migration from System.Text.Json attributes
 
-When the generator finds these attributes by metadata name, it honors them, with no package dependency: `JsonPropertyName`, `JsonPropertyOrder`, `JsonIgnore` (`Always` ignores; `WhenWritingDefault` / `WhenWritingNull` map to `DefaultValues` / `NullValues = Omit`), `JsonRequired`, `JsonInclude`, `JsonExtensionData`, `JsonConstructor` and `JsonStringEnumMemberName`. If a `[JsonMember]` is present on the same member, it wins. A type can therefore keep its System.Text.Json attributes during a migration; only Jakar.SystemTextJson's `[JsonModel]` conflicts with `[GenerateJson]` (JJSON010).
+When the generator finds these attributes by metadata name, it honors them, with no package dependency: `JsonPropertyName`, `JsonPropertyOrder`, `JsonIgnore` (`Always` ignores; `WhenWritingDefault` / `WhenWritingNull` map to `DefaultValues` / `NullValues = Omit`), `JsonRequired`, `JsonInclude`, `JsonExtensionData`, `JsonConstructor` and `JsonStringEnumMemberName`. If a `[JsonMember]` is present on the same member, it wins. A type can therefore keep its System.Text.Json attributes during a migration; it can even keep Jakar.SystemTextJson's `[JsonModel]` alongside `[GenerateJson]` (§7.7).
 
 ---
 
@@ -504,6 +504,34 @@ public abstract partial class Animal { public string Name { get; init; } = ""; }
 
 `[JsonMember(ExtensionData = true)]` (or STJ's `[JsonExtensionData]`) marks an `OrderedDictionary<string, JNode?>?` or a `JObjectNode?` member. Its presence implies `UnknownMembers = Capture` (an explicit `UnknownMembers = Error` is JJSON008). Unknown members are read into it in input order, as `JNode`s; when writing, they're written after the declared members, in insertion order.
 
+### 7.7 Side by side with Jakar.SystemTextJson
+
+A type can carry both `[GenerateJson]` and Jakar.SystemTextJson's `[JsonModel]`, so a codebase can move to Jakar.Json one call site at a time.
+
+Source generators can't see each other's output, so neither generator can skip a member the other emits. Jakar.Json can still read the `[JsonModel]` attribute, though, and it knows what that generator emits. With both attributes present, the type's own helpers belong to Jakar.SystemTextJson, and Jakar.Json emits only its contract (JJSON010, Info):
+
+| Member | Emitted by |
+|---|---|
+| `JsonTypeInfo`, static `FromJson` / `TryFromJson` / `FromJsonAsync`, the `ToJson()` / `ToUtf8Json()` extensions, `ToString()` with `[JsonModel(GenerateToString = true)]` | Jakar.SystemTextJson |
+| `IJsonSerializable<T>` (`WriteJson`, `TryReadJson`, `DefaultWriterOptions`, `DefaultReaderOptions`), `TryFormat` (UTF-16 and UTF-8), `ToString(format, provider)`, `Parse` / `TryParse` | Jakar.Json |
+| Jakar.Json's instance helpers (`ToJson`, `ToJsonUtf8`, `ToJson(Stream)`, `ToJsonAsync`, `WriteJson(IBufferWriter<byte>)`), static `FromJson*` / `TryFromJson*` / `FromJsonAsync`, `ToString()` | not emitted |
+
+Emitting both sets would compile, but call sites would silently split between the two serializers. `Type.FromJson(json)` binds to Jakar.SystemTextJson's overload, because it needs no optional `options` argument. `value.ToJson()` binds to Jakar.Json, because an instance method beats an extension. `Type.FromJsonAsync(stream)` would be ambiguous (CS0121). With the rule above, the meaning of every call is predictable:
+
+```csharp
+[GenerateJson]
+[JsonModel(typeof(AppJsonContext))]
+public sealed partial class Invoice { ... }
+
+Invoice a = Invoice.FromJson(json);               // System.Text.Json (Jakar.SystemTextJson)
+string  b = invoice.ToJson();                     // System.Text.Json
+string  c = JsonCodec.ToJson(invoice);            // Jakar.Json
+Invoice d = JsonCodec.FromJson<Invoice>(utf8);    // Jakar.Json
+Invoice e = Invoice.Parse(json, null);            // Jakar.Json (ISpanParsable)
+```
+
+Generic code over `T : IJsonSerializable<T>` uses Jakar.Json. Each library reads the other's output: Jakar.Json honors the System.Text.Json attributes (§4.4), and both read the other's whitespace and escapes. They don't write byte-identical JSON, though (`"name" : value` vs `"name":value`, and different escaping). To finish the migration, remove `[JsonModel]`. The generated `FromJson`/`ToJson` then come back and call sites keep compiling, now on Jakar.Json. The one exception is `FromJsonAsync(stream, token)`: Jakar.Json's overload takes `options` before the token, so name the argument (`token: token`).
+
 ---
 
 ## 8. Helpers
@@ -653,19 +681,33 @@ public sealed class JsonTape : IDisposable
 
 
     /// <summary> Whether the input was UTF-8 (positions are byte offsets) rather than UTF-16 (char offsets). </summary>
-    public bool     IsUtf8 => __utf8;
+    public bool IsUtf8 => __utf8;
+
     /// <summary> The input's length, in <see cref="char"/>s or <see cref="byte"/>s. </summary>
-    public int      Length => __length;
+    public int Length => __length;
+
     /// <summary> The deepest nesting in the document. </summary>
-    public int      MaxDepth => __maxDepthSeen;
+    public int MaxDepth => __maxDepthSeen;
+
     /// <summary> The document's root value. </summary>
-    public JsonItem Root   { get { _ = Entries; return new JsonItem(this, 0); } }
+    public JsonItem Root
+    {
+        get
+        {
+            _ = Entries;
+            return new JsonItem(this, 0);
+        }
+    }
 
 
-    internal int                Count      => __count;
-    internal Entry[]            Entries    => __entries ?? throw new ObjectDisposedException(nameof(JsonTape));
-    internal ReadOnlySpan<char> InputUtf16 => __string is not null ? __string.AsSpan() : __chars.AsSpan(0, __length);
-    internal ReadOnlySpan<byte> InputUtf8  => __bytes.AsSpan(0, __length);
+    internal int     Count   => __count;
+    internal Entry[] Entries => __entries ?? throw new ObjectDisposedException(nameof(JsonTape));
+
+    internal ReadOnlySpan<char> InputUtf16 => __string is not null
+                                                  ? __string.AsSpan()
+                                                  : __chars.AsSpan(0, __length);
+
+    internal ReadOnlySpan<byte> InputUtf8 => __bytes.AsSpan(0, __length);
 
 
     private JsonTape() { }
@@ -677,7 +719,13 @@ public sealed class JsonTape : IDisposable
     public static JsonTape Parse( string json, JsonReaderOptions? options = null )
     {
         ArgumentNullException.ThrowIfNull(json);
-        JsonTape tape = new() { __string = json, __length = json.Length };
+
+        JsonTape tape = new()
+                        {
+                            __string = json,
+                            __length = json.Length
+                        };
+
         return tape.BuildOrThrow(json.AsSpan(), options ?? JsonReaderOptions.Default);
     }
 
@@ -686,7 +734,13 @@ public sealed class JsonTape : IDisposable
     {
         char[] copy = ArrayPool<char>.Shared.Rent(json.Length);
         json.CopyTo(copy);
-        JsonTape tape = new() { __chars = copy, __length = json.Length };
+
+        JsonTape tape = new()
+                        {
+                            __chars  = copy,
+                            __length = json.Length
+                        };
+
         return tape.BuildOrThrow<char>(copy.AsSpan(0, json.Length), options ?? JsonReaderOptions.Default);
     }
 
@@ -711,7 +765,7 @@ public sealed class JsonTape : IDisposable
     public static async ValueTask<JsonTape> ParseAsync( Stream utf8Json, JsonReaderOptions? options = null, CancellationToken token = default )
     {
         JsonReaderOptions settings = options ?? JsonReaderOptions.Default;
-        (byte[] buffer, int length) = await JsonStreams.ReadAllAsync(utf8Json, settings.MaxDocumentBytes, token).ConfigureAwait(false);
+        ( byte[] buffer, int length ) = await JsonStreams.ReadAllAsync(utf8Json, settings.MaxDocumentBytes, token).ConfigureAwait(false);
         return FromPooledUtf8(buffer, length, settings);
     }
 
@@ -726,7 +780,12 @@ public sealed class JsonTape : IDisposable
             return false;
         }
 
-        JsonTape result = new() { __string = json, __length = json.Length };
+        JsonTape result = new()
+                          {
+                              __string = json,
+                              __length = json.Length
+                          };
+
         return Finish(result, result.TryBuild(json.AsSpan(), options ?? JsonReaderOptions.Default, out error), out tape);
     }
 
@@ -736,7 +795,13 @@ public sealed class JsonTape : IDisposable
         byte[] copy = ArrayPool<byte>.Shared.Rent(utf8Json.Length);
         utf8Json.CopyTo(copy);
 
-        JsonTape result = new() { __bytes = copy, __length = utf8Json.Length, __utf8 = true };
+        JsonTape result = new()
+                          {
+                              __bytes  = copy,
+                              __length = utf8Json.Length,
+                              __utf8   = true
+                          };
+
         return Finish(result, result.TryBuild<byte>(copy.AsSpan(0, utf8Json.Length), options ?? JsonReaderOptions.Default, out error), out tape);
     }
 
@@ -770,7 +835,13 @@ public sealed class JsonTape : IDisposable
 
     private static JsonTape FromPooledUtf8( byte[] buffer, int length, in JsonReaderOptions options )
     {
-        JsonTape tape = new() { __bytes = buffer, __length = length, __utf8 = true };
+        JsonTape tape = new()
+                        {
+                            __bytes  = buffer,
+                            __length = length,
+                            __utf8   = true
+                        };
+
         return tape.BuildOrThrow<byte>(buffer.AsSpan(0, length), options);
     }
 
@@ -826,8 +897,6 @@ public sealed class JsonTape : IDisposable
     }
 
 
-
-
     // ─── Access (used by JsonItem and JNode) ─────────────────────────────────
 
     internal JsonError CreateError( JsonErrorKind kind, int position ) => __utf8
@@ -862,14 +931,22 @@ public sealed class JsonTape : IDisposable
 
             ReadOnlySpan<char> text   = InputUtf16.Slice(entry.Start, entry.Length);
             bool               copied = text.TryCopyTo(destination);
-            charsWritten = copied ? text.Length : 0;
+
+            charsWritten = copied
+                               ? text.Length
+                               : 0;
+
             return copied;
         }
 
         ValueStringBuilder builder = new(stackalloc char[256]);
         Unescape(in entry, ref builder);
         bool fits = builder.Values.TryCopyTo(destination);
-        charsWritten = fits ? builder.Length : 0;
+
+        charsWritten = fits
+                           ? builder.Length
+                           : 0;
+
         builder.Dispose();
         return fits;
     }
@@ -899,8 +976,14 @@ public sealed class JsonTape : IDisposable
     internal string GetRawText( in Entry entry )
     {
         bool quoted = entry.Kind is JsonTokenKind.String or JsonTokenKind.PropertyName;
-        int  start  = quoted ? entry.Start  - 1 : entry.Start;
-        int  length = quoted ? entry.Length + 2 : entry.Length;
+
+        int start = quoted
+                        ? entry.Start - 1
+                        : entry.Start;
+
+        int length = quoted
+                         ? entry.Length + 2
+                         : entry.Length;
 
         return __utf8
                    ? Encoding.UTF8.GetString(InputUtf8.Slice(start, length))
@@ -920,6 +1003,8 @@ public sealed class JsonTape : IDisposable
 
     // ─── Entry ───────────────────────────────────────────────────────────────
 
+
+
     /// <summary> One token of the tape. Containers are completed (<see cref="Length"/>, <see cref="Next"/>) when their closing bracket is read. </summary>
     [StructLayout(LayoutKind.Auto)]
     internal struct Entry( JsonTokenKind kind, bool escaped, int start, int length, int next )
@@ -933,7 +1018,10 @@ public sealed class JsonTape : IDisposable
     }
 
 
+
     // ─── Parser ──────────────────────────────────────────────────────────────
+
+
 
     /// <summary> Validates and indexes JSON in one forward pass over <see cref="char"/> or <see cref="byte"/> input, using <see cref="JsonLexer{TChar}"/>. Iterative: nesting costs an <see cref="int"/>, not a stack frame. </summary>
     private static class Parser<TChar>
@@ -947,9 +1035,12 @@ public sealed class JsonTape : IDisposable
                 return false;
             }
 
-            int       maxDepth = options.MaxDepth;
-            int[]?    rented   = null;
-            Span<int> stack    = maxDepth <= STACK_DEPTH ? stackalloc int[STACK_DEPTH] : rented = ArrayPool<int>.Shared.Rent(maxDepth);
+            int    maxDepth = options.MaxDepth;
+            int[]? rented   = null;
+
+            Span<int> stack = maxDepth <= STACK_DEPTH
+                                  ? stackalloc int[STACK_DEPTH]
+                                  : rented = ArrayPool<int>.Shared.Rent(maxDepth);
 
             try
             {
@@ -1006,7 +1097,17 @@ public sealed class JsonTape : IDisposable
                             }
 
                             bool isObject = JsonLexer<TChar>.U(next) == '{';
-                            stack[depth] = AddValue(tape, stack, depth, isObject ? JsonTokenKind.Object : JsonTokenKind.Array, start, 0, false);
+
+                            stack[depth] = AddValue(tape,
+                                                    stack,
+                                                    depth,
+                                                    isObject
+                                                        ? JsonTokenKind.Object
+                                                        : JsonTokenKind.Array,
+                                                    start,
+                                                    0,
+                                                    false);
+
                             depth++;
                             if ( depth > tape.__maxDepthSeen ) { tape.__maxDepthSeen = depth; }
 
@@ -1014,7 +1115,9 @@ public sealed class JsonTape : IDisposable
 
                             if ( ( error = JsonLexer<TChar>.SkipTrivia(ref reader, comments) ) != JsonErrorKind.None ) { goto Fail; }
 
-                            if ( reader.TryReadExact(JsonLexer<TChar>.Char(isObject ? '}' : ']')) ) // an empty container is a complete value
+                            if ( reader.TryReadExact(JsonLexer<TChar>.Char(isObject
+                                                                               ? '}'
+                                                                               : ']')) ) // an empty container is a complete value
                             {
                                 Close(tape, stack[--depth], reader.Position);
                                 expectValue = false;
@@ -1034,7 +1137,7 @@ public sealed class JsonTape : IDisposable
                             break;
                         }
 
-                        case '-' or ( >= '0' and <= '9' ):
+                        case '-' or (>= '0' and <= '9'):
                         {
                             if ( ( error = JsonLexer<TChar>.ReadNumber(ref reader) ) != JsonErrorKind.None ) { goto Fail; }
 
@@ -1078,7 +1181,10 @@ public sealed class JsonTape : IDisposable
 
                 int  container = stack[depth - 1];
                 bool inObject  = tape.Entries[container].Kind == JsonTokenKind.Object;
-                char close     = inObject ? '}' : ']';
+
+                char close = inObject
+                                 ? '}'
+                                 : ']';
 
                 if ( reader.TryReadExact(JsonLexer<TChar>.Char(',')) )
                 {
@@ -1104,7 +1210,10 @@ public sealed class JsonTape : IDisposable
                     continue;
                 }
 
-                error = reader.End ? JsonErrorKind.UnexpectedEnd : JsonErrorKind.UnexpectedToken;
+                error = reader.End
+                            ? JsonErrorKind.UnexpectedEnd
+                            : JsonErrorKind.UnexpectedToken;
+
                 goto Fail;
             }
 
@@ -1137,7 +1246,12 @@ public sealed class JsonTape : IDisposable
         /// <summary> <c>"name"</c>, optional trivia, then <c>:</c>. </summary>
         private static JsonErrorKind ReadMemberName( JsonTape tape, ref ValueSpanReader<TChar> reader, bool comments, int maxString, int container )
         {
-            if ( !reader.IsNext(JsonLexer<TChar>.Char('"')) ) { return reader.End ? JsonErrorKind.UnexpectedEnd : JsonErrorKind.UnexpectedToken; }
+            if ( !reader.IsNext(JsonLexer<TChar>.Char('"')) )
+            {
+                return reader.End
+                           ? JsonErrorKind.UnexpectedEnd
+                           : JsonErrorKind.UnexpectedToken;
+            }
 
             JsonErrorKind error = JsonLexer<TChar>.ReadString(ref reader, maxString, out int start, out int length, out bool escaped);
             if ( error != JsonErrorKind.None ) { return error; }
@@ -1172,13 +1286,17 @@ public readonly struct JsonItem
     }
 
 
-    internal JsonTape                         Tape => __tape ?? throw new InvalidOperationException("default(JsonItem) doesn't belong to a tape.");
-    private  ref readonly JsonTape.Entry      Data => ref Tape.Entries[__index];
+    internal             JsonTape       Tape => __tape ?? throw new InvalidOperationException("default(JsonItem) doesn't belong to a tape.");
+    private ref readonly JsonTape.Entry Data => ref Tape.Entries[__index];
 
-    public JsonTokenKind Kind     => Data.Kind;
+    public JsonTokenKind Kind => Data.Kind;
+
     /// <summary> The offset of the value's first char or byte (a string's opening quote). </summary>
-    public int           Position => Data.Kind is JsonTokenKind.String or JsonTokenKind.PropertyName ? Data.Start - 1 : Data.Start;
-    public bool          IsNull   => Data.Kind == JsonTokenKind.Null;
+    public int Position => Data.Kind is JsonTokenKind.String or JsonTokenKind.PropertyName
+                               ? Data.Start - 1
+                               : Data.Start;
+
+    public bool IsNull => Data.Kind == JsonTokenKind.Null;
 
 
     // ─── Objects ─────────────────────────────────────────────────────────────
@@ -1196,9 +1314,12 @@ public readonly struct JsonItem
         if ( !Tape.IsUtf8 ) { return Find(name, default, out value); }
 
         // A UTF-8 tape compares unescaped names byte for byte: encode the name once, not once per member.
-        int        max    = name.Length * 3;
-        byte[]?    rented = null;
-        Span<byte> utf8   = max <= 256 ? stackalloc byte[256] : ( rented = ArrayPool<byte>.Shared.Rent(max) );
+        int     max    = name.Length * 3;
+        byte[]? rented = null;
+
+        Span<byte> utf8 = max <= 256
+                              ? stackalloc byte[256]
+                              : ( rented = ArrayPool<byte>.Shared.Rent(max) );
 
         try
         {
@@ -1214,8 +1335,11 @@ public readonly struct JsonItem
     /// <inheritdoc cref="TryGetProperty(ReadOnlySpan{char}, out JsonItem)"/>
     public bool TryGetProperty( ReadOnlySpan<byte> utf8Name, out JsonItem value )
     {
-        char[]?    rented = null;
-        Span<char> utf16  = utf8Name.Length <= 256 ? stackalloc char[256] : ( rented = ArrayPool<char>.Shared.Rent(utf8Name.Length) );
+        char[]? rented = null;
+
+        Span<char> utf16 = utf8Name.Length <= 256
+                               ? stackalloc char[256]
+                               : ( rented = ArrayPool<char>.Shared.Rent(utf8Name.Length) );
 
         try
         {
@@ -1300,9 +1424,12 @@ public readonly struct JsonItem
         JsonTape                    tape  = __tape!;
         if ( !tape.IsUtf8 || entry.Escaped ) { return tape.StringEquals(in entry, text, default); }
 
-        int        max    = text.Length * 3;
-        byte[]?    rented = null;
-        Span<byte> utf8   = max <= 256 ? stackalloc byte[256] : ( rented = ArrayPool<byte>.Shared.Rent(max) );
+        int     max    = text.Length * 3;
+        byte[]? rented = null;
+
+        Span<byte> utf8 = max <= 256
+                              ? stackalloc byte[256]
+                              : ( rented = ArrayPool<byte>.Shared.Rent(max) );
 
         try
         {
@@ -1321,7 +1448,10 @@ public readonly struct JsonItem
     {
         ref readonly JsonTape.Entry entry  = ref ExpectText();
         char[]?                     rented = null;
-        Span<char>                  buffer = entry.Length <= 256 ? stackalloc char[256] : ( rented = ArrayPool<char>.Shared.Rent(entry.Length) ); // decoding never grows the text
+
+        Span<char> buffer = entry.Length <= 256
+                                ? stackalloc char[256]
+                                : ( rented = ArrayPool<char>.Shared.Rent(entry.Length) ); // decoding never grows the text
 
         try
         {
@@ -1344,14 +1474,14 @@ public readonly struct JsonItem
     /// <exception cref="FormatException"> The number has a fraction or exponent, or doesn't fit <typeparamref name="T"/>. </exception>
     public T GetInteger<T>()
         where T : struct, IBinaryInteger<T> => TryGetInteger(out T value)
-                                           ? value
-                                           : throw new FormatException($"{GetRawText()} doesn't fit the integer type (a fraction, an exponent or out of range).");
+                                                   ? value
+                                                   : throw new FormatException($"{GetRawText()} doesn't fit the integer type (a fraction, an exponent or out of range).");
 
     /// <exception cref="FormatException"> The number overflows <typeparamref name="T"/>. </exception>
     public T GetFloat<T>()
         where T : struct, IFloatingPoint<T> => TryGetFloat(out T value)
-                                           ? value
-                                           : throw new FormatException($"{GetRawText()} overflows the floating-point type.");
+                                                   ? value
+                                                   : throw new FormatException($"{GetRawText()} overflows the floating-point type.");
 
     /// <summary> Strict: <c>1.0</c> and <c>1e2</c> aren't integers. </summary>
     public bool TryGetInteger<T>( out T value )
@@ -1368,7 +1498,7 @@ public readonly struct JsonItem
         JsonTape                    tape  = __tape!;
 
         return tape.IsUtf8
-                   ? T.TryParse(tape.InputUtf8.Slice(entry.Start, entry.Length), style, CultureInfo.InvariantCulture, out value)
+                   ? T.TryParse(tape.InputUtf8.Slice(entry.Start, entry.Length),  style, CultureInfo.InvariantCulture, out value)
                    : T.TryParse(tape.InputUtf16.Slice(entry.Start, entry.Length), style, CultureInfo.InvariantCulture, out value);
     }
 
@@ -1384,12 +1514,15 @@ public readonly struct JsonItem
         where T : IJsonSerializable<T>
     {
         JsonTapeReader reader = new(Tape, __index); // §3.2 (P4)
+
         return T.TryReadJson(ref reader, out T? value)
                    ? value
                    : throw new JsonReadException(reader.Error);
     }
 
-    public override string ToString() => __tape is null ? "" : GetRawText();
+    public override string ToString() => __tape is null
+                                             ? ""
+                                             : GetRawText();
 
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -1414,6 +1547,8 @@ public readonly struct JsonItem
 
 
     // ─── Enumerators ─────────────────────────────────────────────────────────
+
+
 
     public struct ArrayEnumerator
     {
@@ -1443,6 +1578,7 @@ public readonly struct JsonItem
             return true;
         }
     }
+
 
 
     public struct ObjectEnumerator
@@ -1483,7 +1619,7 @@ public readonly struct JsonTapeProperty( JsonItem name, JsonItem value )
     public JsonItem Name  { get; } = name;
     public JsonItem Value { get; } = value;
 
-    public string GetName()                           => Name.GetString();
+    public string GetName()                             => Name.GetString();
     public bool   NameEquals( ReadOnlySpan<char> text ) => Name.ValueEquals(text);
 }
 ```
@@ -1545,7 +1681,14 @@ namespace Jakar.Json;
 
 
 /// <summary> The kind of a <see cref="JNode"/>. JSON <c>null</c> has no node: it's a <see langword="null"/> reference. </summary>
-public enum JNodeKind : byte { Object, Array, String, Number, Boolean }
+public enum JNodeKind : byte
+{
+    Object,
+    Array,
+    String,
+    Number,
+    Boolean
+}
 
 
 
@@ -1786,6 +1929,7 @@ public abstract partial class JNode
         where T : IJsonSerializable<T>
     {
         JNodeReader reader = new(this); // §3.2 (P4)
+
         return T.TryReadJson(ref reader, out T? value)
                    ? value
                    : throw new JsonReadException(reader.Error);
@@ -1898,15 +2042,33 @@ public abstract partial class JNode
     public static implicit operator JNode( TimeOnly       value ) => new JValueNode(value);
     public static implicit operator JNode( TimeSpan       value ) => new JValueNode(value);
 
-    public static implicit operator JNode?( string?         value ) => value is null ? null : new JValueNode(value);
-    public static implicit operator JNode?( bool?           value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( int?            value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( long?           value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( double?         value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( decimal?        value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( Guid?           value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( DateTime?       value ) => value.HasValue ? new JValueNode(value.Value) : null;
-    public static implicit operator JNode?( DateTimeOffset? value ) => value.HasValue ? new JValueNode(value.Value) : null;
+    public static implicit operator JNode?( string? value ) => value is null
+                                                                   ? null
+                                                                   : new JValueNode(value);
+    public static implicit operator JNode?( bool? value ) => value.HasValue
+                                                                 ? new JValueNode(value.Value)
+                                                                 : null;
+    public static implicit operator JNode?( int? value ) => value.HasValue
+                                                                ? new JValueNode(value.Value)
+                                                                : null;
+    public static implicit operator JNode?( long? value ) => value.HasValue
+                                                                 ? new JValueNode(value.Value)
+                                                                 : null;
+    public static implicit operator JNode?( double? value ) => value.HasValue
+                                                                   ? new JValueNode(value.Value)
+                                                                   : null;
+    public static implicit operator JNode?( decimal? value ) => value.HasValue
+                                                                    ? new JValueNode(value.Value)
+                                                                    : null;
+    public static implicit operator JNode?( Guid? value ) => value.HasValue
+                                                                 ? new JValueNode(value.Value)
+                                                                 : null;
+    public static implicit operator JNode?( DateTime? value ) => value.HasValue
+                                                                     ? new JValueNode(value.Value)
+                                                                     : null;
+    public static implicit operator JNode?( DateTimeOffset? value ) => value.HasValue
+                                                                           ? new JValueNode(value.Value)
+                                                                           : null;
 
 
     // ─── Conversions: JNode → CLR ────────────────────────────────────────────
@@ -1922,20 +2084,38 @@ public abstract partial class JNode
     public static explicit operator DateTime( JNode?       node ) => RequireValue(node, "DateTime").GetDateTime();
     public static explicit operator DateTimeOffset( JNode? node ) => RequireValue(node, "DateTimeOffset").GetDateTimeOffset();
 
-    public static explicit operator string?( JNode?         node ) => node is null ? null : RequireValue(node, "String").GetString();
-    public static explicit operator bool?( JNode?           node ) => node is null ? null : (bool)node;
-    public static explicit operator int?( JNode?            node ) => node is null ? null : (int)node;
-    public static explicit operator long?( JNode?           node ) => node is null ? null : (long)node;
-    public static explicit operator double?( JNode?         node ) => node is null ? null : (double)node;
-    public static explicit operator decimal?( JNode?        node ) => node is null ? null : (decimal)node;
-    public static explicit operator Guid?( JNode?           node ) => node is null ? null : (Guid)node;
-    public static explicit operator DateTime?( JNode?       node ) => node is null ? null : (DateTime)node;
-    public static explicit operator DateTimeOffset?( JNode? node ) => node is null ? null : (DateTimeOffset)node;
+    public static explicit operator string?( JNode? node ) => node is null
+                                                                  ? null
+                                                                  : RequireValue(node, "String").GetString();
+    public static explicit operator bool?( JNode? node ) => node is null
+                                                                ? null
+                                                                : (bool)node;
+    public static explicit operator int?( JNode? node ) => node is null
+                                                               ? null
+                                                               : (int)node;
+    public static explicit operator long?( JNode? node ) => node is null
+                                                                ? null
+                                                                : (long)node;
+    public static explicit operator double?( JNode? node ) => node is null
+                                                                  ? null
+                                                                  : (double)node;
+    public static explicit operator decimal?( JNode? node ) => node is null
+                                                                   ? null
+                                                                   : (decimal)node;
+    public static explicit operator Guid?( JNode? node ) => node is null
+                                                                ? null
+                                                                : (Guid)node;
+    public static explicit operator DateTime?( JNode? node ) => node is null
+                                                                    ? null
+                                                                    : (DateTime)node;
+    public static explicit operator DateTimeOffset?( JNode? node ) => node is null
+                                                                          ? null
+                                                                          : (DateTimeOffset)node;
 
-    private static JValueNode RequireValue( JNode? node, string target ) => node as JValueNode
-                                                                           ?? throw new InvalidCastException(node is null
-                                                                                                                 ? $"Can't convert JSON null to {target}."
-                                                                                                                 : $"Can't convert a JSON {node.Kind} to {target}.");
+    private static JValueNode RequireValue( JNode? node, string target ) => node as JValueNode ??
+                                                                            throw new InvalidCastException(node is null
+                                                                                                               ? $"Can't convert JSON null to {target}."
+                                                                                                               : $"Can't convert a JSON {node.Kind} to {target}.");
 }
 ```
 
@@ -1945,137 +2125,130 @@ public abstract partial class JNode
 // Jakar.Json
 // 10/07/2026
 
-using Jakar.Json.Converters;
+namespace Jakar.Json;
 
 
-
-namespace Jakar.Json
+public abstract partial class JNode
 {
-    public abstract partial class JNode
+    /// <summary> Reads any JSON value from <paramref name="reader"/> as a tree (JSON <c>null</c> → <see langword="null"/>). Numbers keep their text. A repeated member name fails with <see cref="JsonErrorKind.DuplicateMember"/>. </summary>
+    public static bool TryRead<TReader>( ref TReader reader, out JNode? node )
+        where TReader : IJsonReader, allows ref struct
     {
-        /// <summary> Reads any JSON value from <paramref name="reader"/> as a tree (JSON <c>null</c> → <see langword="null"/>). Numbers keep their text. A repeated member name fails with <see cref="JsonErrorKind.DuplicateMember"/>. </summary>
-        public static bool TryRead<TReader>( ref TReader reader, out JNode? node )
-            where TReader : IJsonReader, allows ref struct
+        RuntimeHelpers.EnsureSufficientExecutionStack();
+        node = null;
+
+        switch ( reader.PeekKind() )
         {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
-            node = null;
-
-            switch ( reader.PeekKind() )
+            case JsonTokenKind.Object:
             {
-                case JsonTokenKind.Object:
+                if ( !reader.TryReadStartObject() ) { return false; }
+
+                JObjectNode obj = new();
+
+                while ( true )
                 {
-                    if ( !reader.TryReadStartObject() ) { return false; }
+                    JsonReaderCheckpoint mark = reader.Checkpoint();
+                    if ( !reader.TryReadProperty(out JsonSpan name, out bool end) ) { return false; }
 
-                    JObjectNode obj = new();
+                    if ( end ) { break; }
 
-                    while ( true )
-                    {
-                        JsonReaderCheckpoint mark = reader.Checkpoint();
-                        if ( !reader.TryReadProperty(out JsonSpan name, out bool end) ) { return false; }
+                    string key = name.ToString();
+                    if ( !TryRead(ref reader, out JNode? value) ) { return false; }
 
-                        if ( end ) { break; }
+                    if ( obj.TryAddNew(key, value) ) { continue; }
 
-                        string key = name.ToString();
-                        if ( !TryRead(ref reader, out JNode? value) ) { return false; }
-
-                        if ( obj.TryAddNew(key, value) ) { continue; }
-
-                        reader.Rewind(mark);
-                        return reader.Fail(JsonErrorKind.DuplicateMember);
-                    }
-
-                    node = obj;
-                    return true;
+                    reader.Rewind(mark);
+                    return reader.Fail(JsonErrorKind.DuplicateMember);
                 }
 
-                case JsonTokenKind.Array:
-                {
-                    if ( !reader.TryReadStartArray() ) { return false; }
-
-                    JArrayNode array = new();
-
-                    while ( true )
-                    {
-                        if ( !reader.TryReadNextElement(out bool end) ) { return false; }
-
-                        if ( end ) { break; }
-
-                        if ( !TryRead(ref reader, out JNode? value) ) { return false; }
-
-                        array.AddNew(value);
-                    }
-
-                    node = array;
-                    return true;
-                }
-
-                case JsonTokenKind.String:
-                    if ( !reader.TryReadString(out string? text) ) { return false; }
-
-                    node = new JValueNode(text);
-                    return true;
-
-                case JsonTokenKind.Number:
-                    if ( !reader.TryReadRawNumber(out JsonSpan number) ) { return false; }
-
-                    node = JValueNode.FromValidatedNumberText(number.ToString());
-                    return true;
-
-                case JsonTokenKind.True or JsonTokenKind.False:
-                    if ( !reader.TryReadBoolean(out bool flag) ) { return false; }
-
-                    node = new JValueNode(flag);
-                    return true;
-
-                case JsonTokenKind.Null:
-                    return reader.TryReadNull();
-
-                default:
-                    return reader.Fail(JsonErrorKind.UnexpectedToken);
+                node = obj;
+                return true;
             }
+
+            case JsonTokenKind.Array:
+            {
+                if ( !reader.TryReadStartArray() ) { return false; }
+
+                JArrayNode array = new();
+
+                while ( true )
+                {
+                    if ( !reader.TryReadNextElement(out bool end) ) { return false; }
+
+                    if ( end ) { break; }
+
+                    if ( !TryRead(ref reader, out JNode? value) ) { return false; }
+
+                    array.AddNew(value);
+                }
+
+                node = array;
+                return true;
+            }
+
+            case JsonTokenKind.String:
+                if ( !reader.TryReadString(out string? text) ) { return false; }
+
+                node = new JValueNode(text);
+                return true;
+
+            case JsonTokenKind.Number:
+                if ( !reader.TryReadRawNumber(out JsonSpan number) ) { return false; }
+
+                node = JValueNode.FromValidatedNumberText(number.ToString());
+                return true;
+
+            case JsonTokenKind.True or JsonTokenKind.False:
+                if ( !reader.TryReadBoolean(out bool flag) ) { return false; }
+
+                node = new JValueNode(flag);
+                return true;
+
+            case JsonTokenKind.Null:
+                return reader.TryReadNull();
+
+            default:
+                return reader.Fail(JsonErrorKind.UnexpectedToken);
         }
     }
 }
 
 
 
-namespace Jakar.Json.Converters
+/// <summary> Any JSON value as a <see cref="JNode"/> (JSON <c>null</c> ↔ <see langword="null"/>). </summary>
+public readonly struct JsonNodeConverter : IJsonConverter<JNode?>
 {
-    /// <summary> Any JSON value as a <see cref="JNode"/> (JSON <c>null</c> ↔ <see langword="null"/>). </summary>
-    public readonly struct JsonNodeConverter : IJsonConverter<JNode?>
+    public static void Write<TWriter>( ref TWriter writer, scoped in JNode? value )
+        where TWriter : IJsonWriter, allows ref struct => JNode.Write(value, ref writer);
+
+    public static bool TryRead<TReader>( ref TReader reader, out JNode? value )
+        where TReader : IJsonReader, allows ref struct => JNode.TryRead(ref reader, out value);
+}
+
+
+
+/// <summary> A <see cref="JObjectNode"/>, <see cref="JArrayNode"/> or <see cref="JValueNode"/> member: reading a different kind of value (or <c>null</c>) fails with <see cref="JsonErrorKind.InvalidValue"/>. </summary>
+public readonly struct JsonNodeConverter<TNode> : IJsonConverter<TNode>
+    where TNode : JNode
+{
+    public static void Write<TWriter>( ref TWriter writer, scoped in TNode value )
+        where TWriter : IJsonWriter, allows ref struct => JNode.Write(value, ref writer);
+
+    public static bool TryRead<TReader>( ref TReader reader, [MaybeNullWhen(false)] out TNode value )
+        where TReader : IJsonReader, allows ref struct
     {
-        public static void Write<TWriter>( ref TWriter writer, scoped in JNode? value )
-            where TWriter : IJsonWriter, allows ref struct => JNode.Write(value, ref writer);
+        value = null;
+        JsonReaderCheckpoint mark = reader.Checkpoint();
+        if ( !JNode.TryRead(ref reader, out JNode? node) ) { return false; }
 
-        public static bool TryRead<TReader>( ref TReader reader, out JNode? value )
-            where TReader : IJsonReader, allows ref struct => JNode.TryRead(ref reader, out value);
-    }
-
-
-
-    /// <summary> A <see cref="JObjectNode"/>, <see cref="JArrayNode"/> or <see cref="JValueNode"/> member: reading a different kind of value (or <c>null</c>) fails with <see cref="JsonErrorKind.InvalidValue"/>. </summary>
-    public readonly struct JsonNodeConverter<TNode> : IJsonConverter<TNode>
-        where TNode : JNode
-    {
-        public static void Write<TWriter>( ref TWriter writer, scoped in TNode value )
-            where TWriter : IJsonWriter, allows ref struct => JNode.Write(value, ref writer);
-
-        public static bool TryRead<TReader>( ref TReader reader, [MaybeNullWhen(false)] out TNode value )
-            where TReader : IJsonReader, allows ref struct
+        if ( node is TNode typed )
         {
-            value = null;
-            JsonReaderCheckpoint mark = reader.Checkpoint();
-            if ( !JNode.TryRead(ref reader, out JNode? node) ) { return false; }
-
-            if ( node is TNode typed )
-            {
-                value = typed;
-                return true;
-            }
-
-            reader.Rewind(mark);
-            return reader.Fail(JsonErrorKind.InvalidValue);
+            value = typed;
+            return true;
         }
+
+        reader.Rewind(mark);
+        return reader.Fail(JsonErrorKind.InvalidValue);
     }
 }
 ```
@@ -2100,7 +2273,19 @@ namespace Jakar.Json;
 /// </summary>
 public sealed class JValueNode : JNode
 {
-    private enum NumberKind : byte { None, Text, Int64, UInt64, Int128, UInt128, Single, Double, Decimal }
+    private enum NumberKind : byte
+    {
+        None,
+        Text,
+        Int64,
+        UInt64,
+        Int128,
+        UInt128,
+        Single,
+        Double,
+        Decimal
+    }
+
 
 
     private readonly JNodeKind  __kind;
@@ -2119,29 +2304,34 @@ public sealed class JValueNode : JNode
     public JValueNode( bool value )
     {
         __kind = JNodeKind.Boolean;
-        __bits = value ? 1 : 0;
+
+        __bits = value
+                     ? 1
+                     : 0;
     }
 
     // int and uint are spelled out: without them, int/byte/ushort/uint arguments are ambiguous between the long and UInt128 overloads.
-    public JValueNode( int     value ) : this(NumberKind.Int64,   value) { }
-    public JValueNode( uint    value ) : this(NumberKind.Int64,   value) { }
-    public JValueNode( long    value ) : this(NumberKind.Int64,   value) { }
-    public JValueNode( ulong   value ) : this(NumberKind.UInt64,  value) { }
-    public JValueNode( Int128  value ) : this(NumberKind.Int128,  value) { }
-    public JValueNode( UInt128 value ) : this(NumberKind.UInt128, unchecked((Int128)value)) { }
-    public JValueNode( float   value ) : this(NumberKind.Single,  BitConverter.SingleToInt32Bits(Finite(value))) { }
-    public JValueNode( double  value ) : this(NumberKind.Double,  BitConverter.DoubleToInt64Bits(Finite(value))) { }
+    public JValueNode( int     value ) : this(NumberKind.Int64, value) { }
+    public JValueNode( uint    value ) : this(NumberKind.Int64, value) { }
+    public JValueNode( long    value ) : this(NumberKind.Int64, value) { }
+    public JValueNode( ulong   value ) : this(NumberKind.UInt64, value) { }
+    public JValueNode( Int128  value ) : this(NumberKind.Int128, value) { }
+    public JValueNode( UInt128 value ) : this(NumberKind.UInt128, unchecked ((Int128)value)) { }
+    public JValueNode( float   value ) : this(NumberKind.Single, BitConverter.SingleToInt32Bits(Finite(value))) { }
+    public JValueNode( double  value ) : this(NumberKind.Double, BitConverter.DoubleToInt64Bits(Finite(value))) { }
     public JValueNode( decimal value ) : this(NumberKind.Decimal, Unsafe.BitCast<decimal, Int128>(value)) { }
 
     // §5.3 canonical strings.
     public JValueNode( Guid           value ) : this(value.ToString("D")) { } // lowercase
-    public JValueNode( DateTimeOffset value ) : this(value.ToString("O", CultureInfo.InvariantCulture)) { }
-    public JValueNode( DateOnly       value ) : this(value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)) { }
+    public JValueNode( DateTimeOffset value ) : this(value.ToString("O",                CultureInfo.InvariantCulture)) { }
+    public JValueNode( DateOnly       value ) : this(value.ToString("yyyy-MM-dd",       CultureInfo.InvariantCulture)) { }
     public JValueNode( TimeOnly       value ) : this(value.ToString("HH:mm:ss.fffffff", CultureInfo.InvariantCulture)) { }
-    public JValueNode( TimeSpan       value ) : this(value.ToString("c", CultureInfo.InvariantCulture)) { }
+    public JValueNode( TimeSpan       value ) : this(value.ToString("c",                CultureInfo.InvariantCulture)) { }
 
     /// <summary> <see cref="DateTimeKind.Local"/> values are converted to UTC first (<c>LocalDateTimes = ConvertToUtc</c>, §5.4). </summary>
-    public JValueNode( DateTime value ) : this(( value.Kind == DateTimeKind.Local ? value.ToUniversalTime() : value ).ToString("O", CultureInfo.InvariantCulture)) { }
+    public JValueNode( DateTime value ) : this(( value.Kind == DateTimeKind.Local
+                                                     ? value.ToUniversalTime()
+                                                     : value ).ToString("O", CultureInfo.InvariantCulture)) { }
 
 
     private JValueNode( NumberKind number, Int128 bits )
@@ -2184,8 +2374,7 @@ public sealed class JValueNode : JNode
     public override JNodeKind Kind => __kind;
 
     /// <summary> A number with no fraction or exponent. </summary>
-    public bool IsInteger => __number is NumberKind.Int64 or NumberKind.UInt64 or NumberKind.Int128 or NumberKind.UInt128
-                             || ( __number == NumberKind.Text && __text.AsSpan().IndexOfAny('.', 'e', 'E') < 0 );
+    public bool IsInteger => __number is NumberKind.Int64 or NumberKind.UInt64 or NumberKind.Int128 or NumberKind.UInt128 || ( __number == NumberKind.Text && __text.AsSpan().IndexOfAny('.', 'e', 'E') < 0 );
 
 
     // ─── Strings and booleans ────────────────────────────────────────────────
@@ -2194,7 +2383,7 @@ public sealed class JValueNode : JNode
                                      ? __text!
                                      : throw Mismatch(JNodeKind.String);
 
-    public bool GetBoolean() => __kind == JNodeKind.Boolean
+    public bool GetBoolean() => __kind       == JNodeKind.Boolean
                                     ? __bits != 0
                                     : throw Mismatch(JNodeKind.Boolean);
 
@@ -2221,7 +2410,7 @@ public sealed class JValueNode : JNode
                                            NumberKind.Int64   => T.CreateChecked((long)__bits),
                                            NumberKind.UInt64  => T.CreateChecked((ulong)__bits),
                                            NumberKind.Int128  => T.CreateChecked(__bits),
-                                           NumberKind.UInt128 => T.CreateChecked(unchecked((UInt128)__bits)),
+                                           NumberKind.UInt128 => T.CreateChecked(unchecked ((UInt128)__bits)),
                                            NumberKind.Text    => T.Parse(__text!, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture),
                                            NumberKind.None    => throw Mismatch(JNodeKind.Number),
                                            _                  => throw new InvalidOperationException("The number isn't an integer.")
@@ -2237,7 +2426,7 @@ public sealed class JValueNode : JNode
                                            NumberKind.Int64   => T.CreateChecked((long)__bits),
                                            NumberKind.UInt64  => T.CreateChecked((ulong)__bits),
                                            NumberKind.Int128  => T.CreateChecked(__bits),
-                                           NumberKind.UInt128 => T.CreateChecked(unchecked((UInt128)__bits)),
+                                           NumberKind.UInt128 => T.CreateChecked(unchecked ((UInt128)__bits)),
                                            NumberKind.Text    => ParseFloat<T>(__text!),
                                            _                  => throw Mismatch(JNodeKind.Number)
                                        };
@@ -2248,8 +2437,14 @@ public sealed class JValueNode : JNode
     {
         switch ( __kind )
         {
-            case JNodeKind.String:  return T.Parse(__text!, CultureInfo.InvariantCulture);
-            case JNodeKind.Boolean: return T.Parse(__bits != 0 ? "true" : "false", CultureInfo.InvariantCulture);
+            case JNodeKind.String:
+                return T.Parse(__text!, CultureInfo.InvariantCulture);
+
+            case JNodeKind.Boolean:
+                return T.Parse(__bits != 0
+                                   ? "true"
+                                   : "false",
+                               CultureInfo.InvariantCulture);
         }
 
         if ( __number == NumberKind.Text ) { return T.Parse(__text!, CultureInfo.InvariantCulture); }
@@ -2271,16 +2466,19 @@ public sealed class JValueNode : JNode
             case NumberKind.Text:
                 if ( T.TryParse(__text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value) ) { return true; }
 
-                error = JsonLexer<char>.HasFractionOrExponent(__text) ? JsonErrorKind.InvalidNumber : JsonErrorKind.NumberOverflow;
+                error = JsonLexer<char>.HasFractionOrExponent(__text)
+                            ? JsonErrorKind.InvalidNumber
+                            : JsonErrorKind.NumberOverflow;
+
                 return false;
 
             case NumberKind.Int64 or NumberKind.UInt64 or NumberKind.Int128 or NumberKind.UInt128:
                 bool fits = __number switch
                             {
-                                NumberKind.Int64  => TryNarrow((long)__bits, out value),
-                                NumberKind.UInt64 => TryNarrow((ulong)__bits, out value),
-                                NumberKind.Int128 => TryNarrow(__bits, out value),
-                                _                 => TryNarrow(unchecked((UInt128)__bits), out value)
+                                NumberKind.Int64  => TryNarrow((long)__bits,                out value),
+                                NumberKind.UInt64 => TryNarrow((ulong)__bits,               out value),
+                                NumberKind.Int128 => TryNarrow(__bits,                      out value),
+                                _                 => TryNarrow(unchecked ((UInt128)__bits), out value)
                             };
 
                 if ( fits ) { return true; }
@@ -2289,7 +2487,10 @@ public sealed class JValueNode : JNode
                 return false;
 
             default:
-                error = __kind == JNodeKind.Number ? JsonErrorKind.InvalidNumber : JsonErrorKind.UnexpectedToken;
+                error = __kind == JNodeKind.Number
+                            ? JsonErrorKind.InvalidNumber
+                            : JsonErrorKind.UnexpectedToken;
+
                 return false;
         }
     }
@@ -2371,14 +2572,16 @@ public sealed class JValueNode : JNode
                              NumberKind.Int64   => ( (long)__bits ).TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
                              NumberKind.UInt64  => ( (ulong)__bits ).TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
                              NumberKind.Int128  => __bits.TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
-                             NumberKind.UInt128 => unchecked((UInt128)__bits).TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
+                             NumberKind.UInt128 => unchecked ((UInt128)__bits).TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
                              NumberKind.Single  => BitConverter.Int32BitsToSingle((int)__bits).TryFormat(destination, out written, "R", CultureInfo.InvariantCulture),
                              NumberKind.Double  => BitConverter.Int64BitsToDouble((long)__bits).TryFormat(destination, out written, "R", CultureInfo.InvariantCulture),
                              NumberKind.Decimal => Unsafe.BitCast<Int128, decimal>(__bits).TryFormat(destination, out written, default, CultureInfo.InvariantCulture),
                              _                  => throw Mismatch(JNodeKind.Number)
                          };
 
-        return formatted ? written : throw new UnreachableException();
+        return formatted
+                   ? written
+                   : throw new UnreachableException();
     }
 
     private ReadOnlySpan<char> NumberText( Span<char> buffer ) => __number == NumberKind.Text
@@ -2405,14 +2608,37 @@ public sealed class JValueNode : JNode
 
         switch ( __number )
         {
-            case NumberKind.Text:    writer.WriteRawNumber(__text!); break; // validated when the node was created
-            case NumberKind.Int64:   writer.WriteInteger((long)__bits); break;
-            case NumberKind.UInt64:  writer.WriteInteger((ulong)__bits); break;
-            case NumberKind.Int128:  writer.WriteInteger(__bits); break;
-            case NumberKind.UInt128: writer.WriteInteger(unchecked((UInt128)__bits)); break;
-            case NumberKind.Single:  writer.WriteFloat(BitConverter.Int32BitsToSingle((int)__bits)); break;
-            case NumberKind.Double:  writer.WriteFloat(BitConverter.Int64BitsToDouble((long)__bits)); break;
-            case NumberKind.Decimal: writer.WriteFloat(Unsafe.BitCast<Int128, decimal>(__bits)); break;
+            case NumberKind.Text:
+                writer.WriteRawNumber(__text!);
+                break; // validated when the node was created
+
+            case NumberKind.Int64:
+                writer.WriteInteger((long)__bits);
+                break;
+
+            case NumberKind.UInt64:
+                writer.WriteInteger((ulong)__bits);
+                break;
+
+            case NumberKind.Int128:
+                writer.WriteInteger(__bits);
+                break;
+
+            case NumberKind.UInt128:
+                writer.WriteInteger(unchecked ((UInt128)__bits));
+                break;
+
+            case NumberKind.Single:
+                writer.WriteFloat(BitConverter.Int32BitsToSingle((int)__bits));
+                break;
+
+            case NumberKind.Double:
+                writer.WriteFloat(BitConverter.Int64BitsToDouble((long)__bits));
+                break;
+
+            case NumberKind.Decimal:
+                writer.WriteFloat(Unsafe.BitCast<Int128, decimal>(__bits));
+                break;
         }
     }
 
@@ -2458,17 +2684,27 @@ public sealed class JValueNode : JNode
     {
         switch ( __number )
         {
-            case NumberKind.Text:    return decimal.TryParse(__text, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
-            case NumberKind.Decimal: value = Unsafe.BitCast<Int128, decimal>(__bits); return true;
-            case NumberKind.Int64:   value = (long)__bits; return true;
-            case NumberKind.UInt64:  value = (ulong)__bits; return true;
+            case NumberKind.Text:
+                return decimal.TryParse(__text, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+
+            case NumberKind.Decimal:
+                value = Unsafe.BitCast<Int128, decimal>(__bits);
+                return true;
+
+            case NumberKind.Int64:
+                value = (long)__bits;
+                return true;
+
+            case NumberKind.UInt64:
+                value = (ulong)__bits;
+                return true;
 
             case NumberKind.Int128 when __bits >= (Int128)decimal.MinValue && __bits <= (Int128)decimal.MaxValue:
                 value = (decimal)__bits;
                 return true;
 
-            case NumberKind.UInt128 when unchecked((UInt128)__bits) <= (UInt128)decimal.MaxValue:
-                value = (decimal)unchecked((UInt128)__bits);
+            case NumberKind.UInt128 when unchecked ((UInt128)__bits) <= (UInt128)decimal.MaxValue:
+                value = (decimal)unchecked ((UInt128)__bits);
                 return true;
 
             case NumberKind.Single or NumberKind.Double:
@@ -2526,15 +2762,15 @@ public sealed class JArrayNode : JNode, IList<JNode?>, IReadOnlyList<JNode?>
 
     /// <exception cref="JsonReadException"> The JSON is malformed. </exception>
     /// <exception cref="FormatException"> The root isn't an array. </exception>
-    public static new JArrayNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
+    public new static JArrayNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
 
     /// <inheritdoc cref="Parse(string, JsonReaderOptions?)"/>
-    public static new JArrayNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
+    public new static JArrayNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JArrayNode ?? throw new FormatException("The JSON root isn't an array.");
 
 
-    public override JNodeKind Kind  => JNodeKind.Array;
-    public          int       Count => __items.Count;
-    bool ICollection<JNode?>.IsReadOnly => false;
+    public override JNodeKind Kind       => JNodeKind.Array;
+    public          int       Count      => __items.Count;
+    bool ICollection<JNode?>. IsReadOnly => false;
 
 
     /// <exception cref="InvalidOperationException"> <paramref name="value"/> already has a parent, or is this array or one of its ancestors. </exception>
@@ -2598,9 +2834,9 @@ public sealed class JArrayNode : JNode, IList<JNode?>, IReadOnlyList<JNode?>
 
     public void CopyTo( JNode?[] array, int arrayIndex ) => __items.CopyTo(array, arrayIndex);
 
-    public List<JNode?>.Enumerator GetEnumerator() => __items.GetEnumerator();
+    public List<JNode?>.Enumerator          GetEnumerator() => __items.GetEnumerator();
     IEnumerator<JNode?> IEnumerable<JNode?>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.                GetEnumerator() => GetEnumerator();
 
 
     internal void AddNew( JNode? item )
@@ -2688,10 +2924,10 @@ public sealed class JObjectNode : JNode, IDictionary<string, JNode?>, IReadOnlyD
 
     /// <exception cref="JsonReadException"> The JSON is malformed, or a member name repeats. </exception>
     /// <exception cref="FormatException"> The root isn't an object. </exception>
-    public static new JObjectNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
+    public new static JObjectNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
 
     /// <inheritdoc cref="Parse(string, JsonReaderOptions?)"/>
-    public static new JObjectNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
+    public new static JObjectNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
 
 
     public override JNodeKind Kind  => JNodeKind.Object;
@@ -2700,18 +2936,20 @@ public sealed class JObjectNode : JNode, IDictionary<string, JNode?>, IReadOnlyD
     public OrderedDictionary<string, JNode?>.KeyCollection   Keys   => __members.Keys;
     public OrderedDictionary<string, JNode?>.ValueCollection Values => __members.Values;
 
-    ICollection<string> IDictionary<string, JNode?>.Keys   => __members.Keys;
-    ICollection<JNode?> IDictionary<string, JNode?>.Values => __members.Values;
-    IEnumerable<string> IReadOnlyDictionary<string, JNode?>.Keys   => __members.Keys;
-    IEnumerable<JNode?> IReadOnlyDictionary<string, JNode?>.Values => __members.Values;
-    bool ICollection<KeyValuePair<string, JNode?>>.IsReadOnly => false;
+    ICollection<string> IDictionary<string, JNode?>.        Keys       => __members.Keys;
+    ICollection<JNode?> IDictionary<string, JNode?>.        Values     => __members.Values;
+    IEnumerable<string> IReadOnlyDictionary<string, JNode?>.Keys       => __members.Keys;
+    IEnumerable<JNode?> IReadOnlyDictionary<string, JNode?>.Values     => __members.Values;
+    bool ICollection<KeyValuePair<string, JNode?>>.         IsReadOnly => false;
 
 
     /// <summary> Get: the member's value, or <see langword="null"/> when it's missing. Set: adds or replaces the member (a new member goes last). </summary>
     /// <exception cref="InvalidOperationException"> <paramref name="value"/> already has a parent, or is this object or one of its ancestors. </exception>
     public override JNode? this[ string name ]
     {
-        get => __members.TryGetValue(name, out JNode? value) ? value : null;
+        get => __members.TryGetValue(name, out JNode? value)
+                   ? value
+                   : null;
         set
         {
             ArgumentNullException.ThrowIfNull(name);
@@ -2775,14 +3013,14 @@ public sealed class JObjectNode : JNode, IDictionary<string, JNode?>, IReadOnlyD
         __members.Clear();
     }
 
-    public OrderedDictionary<string, JNode?>.Enumerator GetEnumerator() => __members.GetEnumerator();
+    public OrderedDictionary<string, JNode?>.Enumerator                                 GetEnumerator() => __members.GetEnumerator();
     IEnumerator<KeyValuePair<string, JNode?>> IEnumerable<KeyValuePair<string, JNode?>>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.                                                            GetEnumerator() => GetEnumerator();
 
 
-    void ICollection<KeyValuePair<string, JNode?>>.Add( KeyValuePair<string, JNode?> member ) => Add(member.Key, member.Value);
-    bool ICollection<KeyValuePair<string, JNode?>>.Contains( KeyValuePair<string, JNode?> member ) => __members.TryGetValue(member.Key, out JNode? value) && ReferenceEquals(value, member.Value);
-    bool ICollection<KeyValuePair<string, JNode?>>.Remove( KeyValuePair<string, JNode?> member ) => ( (ICollection<KeyValuePair<string, JNode?>>)this ).Contains(member) && Remove(member.Key);
+    void ICollection<KeyValuePair<string, JNode?>>.Add( KeyValuePair<string, JNode?>      member )                => Add(member.Key, member.Value);
+    bool ICollection<KeyValuePair<string, JNode?>>.Contains( KeyValuePair<string, JNode?> member )                => __members.TryGetValue(member.Key, out JNode? value)                  && ReferenceEquals(value, member.Value);
+    bool ICollection<KeyValuePair<string, JNode?>>.Remove( KeyValuePair<string, JNode?>   member )                => ( (ICollection<KeyValuePair<string, JNode?>>)this ).Contains(member) && Remove(member.Key);
     void ICollection<KeyValuePair<string, JNode?>>.CopyTo( KeyValuePair<string, JNode?>[] array, int arrayIndex ) => ( (ICollection<KeyValuePair<string, JNode?>>)__members ).CopyTo(array, arrayIndex);
 
 
@@ -2883,7 +3121,7 @@ The prefix is `JJSON`, distinct from `Jakar.SystemTextJson`'s `JAKAR_JSON`. IDs 
 | JJSON007 | Info | A generated member was skipped because it's already declared by hand. | — |
 | JJSON008 | Error | Contradictory settings (e.g. `Required` with `NullValues = Omit` on a nullable member, `Capture` without an extension-data member). | — |
 | JJSON009 | Error | `Converter` doesn't implement `IJsonConverter<T>` for the member's type. | — |
-| JJSON010 | Error | The type has both `[GenerateJson]` and `[JsonModel]` (Jakar.SystemTextJson). Both emit `FromJson`/`ToJson`, and generators can't see each other's output. | remove one |
+| JJSON010 | Info | The type also has Jakar.SystemTextJson's `[JsonModel]`: side-by-side mode (§7.7). The type's own `FromJson`/`TryFromJson`/`FromJsonAsync`/`ToJson` helpers and `ToString()` are left to Jakar.SystemTextJson. | none; remove one attribute to end the migration |
 | JJSON011 | Info | A get-only member isn't bound to a constructor parameter, so it's written but never read. | — |
 | JJSON012 | Error | `ref struct`, pointer, delegate or `object`-typed member. | — |
 | JJSON013 | Warning | `UnorderedCollections = Enumeration` or `LocalDateTimes = WriteOffset`: I1 is weakened (§5.4). | — |

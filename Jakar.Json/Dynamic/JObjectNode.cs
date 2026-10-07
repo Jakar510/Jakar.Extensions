@@ -27,10 +27,10 @@ public sealed class JObjectNode : JNode, IDictionary<string, JNode?>, IReadOnlyD
 
     /// <exception cref="JsonReadException"> The JSON is malformed, or a member name repeats. </exception>
     /// <exception cref="FormatException"> The root isn't an object. </exception>
-    public static new JObjectNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
+    public new static JObjectNode Parse( string json, JsonReaderOptions? options = null ) => JNode.Parse(json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
 
     /// <inheritdoc cref="Parse(string, JsonReaderOptions?)"/>
-    public static new JObjectNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
+    public new static JObjectNode Parse( ReadOnlySpan<byte> utf8Json, JsonReaderOptions? options = null ) => JNode.Parse(utf8Json, options) as JObjectNode ?? throw new FormatException("The JSON root isn't an object.");
 
 
     public override JNodeKind Kind  => JNodeKind.Object;

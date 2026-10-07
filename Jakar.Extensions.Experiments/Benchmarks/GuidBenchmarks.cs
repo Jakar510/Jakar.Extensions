@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 04/25/2022  9:42 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 #pragma warning disable CA1822
 /*
 |      Method |      Mean |     Error |    StdDev | Rank |  Gen 0 | Allocated |
