@@ -230,6 +230,7 @@ public static partial class Json
 
             return any;
         }
+
         /// <summary> <paramref name="removeAt"/> &lt; 0 appends <paramref name="append"/>; otherwise removes that index. </summary>
         private JsonElement RewriteArray( int removeAt, JsonElement? append )
         {

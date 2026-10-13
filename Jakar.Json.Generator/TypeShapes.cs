@@ -22,6 +22,9 @@ internal sealed class KnownTypes( Compilation compilation )
     public readonly INamedTypeSymbol? JNode             = compilation.GetTypeByMetadataName("Jakar.Json.JNode");
     public readonly INamedTypeSymbol? JObjectNode       = compilation.GetTypeByMetadataName("Jakar.Json.JObjectNode");
     public readonly INamedTypeSymbol? OrderedDictionary = compilation.GetTypeByMetadataName("System.Collections.Generic.OrderedDictionary`2");
+    public readonly INamedTypeSymbol? Dictionary        = compilation.GetTypeByMetadataName("System.Collections.Generic.Dictionary`2");
+    public readonly INamedTypeSymbol? JsonElement       = compilation.GetTypeByMetadataName("System.Text.Json.JsonElement");
+    public readonly INamedTypeSymbol? JsonCollection    = compilation.GetTypeByMetadataName("Jakar.Json.IJsonCollection`2");
 
 
     public bool Implements( ITypeSymbol type, INamedTypeSymbol? generic, ITypeSymbol argument ) => generic is not null && type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, generic) && SymbolEqualityComparer.Default.Equals(i.TypeArguments[0].WithNullableAnnotation(NullableAnnotation.None), argument.WithNullableAnnotation(NullableAnnotation.None)));
@@ -30,6 +33,19 @@ internal sealed class KnownTypes( Compilation compilation )
 
     /// <summary> <c>[GenerateJson]</c> in this compilation (its generated interface isn't visible yet), or an <c>IJsonSerializable&lt;T&gt;</c> from anywhere. </summary>
     public bool IsModel( ITypeSymbol type ) => Implements(type, Serializable, type) || ( GenerateJson is not null && type.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, GenerateJson)) );
+
+    /// <summary> The element type when <paramref name="type"/> implements <c>IJsonCollection&lt;type, T&gt;</c> for itself. </summary>
+    public ITypeSymbol? CollectionElement( ITypeSymbol type )
+    {
+        if ( JsonCollection is null ) { return null; }
+
+        foreach ( INamedTypeSymbol candidate in type.AllInterfaces )
+        {
+            if ( SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, JsonCollection) && SymbolEqualityComparer.Default.Equals(candidate.TypeArguments[0].WithNullableAnnotation(NullableAnnotation.None), type.WithNullableAnnotation(NullableAnnotation.None)) ) { return candidate.TypeArguments[1]; }
+        }
+
+        return null;
+    }
 
     public bool IsParsable( ITypeSymbol type ) => Implements(type, SpanFormattable) && Implements(type, SpanParsable, type);
 
@@ -153,6 +169,9 @@ internal static class TypeShapes
 
             case "Jakar.Json.JNode" or "Jakar.Json.JObjectNode" or "Jakar.Json.JArrayNode" or "Jakar.Json.JValueNode":
                 return Simple(ShapeKind.Node);
+
+            case "System.Text.Json.JsonElement":
+                return Simple(ShapeKind.Element);
         }
 
         if ( type is INamedTypeSymbol { IsGenericType: true } generic )
@@ -219,11 +238,14 @@ internal static class TypeShapes
             }
         }
 
+        // Before IsModel: a collection that's also [GenerateJson] would otherwise be written as an object.
+        if ( known.CollectionElement(type) is { } collectionElement ) { return Sequence(ShapeKind.Collection, collectionElement); }
+
         if ( known.IsModel(type) ) { return Simple(ShapeKind.Model); }
 
         if ( known.IsParsable(type) ) { return Simple(ShapeKind.Parsable); }
 
-        return TypeShape.Unsupported(name, "it isn't a [GenerateJson] type, a supported BCL type or collection, or ISpanFormattable + ISpanParsable");
+        return TypeShape.Unsupported(name, "it isn't a [GenerateJson] type, a supported BCL type or collection, an IJsonCollection<TSelf, T>, or ISpanFormattable + ISpanParsable");
 
 
         TypeShape Sequence( ShapeKind kind, ITypeSymbol elementType )

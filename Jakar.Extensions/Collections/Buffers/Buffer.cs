@@ -33,10 +33,12 @@ public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
     public readonly Span<TValue> this[ Range range ] { [Pure] get => Values[range]; }
     public readonly Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
     public readonly Memory<TValue> Memory { [Pure] get => new(_array, 0, _length); }
+
     /// <summary> The whole backing storage (<see cref="Capacity"/> elements). </summary>
-    public readonly Span<TValue>   Span   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_array); }
+    public readonly Span<TValue> Span { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_array); }
+
     /// <summary> The unused storage after <see cref="Length"/>. </summary>
-    public readonly Span<TValue>   Next   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_array, _length, Capacity - _length); }
+    public readonly Span<TValue> Next { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(_array, _length, Capacity - _length); }
 
     /// <summary> The unused storage after <see cref="Length"/>, as <see cref="Memory{T}"/>. </summary>
     internal readonly Memory<TValue> FreeMemory => new(_array, _length, Capacity - _length);
@@ -46,6 +48,7 @@ public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
 
 
     [MustDisposeResource] public Buffer() { }
+
     /// <summary> Starts with a copy of <paramref name="span"/> (<see cref="Length"/> = <paramref name="span"/>.Length). </summary>
     [MustDisposeResource] public Buffer( params ReadOnlySpan<TValue> span ) : this(span.Length)
     {
@@ -57,6 +60,7 @@ public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         _array  = ArrayPool<TValue>.Shared.Rent(capacity);
         _length = 0;
     }
+
     /// <summary> Returns the array to the pool. Safe to call more than once on the same instance. </summary>
     public void Dispose()
     {
@@ -292,6 +296,7 @@ public struct Buffer<TValue> : IMemoryOwner<TValue>, IBufferWriter<TValue>
         span.Slice(start, count).Fill(value);
         _length += count;
     }
+
     /// <summary> Inserts <paramref name="values"/> at <paramref name="start"/> (0..<see cref="Length"/>), shifting later elements up. Capacity must already be sufficient. </summary>
     internal void InsertInternal( int start, params ReadOnlySpan<TValue> values )
     {

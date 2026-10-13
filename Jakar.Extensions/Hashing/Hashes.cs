@@ -539,43 +539,53 @@ public static class Hashes
     // and text is encoded into a stack or pooled buffer instead of a new array. Output (uppercase hex, no separators) is unchanged.
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public static string Hash_MD5( this ref readonly ReadOnlySpan<byte> data )                            => ToHex(HashKind.Md5, data);
+    public static string Hash_MD5( this ref readonly ReadOnlySpan<byte> data ) => ToHex(HashKind.Md5, data);
+
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static string Hash_MD5( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null ) => ToHex(HashKind.Md5, data, encoding);
+
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public static string Hash_MD5( this              string             data, Encoding? encoding = null ) => ToHex(HashKind.Md5, data, encoding);
+    public static string Hash_MD5( this string data, Encoding? encoding = null ) => ToHex(HashKind.Md5, data, encoding);
 
 
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public static string Hash_SHA1( this ref readonly ReadOnlySpan<byte> data )                            => ToHex(HashKind.Sha1, data);
+    public static string Hash_SHA1( this ref readonly ReadOnlySpan<byte> data ) => ToHex(HashKind.Sha1, data);
+
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static string Hash_SHA1( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null ) => ToHex(HashKind.Sha1, data, encoding);
+
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public static string Hash_SHA1( this              string             data, Encoding? encoding = null ) => ToHex(HashKind.Sha1, data, encoding);
+    public static string Hash_SHA1( this string data, Encoding? encoding = null ) => ToHex(HashKind.Sha1, data, encoding);
 
 
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
-    public static string Hash_SHA256( this ref readonly ReadOnlySpan<byte> data )                            => ToHex(HashKind.Sha256, data);
+    public static string Hash_SHA256( this ref readonly ReadOnlySpan<byte> data ) => ToHex(HashKind.Sha256, data);
+
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static string Hash_SHA256( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null ) => ToHex(HashKind.Sha256, data, encoding);
+
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
-    public static string Hash_SHA256( this              string             data, Encoding? encoding = null ) => ToHex(HashKind.Sha256, data, encoding);
+    public static string Hash_SHA256( this string data, Encoding? encoding = null ) => ToHex(HashKind.Sha256, data, encoding);
 
 
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
-    public static string Hash_SHA384( this ref readonly ReadOnlySpan<byte> data )                            => ToHex(HashKind.Sha384, data);
+    public static string Hash_SHA384( this ref readonly ReadOnlySpan<byte> data ) => ToHex(HashKind.Sha384, data);
+
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static string Hash_SHA384( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null ) => ToHex(HashKind.Sha384, data, encoding);
+
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
-    public static string Hash_SHA384( this              string             data, Encoding? encoding = null ) => ToHex(HashKind.Sha384, data, encoding);
+    public static string Hash_SHA384( this string data, Encoding? encoding = null ) => ToHex(HashKind.Sha384, data, encoding);
 
 
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
-    public static string Hash_SHA512( this ref readonly ReadOnlySpan<byte> data )                            => ToHex(HashKind.Sha512, data);
+    public static string Hash_SHA512( this ref readonly ReadOnlySpan<byte> data ) => ToHex(HashKind.Sha512, data);
+
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static string Hash_SHA512( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null ) => ToHex(HashKind.Sha512, data, encoding);
+
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
-    public static string Hash_SHA512( this              string             data, Encoding? encoding = null ) => ToHex(HashKind.Sha512, data, encoding);
+    public static string Hash_SHA512( this string data, Encoding? encoding = null ) => ToHex(HashKind.Sha512, data, encoding);
 
 
     /// <summary> Hashes <paramref name="data"/> with <paramref name="hasher"/> and formats it like <see cref="BitConverter.ToString(byte[])"/> (<c>AB-CD-...</c>). </summary>
@@ -701,13 +711,17 @@ public static class Hashes
     extension( ReadOnlyMemory<byte> data )
     {
         /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-        public ValueTask<string> HashAsync_MD5()    => ToDashedHexAsync(HashKind.Md5,    data.Span);
+        public ValueTask<string> HashAsync_MD5() => ToDashedHexAsync(HashKind.Md5, data.Span);
+
         /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-        public ValueTask<string> HashAsync_SHA1()   => ToDashedHexAsync(HashKind.Sha1,   data.Span);
+        public ValueTask<string> HashAsync_SHA1() => ToDashedHexAsync(HashKind.Sha1, data.Span);
+
         /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
         public ValueTask<string> HashAsync_SHA256() => ToDashedHexAsync(HashKind.Sha256, data.Span);
+
         /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
         public ValueTask<string> HashAsync_SHA384() => ToDashedHexAsync(HashKind.Sha384, data.Span);
+
         /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
         public ValueTask<string> HashAsync_SHA512() => ToDashedHexAsync(HashKind.Sha512, data.Span);
     }
@@ -717,13 +731,17 @@ public static class Hashes
     extension( byte[] data )
     {
         /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-        public ValueTask<string> HashAsync_MD5()    => ToDashedHexAsync(HashKind.Md5,    data);
+        public ValueTask<string> HashAsync_MD5() => ToDashedHexAsync(HashKind.Md5, data);
+
         /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-        public ValueTask<string> HashAsync_SHA1()   => ToDashedHexAsync(HashKind.Sha1,   data);
+        public ValueTask<string> HashAsync_SHA1() => ToDashedHexAsync(HashKind.Sha1, data);
+
         /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
         public ValueTask<string> HashAsync_SHA256() => ToDashedHexAsync(HashKind.Sha256, data);
+
         /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
         public ValueTask<string> HashAsync_SHA384() => ToDashedHexAsync(HashKind.Sha384, data);
+
         /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
         public ValueTask<string> HashAsync_SHA512() => ToDashedHexAsync(HashKind.Sha512, data);
         public ValueTask<string> HashAsync( HashAlgorithm hasher )

@@ -12,6 +12,7 @@ public sealed class JArrayNode : JNode, IList<JNode?>, IReadOnlyList<JNode?>
 
     public JArrayNode() => __items = [];
     public JArrayNode( int capacity ) => __items = new List<JNode?>(capacity);
+
     /// <exception cref="InvalidOperationException"> An item already has a parent. </exception>
     public JArrayNode( params ReadOnlySpan<JNode?> items ) : this(items.Length)
     {

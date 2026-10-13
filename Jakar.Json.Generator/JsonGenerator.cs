@@ -1,7 +1,6 @@
 // Jakar.Json.Generator
 // 10/07/2026
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -13,7 +12,12 @@ namespace Jakar.Json.Generator;
 
 
 /// <summary>
-///     Implements <c>IJsonSerializable&lt;TSelf&gt;</c> on every <see langword="partial"/> type marked <c>[GenerateJson]</c>: reflection-free readers and writers generic over
+///     Jakar.Json's source generator. Each part runs on the types carrying its attribute, and a type may carry both (side by side, JJSON010):
+///     <list type="bullet">
+///         <item> <c>[GenerateJson]</c> (this class): Jakar.Json's own serializer. </item>
+///         <item> <c>[JsonModel]</c> (<see cref="SystemTextJson.JsonModelGenerator"/>): <c>IJsonModel&lt;TSelf&gt;</c> over System.Text.Json source generation. </item>
+///     </list>
+///     The <c>[GenerateJson]</c> part implements <c>IJsonSerializable&lt;TSelf&gt;</c> on every <see langword="partial"/> type marked <c>[GenerateJson]</c>: reflection-free readers and writers generic over
 ///     <c>IJsonWriter</c> / <c>IJsonReader</c>, <c>ISpanFormattable</c> / <c>ISpanParsable</c> (and UTF-8), and <c>ToJson</c> / <c>FromJson</c> helpers. Settings are resolved
 ///     at compile time (member → type → <c>[assembly: JsonDefaults]</c> → built-in) and baked into the generated code.
 /// </summary>
@@ -43,5 +47,7 @@ public sealed class JsonGenerator : IIncrementalGenerator
         IncrementalValueProvider<ImmutableArray<EnumInfo>> enums = combined.SelectMany(static ( pair, _ ) => Emitter.EnumsUsed(pair.Model, pair.Defaults)).Collect();
 
         context.RegisterSourceOutput(enums, static ( spc, all ) => EnumEmitter.Emit(spc, all));
+
+        SystemTextJson.JsonModelGenerator.Initialize(context);
     }
 }

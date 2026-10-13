@@ -1,14 +1,11 @@
-// Jakar.SystemTextJson.Tests
+// Jakar.Json.Tests
 // 10/02/2026
 
-using System.Collections.Immutable;
-using System.Text;
 using System.Text.Json;
-using Jakar.Extensions;
 
 
 
-namespace Jakar.SystemTextJson.Tests;
+namespace Jakar.Json.Tests.SystemTextJson;
 
 
 [TestFixture]

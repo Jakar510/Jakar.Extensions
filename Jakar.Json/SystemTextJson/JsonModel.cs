@@ -1,5 +1,11 @@
-// Jakar.SystemTextJson
+// Jakar.Json
 // 10/02/2026
+
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
+
+
 
 namespace Jakar.Extensions;
 

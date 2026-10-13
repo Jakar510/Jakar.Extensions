@@ -28,12 +28,14 @@ public static class Buffers
             self.EnsureCapacityFor(count);
             self.Length += count;
         }
+
         /// <summary> Free memory after <see cref="Buffer{TValue}.Length"/> with room for at least <paramref name="sizeHint"/> (minimum 1) elements. </summary>
         public Memory<TValue> GetMemory( int sizeHint = 0 )
         {
             self.EnsureCapacityFor(Math.Max(sizeHint, 1));
             return self.FreeMemory;
         }
+
         /// <summary> Free span after <see cref="Buffer{TValue}.Length"/> with room for at least <paramref name="sizeHint"/> (minimum 1) elements. </summary>
         public Span<TValue> GetSpan( int sizeHint = 0 )
         {

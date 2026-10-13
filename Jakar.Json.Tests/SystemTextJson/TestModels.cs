@@ -1,15 +1,12 @@
-// Jakar.SystemTextJson.Tests
+// Jakar.Json.Tests
 // 10/02/2026
 
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using Jakar.Extensions;
 
 
 
-namespace Jakar.SystemTextJson.Tests;
+namespace Jakar.Json.Tests.SystemTextJson;
 
 
 [JsonSourceGenerationOptions(AllowTrailingCommas = true, ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip, PropertyNameCaseInsensitive = true)]

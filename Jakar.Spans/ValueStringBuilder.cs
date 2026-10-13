@@ -22,12 +22,15 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
     private       int        __length;
 
 
-    public readonly bool       IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __length == 0; }
-    public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Length; }
+    public readonly bool IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __length == 0; }
+    public readonly int  Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars.Length; }
+
     /// <summary> The unused storage after <see cref="Length"/>. </summary>
-    public readonly Span<char> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[__length..]; }
+    public readonly Span<char> Next { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[__length..]; }
+
     /// <summary> The written characters (<see cref="Length"/> chars). </summary>
-    public readonly Span<char> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[..__length]; }
+    public readonly Span<char> Span { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars[..__length]; }
+
     /// <summary> The whole underlying storage (<see cref="Capacity"/> chars). </summary>
     public readonly Span<char> RawChars { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __chars; }
     public readonly Span<char> this[ Range range ] => Span[range];
@@ -39,6 +42,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
 
     public ValueStringBuilder() : this(DEFAULT_CAPACITY) { }
+
     /// <summary> Starts with a rented array of at least <paramref name="initialCapacity"/> chars. </summary>
     public ValueStringBuilder( int initialCapacity )
     {
@@ -46,6 +50,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         __chars               = __arrayToReturnToPool;
         __length              = 0;
     }
+
     /// <summary> Starts with <paramref name="initialBuffer"/> as storage (typically <c>stackalloc char[N]</c>); it is only replaced by a rented array if more room is needed. </summary>
     public ValueStringBuilder( Span<char> initialBuffer )
     {
@@ -53,12 +58,14 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         __chars               = initialBuffer;
         __length              = 0;
     }
+
     /// <summary> Starts with a copy of <paramref name="span"/>. </summary>
     public ValueStringBuilder( params ReadOnlySpan<char> span ) : this(Math.Max(span.Length, DEFAULT_CAPACITY))
     {
         span.CopyTo(__chars);
         __length = span.Length;
     }
+
     /// <summary> Returns any rented array to the pool and resets the builder. Safe to call more than once. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Dispose()
     {
@@ -74,8 +81,10 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         __length = 0;
         return ref this;
     }
+
     /// <summary> Ensures room for one value of <typeparamref name="TValue"/> (or <paramref name="format"/>'s length, whichever is larger) after <see cref="Length"/>. </summary>
     public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format ) => EnsureCapacity(__length + Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
+
     /// <summary> Ensures <see cref="Capacity"/> is at least <paramref name="capacity"/>. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public void EnsureCapacity( int capacity )
     {
@@ -136,6 +145,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         __length = MemoryExtensions.TrimEnd(Values, value).Length;
         return ref this;
     }
+
     /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
     [UnscopedRef] public ref ValueStringBuilder TrimEnd( params ReadOnlySpan<char> value )
     {
@@ -148,6 +158,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         RemoveStart(__length - MemoryExtensions.TrimStart(Values, value).Length);
         return ref this;
     }
+
     /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
     [UnscopedRef] public ref ValueStringBuilder TrimStart( params ReadOnlySpan<char> value )
     {
@@ -172,12 +183,14 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         Span[index] = value;
         return ref this;
     }
+
     /// <summary> Overwrites <paramref name="count"/> chars from <paramref name="index"/> (within <see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueStringBuilder Replace( int index, char value, int count )
     {
         Span.Slice(index, count).Fill(value);
         return ref this;
     }
+
     /// <summary> Overwrites chars from <paramref name="index"/> with <paramref name="value"/> (within <see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueStringBuilder Replace( int index, params ReadOnlySpan<char> value )
     {
@@ -187,6 +200,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
 
     [UnscopedRef] public ref ValueStringBuilder Insert( int index, char value ) => ref Insert(index, value, 1);
+
     /// <summary> Inserts <paramref name="count"/> copies of <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueStringBuilder Insert( int index, char value, int count )
     {
@@ -200,6 +214,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         __length += count;
         return ref this;
     }
+
     /// <summary> Inserts <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueStringBuilder Insert( int index, params ReadOnlySpan<char> value )
     {
@@ -341,6 +356,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
 
         return ref this;
     }
+
     /// <inheritdoc cref="AppendJoin(char, IEnumerable{string})"/>
     [UnscopedRef] public ref ValueStringBuilder AppendJoin( ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
@@ -674,6 +690,7 @@ public ref struct ValueStringBuilder : ISpanFormattable, IDisposable
         charsWritten = 0;
         return false;
     }
+
     /// <summary> The content as a string; the builder is disposed (its pooled array returned). </summary>
     public override string ToString()
     {

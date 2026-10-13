@@ -38,6 +38,7 @@ public static class UriExtensions
             AppendQuery(ref sb, parameters, false);
             return sb.ToString();
         }
+
         /// <summary> <c>/segment/segment</c> </summary>
         public string Parameterize()
         {

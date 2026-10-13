@@ -4,7 +4,6 @@
 
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.DependencyInjection;
 
 
 
@@ -80,6 +79,7 @@ public partial class WebRequester
             previous?.Release();
             return this;
         }
+
         /// <summary> A lease on the handler (connection pool) shared by every client this builder creates, built on first use. </summary>
         private HttpMessageHandler LeaseSharedHandler()
         {
@@ -89,6 +89,7 @@ public partial class WebRequester
                 return __handler.Lease();
             }
         }
+
         /// <summary>
         ///     Releases the builder's reference to the shared handler. Clients already built keep working: the handler (and its connections) is disposed only once the builder
         ///     <i>and</i> every client built from it have been disposed.
@@ -414,18 +415,21 @@ public partial class WebRequester
         public Builder With_Timeout( int    minutes )      => With_Timeout(TimeSpan.FromMinutes(minutes));
         public Builder With_Timeout( float  seconds )      => With_Timeout(TimeSpan.FromSeconds(seconds));
         public Builder With_Timeout( double milliseconds ) => With_Timeout(TimeSpan.FromMilliseconds(milliseconds));
+
         /// <summary> The whole-request timeout (<see cref="HttpClient.Timeout"/>). Use <see cref="With_ConnectTimeout"/> to limit only establishing the connection. </summary>
         public Builder With_Timeout( TimeSpan value )
         {
             __timeout = value;
             return this; // client setting: the shared handler is unaffected
         }
+
         /// <summary> Time allowed to establish a connection (<see cref="SocketsHttpHandler.ConnectTimeout"/>). </summary>
         public Builder With_ConnectTimeout( TimeSpan value )
         {
             __connectTimeout = value;
             return Changed();
         }
+
         /// <summary> Which response encodings are decompressed automatically (and advertised via Accept-Encoding). Default: <see cref="DecompressionMethods.All"/>. </summary>
         public Builder With_AutomaticDecompression( DecompressionMethods value )
         {

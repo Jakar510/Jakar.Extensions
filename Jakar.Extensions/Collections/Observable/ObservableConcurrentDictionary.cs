@@ -162,6 +162,7 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
 
     /// <remarks> An atomic snapshot. </remarks>
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex ) => ( (ICollection<KeyValuePair<TKey, TValue>>)buffer ).CopyTo(array, startIndex);
+
     /// <remarks> Not atomic: items added or removed while copying may or may not be included. </remarks>
     public void CopyTo( Span<KeyValuePair<TKey, TValue>> array, int startIndex )
     {

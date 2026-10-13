@@ -1,6 +1,8 @@
 # Jakar.Json
 
-A reflection-free, allocation-free JSON serializer. `[GenerateJson]` source-generates readers and writers for UTF-16 and UTF-8 that implement `ISpanFormattable` / `ISpanParsable<T>` (and the UTF-8 versions). The package also has a zero-allocation JSON tape and a Newtonsoft-style DOM. It doesn't use `System.Text.Json`. The design is in [SPEC.md](SPEC.md).
+A reflection-free, allocation-free JSON serializer. `[GenerateJson]` source-generates readers and writers for UTF-16 and UTF-8 that implement `ISpanFormattable` / `ISpanParsable<T>` (and the UTF-8 versions). The package also has a zero-allocation JSON tape and a Newtonsoft-style DOM. The serializer doesn't use `System.Text.Json`. The design is in [SPEC.md](SPEC.md).
+
+The package also contains Native AOT friendly System.Text.Json models (`[JsonModel]`, formerly the Jakar.SystemTextJson package; see [below](#systemtextjson-models-jsonmodel)). One source generator serves both: each part runs on the types that carry its attribute, and a type can carry both.
 
 ```csharp
 using Jakar.Json;
@@ -48,7 +50,7 @@ Settings resolve from the nearest level: `[JsonMember]` on the member, then `[Ge
 | `NullValues` / `DefaultValues` | `Write` | `Omit` |
 | `UnknownMembers` | `Skip` | `Error`, `Capture` (into a `[JsonMember(ExtensionData = true)]` member) |
 | `DuplicateMembers` | `Error` | `LastWins` |
-| `Enums` | `Name` | `Number` |
+| `Enums` | `Name` | `Number` (reading accepts names and numbers either way) |
 | `NumbersFromStrings` | `Disallow` | `Allow` |
 | `LargeIntegers` | `Number` | `String` (beyond ±2^53, for JavaScript) |
 | `NonFiniteFloats` | `Error` | `AsString` (`"NaN"`, `"Infinity"`) |
@@ -74,7 +76,8 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
   - other `[GenerateJson]` types, and any `ISpanFormattable` + `ISpanParsable<T>` type;
   - arrays, `List<T>`, the list and collection interfaces, the immutable, frozen, sorted and hash-based sets, `Queue<T>` and `Stack<T>`;
   - every dictionary type, keyed by `string`, an enum, or any parsable type;
-  - `JNode` and its subtypes.
+  - any `IJsonCollection<TSelf, T>`: a collection that writes its own elements and is built from a span in one call (the `Jakar.Extensions` observable collections write their unfiltered contents this way);
+  - `JNode` and its subtypes, and System.Text.Json's `JsonElement`.
 - **Custom converters.** `[JsonMember(Converter = typeof(MyConverter))]`, where the converter is a `struct` implementing `IJsonConverter<T>`.
 - **Polymorphism.** `[JsonDerived(typeof(Dog), "dog")]` on the base type. The discriminator (`"$type"` by default) is written first, and when reading it may appear anywhere in the object.
 - **Generics.** Type parameters work when constrained to `IJsonSerializable<T>`, or to `ISpanFormattable` + `ISpanParsable<T>`.
@@ -97,6 +100,44 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
   - `DeepClone`, `DeepEquals`, `Detach` and `Path` are available.
   - `ToModel<T>()` and `FromModel<T>()` convert without going through text.
 
+## System.Text.Json models (`[JsonModel]`)
+
+Formerly the Jakar.SystemTextJson package. The types keep the `Jakar.Extensions` namespace.
+
+```csharp
+using System.Text.Json.Serialization;
+using Jakar.Extensions;
+
+[JsonSerializable(typeof(Invoice))]
+public sealed partial class AppJsonContext : JsonSerializerContext;
+
+[JsonModel(typeof(AppJsonContext))]
+public sealed partial class Invoice
+{
+    public decimal Total { get; init; }
+}
+
+Invoice invoice = Invoice.FromJson(json);   // generated, uses AppJsonContext.Default.Invoice
+string  text    = invoice.ToJson();
+```
+
+- `[JsonModel]` implements `IJsonModel<TSelf>` on a `partial` class, record or struct: the `JsonTypeInfo` property, `FromJson` / `TryFromJson` / `FromJsonAsync`, and a registration in `JsonModelRegistry`.
+- The type must be registered in its context (`[JsonSerializable(typeof(Invoice))]`). The System.Text.Json generator can't see other generators' output, so this can't be done for you; diagnostic **JAKAR_JSON001** has a code fix that adds it.
+- `[assembly: JsonModelContext(typeof(AppJsonContext))]` sets a default context so `[JsonModel]` can be used without arguments.
+- Root-level JSON arrays are read and written element by element with only the element's metadata, so `List<T>`, `T[]`, `ImmutableArray<T>`, ... never need registering: `JsonModel.FromJsonList(json, Invoice.JsonTypeInfo)`, `invoices.ToJson()`, or `JsonModel.FromJsonArrayPooled(...)` for a pooled buffer (`RentedArray<T>`).
+- `SerializeAsStringJsonConverter<T>` serializes any `ISpanParsable<T>` + `ISpanFormattable` type as a JSON string.
+- With `[GenerateJson]` on the same type, the type's own helpers stay System.Text.Json's (side-by-side mode, JJSON010; SPEC.md §7.7).
+
+| ID | Severity | Meaning |
+|---|---|---|
+| JAKAR_JSON001 | Error | The type isn't registered in its context (code fix adds `[JsonSerializable(typeof(T))]`) |
+| JAKAR_JSON002 | Error | The type, or a containing type, isn't `partial` |
+| JAKAR_JSON003 | Error | Open generic types can't be source generated; put `[JsonModel]` on the closed derived type, or implement `JsonTypeInfo` with `JsonModel.GetRequiredTypeInfo<T>()` |
+| JAKAR_JSON004 | Error | The context isn't a `JsonSerializerContext`, or none was given and there's no assembly default |
+| JAKAR_JSON005 | Warning | The type hand-writes `JsonTypeInfo`; the generator leaves it alone |
+| JAKAR_JSON006 | Error | The type lists `IJsonModel<T>` without `[JsonModel]` and doesn't implement it (code fix adds `[JsonModel]`) |
+| JAKAR_JSON007 | Warning | An `IJsonModel.AdditionalData` implementation lacks `[JsonExtensionData]`, so unknown members are dropped |
+
 ## Diagnostics
 
 | ID | Severity | Meaning |
@@ -110,7 +151,7 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
 | JJSON007 | Info | A generated member was already declared by hand, so it's not generated |
 | JJSON008 | Error | Contradictory settings |
 | JJSON009 | Error | A converter doesn't fit its member |
-| JJSON010 | Info | Side by side with Jakar.SystemTextJson's `[JsonModel]`: the type's `FromJson`/`ToJson`/`ToString()` are Jakar.SystemTextJson's (see Notes) |
+| JJSON010 | Info | Side by side with `[JsonModel]`: the type's `FromJson`/`ToJson`/`ToString()` are the `[JsonModel]` part's (see Notes) |
 | JJSON011 | Info | A member is written but never read (no setter, no constructor parameter) |
 | JJSON012 | Error | `object`, delegate, pointer or ref struct member |
 | JJSON013 | Warning | A setting weakens deterministic output |
@@ -119,7 +160,7 @@ Output is compact unless indented, with `" : "` between names and values: `{"id"
 
 ## Notes
 
-- **Migrating from Jakar.SystemTextJson.** A type can keep `[JsonModel]` next to `[GenerateJson]` (side-by-side mode). Its own `FromJson`/`TryFromJson`/`FromJsonAsync`/`ToJson` and `ToString()` stay System.Text.Json's. Reach Jakar.Json through `JsonCodec.ToJson(value)` / `JsonCodec.FromJson<T>(json)`, `TryFormat`, `Parse`, or generic `T : IJsonSerializable<T>` code. Remove `[JsonModel]` to finish; see SPEC.md §7.7.
+- **Migrating from `[JsonModel]` to `[GenerateJson]`.** A type can keep `[JsonModel]` next to `[GenerateJson]` (side-by-side mode). Its own `FromJson`/`TryFromJson`/`FromJsonAsync`/`ToJson` and `ToString()` stay System.Text.Json's. Reach Jakar.Json through `JsonCodec.ToJson(value)` / `JsonCodec.FromJson<T>(json)`, `TryFormat`, `Parse`, or generic `T : IJsonSerializable<T>` code. Remove `[JsonModel]` to finish; see SPEC.md §7.7.
 - The only reflection-adjacent code is in the BCL collections the reader creates, such as `Dictionary<TKey, TValue>` with its default comparer. Jakar.Json itself makes no reflection calls, and writing to sets and dictionaries uses comparisons chosen at compile time.
 - `byte[]` is written as a JSON array of numbers, not base64. Use a converter if you need base64.
 - Object references aren't preserved. A cyclic graph fails at `MaxDepth` with `DepthExceeded`.

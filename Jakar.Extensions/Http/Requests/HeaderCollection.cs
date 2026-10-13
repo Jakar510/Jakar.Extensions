@@ -19,6 +19,7 @@ public class HeaderCollection : Dictionary<string, object>
                    : null;
         set => this[CONTENT_ENCODING] = value ?? EMPTY;
     }
+
     /// <summary> <c>Content-Type</c>, including any <c>charset</c> parameter. </summary>
     public string? ContentType
     {
@@ -27,6 +28,7 @@ public class HeaderCollection : Dictionary<string, object>
                    : null;
         set => this[CONTENT_TYPE] = value ?? EMPTY;
     }
+
     /// <summary> The <c>charset</c> parameter of <see cref="ContentType"/> (set on <c>text/plain</c> if no content type has been set yet); <see langword="null"/> if absent or unknown. </summary>
     public Encoding? Encoding
     {
@@ -98,6 +100,7 @@ public class HeaderCollection : Dictionary<string, object>
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="request"/>: content headers (e.g. <c>Content-Type</c>) go to <see cref="HttpRequestMessage.Content"/> when it has content, all others to <see cref="HttpRequestMessage.Headers"/>. Existing values are replaced. </summary>
     public HeaderCollection Merge( HttpRequestMessage request )
     {
@@ -109,6 +112,7 @@ public class HeaderCollection : Dictionary<string, object>
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="headers"/>, replacing existing values. Headers that don't belong to that collection (e.g. <c>Content-Type</c> on request headers) are skipped. </summary>
     public HeaderCollection Merge( HttpHeaders headers )
     {
@@ -116,6 +120,7 @@ public class HeaderCollection : Dictionary<string, object>
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="headers"/>, replacing existing values. Non-content headers are skipped. </summary>
     public HeaderCollection Merge( HttpContentHeaders headers ) => Merge((HttpHeaders)headers);
 

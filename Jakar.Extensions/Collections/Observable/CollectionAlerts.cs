@@ -82,14 +82,14 @@ public delegate bool FilterDelegate<TValue>( int index, ref readonly TValue? val
 public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, ICollectionAlerts<TValue>, INotificationSuspendable
     where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
 {
-// ReSharper disable StaticMemberInGenericType
+    // ReSharper disable StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs       = new(NotifyCollectionChangedAction.Reset);
     private static readonly   PropertyChangedEventArgs         __countArgs      = new(nameof(Count));
     private static readonly   PropertyChangedEventArgs         __isEmptyArgs    = new(nameof(IsEmpty));
     private static readonly   PropertyChangedEventArgs         __isNotEmptyArgs = new(nameof(IsNotEmpty));
     private static readonly   PropertyChangedEventArgs         __capacityArgs   = new(nameof(Capacity));
 
-// ReSharper restore StaticMemberInGenericType
+    // ReSharper restore StaticMemberInGenericType
 
     private FilterDelegate<TValue>? __filter;
     private sbyte                   __filterOverridden    = -1; // -1 unknown, 0 no, 1 yes
@@ -122,6 +122,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
             return __filterOverridden == 1;
         }
     }
+
     /// <summary> Whether change args have to be built: someone subscribed to <see cref="CollectionChanged"/>, or a subclass overrides <see cref="OnChanged"/>. </summary>
     private bool NeedsChangeArgs
     {
@@ -230,6 +231,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         if ( NeedsChangeArgs ) { OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, value, index)); }
         else { CountChanged(); }
     }
+
     /// <summary> Items were removed but are no longer available: raised as a reset. </summary>
     protected void Removed( int index ) => Reset();
     protected void Moved( TValue[] value, ref readonly int index, ref readonly int oldIndex )
@@ -251,6 +253,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         if ( NeedsChangeArgs ) { OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old, index)); }
     }
     protected void OnCapacityChanged() => OnPropertyChanged(__capacityArgs);
+
     /// <summary> Raises <see cref="Count"/>, <see cref="IsEmpty"/> and <see cref="IsNotEmpty"/>. </summary>
     protected void OnCountChanged()
     {
@@ -259,6 +262,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 
         CountChanged();
     }
+
     /// <summary> Raises <see cref="Count"/> when it changed, and <see cref="IsEmpty"/> / <see cref="IsNotEmpty"/> when emptiness changed (e.g. a sort raises neither). </summary>
     private void CountChanged()
     {

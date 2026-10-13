@@ -56,10 +56,12 @@ public sealed class FeatureTests
         Assert.That(json, Is.EqualTo("""{"Big" : "9223372036854775807","Small" : 42,"Weird" : "-Infinity","Status" : 2}"""));
 
         Numeric back = Numeric.FromJson(json);
-        Assert.That(back.Big,                                      Is.EqualTo(long.MaxValue));
-        Assert.That(back.Weird,                                    Is.EqualTo(double.NegativeInfinity));
-        Assert.That(back.Status,                                   Is.EqualTo(Status.Paid));
-        Assert.That(Numeric.FromJson("""{"Weird":"NaN"}""").Weird, Is.NaN);
+        Assert.That(back.Big,                                            Is.EqualTo(long.MaxValue));
+        Assert.That(back.Weird,                                          Is.EqualTo(double.NegativeInfinity));
+        Assert.That(back.Status,                                         Is.EqualTo(Status.Paid));
+        Assert.That(Numeric.FromJson("""{"Weird":"NaN"}""").Weird,       Is.NaN);
+        Assert.That(Numeric.FromJson("""{"Status":"Paid"}""").Status,    Is.EqualTo(Status.Paid), "Enums = Number still reads names (what a name-writing serializer produces)");
+        Assert.That(Numeric.TryFromJson("""{"Status":"Nope"}""", out _), Is.False);
     }
 
     [Test] public void NaN_WithoutAsString_IsAWriteError() { Assert.Throws<JsonWriteException>(() => new Scalars { Double = double.NaN }.ToJson()); }

@@ -1,7 +1,6 @@
 // Jakar.Json.Generator
 // 10/07/2026
 
-using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -87,7 +86,9 @@ internal enum ShapeKind : byte
     Stack,
     Dictionary,
     Map,
-    Node
+    Node,
+    Collection, // IJsonCollection<TSelf, T>: the collection writes its elements and is built from a span
+    Element     // System.Text.Json's JsonElement
 }
 
 
@@ -160,26 +161,41 @@ internal enum SetterKind : byte
 
 internal sealed record MemberInfo
 {
-    public required string        Name                 { get; init; }
-    public required string        TypeName             { get; init; } // as declared, with nullable annotation
-    public required TypeShape     Shape                { get; init; }
-    public required string?       JsonNameOverride     { get; init; }
-    public required int           Order                { get; init; }
-    public required bool          HasOrder             { get; init; }
-    public required bool          CanGet               { get; init; }
-    public required SetterKind    Setter               { get; init; }
-    public required bool          IsRequiredKeyword    { get; init; }
-    public required bool          RequiredAttribute    { get; init; }
-    public required string?       Converter            { get; init; } // a converter type that fits; null otherwise
-    public required bool          IsExtensionData      { get; init; }
-    public required Settings      Settings             { get; init; }
-    public required int           BaseDepth            { get; init; } // 0 for the most-base declaring type
-    public required string        FilePath             { get; init; }
-    public required int           Position             { get; init; }
-    public required string        DeclaringType        { get; init; } // global::-qualified
-    public required bool          DeclaringIsValueType { get; init; }
-    public required LocationInfo? Location             { get; init; }
+    public required string               Name                 { get; init; }
+    public required string               TypeName             { get; init; } // as declared, with nullable annotation
+    public required TypeShape            Shape                { get; init; }
+    public required string?              JsonNameOverride     { get; init; }
+    public required int                  Order                { get; init; }
+    public required bool                 HasOrder             { get; init; }
+    public required bool                 CanGet               { get; init; }
+    public required SetterKind           Setter               { get; init; }
+    public required bool                 IsRequiredKeyword    { get; init; }
+    public required bool                 RequiredAttribute    { get; init; }
+    public required string?              Converter            { get; init; } // a converter type that fits; null otherwise
+    public required bool                 IsExtensionData      { get; init; }
+    public required bool                 ExtensionElements    { get; init; } // the extension-data bag holds JsonElement values (Dictionary<string, JsonElement>), not JNode
+    public required Settings             Settings             { get; init; }
+    public required int                  BaseDepth            { get; init; } // 0 for the most-base declaring type
+    public required string               FilePath             { get; init; }
+    public required int                  Position             { get; init; }
+    public required string               DeclaringType        { get; init; } // global::-qualified
+    public required bool                 DeclaringIsValueType { get; init; }
+    public required LocationInfo?        Location             { get; init; }
+    public required GenericAccessorInfo? GenericAccessor      { get; init; } // an init-only member declared on a closed generic base type
 }
+
+
+
+/// <summary>
+///     <c>[UnsafeAccessor]</c> only binds a member of a generic type through the open definition, from a generic class with matching type parameters:
+///     <c>Access&lt;__T0, __T1&gt;.Set(Base&lt;__T0, __T1&gt; target, __T1 value)</c>, called as <c>Access&lt;Closed, Args&gt;.Set(...)</c>.
+/// </summary>
+/// <param name="TypeParameters"> <c>&lt;__T0, __T1&gt;</c>. </param>
+/// <param name="Constraints"> The definition's constraints, renamed (<c> where __T0 : ...</c>), or empty. </param>
+/// <param name="OpenTarget"> The definition over the renamed parameters. </param>
+/// <param name="TypeArguments"> <c>&lt;global::A, global::System.Guid&gt;</c>: the closed base's arguments. </param>
+/// <param name="ValueType"> The member's type in the definition's terms, renamed. </param>
+internal sealed record GenericAccessorInfo( string TypeParameters, string Constraints, string OpenTarget, string TypeArguments, string ValueType );
 
 
 
@@ -191,8 +207,10 @@ internal enum ConstructionKind : byte
 {
     /// <summary> Abstract: only derived types are constructed. </summary>
     None,
+
     /// <summary> <c>new T(args) { required... }</c> </summary>
     Constructor,
+
     /// <summary> A struct without an explicit constructor: <c>new T() { required... }</c>. </summary>
     Default
 }
@@ -228,7 +246,7 @@ internal sealed record ModelInfo
     public required bool                           HasSerializableBase { get; init; } // a base type already has generated members: hide them with 'new'
     public required EquatableArray<string>         Skip                { get; init; } // generated members the type already declares
     public required bool                           OverridesToString   { get; init; }
-    public required bool                           SideBySide          { get; init; } // [JsonModel] too: Jakar.SystemTextJson owns FromJson/ToJson/ToString(), so only the contract members are emitted
+    public required bool                           SideBySide          { get; init; } // [JsonModel] too: that part owns FromJson/ToJson/ToString(), so only the contract members are emitted
     public required LocationInfo?                  AttributeLocation   { get; init; }
     public required EquatableArray<DiagnosticInfo> Diagnostics         { get; init; }
     public required bool                           IsFatal             { get; init; }

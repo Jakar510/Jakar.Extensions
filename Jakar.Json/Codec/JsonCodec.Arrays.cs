@@ -1,10 +1,6 @@
 // Jakar.Json
 // 10/07/2026
 
-using System.Runtime.CompilerServices;
-
-
-
 namespace Jakar.Json;
 
 

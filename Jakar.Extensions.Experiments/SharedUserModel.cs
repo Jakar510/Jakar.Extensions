@@ -1,4 +1,4 @@
-﻿// Jakar.Extensions :: Experiments
+// Jakar.Extensions :: Experiments
 // 10/07/2026  16:03
 
 using Jakar.Json;
@@ -9,8 +9,8 @@ namespace Experiments;
 
 
 [Serializable]
-[GenerateJson]
-[JsonModel(typeof(UserGuidJsonContext))]
+[GenerateJson(Enums = JsonEnumFormat.Name, Indented = JsonToggle.On)] // enums as names, like SharedUserJsonContext (UseStringEnumConverter), so each serializer reads the other's output
+[JsonModel(typeof(SharedUserJsonContext))]
 public sealed partial class SharedUserModel : UserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public SharedUserModel() : base() { }

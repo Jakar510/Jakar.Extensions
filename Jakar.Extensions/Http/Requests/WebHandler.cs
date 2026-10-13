@@ -236,8 +236,10 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
         return await stream.FromJson(token).ConfigureAwait(false);
     }
+
     /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> with <see cref="Json.GetTypeInfo{T}"/> (no intermediate DOM). </summary>
     public static ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token ) => AsJson(response, Json.GetTypeInfo<TValue>(), token);
+
     /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
     public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
     {
@@ -281,6 +283,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                    ? result
                    : Guid.Empty;
     }
+
     /// <summary> The body as one array (a single copy of the buffered content). </summary>
     public static async ValueTask<byte[]> AsBytes( HttpResponseMessage response, CancellationToken token )
     {
@@ -298,6 +301,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await CopyBody(response, fs, token).ConfigureAwait(false);
         return file;
     }
+
     /// <summary> Saves the body to a temp file whose extension comes from the <see cref="MimeType"/> named by header <paramref name="fileNameHeader"/> (response or content headers), if present. </summary>
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader, CancellationToken token )
     {
@@ -312,6 +316,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         return await AsFile(response, token).ConfigureAwait(false);
     }
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path, CancellationToken token ) => await AsFile(response, new LocalFile(path), token).ConfigureAwait(false);
+
     /// <summary> Saves the body to <paramref name="file"/>, replacing its contents. </summary>
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file, CancellationToken token )
     {
@@ -331,6 +336,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await CopyBody(response, fs, token).ConfigureAwait(false);
         return file;
     }
+
     /// <summary> The body as a seekable <see cref="MemoryStream"/> over a single copy of the content (fixed size: it can be overwritten but not grown). </summary>
     public static async ValueTask<MemoryStream> AsStream( HttpResponseMessage response, CancellationToken token )
     {

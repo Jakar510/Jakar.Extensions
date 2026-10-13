@@ -32,10 +32,5 @@
   <Project Path="Jakar.Json.Generator/Jakar.Json.Generator.csproj" />
   <Project Path="Jakar.Json.Tests/Jakar.Json.Tests.csproj" />
   <Project Path="Jakar.Json/Jakar.Json.csproj" />
-  <Project Path="Jakar.SystemTextJson.Generator.CodeFixes/Jakar.SystemTextJson.Generator.CodeFixes.csproj" />
-  <Project Path="Jakar.SystemTextJson.Generator.Tests/Jakar.SystemTextJson.Generator.Tests.csproj" />
-  <Project Path="Jakar.SystemTextJson.Generator/Jakar.SystemTextJson.Generator.csproj" />
-  <Project Path="Jakar.SystemTextJson.Tests/Jakar.SystemTextJson.Tests.csproj" />
-  <Project Path="Jakar.SystemTextJson/Jakar.SystemTextJson.csproj" />
   <Project Path="Jakar.Permissions.Generator/src/Jakar.Permissions.Generator.csproj" />
 </Solution>

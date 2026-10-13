@@ -57,7 +57,8 @@ internal static class Emitter
 
     private static IEnumerable<EnumInfo> Enums( TypeShape shape, Settings settings )
     {
-        if ( shape is { Kind: ShapeKind.Enum, Enum: { } info } && settings.Enums != Values.ENUMS_NUMBER ) { yield return TypeShapes.WithNaming(info, settings.EnumNaming); }
+        // Number mode needs the name converter too: it reads names (JsonEnumNumberConverter<TEnum, TUnderlying, TNames>).
+        if ( shape is { Kind: ShapeKind.Enum, Enum: { } info } ) { yield return TypeShapes.WithNaming(info, settings.EnumNaming); }
 
         if ( shape.Key is { Kind: ShapeKind.Enum, Enum: { } key } ) { yield return TypeShapes.WithNaming(key, settings.EnumNaming); }
 
@@ -104,7 +105,7 @@ internal static class Emitter
         EmitOptions(code, model, type);
         EmitInterfaces(code, model);
 
-        // Side by side with [JsonModel] (JJSON010), Jakar.SystemTextJson owns the type's own helpers: emitting ours too would make some calls ambiguous
+        // Side by side with [JsonModel] (JJSON010), the [JsonModel] part owns the type's own helpers: emitting ours too would make some calls ambiguous
         // (FromJsonAsync(stream)) and silently split the rest between the two serializers (Type.FromJson binds to one, value.ToJson() to the other).
         if ( !model.SideBySide )
         {
@@ -305,9 +306,12 @@ internal static class Emitter
             case ShapeKind.Node:
                 return $"{C}JsonNodeConverter<{name}>";
 
+            case ShapeKind.Element:
+                return $"{C}JsonElementConverter";
+
             case ShapeKind.Enum:
                 return settings.Enums == Values.ENUMS_NUMBER
-                           ? $"{C}JsonEnumNumberConverter<{name}, {shape.Enum!.UnderlyingType}>"
+                           ? $"{C}JsonEnumNumberConverter<{name}, {shape.Enum!.UnderlyingType}, {TypeShapes.WithNaming(shape.Enum!, settings.EnumNaming).ConverterName}>"
                            : TypeShapes.WithNaming(shape.Enum!, settings.EnumNaming).ConverterName;
         }
 
@@ -346,6 +350,9 @@ internal static class Emitter
 
             case ShapeKind.Stack:
                 return $"{C}JsonStackConverter<{e}, {ec}>";
+
+            case ShapeKind.Collection:
+                return $"{C}JsonCollectionConverter<{name}, {e}, {ec}>";
         }
 
         TypeShape key = shape.Key!;
@@ -524,10 +531,17 @@ internal static class Emitter
         {
             using ( code.Block($"if ( value.{Id(extension.Name)} is {{ }} __extension )") )
             {
-                using ( code.Block("foreach ( global::System.Collections.Generic.KeyValuePair<string, global::Jakar.Json.JNode?> __pair in __extension )") )
+                string pair = extension.ExtensionElements
+                                  ? "global::System.Text.Json.JsonElement"
+                                  : "global::Jakar.Json.JNode?";
+
+                using ( code.Block($"foreach ( global::System.Collections.Generic.KeyValuePair<string, {pair}> __pair in __extension )") )
                 {
                     code.Line("writer.WritePropertyName(__pair.Key);");
-                    code.Line($"{J}JNode.Write(__pair.Value, ref writer);");
+
+                    code.Line(extension.ExtensionElements
+                                  ? $"{J}JsonElementConverter.Write(ref writer, __pair.Value);"
+                                  : $"{J}JNode.Write(__pair.Value, ref writer);");
                 }
             }
         }
@@ -669,7 +683,11 @@ internal static class Emitter
 
                         case Values.UNKNOWN_CAPTURE:
                             code.Line("string __key = __name.ToString();");
-                            code.Line($"if ( !{J}JNode.TryRead(ref reader, out {J}JNode? __captured) ) {{ return false; }}");
+
+                            code.Line(extension!.ExtensionElements
+                                          ? $"if ( !{J}JsonElementConverter.TryRead(ref reader, out global::System.Text.Json.JsonElement __captured) ) {{ return false; }}"
+                                          : $"if ( !{J}JNode.TryRead(ref reader, out {J}JNode? __captured) ) {{ return false; }}");
+
                             code.Line($"( __extension ??= new() )[__key] = __captured;");
                             code.Line("break;");
                             break;
@@ -860,8 +878,24 @@ internal static class Emitter
                             ? $"ref {member.DeclaringType}"
                             : member.DeclaringType;
 
-        code.Line($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_{member.Name}\")]");
-        code.Line($"private static extern void {name}( {target} target, {member.TypeName} value );");
+        const string ACCESSOR = "[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_{0}\")]";
+
+        if ( member.GenericAccessor is not { } generic )
+        {
+            code.Line(string.Format(ACCESSOR, member.Name));
+            code.Line($"private static extern void {name}( {target} target, {member.TypeName} value );");
+            code.Line();
+            return;
+        }
+
+        // Declared on a closed generic base: bind through the open definition (GenericAccessorInfo), then call it with the closed arguments.
+        using ( code.Block($"private static class {name}Access{generic.TypeParameters}{generic.Constraints}") )
+        {
+            code.Line(string.Format(ACCESSOR, member.Name));
+            code.Line($"public static extern void Set( {generic.OpenTarget} target, {generic.ValueType} value );");
+        }
+
+        code.Line($"private static void {name}( {target} target, {member.TypeName} value ) => {name}Access{generic.TypeArguments}.Set(target, value);");
         code.Line();
     }
 

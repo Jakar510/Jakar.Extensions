@@ -120,10 +120,21 @@ internal static class ObservableJson
 
 
 
-public abstract partial class ObservableCollection<TSelf, TValue> : IJsonArraySource<TValue>
+public abstract partial class ObservableCollection<TSelf, TValue> : IJsonArraySource<TValue>, Jakar.Json.IJsonCollection<TSelf, TValue>
 {
     /// <summary> Writes the unfiltered backing list. </summary>
     public virtual void WriteJsonArray( Utf8JsonWriter writer, JsonTypeInfo<TValue> info ) => JsonModel.WriteArray(writer, CollectionsMarshal.AsSpan(buffer), info);
+
+    /// <summary> Jakar.Json: the unfiltered backing list, like <see cref="WriteJsonArray"/>. </summary>
+    public virtual void WriteJsonElements<TWriter, TConverter>( ref TWriter writer )
+        where TWriter : Jakar.Json.IJsonWriter, allows ref struct
+        where TConverter : Jakar.Json.IJsonConverter<TValue>
+    {
+        foreach ( ref readonly TValue value in CollectionsMarshal.AsSpan(buffer) ) { TConverter.Write(ref writer, in value); }
+    }
+
+    /// <summary> Jakar.Json: every element at once (one notification). </summary>
+    public static TSelf FromJsonElements( ReadOnlySpan<TValue> elements ) => elements;
 
     /// <summary> The unfiltered contents as a JSON array (instance members win over the <c> JsonModel.ToJson </c> extensions). </summary>
     public string ToJson( bool? indented = null ) => JsonModel.ToJson((IEnumerable<TValue>)this, Json.GetTypeInfo<TValue>(), indented);
@@ -142,12 +153,29 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue>
     {
         using ( AcquireLock() ) { base.WriteJsonArray(writer, info); }
     }
+
+    /// <inheritdoc cref="WriteJsonArray"/>
+    public override void WriteJsonElements<TWriter, TConverter>( ref TWriter writer )
+    {
+        using ( AcquireLock() ) { base.WriteJsonElements<TWriter, TConverter>(ref writer); }
+    }
 }
 
 
 
-public abstract partial class ObservableHashSet<TSelf, TValue> : IJsonArraySource<TValue>
+public abstract partial class ObservableHashSet<TSelf, TValue> : IJsonArraySource<TValue>, Jakar.Json.IJsonCollection<TSelf, TValue>
 {
+    /// <summary> Jakar.Json: the unfiltered backing set, in its enumeration order (like <see cref="WriteJsonArray"/>). </summary>
+    public virtual void WriteJsonElements<TWriter, TConverter>( ref TWriter writer )
+        where TWriter : Jakar.Json.IJsonWriter, allows ref struct
+        where TConverter : Jakar.Json.IJsonConverter<TValue>
+    {
+        foreach ( TValue value in buffer ) { TConverter.Write(ref writer, in value); }
+    }
+
+    /// <summary> Jakar.Json: every element at once (one notification). </summary>
+    public static TSelf FromJsonElements( ReadOnlySpan<TValue> elements ) => elements;
+
     /// <summary> Writes the unfiltered backing set. </summary>
     public virtual void WriteJsonArray( Utf8JsonWriter writer, JsonTypeInfo<TValue> info )
     {

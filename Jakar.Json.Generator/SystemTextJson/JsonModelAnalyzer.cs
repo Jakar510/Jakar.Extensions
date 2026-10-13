@@ -1,4 +1,4 @@
-// Jakar.SystemTextJson.Generator
+// Jakar.Json.Generator
 // 10/02/2026
 
 using System.Collections.Immutable;
@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 
 
-namespace Jakar.SystemTextJson.Generator;
+namespace Jakar.Json.Generator.SystemTextJson;
 
 
 /// <summary>

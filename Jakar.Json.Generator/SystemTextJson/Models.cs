@@ -1,13 +1,12 @@
-// Jakar.SystemTextJson.Generator
+// Jakar.Json.Generator
 // 10/02/2026
 
-using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 
 
-namespace Jakar.SystemTextJson.Generator;
+namespace Jakar.Json.Generator.SystemTextJson;
 
 
 // Pipeline models hold no ISymbol/SyntaxNode/Compilation references, and compare by value, so the incremental generator can cache them.

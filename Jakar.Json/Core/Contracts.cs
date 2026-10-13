@@ -138,7 +138,8 @@ public interface IJsonWriter
     void WriteEndArray();
 
     /// <summary> A pre-escaped, pre-encoded member name (<see cref="JsonName"/>). </summary>
-    void WritePropertyName( JsonName                  name );
+    void WritePropertyName( JsonName name );
+
     /// <summary> A runtime name (dictionary keys, extension data); escaped by the writer. </summary>
     void WritePropertyName( scoped ReadOnlySpan<char> name );
 
@@ -181,28 +182,35 @@ public interface IJsonReader
     JsonTokenKind PeekKind();
 
     bool TryReadStartObject();
+
     /// <summary> Reads the next member's name, or the end of the object (<paramref name="end"/>; the <c>}</c> is consumed). Call after <see cref="TryReadStartObject"/> and after each member value. </summary>
     bool TryReadProperty( out JsonSpan name, out bool end );
 
     bool TryReadStartArray();
+
     /// <summary> Moves to the next element, or reads the end of the array (<paramref name="end"/>; the <c>]</c> is consumed). Call before each element. </summary>
     bool TryReadNextElement( out bool end );
 
     /// <summary> Consumes a <c>null</c> if that's the next value; otherwise consumes nothing and returns <see langword="false"/> (not an error). </summary>
     bool TryReadNull();
     bool TryReadBoolean( out bool value );
+
     /// <param name="value"> The number; <see langword="default"/> on failure. </param>
     /// <param name="allowString"> Also accept the number as a JSON string (<c>NumbersFromStrings = Allow</c>). </param>
     bool TryReadInteger<T>( out T value, bool allowString = false )
         where T : struct, IBinaryInteger<T>;
     bool TryReadFloat<T>( out T value, JsonFloatRead mode = JsonFloatRead.Strict )
         where T : struct, IFloatingPoint<T>;
+
     /// <summary> The only allocating read: the string itself, at its exact length. </summary>
-    bool TryReadString( [NotNullWhen(true)] out string?  value );
+    bool TryReadString( [NotNullWhen(true)] out string? value );
+
     /// <summary> The string's content without allocating; valid until the next read. </summary>
-    bool TryReadStringSpan( out                 JsonSpan value );
+    bool TryReadStringSpan( out JsonSpan value );
+
     /// <summary> A number token's text, verbatim (validated). </summary>
-    bool TryReadRawNumber( out                  JsonSpan number );
+    bool TryReadRawNumber( out JsonSpan number );
+
     /// <summary> Skips any value, depth-checked. </summary>
     bool TrySkipValue();
 
@@ -221,9 +229,11 @@ public interface IJsonReader
 [Flags]
 public enum JsonFloatRead : byte
 {
-    Strict         = 0,
+    Strict = 0,
+
     /// <summary> Accept the number as a JSON string (<c>NumbersFromStrings = Allow</c>). </summary>
-    AllowString    = 1,
+    AllowString = 1,
+
     /// <summary> Accept <c>"NaN"</c>, <c>"Infinity"</c> and <c>"-Infinity"</c> (<c>NonFiniteFloats = AsString</c>). </summary>
     AllowNonFinite = 2
 }

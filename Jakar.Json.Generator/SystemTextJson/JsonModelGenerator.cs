@@ -1,4 +1,4 @@
-// Jakar.SystemTextJson.Generator
+// Jakar.Json.Generator
 // 10/02/2026
 
 using System;
@@ -12,19 +12,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
 
-namespace Jakar.SystemTextJson.Generator;
+namespace Jakar.Json.Generator.SystemTextJson;
 
 
 /// <summary>
-///     Implements <c> IJsonModel&lt;TSelf&gt; </c> on every <see langword="partial"/> type marked <c> [JsonModel] </c>: the <c> JsonTypeInfo </c> property (from the type's
+///     The <c>[JsonModel]</c> part of <see cref="JsonGenerator"/>: implements <c> IJsonModel&lt;TSelf&gt; </c> on every <see langword="partial"/> type marked <c> [JsonModel] </c>: the <c> JsonTypeInfo </c> property (from the type's
 ///     <c> JsonSerializerContext </c>), the static <c> FromJson </c> / <c> TryFromJson </c> / <c> FromJsonAsync </c> methods, and a lazy <c> JsonModelRegistry </c> registration.
 /// </summary>
 /// <remarks>
 ///     Generators can't see each other's output, so this can't add <c> [JsonSerializable] </c> for System.Text.Json: the type must be registered in its context by hand.
 ///     The generator reads the context's <c> [JsonSerializable] </c> attributes (user-written, so visible) to check that, and to use the exact property name System.Text.Json generates.
 /// </remarks>
-[Generator(LanguageNames.CSharp)]
-public sealed class JsonModelGenerator : IIncrementalGenerator
+internal static class JsonModelGenerator
 {
     internal const string JSON_MODEL_ATTRIBUTE         = "Jakar.Extensions.JsonModelAttribute";
     internal const string JSON_MODEL_CONTEXT_ATTRIBUTE = "Jakar.Extensions.JsonModelContextAttribute";
@@ -33,7 +32,7 @@ public sealed class JsonModelGenerator : IIncrementalGenerator
     internal const string VERSION                      = "1.0.0";
 
 
-    public void Initialize( IncrementalGeneratorInitializationContext context )
+    public static void Initialize( IncrementalGeneratorInitializationContext context )
     {
         IncrementalValuesProvider<ModelInfo> models = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_MODEL_ATTRIBUTE, static ( node, _ ) => node is TypeDeclarationSyntax, static ( ctx, token ) => ModelExtractor.Extract(ctx, token));
 

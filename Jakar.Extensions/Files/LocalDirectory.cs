@@ -247,6 +247,7 @@ public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryConte
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
+
     /// <summary> </summary>
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>

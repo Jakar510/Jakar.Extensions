@@ -12,13 +12,16 @@ namespace Jakar.Json;
 [Flags]
 public enum JsonNumberMode : byte
 {
-    Strict                 = 0,
+    Strict = 0,
+
     /// <summary> Read numbers given as JSON strings too (<c>NumbersFromStrings = Allow</c>). </summary>
     AllowReadingFromString = 1,
+
     /// <summary> Write integers beyond ±(2^53 − 1) as strings (<c>LargeIntegers = String</c>); they read back from strings too. </summary>
-    WriteLargeAsString     = 2,
+    WriteLargeAsString = 2,
+
     /// <summary> Write and read NaN and ±Infinity as <c>"NaN"</c>, <c>"Infinity"</c>, <c>"-Infinity"</c> (<c>NonFiniteFloats = AsString</c>). </summary>
-    NonFiniteAsString      = 4
+    NonFiniteAsString = 4
 }
 
 

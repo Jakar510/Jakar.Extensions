@@ -21,6 +21,7 @@ internal static class JsonLexer<TChar>
                                                                                       span[1] = '\\';
                                                                                       for ( int i = 0; i < 32; i++ ) { span[i + 2] = (char)i; } // raw control chars are invalid in strings
                                                                                   }));
+
     /// <summary> The surrogate range, as <see cref="SearchValues{T}"/>: <c>IndexOfAnyInRange</c> allocates until tier-1 code replaces it. </summary>
     public static readonly SearchValues<char> Surrogates = SearchValues.Create(string.Create(0x800,
                                                                                              0,

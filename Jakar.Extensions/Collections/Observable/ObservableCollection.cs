@@ -148,6 +148,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
         if ( (uint)index > (uint)buffer.Count ) { ThrowOutOfRange(index, nameof(index)); }
     }
     [DoesNotReturn] private void ThrowOutOfRange( int index, string? name, int count = 1 ) => throw new ArgumentOutOfRangeException(name, index, $"[{index}, {index + count}) is outside of [0, {buffer.Count})");
+
     /// <summary> The inclusive range <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>; empty when the collection is empty. </summary>
     private ReadOnlySpan<TValue> Range( int start, int endInclusive )
     {
@@ -266,6 +267,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
         Removed(in removed, index);
         return true;
     }
+
     /// <summary> Removes every item matching <paramref name="match"/> in a single pass. </summary>
     protected internal virtual int InternalRemove( RefCheck<TValue> match )
     {
@@ -472,13 +474,15 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
 
 
     /// <summary> First index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
-    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 )               => FindIndex(match, start, buffer.Count - 1);
+    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 ) => FindIndex(match, start, buffer.Count - 1);
+
     /// <summary> First index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindIndexCore(match, start, endInclusive);
 
 
     /// <summary> Last index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
-    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 )               => FindLastIndex(match, start, buffer.Count - 1);
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 ) => FindLastIndex(match, start, buffer.Count - 1);
+
     /// <summary> Last index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindLastIndexCore(match, start, endInclusive);
 
@@ -489,6 +493,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
         ThrowIfInvalidInsert(start);
         return buffer.IndexOf(value, start);
     }
+
     /// <summary> First index of <paramref name="value"/> in the <paramref name="count"/> items starting at <paramref name="start"/>. </summary>
     public virtual int IndexOf( TValue value, int start, int count )
     {
@@ -498,6 +503,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
 
 
     public virtual int LastIndexOf( TValue value ) => buffer.LastIndexOf(value);
+
     /// <summary> Last index of <paramref name="value"/> searching backwards from <paramref name="start"/>. </summary>
     public virtual int LastIndexOf( TValue value, int start )
     {
@@ -506,6 +512,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
         ThrowIfOutOfRange(start);
         return buffer.LastIndexOf(value, start);
     }
+
     /// <summary> Last index of <paramref name="value"/> in the <paramref name="count"/> items ending at <paramref name="start"/>, searching backwards. </summary>
     public virtual int LastIndexOf( TValue value, int start, int count )
     {
@@ -744,6 +751,7 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
                                               ? IndexOf(x)
                                               : NOT_FOUND;
     void IList.Insert( int index, object? value ) => Insert(index, Cast(value));
+
     /// <summary> Adds <paramref name="value"/> and returns its index (<see cref="IList.Add"/>). </summary>
     protected virtual int AddAndGetIndex( TValue value )
     {

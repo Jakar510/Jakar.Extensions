@@ -17,6 +17,7 @@ public sealed class JObjectNode : JNode, IDictionary<string, JNode?>, IReadOnlyD
 
     public JObjectNode() => __members = new OrderedDictionary<string, JNode?>(StringComparer.Ordinal);
     public JObjectNode( int capacity ) => __members = new OrderedDictionary<string, JNode?>(capacity, StringComparer.Ordinal);
+
     /// <exception cref="ArgumentException"> A name repeats. </exception>
     /// <exception cref="InvalidOperationException"> A value already has a parent. </exception>
     public JObjectNode( params ReadOnlySpan<KeyValuePair<string, JNode?>> members ) : this(members.Length)

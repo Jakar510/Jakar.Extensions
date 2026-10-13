@@ -1,4 +1,4 @@
-// Jakar.SystemTextJson.Generator.CodeFixes
+// Jakar.Json.Generator.CodeFixes
 // 10/02/2026
 
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.Simplification;
 
 
 
-namespace Jakar.SystemTextJson.Generator.CodeFixes;
+namespace Jakar.Json.Generator.CodeFixes.SystemTextJson;
 
 
 /// <summary>
@@ -30,7 +30,7 @@ namespace Jakar.SystemTextJson.Generator.CodeFixes;
 [Shared]
 public sealed class JsonModelCodeFixProvider : CodeFixProvider
 {
-    // Duplicated from Jakar.SystemTextJson.Generator.JsonModelDiagnostics: this assembly doesn't reference the generator.
+    // Duplicated from Jakar.Json.Generator.SystemTextJson.JsonModelDiagnostics: this assembly doesn't reference the generator.
     internal const string NOT_REGISTERED        = "JAKAR_JSON001";
     internal const string MISSING_ATTRIBUTE     = "JAKAR_JSON006";
     internal const string CONTEXT_METADATA_NAME = "ContextMetadataName";

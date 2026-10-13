@@ -59,7 +59,7 @@ public static class JsonDiagnostics
 
     public static readonly DiagnosticDescriptor InvalidConverter = Create(INVALID_CONVERTER, "Converter doesn't fit the member", "Converter '{0}' on member '{1}' must implement IJsonConverter<{2}>", DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor SideBySide = Create(SIDE_BY_SIDE, "[GenerateJson] side by side with [JsonModel]", "'{0}' also has Jakar.SystemTextJson's [JsonModel], so its FromJson/TryFromJson/FromJsonAsync/ToJson helpers and ToString() come from Jakar.SystemTextJson; reach Jakar.Json through JsonCodec, IJsonSerializable<T>, TryFormat or Parse", DiagnosticSeverity.Info);
+    public static readonly DiagnosticDescriptor SideBySide = Create(SIDE_BY_SIDE, "[GenerateJson] side by side with [JsonModel]", "'{0}' also has [JsonModel], so its FromJson/TryFromJson/FromJsonAsync/ToJson helpers and ToString() are the [JsonModel] part's (System.Text.Json); reach Jakar.Json's serializer through JsonCodec, IJsonSerializable<T>, TryFormat or Parse", DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor NotRead = Create(NOT_READ, "Member is written but never read", "Member '{0}' has no setter and no matching constructor parameter, so it's written but ignored when reading", DiagnosticSeverity.Info);
 

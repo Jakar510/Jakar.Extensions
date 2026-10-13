@@ -378,3 +378,23 @@ public readonly struct JsonEnumNumberConverter<TEnum, TUnderlying> : IJsonConver
         return true;
     }
 }
+
+
+
+/// <summary>
+///     Enums as numbers (<c>Enums = Number</c>), read leniently: a number, or anything <typeparamref name="TNames"/> reads (the generated name converter: a name, or the number as text).
+///     Like <c>Enums = Name</c>, which also reads numbers, the format only decides what's written, so output from a serializer that writes the other form still reads.
+/// </summary>
+public readonly struct JsonEnumNumberConverter<TEnum, TUnderlying, TNames> : IJsonConverter<TEnum>
+    where TEnum : struct, Enum
+    where TUnderlying : struct, IBinaryInteger<TUnderlying>
+    where TNames : IJsonConverter<TEnum>
+{
+    public static void Write<TWriter>( ref TWriter writer, scoped in TEnum value )
+        where TWriter : IJsonWriter, allows ref struct => writer.WriteInteger(Unsafe.BitCast<TEnum, TUnderlying>(value));
+
+    public static bool TryRead<TReader>( ref TReader reader, out TEnum value )
+        where TReader : IJsonReader, allows ref struct => reader.PeekKind() == JsonTokenKind.String
+                                                              ? TNames.TryRead(ref reader, out value)
+                                                              : JsonEnumNumberConverter<TEnum, TUnderlying>.TryRead(ref reader, out value);
+}

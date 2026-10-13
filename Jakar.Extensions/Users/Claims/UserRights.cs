@@ -1,4 +1,4 @@
-﻿// Jakar.Extensions :: Jakar.Database
+// Jakar.Extensions :: Jakar.Database
 // 02/19/2023  7:25 PM
 
 namespace Jakar.Extensions;
@@ -20,7 +20,8 @@ public interface IUserRights
 
 
 
-public class UserRights : BaseClass, IEqualComparable<UserRights>
+[Jakar.Json.GenerateJson]
+public partial class UserRights : BaseClass, IEqualComparable<UserRights>
 {
     protected string _rights = EMPTY;
 

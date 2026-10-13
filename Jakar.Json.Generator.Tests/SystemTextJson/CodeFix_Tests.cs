@@ -1,19 +1,20 @@
-// Jakar.SystemTextJson.Generator.Tests
+// Jakar.Json.Generator.Tests
 // 10/02/2026
 
 using System.Collections.Immutable;
-using Jakar.SystemTextJson.Generator.CodeFixes;
+using Jakar.Json.Generator.CodeFixes.SystemTextJson;
+using Jakar.Json.Generator.SystemTextJson;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-using static Jakar.SystemTextJson.Generator.Tests.GeneratorHarness;
+using static Jakar.Json.Generator.Tests.SystemTextJson.GeneratorHarness;
 
 
 
-namespace Jakar.SystemTextJson.Generator.Tests;
+namespace Jakar.Json.Generator.Tests.SystemTextJson;
 
 
 [TestFixture]

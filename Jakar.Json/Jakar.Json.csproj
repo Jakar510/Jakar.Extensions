@@ -4,16 +4,16 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<!-- Jakar.Json, not Jakar.Extensions: Jakar.Extensions already has Json, IJsonModel<T> and [JsonModel] (SPEC.md §2). -->
+		<!-- Jakar.Json's own types use the Jakar.Json namespace; the System.Text.Json models (SystemTextJson/, formerly Jakar.SystemTextJson) stay in Jakar.Extensions. -->
 		<RootNamespace>Jakar.Json</RootNamespace>
 		<AssemblyName>Jakar.Json</AssemblyName>
 		<Version>1.0.0</Version>
 		<Title>Jakar.Json</Title>
 		<PackageId>Jakar.Json</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
-		<Description>A reflection-free, allocation-free JSON serializer: [GenerateJson] source-generates idempotent readers and writers (UTF-16 and UTF-8) that implement ISpanFormattable / ISpanParsable, plus a zero-allocation JSON tape and a Newtonsoft-style DOM.</Description>
-		<PackageTags>json source-generator aot trimming zero-allocation utf8 ndjson</PackageTags>
-		<PackageReleaseNotes>1.0.0: initial release.</PackageReleaseNotes>
+		<Description>A reflection-free, allocation-free JSON serializer: [GenerateJson] source-generates idempotent readers and writers (UTF-16 and UTF-8) that implement ISpanFormattable / ISpanParsable, plus a zero-allocation JSON tape and a Newtonsoft-style DOM. Also includes Native AOT friendly System.Text.Json models (IJsonModel&lt;TSelf&gt;, [JsonModel], pooled element-wise JSON arrays), formerly Jakar.SystemTextJson; a type can use both generators side by side.</Description>
+		<PackageTags>json System.Text.Json source-generator aot trimming zero-allocation utf8 ndjson</PackageTags>
+		<PackageReleaseNotes>1.0.0: initial release. Absorbs Jakar.SystemTextJson (IJsonModel&lt;TSelf&gt;, [JsonModel], JsonModel, RentedArray&lt;T&gt;, SerializeAsStringJsonConverter&lt;T&gt;; still in the Jakar.Extensions namespace, diagnostics JAKAR_JSON001-007 unchanged). One source generator runs the [GenerateJson] and [JsonModel] parts by attribute.</PackageReleaseNotes>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -27,7 +27,13 @@
 		<IsAotCompatible>true</IsAotCompatible>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<!-- Keep the JetBrains annotations ([MustDisposeResource], [Pure], ...) in the compiled metadata so Rider/ReSharper users see them. -->
+		<DefineConstants>$(DefineConstants);JETBRAINS_ANNOTATIONS</DefineConstants>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Jakar.Spans\Jakar.Spans.csproj" />

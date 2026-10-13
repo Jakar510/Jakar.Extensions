@@ -1,4 +1,4 @@
-﻿// Jakar.Extensions :: Jakar.Database
+// Jakar.Extensions :: Jakar.Database
 // 4/4/2024  10:1
 
 
@@ -62,6 +62,7 @@ public interface IUserModel : IUserData<Guid>, IEscalateToUser, ICreatedByUser, 
 
 
 [Serializable]
+[GenerateJson]
 [JsonModel(typeof(UserGuidJsonContext))]
 public sealed partial class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>, IAddress, IEqualComparable<UserAddress>
 {
@@ -108,6 +109,7 @@ public sealed partial class UserAddress : UserAddress<UserAddress, Guid>, IAddre
 
 
 [Serializable]
+[GenerateJson]
 [JsonModel(typeof(UserGuidJsonContext))]
 public sealed partial class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IGroupModel, IEqualComparable<GroupModel>
 {
@@ -129,6 +131,7 @@ public sealed partial class GroupModel : GroupModel<GroupModel, Guid>, IGroupMod
 
 
 [Serializable]
+[GenerateJson]
 [JsonModel(typeof(UserGuidJsonContext))]
 public sealed partial class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IRoleModel, IEqualComparable<RoleModel>
 {

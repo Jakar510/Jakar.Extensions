@@ -1,15 +1,15 @@
-// Jakar.SystemTextJson.Generator.Tests
+// Jakar.Json.Generator.Tests
 // 10/02/2026
 
-global using NUnit.Framework;
 using System.Collections.Immutable;
+using Jakar.Json.Generator.SystemTextJson;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 
 
-namespace Jakar.SystemTextJson.Generator.Tests;
+namespace Jakar.Json.Generator.Tests.SystemTextJson;
 
 
 internal static class GeneratorHarness
@@ -63,7 +63,7 @@ internal static class GeneratorHarness
         CSharpCompilation.Create("TestAssembly", sources.Select(static ( source, i ) => CSharpSyntaxTree.ParseText(source, TestParseOptions, $"Source{i}.cs")), __references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
 
 
-    public static GeneratorDriver CreateDriver() => CSharpGeneratorDriver.Create([new JsonModelGenerator().AsSourceGenerator()], parseOptions: TestParseOptions, driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true));
+    public static GeneratorDriver CreateDriver() => CSharpGeneratorDriver.Create([new JsonGenerator().AsSourceGenerator()], parseOptions: TestParseOptions, driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true));
 
 
 

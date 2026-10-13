@@ -87,6 +87,20 @@ public static class JakarJsonChecks
                                          } );
 
         yield return ( "Jakar.Json malformed input", () => !Order.TryFromJson("{\"id\":", out _) );
+
+        // Jakar.Extensions' user models carry [GenerateJson] and [JsonModel]: init-only members of generic bases ([UnsafeAccessor] through the open definition),
+        // observable collections (IJsonCollection) and the Dictionary<string, JsonElement> extension-data bag, read and written by each serializer.
+        yield return ( "Jakar.Json + [JsonModel] side by side", () =>
+                                                                {
+                                                                    Jakar.Extensions.UserGuid.UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
+                                                                    user.Addresses.Add(new Jakar.Extensions.UserGuid.UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
+
+                                                                    string                              json   = JsonCodec.ToJson(user);
+                                                                    Jakar.Extensions.UserGuid.UserModel viaJ   = JsonCodec.FromJson<Jakar.Extensions.UserGuid.UserModel>(json[..^1] + ",\"extra\":[1,2.50]}");
+                                                                    Jakar.Extensions.UserGuid.UserModel viaStj = Jakar.Extensions.UserGuid.UserModel.FromJson(json);
+
+                                                                    return viaJ.Addresses.Single().ID == user.Addresses.Single().ID && viaStj.UserName == "ada" && viaJ.AdditionalData!["extra"][1].GetRawText() == "2.50" && JsonCodec.ToJson(viaJ).EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
+                                                                } );
     }
 
     private static T Parse<T>( string text )

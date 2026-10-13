@@ -5,9 +5,9 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using AotCompatibility.TestApp;
 using Jakar.Extensions;
 using Jakar.Extensions.UserGuid;
-using AotCompatibility.TestApp;
 
 
 int failures = 0;

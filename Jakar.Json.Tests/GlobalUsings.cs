@@ -8,5 +8,4 @@ global using System.Collections.Immutable;
 global using System.Globalization;
 global using System.Text;
 global using Jakar.Extensions;
-global using Jakar.Json;
 global using NUnit.Framework;

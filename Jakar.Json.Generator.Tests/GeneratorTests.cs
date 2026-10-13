@@ -79,7 +79,7 @@ public sealed class GeneratorTests
         Assert.That(enums,               Does.Contain("internal readonly struct Color__2"));
         Assert.That(enums,               Does.Contain("internal readonly struct Color__1"));
         Assert.That(enums,               Does.Contain("\"darkBlue\""));
-        Assert.That(result.Source("N."), Does.Contain("JsonEnumNumberConverter<global::Color, int>"));
+        Assert.That(result.Source("N."), Does.Contain("JsonEnumNumberConverter<global::Color, int, global::Jakar.Json.Generated.JsonEnums.Color__1>"), "numbers written, names still read");
     }
 
     [Test] public void Polymorphism_DispatchesMostDerivedFirst()
@@ -208,7 +208,7 @@ public sealed class GeneratorTests
                             """);
 
         Assert.That(result.GeneratorDiagnostics.Single(static d => d.Id == "JJSON010").Severity, Is.EqualTo(DiagnosticSeverity.Info));
-        Assert.That(result.CompileErrors,                                                     Is.Empty);
+        Assert.That(result.CompileErrors,                                                        Is.Empty);
 
         string source = result.Source("A.");
         Assert.That(source, Does.Contain("TryReadJson").And.Contain("TryFormat").And.Contain(" Parse("), "the IJsonSerializable contract is still implemented");

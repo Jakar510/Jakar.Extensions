@@ -1,18 +1,18 @@
-// Jakar.SystemTextJson.Generator
+// Jakar.Json.Generator
 // 10/02/2026
 
 using Microsoft.CodeAnalysis;
 
 
 
-namespace Jakar.SystemTextJson.Generator;
+namespace Jakar.Json.Generator.SystemTextJson;
 
 
 /// <summary> Diagnostic IDs are public API once shipped: never renumber or reuse them. </summary>
 public static class JsonModelDiagnostics
 {
-    public const string CATEGORY = "Jakar.SystemTextJson";
-    public const string HELP     = "https://github.com/Jakar510/Jakar.Extensions/blob/master/Jakar.SystemTextJson/README.md#diagnostics";
+    public const string CATEGORY = "Jakar.Json";
+    public const string HELP     = "https://github.com/Jakar510/Jakar.Extensions/blob/master/Jakar.Json/README.md#systemtextjson-models-jsonmodel";
 
     public const string NOT_REGISTERED        = "JAKAR_JSON001";
     public const string NOT_PARTIAL           = "JAKAR_JSON002";

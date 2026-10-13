@@ -58,6 +58,7 @@ public sealed class WebResponse<TValue>
         ContentEncoding = [.. contentHeaders.ContentEncoding];
         Allow           = [.. contentHeaders.Allow];
     }
+
     /// <summary> A request that got no response: the connection failed or it timed out (<see cref="Status.RequestTimeout"/> for timeouts, otherwise <see cref="Status.ServiceUnavailable"/>). </summary>
     public WebResponse( HttpRequestMessage? request, Exception exception )
     {
@@ -193,6 +194,7 @@ public sealed class WebResponse<TValue>
     /// <summary> Parses <paramref name="response"/>. <paramref name="policy"/> is ignored: an existing response cannot be retried, the request has to be sent again (see <see cref="WebHandler"/>). </summary>
     [Obsolete("Retries re-send the request; WebHandler applies RetryPolicy. This overload ignores the policy.")]
     public static ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token ) => Create(response, func, token);
+
     /// <summary> Parses <paramref name="response"/>. <paramref name="policy"/> is ignored: an existing response cannot be retried, the request has to be sent again (see <see cref="WebHandler"/>). </summary>
     [Obsolete("Retries re-send the request; WebHandler applies RetryPolicy. This overload ignores the policy.")]
     public static ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token ) => Create(response, arg, func, token);
@@ -204,6 +206,7 @@ public sealed class WebResponse<TValue>
         string error = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
         return new WebResponse<TValue>(response, error);
     }
+
     /// <summary> A response whose processing failed with <paramref name="e"/>: the body is read as the error message. </summary>
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {

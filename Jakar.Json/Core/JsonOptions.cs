@@ -106,6 +106,7 @@ public readonly record struct JsonReaderOptions
     public bool AllowComments { get; init; }
 
     public bool AllowTrailingCommas { get; init; }
+
     /// <summary> The most a stream read buffers (default 64 MB); also the longest NDJSON line. </summary>
     public int MaxDocumentBytes
     {
@@ -114,6 +115,7 @@ public readonly record struct JsonReaderOptions
                    : field;
         init;
     }
+
     /// <summary> The longest string token, in chars or bytes as written (default unlimited). </summary>
     public int MaxStringLength
     {

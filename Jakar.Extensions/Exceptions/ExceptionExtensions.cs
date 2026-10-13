@@ -123,6 +123,7 @@ public static class ExceptionExtensions
 
             return dictionary;
         }
+
         /// <summary> Trim/AOT-safe details (no <see cref="ExceptionDetails.TargetSite"/>); see <see cref="FullDetails"/>. </summary>
         public                                                                                      ExceptionDetails Details()     => ExceptionDetails.Create(e);
         [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public ExceptionDetails FullDetails() => ExceptionDetails.CreateWithMethodInfo(e);
@@ -244,45 +245,45 @@ public static class ExceptionExtensions
 
 
 
-/*
-    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref JObject dictionary )
-        where TValue : Exception
-    {
-        foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+    /*
+        public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref JObject dictionary )
+            where TValue : Exception
         {
-            string key = info.AppName;
+            foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+            {
+                string key = info.AppName;
 
-            if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
+                if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
 
 
-            dictionary[key] = info.GetValue( e, null )?.ToJson();
+                dictionary[key] = info.GetValue( e, null )?.ToJson();
+            }
         }
-    }
 
 
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    public static void Details( this Exception e, out JObject dict, bool includeFullMethodInfo )
-    {
-        dict = new JObject
-               {
-                   [nameof(Type)] = e.GetType().FullName,
-                   [nameof(Exception.HResult)] = e.HResult,
-                   [nameof(Exception.HelpLink)] = e.HelpLink,
-                   [nameof(Exception.Source)] = e.Source,
-                   [nameof(Exception.Message)] = e.Message,
-                   [nameof(Exception.Data)] = e.GetData().ToJson(),
-                   [nameof(Exception.StackTrace)] = (e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>()).ToJson()
-               };
-
-
-        if ( includeFullMethodInfo )
+        [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
+        public static void Details( this Exception e, out JObject dict, bool includeFullMethodInfo )
         {
-            MethodDetails? info = e.MethodInfo();
-            dict[nameof(Exception.TargetSite)] = JsonSerializer.SerializeToNode( info, MethodDetailsContext.MethodDetails );
-        }
-        else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+            dict = new JObject
+                   {
+                       [nameof(Type)] = e.GetType().FullName,
+                       [nameof(Exception.HResult)] = e.HResult,
+                       [nameof(Exception.HelpLink)] = e.HelpLink,
+                       [nameof(Exception.Source)] = e.Source,
+                       [nameof(Exception.Message)] = e.Message,
+                       [nameof(Exception.Data)] = e.GetData().ToJson(),
+                       [nameof(Exception.StackTrace)] = (e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>()).ToJson()
+                   };
 
-        e.GetProperties( ref dict );
-    }
-*/
+
+            if ( includeFullMethodInfo )
+            {
+                MethodDetails? info = e.MethodInfo();
+                dict[nameof(Exception.TargetSite)] = JsonSerializer.SerializeToNode( info, MethodDetailsContext.MethodDetails );
+            }
+            else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
+
+            e.GetProperties( ref dict );
+        }
+    */
 }

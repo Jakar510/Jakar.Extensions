@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -43,8 +45,8 @@ internal static class ModelExtractor
             break;
         }
 
-        // JJSON010: side-by-side with Jakar.SystemTextJson. Generators can't see each other's output, but [JsonModel] says exactly what that generator emits,
-        // so this one stays out of its way: the static FromJson/TryFromJson/FromJsonAsync, the instance ToJson and ToString() are left to it.
+        // JJSON010: side by side with [JsonModel]. The parts run independently (neither sees the other's output), but [JsonModel] says exactly what that part emits,
+        // so this part stays out of its way: the static FromJson/TryFromJson/FromJsonAsync, the instance ToJson and ToString() are left to it.
         bool sideBySide = symbol.GetAttributes().Any(static a => a.AttributeClass is not null && TypeShapes.MetadataName(a.AttributeClass) == "Jakar.Extensions.JsonModelAttribute");
         if ( sideBySide ) { diagnostics.Add(DiagnosticInfo.Create(JsonDiagnostics.SideBySide, attributeLocation, displayName)); }
 
@@ -222,7 +224,7 @@ internal static class ModelExtractor
         {
             if ( !IsExtensionDataType(type, known) )
             {
-                diagnostics.Add(DiagnosticInfo.Create(JsonDiagnostics.Contradictory, info, $"Extension data member '{member.Name}' must be an OrderedDictionary<string, JNode?> or a JObjectNode"));
+                diagnostics.Add(DiagnosticInfo.Create(JsonDiagnostics.Contradictory, info, $"Extension data member '{member.Name}' must be an OrderedDictionary<string, JNode?>, a JObjectNode, or a Dictionary<string, JsonElement>"));
                 fatal = true;
             }
         }
@@ -251,23 +253,80 @@ internal static class ModelExtractor
                    RequiredAttribute    = attributes.Required,
                    Converter            = converter,
                    IsExtensionData      = attributes.ExtensionData,
+                   ExtensionElements    = attributes.ExtensionData && IsElementBag(type, known),
                    Settings             = attributes.Settings,
                    BaseDepth            = baseDepth,
                    FilePath             = location?.SourceTree?.FilePath ?? "",
                    Position             = location?.SourceSpan.Start     ?? 0,
                    DeclaringType        = member.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                    DeclaringIsValueType = member.ContainingType.IsValueType,
-                   Location             = info
+                   Location             = info,
+                   GenericAccessor = setter == SetterKind.Init
+                                         ? GenericAccessor(member)
+                                         : null
                };
     }
 
-    private static bool IsExtensionDataType( ITypeSymbol type, KnownTypes known )
+    /// <summary> See <see cref="GenericAccessorInfo"/>: <see langword="null"/> unless <paramref name="member"/> is declared on a generic type (a base type, or a containing generic of a nested type isn't supported: those keep the direct accessor). </summary>
+    private static GenericAccessorInfo? GenericAccessor( ISymbol member )
+    {
+        INamedTypeSymbol declaring = member.ContainingType;
+        if ( !declaring.IsGenericType || member is not IPropertySymbol property ) { return null; }
+
+        // A generic model's own members are declared on the model itself, whose type parameters are in scope: the direct accessor works there.
+        if ( declaring.TypeArguments.SequenceEqual<ITypeSymbol>(declaring.OriginalDefinition.TypeParameters, SymbolEqualityComparer.Default) ) { return null; }
+
+        INamedTypeSymbol                     definition = declaring.OriginalDefinition;
+        ImmutableArray<ITypeParameterSymbol> parameters = definition.TypeParameters;
+        Dictionary<string, string>           renamed    = new(StringComparer.Ordinal);
+        for ( int i = 0; i < parameters.Length; i++ ) { renamed[parameters[i].Name] = $"__T{i}"; }
+
+        Regex identifiers = new($@"(?<![\w.:])({string.Join("|", renamed.Keys.Select(Regex.Escape))})(?![\w])");
+        string Rename( string text ) => identifiers.Replace(text, match => renamed[match.Value]);
+
+        StringBuilder constraints = new();
+
+        foreach ( ITypeParameterSymbol parameter in parameters )
+        {
+            List<string> parts = [];
+
+            if ( parameter.HasReferenceTypeConstraint )
+            {
+                parts.Add(parameter.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated
+                              ? "class?"
+                              : "class");
+            }
+            else if ( parameter.HasUnmanagedTypeConstraint ) { parts.Add("unmanaged"); }
+            else if ( parameter.HasValueTypeConstraint ) { parts.Add("struct"); }
+            else if ( parameter.HasNotNullConstraint ) { parts.Add("notnull"); }
+
+            parts.AddRange(parameter.ConstraintTypes.Select(static t => t.ToDisplayString(TypeShapes.Format)));
+            if ( parameter.HasConstructorConstraint && !parameter.HasValueTypeConstraint ) { parts.Add("new()"); }
+
+            if ( parameter.AllowsRefLikeType ) { parts.Add("allows ref struct"); }
+
+            if ( parts.Count > 0 ) { constraints.Append($" where {renamed[parameter.Name]} : {Rename(string.Join(", ", parts))}"); }
+        }
+
+        return new GenericAccessorInfo($"<{string.Join(", ", renamed.Values)}>", constraints.ToString(), Rename(definition.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)), $"<{string.Join(", ", declaring.TypeArguments.Select(static t => t.ToDisplayString(TypeShapes.Format)))}>", Rename(property.OriginalDefinition.Type.ToDisplayString(TypeShapes.Format)));
+    }
+
+    private static bool IsExtensionDataType( ITypeSymbol type, KnownTypes known ) => IsJNodeBag(type, known) || IsElementBag(type, known);
+
+    /// <summary> <c>JObjectNode</c> or <c>OrderedDictionary&lt;string, JNode?&gt;</c>. </summary>
+    private static bool IsJNodeBag( ITypeSymbol type, KnownTypes known )
     {
         ITypeSymbol plain = type.WithNullableAnnotation(NullableAnnotation.None);
         if ( SymbolEqualityComparer.Default.Equals(plain, known.JObjectNode) ) { return true; }
 
         return plain is INamedTypeSymbol { IsGenericType: true } named && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, known.OrderedDictionary) && named.TypeArguments[0].SpecialType == SpecialType.System_String && SymbolEqualityComparer.Default.Equals(named.TypeArguments[1].WithNullableAnnotation(NullableAnnotation.None), known.JNode);
     }
+
+    /// <summary> <c>Dictionary&lt;string, JsonElement&gt;</c>: System.Text.Json's extension-data shape (<c>IJsonModel.AdditionalData</c>), so a type shared with it keeps one bag. </summary>
+    private static bool IsElementBag( ITypeSymbol type, KnownTypes known ) => type.WithNullableAnnotation(NullableAnnotation.None) is INamedTypeSymbol { IsGenericType: true } named &&
+                                                                              SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, known.Dictionary) &&
+                                                                              named.TypeArguments[0].SpecialType == SpecialType.System_String                   &&
+                                                                              SymbolEqualityComparer.Default.Equals(named.TypeArguments[1], known.JsonElement);
 
     /// <summary> The converter expression for a member: the converter itself, or wrapped for <c>T?</c> when it converts <c>T</c>. <see langword="null"/> when it fits neither. </summary>
     private static string? ResolveConverter( INamedTypeSymbol converter, ITypeSymbol memberType, KnownTypes known )

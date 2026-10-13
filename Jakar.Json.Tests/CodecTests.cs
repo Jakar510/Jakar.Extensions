@@ -159,12 +159,12 @@ public sealed class CodecTests
 
         foreach ( JsonWriterOptions option in options )
         {
-            Assert.That(option.MaxDepth,   Is.EqualTo(JsonWriterOptions.DEFAULT_MAX_DEPTH));
-            Assert.That(option.IndentSize, Is.EqualTo(1));
+            Assert.That(option.MaxDepth,                                                   Is.EqualTo(JsonWriterOptions.DEFAULT_MAX_DEPTH));
+            Assert.That(option.IndentSize,                                                 Is.EqualTo(1));
             Assert.That(Invoice.FromJson(ModelTests.SampleInvoice().ToJson(option)).Total, Is.EqualTo(1.10m), "nested output writes and reads back");
         }
 
-        Assert.That(new JsonWriterOptions { MaxDepth = 5000 }.MaxDepth, Is.EqualTo(JsonWriterOptions.MAX_DEPTH_LIMIT));
+        Assert.That(new JsonWriterOptions { MaxDepth = 5000 }.MaxDepth,                         Is.EqualTo(JsonWriterOptions.MAX_DEPTH_LIMIT));
         Assert.That(new LineItem("a", 1, 1m).ToJson(new JsonWriterOptions { Indented = true }), Is.EqualTo("{\n\t\"sku\" : \"a\",\n\t\"quantity\" : 1,\n\t\"price\" : 1\n}"));
     }
 

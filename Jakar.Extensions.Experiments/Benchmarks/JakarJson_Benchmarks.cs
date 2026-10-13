@@ -12,9 +12,9 @@ namespace Experiments.Benchmarks;
 
 
 /// <summary>
-///     Jakar.Json (<c>[GenerateJson]</c>) against Jakar.SystemTextJson (<c>[JsonModel]</c>, System.Text.Json source generation) and Newtonsoft.Json (reflection), on the same model shape (Jakar.Json SPEC.md §12.5).
-///     Jakar.SystemTextJson is the baseline of every category.
-///     <para> Each library gets its own model type (<see cref="BenchOrder"/> / <see cref="StjOrder"/>): with both generators on one type, its own FromJson/ToJson would be Jakar.SystemTextJson's (JJSON010 side-by-side mode). Newtonsoft reads and writes <see cref="StjOrder"/>, which is a plain POCO to it. All three write enums as names. </para>
+///     Jakar.Json (<c>[GenerateJson]</c>) against <c>[JsonModel]</c> (System.Text.Json source generation, the <c>JakarSystemTextJson_*</c> methods) and Newtonsoft.Json (reflection), on the same model shape (Jakar.Json SPEC.md §12.5).
+///     <c>[JsonModel]</c> is the baseline of every category.
+///     <para> Each library gets its own model type (<see cref="BenchOrder"/> / <see cref="StjOrder"/>): with both generators on one type, its own FromJson/ToJson would be the [JsonModel] part's (JJSON010 side-by-side mode). Newtonsoft reads and writes <see cref="StjOrder"/>, which is a plain POCO to it. All three write enums as names. </para>
 ///     Run: <c>dotnet run -c Release --project Jakar.Extensions.Experiments -- --bench --filter *JakarJson*</c>
 /// </summary>
 [MemoryDiagnoser]
@@ -252,7 +252,7 @@ public sealed partial class BenchLine
 
 
 
-// ─── Jakar.SystemTextJson (and Newtonsoft.Json, by reflection) ───────────────
+// ─── [JsonModel] / System.Text.Json (and Newtonsoft.Json, by reflection) ─────
 
 
 

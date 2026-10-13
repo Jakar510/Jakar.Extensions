@@ -129,13 +129,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public static WebRequester       Get( IServiceProvider            provider )                                                                   => provider.GetRequiredService<WebRequester>();
     public static WebRequester       Create( IHttpClientFactory       factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(nameof(WebRequester)), host, logger, encoding);
     public static WebRequester       Create( HttpClient               client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
+
     /// <summary>
     ///     Builds a requester from DI: the default (or, for the overload taking a name, the named) <see cref="WebRequesterOptions"/> (see <see cref="WebRequesterServiceCollectionExtensions.AddWebRequester(IServiceCollection, Action{WebRequesterOptions})"/>),
     ///     the registered <see cref="ILoggerFactory"/> (if any), and <see cref="WebRequesterOptions.BaseAddress"/> or else the registered <see cref="IHostInfo"/>.
     ///     Requests are not retried unless <see cref="WebRequesterOptions.Retry"/> is set.
     /// </summary>
     /// <exception cref="OptionsValidationException"> The options are invalid. </exception>
-    public static WebRequester       Create( IServiceProvider         provider ) => Create(provider, Options.DefaultName);
+    public static WebRequester Create( IServiceProvider provider ) => Create(provider, Options.DefaultName);
+
     /// <remarks> When an <see cref="IOptionsMonitor{TOptions}"/> is registered, the requester reloads whenever the named options change (see <see cref="WebRequester"/>). </remarks>
     public static WebRequester Create( IServiceProvider provider, string name )
     {

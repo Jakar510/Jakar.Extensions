@@ -29,12 +29,15 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
     private       int        __length;
 
 
-    public readonly bool       IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __length == 0; }
-    public readonly int        Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes.Length; }
+    public readonly bool IsEmpty  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __length == 0; }
+    public readonly int  Capacity { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes.Length; }
+
     /// <summary> The unused storage after <see cref="Length"/>. </summary>
-    public readonly Span<byte> Next     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes[__length..]; }
+    public readonly Span<byte> Next { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes[__length..]; }
+
     /// <summary> The written bytes (<see cref="Length"/> bytes). </summary>
-    public readonly Span<byte> Span     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes[..__length]; }
+    public readonly Span<byte> Span { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes[..__length]; }
+
     /// <summary> The whole underlying storage (<see cref="Capacity"/> bytes). </summary>
     public readonly Span<byte> RawBytes { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __bytes; }
     public readonly Span<byte> this[ Range range ] => Span[range];
@@ -46,6 +49,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
 
 
     public ValueUtf8Builder() : this(DEFAULT_CAPACITY) { }
+
     /// <summary> Starts with a rented array of at least <paramref name="initialCapacity"/> bytes. </summary>
     public ValueUtf8Builder( int initialCapacity )
     {
@@ -53,6 +57,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __bytes               = __arrayToReturnToPool;
         __length              = 0;
     }
+
     /// <summary> Starts with <paramref name="initialBuffer"/> as storage (typically <c>stackalloc byte[N]</c>); it is only replaced by a rented array if more room is needed. </summary>
     public ValueUtf8Builder( Span<byte> initialBuffer )
     {
@@ -60,12 +65,14 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __bytes               = initialBuffer;
         __length              = 0;
     }
+
     /// <summary> Starts with a copy of <paramref name="span"/>. </summary>
     public ValueUtf8Builder( params ReadOnlySpan<byte> span ) : this(Math.Max(span.Length, DEFAULT_CAPACITY))
     {
         span.CopyTo(__bytes);
         __length = span.Length;
     }
+
     /// <summary> Returns any rented array to the pool and resets the builder. Safe to call more than once. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Dispose()
     {
@@ -81,8 +88,10 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __length = 0;
         return ref this;
     }
+
     /// <summary> Ensures room for one value of <typeparamref name="TValue"/> (or <paramref name="format"/>'s length, whichever is larger) after <see cref="Length"/>. </summary>
     public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format ) => EnsureCapacity(__length + Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
+
     /// <summary> Ensures <see cref="Capacity"/> is at least <paramref name="capacity"/>. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public void EnsureCapacity( int capacity )
     {
@@ -143,6 +152,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __length = MemoryExtensions.TrimEnd(Values, value).Length;
         return ref this;
     }
+
     /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
     [UnscopedRef] public ref ValueUtf8Builder TrimEnd( params ReadOnlySpan<byte> value )
     {
@@ -155,6 +165,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         RemoveStart(__length - MemoryExtensions.TrimStart(Values, value).Length);
         return ref this;
     }
+
     /// <remarks> An empty <paramref name="value"/> trims nothing. </remarks>
     [UnscopedRef] public ref ValueUtf8Builder TrimStart( params ReadOnlySpan<byte> value )
     {
@@ -179,12 +190,14 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         Span[index] = value;
         return ref this;
     }
+
     /// <summary> Overwrites <paramref name="count"/> bytes from <paramref name="index"/> (within <see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueUtf8Builder Replace( int index, byte value, int count )
     {
         Span.Slice(index, count).Fill(value);
         return ref this;
     }
+
     /// <summary> Overwrites bytes from <paramref name="index"/> with <paramref name="value"/> (within <see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueUtf8Builder Replace( int index, params ReadOnlySpan<byte> value )
     {
@@ -194,6 +207,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
 
 
     [UnscopedRef] public ref ValueUtf8Builder Insert( int index, byte value ) => ref Insert(index, value, 1);
+
     /// <summary> Inserts <paramref name="count"/> copies of <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueUtf8Builder Insert( int index, byte value, int count )
     {
@@ -207,6 +221,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __length += count;
         return ref this;
     }
+
     /// <summary> Inserts <paramref name="value"/> at <paramref name="index"/> (0..<see cref="Length"/>). </summary>
     [UnscopedRef] public ref ValueUtf8Builder Insert( int index, params ReadOnlySpan<byte> value )
     {
@@ -248,6 +263,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         __length += count;
         return ref this;
     }
+
     /// <summary> Appends UTF-8 bytes as is (e.g. a <c>"..."u8</c> literal); they aren't validated. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)] [UnscopedRef] public ref ValueUtf8Builder Append( scoped ReadOnlySpan<byte> value )
     {
@@ -275,6 +291,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
 
         return ref Append(value.AsSpan());
     }
+
     /// <summary> Appends <paramref name="value"/> encoded as UTF-8 (vectorized through <see cref="Utf8.FromUtf16"/>). Lone surrogates are written as U+FFFD. </summary>
     [UnscopedRef] public ref ValueUtf8Builder Append( scoped ReadOnlySpan<char> value )
     {
@@ -335,6 +352,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
 
     /// <summary> The content decoded as UTF-16. Does not dispose the builder. </summary>
     public readonly string ToString( string? format, IFormatProvider? formatProvider ) => Encoding.UTF8.GetString(Values);
+
     /// <summary> Copies the UTF-8 content to <paramref name="utf8Destination"/>. </summary>
     public readonly bool TryFormat( Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
@@ -347,6 +365,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         bytesWritten = 0;
         return false;
     }
+
     /// <summary> Decodes the content into <paramref name="destination"/> as UTF-16. </summary>
     public readonly bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
@@ -355,6 +374,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         charsWritten = 0;
         return false;
     }
+
     /// <summary> The content as a new array; the builder is disposed (its pooled array returned). </summary>
     public byte[] ToArray()
     {
@@ -362,6 +382,7 @@ public ref struct ValueUtf8Builder : IUtf8SpanFormattable, ISpanFormattable, IDi
         Dispose();
         return result;
     }
+
     /// <summary> The content decoded as a string; the builder is disposed (its pooled array returned). </summary>
     public override string ToString()
     {

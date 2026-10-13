@@ -137,10 +137,13 @@ public enum JsonUnorderedCollections : byte
 public enum JsonEscaping : byte
 {
     Inherit,
+
     /// <summary> Only what JSON requires (the default). </summary>
     Minimal,
+
     /// <summary> Also everything outside ASCII. </summary>
     AsciiOnly,
+
     /// <summary> Also <c>&lt; &gt; &amp; ' +</c>, so the output is safe inside HTML. </summary>
     HtmlSafe
 }
@@ -159,34 +162,34 @@ public enum JsonIndentChar : byte
 /// <summary> The settings shared by <see cref="JsonDefaultsAttribute"/> (assembly) and <see cref="GenerateJsonAttribute"/> (type). See SPEC.md §4.2. </summary>
 public abstract class JsonSettingsAttribute : Attribute
 {
-    public JsonNaming               Naming               { get; set; }
-    public JsonNameMatching         NameMatching         { get; set; }
-    public JsonNullValues           NullValues           { get; set; }
-    public JsonDefaultValues        DefaultValues        { get; set; }
-    public JsonUnknownMembers       UnknownMembers       { get; set; }
-    public JsonDuplicateMembers     DuplicateMembers     { get; set; }
-    public JsonEnumFormat           Enums                { get; set; }
-    public JsonNaming               EnumNaming           { get; set; }
-    public JsonNumbersFromStrings   NumbersFromStrings   { get; set; }
-    public JsonLargeIntegers        LargeIntegers        { get; set; }
-    public JsonNonFiniteFloats      NonFiniteFloats      { get; set; }
-    public JsonLocalDateTimes       LocalDateTimes       { get; set; }
-    public JsonUnorderedCollections UnorderedCollections { get; set; }
-    public JsonEscaping             Escaping             { get; set; }
-    public JsonToggle               Indented             { get; set; }
-    public JsonIndentChar           IndentChar           { get; set; }
+    public JsonNaming               Naming               { get; set; } = JsonNaming.CamelCase;
+    public JsonNameMatching         NameMatching         { get; set; } = JsonNameMatching.Inherit;
+    public JsonNullValues           NullValues           { get; set; } = JsonNullValues.Inherit;
+    public JsonDefaultValues        DefaultValues        { get; set; } = JsonDefaultValues.Inherit;
+    public JsonUnknownMembers       UnknownMembers       { get; set; } = JsonUnknownMembers.Inherit;
+    public JsonDuplicateMembers     DuplicateMembers     { get; set; } = JsonDuplicateMembers.Inherit;
+    public JsonEnumFormat           Enums                { get; set; } = JsonEnumFormat.Number;
+    public JsonNaming               EnumNaming           { get; set; } = JsonNaming.Inherit;
+    public JsonNumbersFromStrings   NumbersFromStrings   { get; set; } = JsonNumbersFromStrings.Inherit;
+    public JsonLargeIntegers        LargeIntegers        { get; set; } = JsonLargeIntegers.Inherit;
+    public JsonNonFiniteFloats      NonFiniteFloats      { get; set; } = JsonNonFiniteFloats.Inherit;
+    public JsonLocalDateTimes       LocalDateTimes       { get; set; } = JsonLocalDateTimes.ConvertToUtc;
+    public JsonUnorderedCollections UnorderedCollections { get; set; } = JsonUnorderedCollections.Sorted;
+    public JsonEscaping             Escaping             { get; set; } = JsonEscaping.Inherit;
+    public JsonToggle               Indented             { get; set; } = JsonToggle.On;
+    public JsonIndentChar           IndentChar           { get; set; } = JsonIndentChar.Tab;
 
     /// <summary> 0 inherits. </summary>
-    public int IndentSize { get; set; }
+    public int IndentSize { get; set; } = 1;
 
-    public JsonToggle AllowComments       { get; set; }
-    public JsonToggle AllowTrailingCommas { get; set; }
+    public JsonToggle AllowComments       { get; set; } = JsonToggle.Inherit;
+    public JsonToggle AllowTrailingCommas { get; set; } = JsonToggle.Inherit;
 
     /// <summary> 0 inherits. </summary>
-    public int MaxDepth { get; set; }
+    public int MaxDepth { get; set; } = 0;
 
     /// <summary> Emit <c>ToString()</c> returning compact JSON (default <see cref="JsonToggle.On"/>), unless the type already overrides it. </summary>
-    public JsonToggle GenerateToString { get; set; }
+    public JsonToggle GenerateToString { get; set; } = JsonToggle.Inherit;
 }
 
 
