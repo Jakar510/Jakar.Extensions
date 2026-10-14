@@ -1,0 +1,27 @@
+@Jakar.Json.Tests.WebApi_HostAddress = http://localhost:5073
+
+### Minimal API, plain return value (written by Jakar.Json through WithJakarJson)
+GET {{Jakar.Json.Tests.WebApi_HostAddress}}/api/forecast
+Accept: application/json
+
+### Minimal API, JakarResults.JsonArray
+GET {{Jakar.Json.Tests.WebApi_HostAddress}}/api/forecast/3
+Accept: application/json
+
+### Minimal API, JsonBody<WeatherForecast> → 201 Created
+POST {{Jakar.Json.Tests.WebApi_HostAddress}}/api/forecast
+Content-Type: application/json
+
+{ "date": "2026-10-15", "temperatureC": 21, "summary": "Mild" }
+
+### MVC (AddJakarJson)
+GET {{Jakar.Json.Tests.WebApi_HostAddress}}/mvc/forecast
+Accept: application/json
+
+### MVC, request body read by Jakar.Json → 201 Created
+POST {{Jakar.Json.Tests.WebApi_HostAddress}}/mvc/forecast
+Content-Type: application/json
+
+{ "date": "2026-10-15", "temperatureC": 21, "summary": "Mild" }
+
+###

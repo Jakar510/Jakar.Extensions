@@ -23,6 +23,7 @@
   <Project Path="Jakar.Extensions.Bogus/Jakar.Extensions.Bogus.csproj" />
   <Project Path="Jakar.Extensions.Experiments/Experiments.csproj" />
   <Project Path="Jakar.Extensions.SignalR/Jakar.Extensions.SignalR.csproj" />
+  <Project Path="Jakar.Json.Tests.WebApi/Jakar.Json.Tests.WebApi.csproj" />
   <Project Path="Jakar.Extensions.Tests/Jakar.Extensions.Tests.csproj" />
   <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />
   <Project Path="Jakar.Extensions/Jakar.Extensions.csproj" />

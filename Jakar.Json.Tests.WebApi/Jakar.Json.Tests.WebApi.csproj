@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>f701d4ef-4568-4a3c-b702-af7abd4c2378</UserSecretsId>
@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
+    <ProjectReference Include="..\Jakar.Json.AspNetCore\Jakar.Json.AspNetCore.csproj" />
+    <!-- [JsonModel] code for this app's own types (the Jakar.Json package ships the generator; a project reference has to add it). -->
+    <ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
