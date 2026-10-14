@@ -3172,30 +3172,33 @@ Reliability claims are only as good as their tests. Status as of 10/07/2026: 197
 
 ### 12.1 Benchmark results
 
-BenchmarkDotNet 0.15.8, default job (15–30 iterations; error ≤ 2%), in-process toolchain, .NET 10.0.12, x64 (Ryzen 9 3900X, AVX2), 10/13/2026. The model is an order with 1, 75 or 7,500 lines (≈ 200 B, 10 KB, 1 MB of JSON). Source: `Jakar.Extensions.Experiments/Benchmarks/JakarJson_Benchmarks.cs` (`--filter *JakarJson*`).
+BenchmarkDotNet 0.15.8, default job (13–73 iterations; error ≤ 2%), in-process toolchain, .NET 10.0.12, x64 (Ryzen 9 3900X, AVX2), 10/14/2026. The model is an order with 1, 75 or 7,500 lines (≈ 200 B, 10 KB, 1 MB of JSON). Source: `Jakar.Extensions.Experiments/Benchmarks/JakarJson_Benchmarks.cs` (`--filter *JakarJson*`).
 
 **Jakar.Json is the baseline (1.00)**: a context-less `[JsonModel]` for the serializer rows, `JsonTape` / `JNode` for the dynamic ones. Each cell is time relative to it at ≈ 200 B / 10 KB / 1 MB; above 1.00 is slower than Jakar.Json.
 
 | Operation | `[JsonModel]` hybrid (§7.7) | System.Text.Json (source-generated) | Newtonsoft.Json | Jakar.Json allocates |
 |---|---|---|---|---|
-| Serialize to `string` | 0.99 / 1.01 / 1.08 | 1.29 / 1.40 / 1.39 | 3.63 / 3.16 / 3.05 | 93–105% of STJ (the string) |
-| … into a caller `char` buffer (`TryFormat`) | — | — | — | **0 B** (0.83–0.95 of the `string` row) |
-| Serialize to UTF-8 `byte[]` | 0.98 / 0.99 / 1.01 | 1.08 / 1.07 / 1.12 | 5.05 / 3.25 / 3.14 | 95–103% of STJ (the array) |
-| … into a caller `byte` buffer (`TryFormat`) | — | — | — | **0 B** (0.91–0.99 of the `byte[]` row) |
-| Serialize to a `Stream` | 1.10 / 1.03 / 1.00 | 1.16 / 1.12 / 1.57 | 4.94 / 3.35 / 3.17 | 0–23 B (STJ 56–527 B) |
-| Deserialize from `string` | 1.01 / 1.01 / 1.00 | 1.01 / 1.10 / 1.11 | 2.04 / 1.75 / 1.73 | STJ allocates 2.35× / 1.16× / 1.06× as much |
-| Deserialize from UTF-8 | 1.04 / 0.95 / 0.95 | **0.87 / 0.95 / 0.95** | 2.07 / 1.62 / 1.63 | STJ allocates 2.35× / 1.16× / 1.06× as much |
-| Navigate: sum one field over every line (`JsonDocument` vs `JsonTape`) | — | **0.95 / 0.98 / 0.97** | — | 64–87 B (STJ 72–95 B) |
-| DOM: parse and sum (`JsonNode` / `JObject` vs `JNode`) | — | **0.90 / 0.88 / 0.88** | 1.91 / 1.76 / 4.86 | STJ allocates 1.17–1.19× as much |
+| Serialize to `string` | 1.01 / 1.11 / 1.07 | 1.63 / 1.88 / 1.93 | 4.43 / 4.34 / 4.22 | 93–105% of STJ (the string) |
+| … into a caller `char` buffer (`TryFormat`) | — | — | — | **0 B** (0.83–1.01 of the `string` row) |
+| Serialize to UTF-8 `byte[]` | 1.06 / 0.99 / 0.94 | 1.18 / 1.26 / 1.28 | 5.85 / 3.69 / 3.53 | 95–103% of STJ (the array) |
+| … into a caller `byte` buffer (`TryFormat`) | — | — | — | **0 B** (0.92–1.00 of the `byte[]` row) |
+| Serialize to a `Stream` | 1.16 / 1.00 / 1.02 | 1.35 / 1.24 / 1.87 | 5.71 / 3.63 / 3.73 | 0–12 B (STJ 56–527 B) |
+| Deserialize from `string` | 0.99 / 1.02 / 0.92 | 1.40 / 1.52 / 1.51 | 2.74 / 2.39 / 2.41 | STJ allocates 2.35× / 1.16× / 1.06× as much |
+| Deserialize from UTF-8 | 1.06 / 1.01 / 1.03 | 1.23 / 1.32 / 1.36 | 2.70 / 2.27 / 2.33 | STJ allocates 2.35× / 1.16× / 1.06× as much |
+| Navigate: sum one field over every line (`JsonDocument` vs `JsonTape`) | — | 1.30 / 1.35 / 1.36 | — | 64–86 B (STJ 72–94 B) |
+| DOM: parse and sum (`JsonNode` / `JObject` vs `JNode`) | — | 1.08 / 1.18 / 1.21 | 2.03 / 2.30 / 6.15 | STJ allocates 0.96× / 1.40× / 1.41× as much |
 
 **Reading the table.**
 
-- **Hybrid** (`IJsonModel` members on Jakar.Json, what context-backed `[JsonModel]` types use) costs about the same as plain Jakar.Json: the extra static-virtual dispatch and options check are within noise, except `WriteToAsync` on small documents (1.10: it takes the buffered async path, where the plain row writes synchronously). It's faster than System.Text.Json in every row except small UTF-8 reads, and allocates the same as Jakar.Json, which is the basis of decision D8.
-- **Writes**: Jakar.Json is 7–40% faster than System.Text.Json, and allocation-free into a caller's buffer. Stream writes buffer on the stack first, so small documents reach the stream in one write (this run: 0.86× STJ's time; before that change, small stream writes were 4% slower).
-- **Reads**: from `string`, at parity or faster with less memory. From UTF-8, System.Text.Json is 5–13% faster, while Jakar.Json allocates 6–57% less. Jakar.Json's own UTF-8 reads are slower than its string reads (41.9 µs vs 37.5 µs at 10 KB), so the UTF-8 reader (byte-level name matching and number parsing) is the open performance item.
-- **Dynamic JSON** trails: `JsonTape` by 2–5% against `JsonDocument`, `JNode` by 11–14% against STJ's `JsonNode` (with ~15% less memory). Newtonsoft is 1.6–5× slower than Jakar.Json throughout and allocates up to 37,000× more on stream writes.
+- **Against System.Text.Json**, Jakar.Json is faster on every path at every size: 18–93% on writes, 23–52% on reads, 30–36% for `JsonTape` against `JsonDocument`, and 8–21% for `JNode` against `JsonNode`. It allocates the same or less everywhere except the ≈ 200 B DOM row (4% more; `JNode` builds every node up front, where `JsonNode` decodes values only when they're read).
+- **Hybrid** (`IJsonModel` members on Jakar.Json, what context-backed `[JsonModel]` types use) costs about the same as plain Jakar.Json, within 0.92–1.16, and allocates the same, which is the basis of decision D8. The extra static-virtual dispatch shows on small documents (≈ 200 B stream and UTF-8 writes, 6–16%), and it's still faster than System.Text.Json in every row.
+- **Writes** are allocation-free into a caller's buffer. Stream writes buffer on the stack first, so small documents reach the stream in one write.
+- **Reads**: UTF-8 reads are now 23–36% faster than System.Text.Json (they were 5–13% slower). Jakar.Json's own UTF-8 reads are still a little slower than its string reads (32.8 µs vs 30.5 µs at 10 KB): UTF-8 names and strings are transcoded where UTF-16 input is sliced.
+- **Newtonsoft** is 2–6× slower than Jakar.Json throughout and allocates up to 72,000× more on stream writes.
 
-Against §12.5's target (parity with STJ source generation, 0 B on writes): writes beat it, with 0 B into caller buffers; reads meet it from strings and miss it by 5–13% on time (not memory) from UTF-8.
+What closed the gaps (10/14/2026): exact fast paths for numbers (`JsonFastNumbers`) and ISO 8601 dates (`JsonFastDates`), each falling back to the BCL for anything unusual; expected-name matching in generated readers; one writer construction per call with size hints reserving pooled space (choosing between two constructors copied the whole writer); `[module: SkipLocalsInit]`; Guids, dates and integers formatted straight to UTF-8; an inlined no-trivia check and a 16-byte vector string scan in the lexer; container kinds on the tape's depth stack; and `JNode` built in one forward walk over the tape with a per-parse name cache.
+
+Against §12.5's target (parity with STJ source generation, 0 B on writes): every row beats it, reads and writes alike, with 0 B into caller buffers.
 
 ---
 
