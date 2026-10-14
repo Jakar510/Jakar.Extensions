@@ -181,8 +181,24 @@ internal static class ModelExtractor
                    OptionalConstructorParameters = known.Mirror.IsActive && known.Mirror.OptionalConstructorParameters,
                    AttributeLocation   = attributeLocation,
                    Diagnostics         = new EquatableArray<DiagnosticInfo>(diagnostics),
-                   IsFatal             = fatal
+                   IsFatal             = fatal,
+                   Registrable         = IsRegistrable(symbol)
                };
+    }
+
+    /// <summary> Whether generated code outside the type can name it for <c>JsonCodecRegistry.Register&lt;T&gt;()</c>: not generic, not an interface, and visible to its assembly all the way out. </summary>
+    private static bool IsRegistrable( INamedTypeSymbol symbol )
+    {
+        if ( symbol.TypeKind == TypeKind.Interface ) { return false; }
+
+        for ( INamedTypeSymbol? current = symbol; current is not null; current = current.ContainingType )
+        {
+            if ( current.TypeParameters.Length > 0 || current.IsFileLocal ) { return false; }
+
+            if ( current.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal) ) { return false; }
+        }
+
+        return true;
     }
 
 

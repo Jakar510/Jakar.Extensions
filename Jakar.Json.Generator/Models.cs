@@ -252,4 +252,5 @@ internal sealed record ModelInfo
     public required LocationInfo?                  AttributeLocation   { get; init; }
     public required EquatableArray<DiagnosticInfo> Diagnostics         { get; init; }
     public required bool                           IsFatal             { get; init; }
+    public required bool                           Registrable         { get; init; } // non-generic and nameable from generated code: listed in the assembly's JsonCodecRegistry initializer
 }

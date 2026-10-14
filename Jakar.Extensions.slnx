@@ -27,6 +27,8 @@
   <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />
   <Project Path="Jakar.Extensions/Jakar.Extensions.csproj" />
   <Project Path="Jakar.Spans/Jakar.Spans.csproj" />
+  <Project Path="Jakar.Json.AspNetCore.Tests/Jakar.Json.AspNetCore.Tests.csproj" />
+  <Project Path="Jakar.Json.AspNetCore/Jakar.Json.AspNetCore.csproj" />
   <Project Path="Jakar.Json.Generator.CodeFixes/Jakar.Json.Generator.CodeFixes.csproj" />
   <Project Path="Jakar.Json.Generator.Tests/Jakar.Json.Generator.Tests.csproj" />
   <Project Path="Jakar.Json.Generator/Jakar.Json.Generator.csproj" />

@@ -48,6 +48,37 @@ public static partial class JsonCodec
         finally { writer.Dispose(); }
     }
 
+    /// <summary> Writes a UTF-8 JSON array into <paramref name="output"/> (e.g. an ASP.NET Core <c>PipeWriter</c>): one copy from pooled scratch space. </summary>
+    public static void WriteJsonArray<T>( scoped ReadOnlySpan<T> values, IBufferWriter<byte> output, JsonWriterOptions? options = null )
+        where T : IJsonSerializable<T>
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options ?? T.DefaultWriterOptions);
+
+        try
+        {
+            JsonSequences.WriteSpan<JsonUtf8Writer, T, JsonModelConverter<T>>(ref writer, values);
+            output.Write(writer.Written);
+        }
+        finally { writer.Dispose(); }
+    }
+
+    /// <inheritdoc cref="WriteJsonArray{T}(ReadOnlySpan{T}, IBufferWriter{byte}, JsonWriterOptions?)"/>
+    public static void WriteJsonArray<T>( IEnumerable<T> values, IBufferWriter<byte> output, JsonWriterOptions? options = null )
+        where T : IJsonSerializable<T>
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        ArgumentNullException.ThrowIfNull(output);
+        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options ?? T.DefaultWriterOptions);
+
+        try
+        {
+            JsonSequences.WriteEnumerable<JsonUtf8Writer, T, JsonModelConverter<T>>(ref writer, values);
+            output.Write(writer.Written);
+        }
+        finally { writer.Dispose(); }
+    }
+
     public static void ToJsonArray<T>( scoped ReadOnlySpan<T> values, Stream stream, JsonWriterOptions? options = null )
         where T : IJsonSerializable<T>
     {
