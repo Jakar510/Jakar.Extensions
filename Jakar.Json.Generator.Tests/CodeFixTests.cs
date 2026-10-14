@@ -56,7 +56,7 @@ public sealed class CodeFixTests
 
     [Test] public async Task JJSON001_MakesTheTypePartial()
     {
-        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A.cs", PRELUDE + "[GenerateJson]\npublic sealed class A { public int Value { get; set; } }" ));
+        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A.cs", PRELUDE + "[JsonModel]\npublic sealed class A { public int Value { get; set; } }" ));
         using AdhocWorkspace dispose = workspace;
 
         Solution fixedSolution = await ApplyAsync(project, await GeneratorDiagnosticAsync(project, "JJSON001"));
@@ -72,7 +72,7 @@ public sealed class CodeFixTests
 
     [Test] public async Task JJSON001_MakesTheContainingTypePartial()
     {
-        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A.cs", PRELUDE + "public static class Outer { [GenerateJson] public sealed partial class Inner { } }" ));
+        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A.cs", PRELUDE + "public static class Outer { [JsonModel] public sealed partial class Inner { } }" ));
         using AdhocWorkspace dispose = workspace;
 
         Solution fixedSolution = await ApplyAsync(project, await GeneratorDiagnosticAsync(project, "JJSON001"));
@@ -81,7 +81,7 @@ public sealed class CodeFixTests
 
     [Test] public async Task JJSON006_FreezesTheOrder()
     {
-        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A1.cs", PRELUDE + "[GenerateJson] public sealed partial class A { public int One { get; set; } [JsonMember(Name = \"z\")] public int Zed { get; set; } }" ), ( "A2.cs", PRELUDE + "public sealed partial class A { public int Two { get; set; } }" ));
+        ( AdhocWorkspace workspace, Project project ) = CreateProject(( "A1.cs", PRELUDE + "[JsonModel] public sealed partial class A { public int One { get; set; } [JsonMember(Name = \"z\")] public int Zed { get; set; } }" ), ( "A2.cs", PRELUDE + "public sealed partial class A { public int Two { get; set; } }" ));
 
         using AdhocWorkspace dispose = workspace;
 
@@ -105,7 +105,7 @@ public sealed class CodeFixTests
         Solution fixedSolution = await ApplyAsync(project, found.Single(static d => d.Id == "JJSON015"));
         string   text          = await TextAsync(fixedSolution, "A.cs");
 
-        Assert.That(text, Does.Contain("[GenerateJson]"));
+        Assert.That(text, Does.Contain("[JsonModel]"));
         Assert.That(text, Does.Contain("public sealed partial class A"));
 
         Compilation fixedCompilation = ( await fixedSolution.Projects.Single().GetCompilationAsync() )!;

@@ -12,7 +12,7 @@ namespace Jakar.Json.Tests;
 
 
 
-[GenerateJson(Naming = JsonNaming.SnakeCaseLower, NullValues = JsonNullValues.Omit, DefaultValues = JsonDefaultValues.Omit)]
+[JsonModel(Naming = JsonNaming.SnakeCaseLower, NullValues = JsonNullValues.Omit, DefaultValues = JsonDefaultValues.Omit)]
 public sealed partial class SnakeOmit
 {
     public int     HTTPStatusCode { get; set; }
@@ -22,7 +22,7 @@ public sealed partial class SnakeOmit
 
 
 
-[GenerateJson(NameMatching = JsonNameMatching.OrdinalIgnoreCase, DuplicateMembers = JsonDuplicateMembers.LastWins, NumbersFromStrings = JsonNumbersFromStrings.Allow, AllowComments = JsonToggle.On, AllowTrailingCommas = JsonToggle.On)]
+[JsonModel(NameMatching = JsonNameMatching.OrdinalIgnoreCase, DuplicateMembers = JsonDuplicateMembers.LastWins, NumbersFromStrings = JsonNumbersFromStrings.Allow, AllowComments = JsonToggle.On, AllowTrailingCommas = JsonToggle.On)]
 public sealed partial class Lenient
 {
     public int    Count { get; set; }
@@ -32,7 +32,7 @@ public sealed partial class Lenient
 
 
 
-[GenerateJson(LargeIntegers = JsonLargeIntegers.String, NonFiniteFloats = JsonNonFiniteFloats.AsString, Enums = JsonEnumFormat.Number)]
+[JsonModel(LargeIntegers = JsonLargeIntegers.String, NonFiniteFloats = JsonNonFiniteFloats.AsString, Enums = JsonEnumFormat.Number)]
 public sealed partial class Numeric
 {
     public long   Big    { get; set; }
@@ -43,7 +43,7 @@ public sealed partial class Numeric
 
 
 
-[GenerateJson(Indented = JsonToggle.On, IndentChar = JsonIndentChar.Space, IndentSize = 4, GenerateToString = JsonToggle.Off)]
+[JsonModel(Indented = JsonToggle.On, IndentChar = JsonIndentChar.Space, IndentSize = 4, GenerateToString = JsonToggle.Off)]
 public sealed partial class Pretty
 {
     public int[] Values { get; set; } = [];
@@ -57,7 +57,7 @@ public sealed partial class Pretty
 
 
 
-[GenerateJson(Discriminator = "kind")]
+[JsonModel(Discriminator = "kind")]
 [JsonDerived(typeof(Dog),   "dog")]
 [JsonDerived(typeof(Cat),   "cat")]
 [JsonDerived(typeof(Puppy), "puppy")]
@@ -68,7 +68,7 @@ public abstract partial class Animal
 
 
 
-[GenerateJson]
+[JsonModel]
 public partial class Dog : Animal
 {
     public bool GoodBoy { get; set; }
@@ -76,7 +76,7 @@ public partial class Dog : Animal
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Puppy : Dog
 {
     public int Weeks { get; set; }
@@ -84,7 +84,7 @@ public sealed partial class Puppy : Dog
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Cat : Animal
 {
     public int Lives { get; set; } = 9;
@@ -92,7 +92,7 @@ public sealed partial class Cat : Animal
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Zoo
 {
     public List<Animal> Animals { get; set; } = [];
@@ -105,7 +105,7 @@ public sealed partial class Zoo
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Bag
 {
     public string Title { get; set; } = "";
@@ -134,7 +134,7 @@ public readonly struct UnixSecondsConverter : IJsonConverter<DateTimeOffset>
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Converted
 {
     [JsonMember(Converter = typeof(UnixSecondsConverter))] public DateTimeOffset  When  { get; set; }
@@ -149,7 +149,7 @@ public sealed partial class Converted
 
 
 
-[GenerateJson]
+[JsonModel]
 public partial struct Point
 {
     public          int X;
@@ -159,11 +159,11 @@ public partial struct Point
 
 
 
-[GenerateJson] public readonly partial record struct Money( decimal Amount, string Currency = "USD" );
+[JsonModel] public readonly partial record struct Money( decimal Amount, string Currency = "USD" );
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Page<T>
     where T : IJsonSerializable<T>
 {
@@ -173,7 +173,7 @@ public sealed partial class Page<T>
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Keyed<TKey>
     where TKey : ISpanFormattable, ISpanParsable<TKey>
 {
@@ -183,7 +183,7 @@ public sealed partial class Keyed<TKey>
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Account
 {
     [JsonConstructor] public Account( string login, int age )
@@ -204,7 +204,7 @@ public sealed partial class Account
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Migrated
 {
     [JsonPropertyName("full_name")] public string Name { get; set; } = "";
@@ -228,5 +228,5 @@ public sealed partial class Migrated
 
 public static partial class Outer
 {
-    [GenerateJson(Naming = JsonNaming.KebabCaseLower)] public sealed partial record Inner( string FirstValue, int? SecondValue );
+    [JsonModel(Naming = JsonNaming.KebabCaseLower)] public sealed partial record Inner( string FirstValue, int? SecondValue );
 }

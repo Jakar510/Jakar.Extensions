@@ -180,4 +180,9 @@ internal static class Values
     public const int ESCAPING_ASCII_ONLY   = 2;
     public const int ESCAPING_HTML_SAFE    = 3;
     public const int INDENT_SPACE          = 2;
+
+    // JsonModelImplementation
+    public const int IMPLEMENTATION_AUTO  = 0;
+    public const int IMPLEMENTATION_STJ   = 1;
+    public const int IMPLEMENTATION_JAKAR = 2;
 }

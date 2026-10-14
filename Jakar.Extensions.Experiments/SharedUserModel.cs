@@ -9,7 +9,6 @@ namespace Experiments;
 
 
 [Serializable]
-[GenerateJson(Enums = JsonEnumFormat.Name, Indented = JsonToggle.On)] // enums as names, like SharedUserJsonContext (UseStringEnumConverter), so each serializer reads the other's output
 [JsonModel(typeof(SharedUserJsonContext))]
 public sealed partial class SharedUserModel : UserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {

@@ -24,6 +24,7 @@ internal static class GeneratorHarness
                                   using System;
                                   using System.Collections.Generic;
                                   using Jakar.Json;
+                                  using Jakar.Extensions;
 
                                   """;
 

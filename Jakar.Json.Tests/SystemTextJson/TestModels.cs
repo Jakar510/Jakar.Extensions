@@ -37,7 +37,7 @@ public sealed partial class Invoice : IEquatable<Invoice>
 
 
 
-[JsonModel(typeof(TestJsonContext), GenerateToString = true)] public readonly partial record struct Point( int X, int Y );
+[JsonModel(typeof(TestJsonContext), GenerateToString = Jakar.Json.JsonToggle.On)] public readonly partial record struct Point( int X, int Y );
 
 
 

@@ -22,7 +22,7 @@ public sealed class GeneratorTests
                             """
                             namespace Shop;
 
-                            [GenerateJson(Naming = JsonNaming.CamelCase)]
+                            [JsonModel(Naming = JsonNaming.CamelCase)]
                             public sealed partial record Item( string Sku, int Quantity );
                             """);
 
@@ -43,10 +43,10 @@ public sealed class GeneratorTests
                             """
                             [assembly: JsonDefaults(Naming = JsonNaming.SnakeCaseLower, Indented = JsonToggle.On)]
 
-                            [GenerateJson]
+                            [JsonModel]
                             public sealed partial class A { public int FirstValue { get; set; } }
 
-                            [GenerateJson(Naming = JsonNaming.KebabCaseUpper, Indented = JsonToggle.Off)]
+                            [JsonModel(Naming = JsonNaming.KebabCaseUpper, Indented = JsonToggle.Off)]
                             public sealed partial class B { public int FirstValue { get; set; } }
                             """);
 
@@ -63,13 +63,13 @@ public sealed class GeneratorTests
                             """
                             public enum Color { Red, DarkBlue }
 
-                            [GenerateJson(EnumNaming = JsonNaming.CamelCase)]
+                            [JsonModel(EnumNaming = JsonNaming.CamelCase)]
                             public sealed partial class A { public Color C { get; set; } public Dictionary<Color, int> Counts { get; set; } = []; }
 
-                            [GenerateJson]
+                            [JsonModel]
                             public sealed partial class B { public Color C { get; set; } }
 
-                            [GenerateJson(Enums = JsonEnumFormat.Number)]
+                            [JsonModel(Enums = JsonEnumFormat.Number)]
                             public sealed partial class N { public Color C { get; set; } }
                             """);
 
@@ -86,13 +86,13 @@ public sealed class GeneratorTests
     {
         Result result = Run(PRELUDE +
                             """
-                            [GenerateJson]
+                            [JsonModel]
                             [JsonDerived(typeof(Dog), "dog")]
                             [JsonDerived(typeof(Puppy), "puppy")]
                             public abstract partial class Animal { public string Name { get; set; } = ""; }
 
-                            [GenerateJson] public partial class Dog : Animal { }
-                            [GenerateJson] public sealed partial class Puppy : Dog { }
+                            [JsonModel] public partial class Dog : Animal { }
+                            [JsonModel] public sealed partial class Puppy : Dog { }
                             """);
 
         Assert.That(result.CompileErrors, Is.Empty, string.Join("\n", result.CompileErrors));
@@ -107,48 +107,48 @@ public sealed class GeneratorTests
 
     [Test] public void JJSON001_NotPartial()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed class A { }\npublic class Outer { [GenerateJson] public sealed partial class Inner { } }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed class A { }\npublic class Outer { [JsonModel] public sealed partial class Inner { } }");
         Assert.That(result.Ids.Count(static id => id == "JJSON001"), Is.EqualTo(2));
     }
 
     [Test] public void JJSON002_UnconstrainedTypeParameter()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A<T> { public T Value { get; set; } = default!; }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A<T> { public T Value { get; set; } = default!; }");
         Assert.That(result.Ids, Does.Contain("JJSON002"));
 
-        Result ok = Run(PRELUDE + "[GenerateJson] public sealed partial class A<T> where T : IJsonSerializable<T> { public T? Value { get; set; } }");
+        Result ok = Run(PRELUDE + "[JsonModel] public sealed partial class A<T> where T : IJsonSerializable<T> { public T? Value { get; set; } }");
         Assert.That(ok.GeneratorDiagnostics, Is.Empty);
         Assert.That(ok.CompileErrors,        Is.Empty, string.Join("\n", ok.CompileErrors));
     }
 
     [Test] public void JJSON003_UnsupportedMember()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A { public System.Threading.Thread? T { get; set; } }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A { public System.Threading.Thread? T { get; set; } }");
         Assert.That(result.Ids, Does.Contain("JJSON003"));
     }
 
     [Test] public void JJSON004_UnboundConstructorParameter()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A { public A( int unmatched ) { } public int Value { get; set; } }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A { public A( int unmatched ) { } public int Value { get; set; } }");
         Assert.That(result.Ids, Does.Contain("JJSON004"));
     }
 
     [Test] public void JJSON005_NameCollision()
     {
-        Result exact = Run(PRELUDE + "[GenerateJson] public sealed partial class A { [JsonMember(Name = \"x\")] public int One { get; set; } [JsonMember(Name = \"x\")] public int Two { get; set; } }");
+        Result exact = Run(PRELUDE + "[JsonModel] public sealed partial class A { [JsonMember(Name = \"x\")] public int One { get; set; } [JsonMember(Name = \"x\")] public int Two { get; set; } }");
         Assert.That(exact.Ids, Does.Contain("JJSON005"));
 
-        Result folded = Run(PRELUDE + "[GenerateJson(NameMatching = JsonNameMatching.OrdinalIgnoreCase)] public sealed partial class A { public int Value { get; set; } public int value { get; set; } }");
+        Result folded = Run(PRELUDE + "[JsonModel(NameMatching = JsonNameMatching.OrdinalIgnoreCase)] public sealed partial class A { public int Value { get; set; } public int value { get; set; } }");
         Assert.That(folded.Ids, Does.Contain("JJSON005"));
     }
 
     [Test] public void JJSON006_MembersAcrossFiles()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A { public int One { get; set; } }", PRELUDE + "public sealed partial class A { public int Two { get; set; } }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A { public int One { get; set; } }", PRELUDE + "public sealed partial class A { public int Two { get; set; } }");
         Assert.That(result.Ids,                                                                              Does.Contain("JJSON006"));
         Assert.That(result.GeneratorDiagnostics.First(static d => d.Id == "JJSON006").Properties["Members"], Is.EqualTo("One,Two"));
 
-        Result ordered = Run(PRELUDE + "[GenerateJson] public sealed partial class A { [JsonMember(Order = 1)] public int One { get; set; } }", PRELUDE + "public sealed partial class A { [JsonMember(Order = 2)] public int Two { get; set; } }");
+        Result ordered = Run(PRELUDE + "[JsonModel] public sealed partial class A { [JsonMember(Order = 1)] public int One { get; set; } }", PRELUDE + "public sealed partial class A { [JsonMember(Order = 2)] public int Two { get; set; } }");
         Assert.That(ordered.Ids, Does.Not.Contain("JJSON006"));
     }
 
@@ -156,7 +156,7 @@ public sealed class GeneratorTests
     {
         Result result = Run(PRELUDE +
                             """
-                            [GenerateJson]
+                            [JsonModel]
                             public sealed partial class A
                             {
                                 public int Value { get; set; }
@@ -170,13 +170,13 @@ public sealed class GeneratorTests
 
     [Test] public void JJSON008_ContradictorySettings()
     {
-        Result capture = Run(PRELUDE + "[GenerateJson(UnknownMembers = JsonUnknownMembers.Capture)] public sealed partial class A { public int Value { get; set; } }");
+        Result capture = Run(PRELUDE + "[JsonModel(UnknownMembers = JsonUnknownMembers.Capture)] public sealed partial class A { public int Value { get; set; } }");
         Assert.That(capture.Ids, Does.Contain("JJSON008"));
 
-        Result required = Run(PRELUDE + "[GenerateJson(NullValues = JsonNullValues.Omit)] public sealed partial class A { [JsonMember(Required = true)] public string? Value { get; set; } }");
+        Result required = Run(PRELUDE + "[JsonModel(NullValues = JsonNullValues.Omit)] public sealed partial class A { [JsonMember(Required = true)] public string? Value { get; set; } }");
         Assert.That(required.Ids, Does.Contain("JJSON008"));
 
-        Result extension = Run(PRELUDE + "[GenerateJson] public sealed partial class A { [JsonMember(ExtensionData = true)] public Dictionary<string, int>? Extra { get; set; } }");
+        Result extension = Run(PRELUDE + "[JsonModel] public sealed partial class A { [JsonMember(ExtensionData = true)] public Dictionary<string, int>? Extra { get; set; } }");
         Assert.That(extension.Ids, Does.Contain("JJSON008"));
     }
 
@@ -190,41 +190,24 @@ public sealed class GeneratorTests
                                 public static bool TryRead<TReader>( ref TReader reader, out int value ) where TReader : IJsonReader, allows ref struct => reader.TryReadInteger(out value);
                             }
 
-                            [GenerateJson] public sealed partial class A { [JsonMember(Converter = typeof(IntConverter))] public string Value { get; set; } = ""; }
-                            [GenerateJson] public sealed partial class B { [JsonMember(Converter = typeof(IntConverter))] public int? Value { get; set; } }
+                            [JsonModel] public sealed partial class A { [JsonMember(Converter = typeof(IntConverter))] public string Value { get; set; } = ""; }
+                            [JsonModel] public sealed partial class B { [JsonMember(Converter = typeof(IntConverter))] public int? Value { get; set; } }
                             """);
 
         Assert.That(result.GeneratorDiagnostics.Where(static d => d.Id == "JJSON009"), Has.Exactly(1).Items, "int? reuses the int converter");
         Assert.That(result.Source("B."),                                               Does.Contain("JsonNullableConverter<int, global::IntConverter>"));
     }
 
-    [Test] public void JJSON010_SideBySide_LeavesTheHelpersToJsonModel()
-    {
-        Result result = Run(PRELUDE +
-                            """
-                            namespace Jakar.Extensions { public sealed class JsonModelAttribute : System.Attribute { } }
-
-                            [GenerateJson, Jakar.Extensions.JsonModel] public sealed partial class A { public int Value { get; set; } }
-                            """);
-
-        Assert.That(result.GeneratorDiagnostics.Single(static d => d.Id == "JJSON010").Severity, Is.EqualTo(DiagnosticSeverity.Info));
-        Assert.That(result.CompileErrors,                                                        Is.Empty);
-
-        string source = result.Source("A.");
-        Assert.That(source, Does.Contain("TryReadJson").And.Contain("TryFormat").And.Contain(" Parse("), "the IJsonSerializable contract is still implemented");
-        Assert.That(source, Does.Not.Contain(" FromJson(").And.Not.Contain(" TryFromJson(").And.Not.Contain(" FromJsonAsync(").And.Not.Contain(" ToJson(").And.Not.Contain("ToString()"));
-    }
-
     [Test] public void JJSON011_ComputedMember()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A { public int Value { get; set; } public int Double => Value * 2; }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A { public int Value { get; set; } public int Double => Value * 2; }");
         Assert.That(result.Ids,           Does.Contain("JJSON011"));
         Assert.That(result.CompileErrors, Is.Empty);
     }
 
     [Test] public void JJSON012_NoJsonForm()
     {
-        Result result = Run(PRELUDE + "[GenerateJson] public sealed partial class A { public object? Any { get; set; } public Action? Callback { get; set; } }");
+        Result result = Run(PRELUDE + "[JsonModel] public sealed partial class A { public object? Any { get; set; } public Action? Callback { get; set; } }");
         Assert.That(result.Ids.Count(static id => id == "JJSON012"), Is.EqualTo(2));
     }
 
@@ -232,9 +215,9 @@ public sealed class GeneratorTests
     {
         Result result = Run(PRELUDE +
                             """
-                            [GenerateJson(UnorderedCollections = JsonUnorderedCollections.Enumeration)] public sealed partial class A { public HashSet<int> Set { get; set; } = []; }
-                            [GenerateJson(LocalDateTimes = JsonLocalDateTimes.WriteOffset)] public sealed partial class B { public DateTime When { get; set; } }
-                            [GenerateJson] public sealed partial class C { public HashSet<B> Unsortable { get; set; } = []; }
+                            [JsonModel(UnorderedCollections = JsonUnorderedCollections.Enumeration)] public sealed partial class A { public HashSet<int> Set { get; set; } = []; }
+                            [JsonModel(LocalDateTimes = JsonLocalDateTimes.WriteOffset)] public sealed partial class B { public DateTime When { get; set; } }
+                            [JsonModel] public sealed partial class C { public HashSet<B> Unsortable { get; set; } = []; }
                             """);
 
         Assert.That(result.Ids.Count(static id => id == "JJSON013"), Is.EqualTo(3));
@@ -245,11 +228,11 @@ public sealed class GeneratorTests
     {
         Result result = Run(PRELUDE +
                             """
-                            [GenerateJson]
+                            [JsonModel]
                             [JsonDerived(typeof(Unrelated), "u")]
                             [JsonDerived(typeof(Plain), "p")]
                             public abstract partial class Base { }
-                            [GenerateJson] public sealed partial class Unrelated { }
+                            [JsonModel] public sealed partial class Unrelated { }
                             public sealed class Plain : Base { }
                             """);
 
@@ -267,7 +250,7 @@ public sealed class GeneratorTests
 
     [Test] public void EditingAnUnrelatedFile_DoesNotReExtractModels()
     {
-        SyntaxTree model     = CSharpSyntaxTree.ParseText(PRELUDE + "[GenerateJson] public sealed partial record A( int Value );", TestParseOptions, "Model.cs");
+        SyntaxTree model     = CSharpSyntaxTree.ParseText(PRELUDE + "[JsonModel] public sealed partial record A( int Value );", TestParseOptions, "Model.cs");
         SyntaxTree unrelated = CSharpSyntaxTree.ParseText("public static class Other { public static int X => 1; }",               TestParseOptions, "Other.cs");
 
         CSharpCompilation compilation = CreateCompilation().AddSyntaxTrees(model, unrelated);

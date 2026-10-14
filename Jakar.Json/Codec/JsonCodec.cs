@@ -19,6 +19,12 @@ public static partial class JsonCodec
 
     // ─── Write ───────────────────────────────────────────────────────────────
 
+    /// <summary> <typeparamref name="T"/>'s layout with indentation on or off: <c>IJsonModel</c>'s <c>ToJson(indented)</c> for a <c>[JsonModel]</c> type that runs on Jakar.Json. </summary>
+    public static string ToJson<T>( in T value, bool indented )
+        where T : IJsonSerializable<T> => indented == T.DefaultWriterOptions.Indented
+                                              ? ToJson(in value)
+                                              : ToJson(in value, T.DefaultWriterOptions with { Indented = indented });
+
     /// <summary> The JSON (compact unless the type's or <paramref name="options"/>' settings say otherwise): exactly one allocation, the string. </summary>
     /// <exception cref="JsonWriteException"> A value JSON can't hold (NaN, too deep). </exception>
     public static string ToJson<T>( in T value, JsonWriterOptions? options = null )
@@ -144,7 +150,8 @@ public static partial class JsonCodec
     public static void ToJson<T>( in T value, Stream stream, JsonWriterOptions? options = null )
         where T : IJsonSerializable<T>
     {
-        JsonUtf8Writer writer = new(stream, options ?? T.DefaultWriterOptions);
+        // Buffered on the stack first: small documents reach the stream in one write, without growing a pooled buffer from empty.
+        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], stream, options ?? T.DefaultWriterOptions);
 
         try
         {
@@ -198,7 +205,7 @@ public static partial class JsonCodec
 
     // ─── Read ────────────────────────────────────────────────────────────────
 
-    /// <exception cref="JsonReadException"> The JSON is malformed, doesn't match <typeparamref name="T"/>, or its root is <c>null</c>. </exception>
+    /// <exception cref="JsonReadException"> The JSON is malformed, doesn't match <typeparamref name="T"/>, or its root is <c>null</c> (a System.Text.Json <c>JsonException</c>). </exception>
     public static T FromJson<T>( string json, JsonReaderOptions? options = null )
         where T : IJsonSerializable<T>
     {

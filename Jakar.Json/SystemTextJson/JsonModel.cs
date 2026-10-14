@@ -100,14 +100,18 @@ public static partial class JsonModel
     extension<TSelf>( TSelf self )
         where TSelf : IJsonModel<TSelf>
     {
-        /// <summary> Serializes with <typeparamref name="TSelf"/>'s source-generated metadata. </summary>
-        public string ToJson( bool? indented = null ) => ToJson(self, TSelf.JsonTypeInfo, indented);
+        /// <summary> Serializes with <typeparamref name="TSelf"/>'s generated implementation: Jakar.Json when the type supports it, otherwise its System.Text.Json metadata (<see cref="IJsonModel{TSelf}.SerializeJson"/>). </summary>
+        public string ToJson( bool? indented = null ) => TSelf.SerializeJson(self, indented);
 
-        public byte[]      ToUtf8Json()                                                        => JsonSerializer.SerializeToUtf8Bytes(self, TSelf.JsonTypeInfo);
+        /// <inheritdoc cref="IJsonModel{TSelf}.SerializeJsonUtf8"/>
+        public byte[] ToUtf8Json() => TSelf.SerializeJsonUtf8(self);
+
         public JsonNode?   ToJsonNode()                                                        => JsonSerializer.SerializeToNode(self, TSelf.JsonTypeInfo);
         public JsonElement ToJsonElement()                                                     => JsonSerializer.SerializeToElement(self, TSelf.JsonTypeInfo);
         public void        WriteTo( Utf8JsonWriter writer )                                    => JsonSerializer.Serialize(writer, self, TSelf.JsonTypeInfo);
-        public Task        WriteToAsync( Stream    stream, CancellationToken token = default ) => JsonSerializer.SerializeAsync(stream, self, TSelf.JsonTypeInfo, token);
+
+        /// <inheritdoc cref="IJsonModel{TSelf}.SerializeJsonAsync"/>
+        public Task WriteToAsync( Stream stream, CancellationToken token = default ) => TSelf.SerializeJsonAsync(self, stream, token);
     }
 
 

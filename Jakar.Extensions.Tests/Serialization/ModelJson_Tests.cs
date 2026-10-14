@@ -66,7 +66,7 @@ public sealed class ModelJson_Tests
 
         Assert.That(back.UserPassword,                Is.EqualTo("hunter2"));
         Assert.That(back.Data.Get<string>("Token"),   Is.EqualTo("abc"));
-        Assert.That(new LoginRequestValue().ToJson(), Does.Contain("\"Data\": null"));
+        Assert.That(new LoginRequestValue().ToJson(), Does.Contain("\"Data\" : null"), "a default JsonElement is written as null (Jakar.Json's layout: this model's IJsonModel members run on Jakar.Json)");
     }
 
 

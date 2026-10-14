@@ -241,7 +241,7 @@ public enum JsonFloatRead : byte
 
 
 /// <summary>
-///     A type that reads and writes itself as JSON through source-generated code. Don't implement it by hand: put <see cref="GenerateJsonAttribute"/> on a
+///     A type that reads and writes itself as JSON through source-generated code. Don't implement it by hand: put <c>[JsonModel]</c> (<c>Jakar.Extensions.JsonModelAttribute</c>) on a
 ///     <see langword="partial"/> type. Generic code reaches everything through the type parameter (<c>T.TryReadJson(ref reader, out T value)</c>), with no reflection.
 /// </summary>
 public interface IJsonSerializable<TSelf> : ISpanFormattable, IUtf8SpanFormattable, ISpanParsable<TSelf>, IUtf8SpanParsable<TSelf>

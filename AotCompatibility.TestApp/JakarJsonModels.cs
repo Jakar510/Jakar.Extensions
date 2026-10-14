@@ -1,5 +1,6 @@
 // Jakar.Json models for the Native AOT smoke test: every check in JakarJsonChecks runs in the published native executable.
 
+using Jakar.Extensions;
 using Jakar.Json;
 
 
@@ -15,7 +16,7 @@ public enum Stage
 
 
 
-[GenerateJson(Naming = JsonNaming.CamelCase)]
+[JsonModel(Naming = JsonNaming.CamelCase)]
 public sealed partial record Order( Guid Id, decimal Total )
 {
     public required List<Line>              Lines   { get; init; }
@@ -26,15 +27,15 @@ public sealed partial record Order( Guid Id, decimal Total )
 
 
 
-[GenerateJson(Naming = JsonNaming.CamelCase)] public sealed partial record Line( string Sku, int Quantity );
+[JsonModel(Naming = JsonNaming.CamelCase)] public sealed partial record Line( string Sku, int Quantity );
 
 
 
-[GenerateJson] [JsonDerived(typeof(Circle), "circle")] [JsonDerived(typeof(Square), "square")] public abstract partial class Shape;
+[JsonModel] [JsonDerived(typeof(Circle), "circle")] [JsonDerived(typeof(Square), "square")] public abstract partial class Shape;
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Circle : Shape
 {
     public double Radius { get; set; }
@@ -42,7 +43,7 @@ public sealed partial class Circle : Shape
 
 
 
-[GenerateJson]
+[JsonModel]
 public sealed partial class Square : Shape
 {
     public double Side { get; set; }
@@ -88,19 +89,24 @@ public static class JakarJsonChecks
 
         yield return ( "Jakar.Json malformed input", () => !Order.TryFromJson("{\"id\":", out _) );
 
-        // Jakar.Extensions' user models carry [GenerateJson] and [JsonModel]: init-only members of generic bases ([UnsafeAccessor] through the open definition),
-        // observable collections (IJsonCollection) and the Dictionary<string, JsonElement> extension-data bag, read and written by each serializer.
-        yield return ( "Jakar.Json + [JsonModel] side by side", () =>
-                                                                {
-                                                                    Jakar.Extensions.UserGuid.UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
-                                                                    user.Addresses.Add(new Jakar.Extensions.UserGuid.UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
+        // Jakar.Extensions' user models are hybrid [JsonModel]s: IJsonModel's members run on Jakar.Json (static virtual dispatch through IJsonModel<TSelf>), JsonTypeInfo stays
+        // System.Text.Json's. Covers init-only members of generic bases ([UnsafeAccessor] through the open definition), observable collections (IJsonCollection) and the
+        // Dictionary<string, JsonElement> extension-data bag.
+        yield return ( "[JsonModel] hybrid: Jakar.Json behind IJsonModel", () =>
+                                                                           {
+                                                                               Jakar.Extensions.UserGuid.UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
+                                                                               user.Addresses.Add(new Jakar.Extensions.UserGuid.UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
 
-                                                                    string                              json   = JsonCodec.ToJson(user);
-                                                                    Jakar.Extensions.UserGuid.UserModel viaJ   = JsonCodec.FromJson<Jakar.Extensions.UserGuid.UserModel>(json[..^1] + ",\"extra\":[1,2.50]}");
-                                                                    Jakar.Extensions.UserGuid.UserModel viaStj = Jakar.Extensions.UserGuid.UserModel.FromJson(json);
+                                                                               string                              json  = user.ToJson(indented: false);
+                                                                               Jakar.Extensions.UserGuid.UserModel back  = Jakar.Extensions.UserGuid.UserModel.FromJson(json[..^1] + ",\"extra\":[1,2.50]}");
+                                                                               Jakar.Extensions.UserGuid.UserModel stj   = System.Text.Json.JsonSerializer.Deserialize(json, Jakar.Extensions.UserGuid.UserModel.JsonTypeInfo)!;
 
-                                                                    return viaJ.Addresses.Single().ID == user.Addresses.Single().ID && viaStj.UserName == "ada" && viaJ.AdditionalData!["extra"][1].GetRawText() == "2.50" && JsonCodec.ToJson(viaJ).EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
-                                                                } );
+                                                                               return json == JsonCodec.ToJson(user, JsonWriterOptions.Default)
+                                                                                   && back.Addresses.Single().ID == user.Addresses.Single().ID
+                                                                                   && stj.UserName == "ada"
+                                                                                   && back.AdditionalData!["extra"][1].GetRawText() == "2.50"
+                                                                                   && back.ToJson(indented: false).EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
+                                                                           } );
     }
 
     private static T Parse<T>( string text )

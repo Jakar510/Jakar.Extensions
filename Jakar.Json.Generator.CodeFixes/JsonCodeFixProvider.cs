@@ -25,7 +25,7 @@ namespace Jakar.Json.Generator.CodeFixes;
 ///     <list type="bullet">
 ///         <item> JJSON001: makes the type (or the containing type the diagnostic names) <see langword="partial"/>. </item>
 ///         <item> JJSON006: freezes the current member order with <c>[JsonMember(Order = n)]</c>. </item>
-///         <item> JJSON015: adds <c>[GenerateJson]</c>. </item>
+///         <item> JJSON015: adds <c>[JsonModel]</c>. </item>
 ///     </list>
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(JsonCodeFixProvider))]
@@ -38,7 +38,7 @@ public sealed class JsonCodeFixProvider : CodeFixProvider
     internal const string MISSING_ATTRIBUTE = "JJSON015";
     internal const string MEMBERS           = "Members";
 
-    private const string GENERATE_JSON = "global::Jakar.Json.GenerateJson";
+    private const string JSON_MODEL = "global::Jakar.Extensions.JsonModel";
     private const string JSON_MEMBER   = "global::Jakar.Json.JsonMember";
 
 
@@ -70,7 +70,7 @@ public sealed class JsonCodeFixProvider : CodeFixProvider
                     break;
 
                 case MISSING_ATTRIBUTE:
-                    context.RegisterCodeFix(CodeAction.Create("Add [GenerateJson]", token => AddGenerateJsonAsync(context.Document, declaration, token), MISSING_ATTRIBUTE), diagnostic);
+                    context.RegisterCodeFix(CodeAction.Create("Add [JsonModel]", token => AddJsonModelAsync(context.Document, declaration, token), MISSING_ATTRIBUTE), diagnostic);
                     break;
             }
         }
@@ -180,12 +180,12 @@ public sealed class JsonCodeFixProvider : CodeFixProvider
 
     // ─── JJSON015 ────────────────────────────────────────────────────────────
 
-    internal static async Task<Solution> AddGenerateJsonAsync( Document document, TypeDeclarationSyntax declaration, CancellationToken token )
+    internal static async Task<Solution> AddJsonModelAsync( Document document, TypeDeclarationSyntax declaration, CancellationToken token )
     {
         SyntaxNode? root = await document.GetSyntaxRootAsync(token).ConfigureAwait(false);
         if ( root is null ) { return document.Project.Solution; }
 
-        AttributeListSyntax list = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Attribute(SyntaxFactory.ParseName(GENERATE_JSON)))).WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
+        AttributeListSyntax list = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Attribute(SyntaxFactory.ParseName(JSON_MODEL)))).WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation);
 
         TypeDeclarationSyntax updated = declaration.WithAttributeLists(declaration.AttributeLists.Add(list));
         if ( !updated.Modifiers.Any(SyntaxKind.PartialKeyword) ) { updated = updated.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space)); }

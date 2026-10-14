@@ -31,7 +31,7 @@ public enum Permissions
 
 
 /// <summary> The SPEC.md §4.3 example. </summary>
-[GenerateJson(Naming = JsonNaming.CamelCase, UnknownMembers = JsonUnknownMembers.Error)]
+[JsonModel(Naming = JsonNaming.CamelCase, UnknownMembers = JsonUnknownMembers.Error)]
 public sealed partial record Invoice( Guid Id, decimal Total )
 {
     public required List<LineItem> Lines { get; init; }
@@ -46,12 +46,12 @@ public sealed partial record Invoice( Guid Id, decimal Total )
 
 
 
-[GenerateJson(Naming = JsonNaming.CamelCase)] public sealed partial record LineItem( string Sku, int Quantity, decimal Price );
+[JsonModel(Naming = JsonNaming.CamelCase)] public sealed partial record LineItem( string Sku, int Quantity, decimal Price );
 
 
 
 /// <summary> Every scalar the converters support, with defaults that a missing member must keep. </summary>
-[GenerateJson]
+[JsonModel]
 public sealed partial class Scalars
 {
     public bool           Flag      { get; set; }
@@ -91,7 +91,7 @@ public sealed partial class Scalars
 
 
 /// <summary> Every collection shape. </summary>
-[GenerateJson]
+[JsonModel]
 public sealed partial class Collections
 {
     public int[]                               Array         { get; set; } = [];

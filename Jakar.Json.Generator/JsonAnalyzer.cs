@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Jakar.Json.Generator;
 
 
-/// <summary> JJSON015: a type lists <c>IJsonSerializable&lt;T&gt;</c> itself, has no <c>[GenerateJson]</c>, and doesn't implement <c>WriteJson</c> / <c>TryReadJson</c>. </summary>
+/// <summary> JJSON015: a type lists <c>IJsonSerializable&lt;T&gt;</c> itself, has no <c>[JsonModel]</c>, and doesn't implement <c>WriteJson</c> / <c>TryReadJson</c>. </summary>
 /// <remarks> A symbol analyzer rather than part of the generator, so the generator's pipeline stays attribute-driven (cheap per keystroke). </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class JsonAnalyzer : DiagnosticAnalyzer
@@ -27,7 +27,7 @@ public sealed class JsonAnalyzer : DiagnosticAnalyzer
         context.RegisterCompilationStartAction(static start =>
                                                {
                                                    INamedTypeSymbol? serializable = start.Compilation.GetTypeByMetadataName(JsonGenerator.SERIALIZABLE_INTERFACE);
-                                                   INamedTypeSymbol? attribute    = start.Compilation.GetTypeByMetadataName(JsonGenerator.GENERATE_JSON_ATTRIBUTE);
+                                                   INamedTypeSymbol? attribute    = start.Compilation.GetTypeByMetadataName(JsonGenerator.JSON_MODEL_ATTRIBUTE);
 
                                                    if ( serializable is not null && attribute is not null ) { start.RegisterSymbolAction(ctx => Analyze(ctx, serializable, attribute), SymbolKind.NamedType); }
                                                });

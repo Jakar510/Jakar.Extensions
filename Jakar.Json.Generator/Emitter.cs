@@ -43,7 +43,7 @@ internal static class Emitter
 
     public static IEnumerable<EnumInfo> EnumsUsed( ModelInfo model, Settings defaults )
     {
-        if ( model.IsFatal ) { yield break; }
+        if ( model.IsFatal || model.Implementation == Values.IMPLEMENTATION_STJ ) { yield break; }
 
         Settings type = defaults.With(model.Settings);
 
@@ -66,6 +66,25 @@ internal static class Emitter
         {
             foreach ( EnumInfo nested in Enums(shape.Element, settings) ) { yield return nested; }
         }
+    }
+
+
+    /// <summary> Whether Jakar.Json can implement <paramref name="model"/>: no extraction or resolution errors. <paramref name="reason"/> is the first error otherwise. </summary>
+    public static bool CanEmit( ModelInfo model, Settings defaults, out string? reason )
+    {
+        DiagnosticInfo? error = model.Diagnostics.FirstOrDefault(static d => d.Descriptor.DefaultSeverity == DiagnosticSeverity.Error);
+
+        if ( error is null && !model.IsFatal )
+        {
+            Resolve(model, defaults.With(model.Settings), out _, out List<DiagnosticInfo> problems);
+            error = problems.FirstOrDefault(static p => p.Descriptor.DefaultSeverity == DiagnosticSeverity.Error);
+        }
+
+        reason = error?.ToDiagnostic().GetMessage(System.Globalization.CultureInfo.InvariantCulture) ?? ( model.IsFatal
+                                                                                                                ? "it can't be generated"
+                                                                                                                : null );
+
+        return reason is null;
     }
 
 
@@ -105,14 +124,11 @@ internal static class Emitter
         EmitOptions(code, model, type);
         EmitInterfaces(code, model);
 
-        // Side by side with [JsonModel] (JJSON010), the [JsonModel] part owns the type's own helpers: emitting ours too would make some calls ambiguous
-        // (FromJsonAsync(stream)) and silently split the rest between the two serializers (Type.FromJson binds to one, value.ToJson() to the other).
-        if ( !model.SideBySide )
-        {
-            EmitHelpers(code, model);
+        // With a context, the IJsonModel part owns the type's own helpers (FromJson/TryFromJson/FromJsonAsync, and ToJson through IJsonModel), calling this code through
+        // JsonCodec: emitting Jakar.Json's helper overloads too would make some calls ambiguous (FromJsonAsync(stream)).
+        if ( !model.ContextRequested ) { EmitHelpers(code, model); }
 
-            if ( type.GenerateToString != Values.OFF && !model.OverridesToString ) { code.Line($"public override string ToString() => {J}JsonCodec.ToJson(this);"); }
-        }
+        if ( type.GenerateToString != Values.OFF && !model.OverridesToString ) { code.Line($"public override string ToString() => {J}JsonCodec.ToJson(this);"); }
 
         code.Close();
 
@@ -129,7 +145,11 @@ internal static class Emitter
         problems  = [];
         extension = null;
 
-        HashSet<string> bound    = new(model.Construction.Parameters.Where(static p => p.Member is not null && !p.HasDefault).Select(static p => p.Member!), StringComparer.Ordinal);
+        // Constructor parameters without defaults are required, unless the model mirrors System.Text.Json (a missing one is its default there).
+        HashSet<string> bound = model.OptionalConstructorParameters
+                                    ? new HashSet<string>(StringComparer.Ordinal)
+                                    : new HashSet<string>(model.Construction.Parameters.Where(static p => p.Member is not null && !p.HasDefault).Select(static p => p.Member!), StringComparer.Ordinal);
+
         HashSet<string> boundAny = new(model.Construction.Parameters.Where(static p => p.Member is not null).Select(static p => p.Member!), StringComparer.Ordinal);
 
         // Order (SPEC.md §5.2): Order, then base members first, then declaration (file path, position).

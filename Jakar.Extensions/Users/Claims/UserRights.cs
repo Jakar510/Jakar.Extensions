@@ -20,7 +20,7 @@ public interface IUserRights
 
 
 
-[Jakar.Json.GenerateJson]
+[JsonModel] // no context: Jakar.Json only (System.Text.Json serializes it through the user-model contexts)
 public partial class UserRights : BaseClass, IEqualComparable<UserRights>
 {
     protected string _rights = EMPTY;

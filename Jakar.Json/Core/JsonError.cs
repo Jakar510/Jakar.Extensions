@@ -1,6 +1,10 @@
 // Jakar.Json
 // 10/07/2026
 
+using System.Text.Json;
+
+
+
 namespace Jakar.Json;
 
 
@@ -45,20 +49,18 @@ public readonly record struct JsonError( JsonErrorKind Kind, int Position, int L
 
 
 
-/// <summary> Malformed JSON, or JSON that doesn't match the target type. A <see cref="FormatException"/>, so <see cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)"/> callers catch the type they expect. </summary>
-public sealed class JsonReadException : FormatException
+/// <summary>
+///     Malformed JSON, or JSON that doesn't match the target type. A System.Text.Json <see cref="JsonException"/>, so code that catches that keeps working whichever serializer
+///     read the JSON (a <c>[JsonModel]</c> type's <c>IJsonModel</c> members may run on either). <see cref="JsonException.Path"/>, <see cref="JsonException.LineNumber"/> and
+///     <see cref="JsonException.BytePositionInLine"/> are set (zero-based, as System.Text.Json reports them); <see cref="Error"/> has the kind and the one-based position.
+/// </summary>
+/// <remarks> Not a <see cref="FormatException"/>: <see cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)"/> on a generated type throws this. </remarks>
+public sealed class JsonReadException( JsonError error, string? path = null ) : JsonException(Describe(error, path), path ?? "$", Math.Max(0, error.Line - 1), Math.Max(0, error.Column - 1), null)
 {
-    public JsonError Error { get; }
+    public JsonError Error { get; } = error;
 
     /// <summary> The JSON path of the failure, e.g. <c>$.lines[3].price</c>; <c>$</c> when it isn't known. </summary>
-    public string Path { get; }
-
-
-    public JsonReadException( JsonError error, string? path = null ) : base(Describe(error, path))
-    {
-        Error = error;
-        Path  = path ?? "$";
-    }
+    public new string Path => base.Path ?? "$";
 
 
     private static string Describe( JsonError error, string? path ) => path is null or "$"

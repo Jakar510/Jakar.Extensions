@@ -225,7 +225,7 @@ internal readonly record struct DerivedInfo( string TypeName, string Tag );
 
 
 
-/// <summary> A <c>[GenerateJson]</c> type, as extracted from the syntax tree. </summary>
+/// <summary> A <c>[JsonModel]</c> type as Jakar.Json sees it, extracted from the syntax tree. </summary>
 internal sealed record ModelInfo
 {
     public required string                         Name                { get; init; }
@@ -237,7 +237,7 @@ internal sealed record ModelInfo
     public required bool                           IsValueType         { get; init; }
     public required bool                           IsAbstract          { get; init; }
     public required bool                           IsSealed            { get; init; }
-    public required Settings                       Settings            { get; init; } // [GenerateJson] on the type
+    public required Settings                       Settings            { get; init; } // [JsonModel] on the type, over its mirrored context
     public required EquatableArray<MemberInfo>     Members             { get; init; }
     public required ConstructionInfo               Construction        { get; init; }
     public required string                         Discriminator       { get; init; }
@@ -246,7 +246,9 @@ internal sealed record ModelInfo
     public required bool                           HasSerializableBase { get; init; } // a base type already has generated members: hide them with 'new'
     public required EquatableArray<string>         Skip                { get; init; } // generated members the type already declares
     public required bool                           OverridesToString   { get; init; }
-    public required bool                           SideBySide          { get; init; } // [JsonModel] too: that part owns FromJson/ToJson/ToString(), so only the contract members are emitted
+    public required bool                           ContextRequested    { get; init; } // a System.Text.Json context backs it: the [JsonModel] part implements IJsonModel's members (with this code when it can), so only the contract members are emitted here
+    public required int                            Implementation      { get; init; } // Values.IMPLEMENTATION_*
+    public required bool                           OptionalConstructorParameters { get; init; } // mirrors System.Text.Json: a missing constructor parameter is its default, not an error
     public required LocationInfo?                  AttributeLocation   { get; init; }
     public required EquatableArray<DiagnosticInfo> Diagnostics         { get; init; }
     public required bool                           IsFatal             { get; init; }

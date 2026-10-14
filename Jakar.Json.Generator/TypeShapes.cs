@@ -11,14 +11,25 @@ namespace Jakar.Json.Generator;
 
 
 /// <summary> The well-known types shape analysis needs, looked up once per compilation. </summary>
-internal sealed class KnownTypes( Compilation compilation )
+internal sealed class KnownTypes( Compilation compilation, System.Threading.CancellationToken token )
 {
+    public readonly Compilation                       Compilation = compilation;
+    public readonly System.Threading.CancellationToken Token       = token;
+
+    /// <summary> The context being mirrored by the model under analysis (<see cref="ContextMirror.None"/> without one). Set by <see cref="ModelExtractor"/> around each model. </summary>
+    public ContextMirror Mirror { get; set; } = ContextMirror.None;
+
+    /// <summary> <c>[assembly: JsonDefaults]</c> over the built-in defaults. </summary>
+    public Settings Defaults { get; } = Settings.BuiltIn.With(Settings.From(compilation.Assembly.GetAttributes().FirstOrDefault(static a => a.AttributeClass is not null && TypeShapes.MetadataName(a.AttributeClass) == JsonGenerator.JSON_DEFAULTS_ATTRIBUTE)));
+
+    private readonly Dictionary<ITypeSymbol, bool> __capable = new(SymbolEqualityComparer.Default);
+
     public readonly INamedTypeSymbol? SpanFormattable   = compilation.GetTypeByMetadataName("System.ISpanFormattable");
     public readonly INamedTypeSymbol? SpanParsable      = compilation.GetTypeByMetadataName("System.ISpanParsable`1");
     public readonly INamedTypeSymbol? Comparable        = compilation.GetTypeByMetadataName("System.IComparable`1");
     public readonly INamedTypeSymbol? Serializable      = compilation.GetTypeByMetadataName(JsonGenerator.SERIALIZABLE_INTERFACE);
     public readonly INamedTypeSymbol? Converter         = compilation.GetTypeByMetadataName(JsonGenerator.CONVERTER_INTERFACE);
-    public readonly INamedTypeSymbol? GenerateJson      = compilation.GetTypeByMetadataName(JsonGenerator.GENERATE_JSON_ATTRIBUTE);
+    public readonly INamedTypeSymbol? JsonModel         = compilation.GetTypeByMetadataName(JsonGenerator.JSON_MODEL_ATTRIBUTE);
     public readonly INamedTypeSymbol? JNode             = compilation.GetTypeByMetadataName("Jakar.Json.JNode");
     public readonly INamedTypeSymbol? JObjectNode       = compilation.GetTypeByMetadataName("Jakar.Json.JObjectNode");
     public readonly INamedTypeSymbol? OrderedDictionary = compilation.GetTypeByMetadataName("System.Collections.Generic.OrderedDictionary`2");
@@ -31,8 +42,29 @@ internal sealed class KnownTypes( Compilation compilation )
 
     public bool Implements( ITypeSymbol type, INamedTypeSymbol? plain ) => plain is not null && type.AllInterfaces.Contains(plain, SymbolEqualityComparer.Default);
 
-    /// <summary> <c>[GenerateJson]</c> in this compilation (its generated interface isn't visible yet), or an <c>IJsonSerializable&lt;T&gt;</c> from anywhere. </summary>
-    public bool IsModel( ITypeSymbol type ) => Implements(type, Serializable, type) || ( GenerateJson is not null && type.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, GenerateJson)) );
+    /// <summary>
+    ///     An <c>IJsonSerializable&lt;T&gt;</c> from anywhere, or a <c>[JsonModel]</c> in this compilation (its generated interface isn't visible yet) that Jakar.Json will implement:
+    ///     one that falls back to System.Text.Json (JJSON016) isn't a model here, so a member of that type makes its owner fall back too.
+    /// </summary>
+    public bool IsModel( ITypeSymbol type )
+    {
+        if ( Implements(type, Serializable, type) ) { return true; }
+
+        if ( JsonModel is null || type is not INamedTypeSymbol named || !SymbolEqualityComparer.Default.Equals(named.ContainingAssembly, Compilation.Assembly) ) { return false; }
+
+        AttributeData? attribute = named.GetAttributes().FirstOrDefault(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, JsonModel));
+        if ( attribute is null ) { return false; }
+
+        if ( __capable.TryGetValue(named, out bool known) ) { return known; }
+
+        __capable[named] = true; // a cycle (A has a B, B has an A) is decided by the outermost check
+
+        ContextMirror outer = Mirror;
+
+        try { return __capable[named] = ModelExtractor.IsJakarCapable(named, attribute, this); }
+        finally { Mirror = outer; }
+    }
+
 
     /// <summary> The element type when <paramref name="type"/> implements <c>IJsonCollection&lt;type, T&gt;</c> for itself. </summary>
     public ITypeSymbol? CollectionElement( ITypeSymbol type )
@@ -94,6 +126,17 @@ internal static class TypeShapes
             if ( formattable && parsable ) { return Simple(ShapeKind.Parsable); }
 
             return TypeShape.Unsupported(name, "TYPE_PARAMETER");
+        }
+
+        // ─── What a mirrored System.Text.Json context handles its own way ─────
+        if ( known.Mirror.IsActive && known.CollectionElement(type) is null && !known.Implements(type, known.Serializable, type) )
+        {
+            ITypeSymbol plain = type.WithNullableAnnotation(NullableAnnotation.None);
+
+            if ( known.Mirror.ConverterTargets.Any(target => SymbolEqualityComparer.Default.Equals(target.WithNullableAnnotation(NullableAnnotation.None), plain)) ) { return TypeShape.Unsupported(name, "the System.Text.Json context has a converter for it, which Jakar.Json can't run"); }
+
+            // SerializeAsStringJsonConverter<T> writes value.ToString(default, InvariantCulture) and parses it back: exactly what Jakar.Json does with an ISpanFormattable + ISpanParsable type.
+            if ( type.GetAttributes().Any(a => a.AttributeClass is not null && MetadataName(a.AttributeClass) == "System.Text.Json.Serialization.JsonConverterAttribute" && !( a.ConstructorArguments.FirstOrDefault().Value is INamedTypeSymbol { IsGenericType: true } converter && MetadataName(converter.OriginalDefinition) == "Jakar.Extensions.SerializeAsStringJsonConverter`1" && known.IsParsable(type) )) ) { return TypeShape.Unsupported(name, "it has System.Text.Json's [JsonConverter], which Jakar.Json can't run"); }
         }
 
         // ─── Special types ────────────────────────────────────────────────────
@@ -238,14 +281,14 @@ internal static class TypeShapes
             }
         }
 
-        // Before IsModel: a collection that's also [GenerateJson] would otherwise be written as an object.
+        // Before IsModel: a collection that's also [JsonModel] would otherwise be written as an object.
         if ( known.CollectionElement(type) is { } collectionElement ) { return Sequence(ShapeKind.Collection, collectionElement); }
 
         if ( known.IsModel(type) ) { return Simple(ShapeKind.Model); }
 
         if ( known.IsParsable(type) ) { return Simple(ShapeKind.Parsable); }
 
-        return TypeShape.Unsupported(name, "it isn't a [GenerateJson] type, a supported BCL type or collection, an IJsonCollection<TSelf, T>, or ISpanFormattable + ISpanParsable");
+        return TypeShape.Unsupported(name, "it isn't a [JsonModel] type Jakar.Json implements, a supported BCL type or collection, an IJsonCollection<TSelf, T>, or ISpanFormattable + ISpanParsable");
 
 
         TypeShape Sequence( ShapeKind kind, ITypeSymbol elementType )

@@ -72,7 +72,8 @@ internal static class Emitter
     }
 
 
-    public static void EmitModel( SourceProductionContext spc, ModelInfo model, ImmutableArray<ContextInfo> contexts, DefaultContextInfo defaultContext )
+    /// <param name="hybrid"> Jakar.Json implements the type (it's also <c>IJsonSerializable&lt;T&gt;</c>): the reading members and <c>SerializeJson*</c> call it through <c>JsonCodec</c>; only <c>JsonTypeInfo</c> stays System.Text.Json's. </param>
+    public static void EmitModel( SourceProductionContext spc, ModelInfo model, ImmutableArray<ContextInfo> contexts, DefaultContextInfo defaultContext, bool hybrid )
     {
         foreach ( DiagnosticInfo diagnostic in model.Diagnostics ) { spc.ReportDiagnostic(diagnostic.ToDiagnostic()); }
 
@@ -83,14 +84,16 @@ internal static class Emitter
 
         if ( resolved is not { } context ) { return; }
 
-        spc.AddSource($"{HintName(model.MetadataName)}.JsonModel.g.cs", SourceText.From(Generate(model, context), Encoding.UTF8));
+        spc.AddSource($"{HintName(model.MetadataName)}.JsonModel.g.cs", SourceText.From(Generate(model, context, hybrid), Encoding.UTF8));
     }
 
 
-    private static string Generate( ModelInfo model, ResolvedContext context )
+    private static string Generate( ModelInfo model, ResolvedContext context, bool hybrid )
     {
-        string self = model.FullyQualifiedName;
-        string info = $"global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<{self}>";
+        string self   = model.FullyQualifiedName;
+        string info   = $"global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<{self}>";
+        string codec  = "global::Jakar.Json.JsonCodec"; // its read errors are JsonReadException : JsonException, as IJsonModel promises
+        string stj    = "global::Jakar.Extensions.JsonModel";
 
         string outType = model.IsValueType
                              ? self
@@ -142,34 +145,55 @@ internal static class Emitter
         if ( model.EmitFromJsonString )
         {
             Line(builder, depth, GENERATED_CODE);
-            Line(builder, depth, $"public static {self} FromJson( string json ) => global::Jakar.Extensions.JsonModel.FromJson(json, JsonTypeInfo);");
+            Line(builder, depth, hybrid
+                                 ? $"public static {self} FromJson( string json ) => {codec}.FromJson<{self}>(json);"
+                                 : $"public static {self} FromJson( string json ) => {stj}.FromJson(json, JsonTypeInfo);");
         }
 
         if ( model.EmitFromJsonUtf8 )
         {
             Line(builder, depth, GENERATED_CODE);
-            Line(builder, depth, $"public static {self} FromJson( global::System.ReadOnlySpan<byte> utf8Json ) => global::Jakar.Extensions.JsonModel.FromJson(utf8Json, JsonTypeInfo);");
+            Line(builder, depth, hybrid
+                                 ? $"public static {self} FromJson( global::System.ReadOnlySpan<byte> utf8Json ) => {codec}.FromJson<{self}>(utf8Json);"
+                                 : $"public static {self} FromJson( global::System.ReadOnlySpan<byte> utf8Json ) => {stj}.FromJson(utf8Json, JsonTypeInfo);");
         }
 
         if ( model.EmitTryFromJsonString )
         {
             Line(builder, depth, GENERATED_CODE);
-            Line(builder, depth, $"public static bool TryFromJson( [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] string? json, {notNull}out {outType} result ) => global::Jakar.Extensions.JsonModel.TryFromJson(json, JsonTypeInfo, out result);");
+            Line(builder, depth, hybrid
+                                 ? $"public static bool TryFromJson( [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] string? json, {notNull}out {outType} result ) => {codec}.TryFromJson<{self}>(json, out result);"
+                                 : $"public static bool TryFromJson( [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] string? json, {notNull}out {outType} result ) => {stj}.TryFromJson(json, JsonTypeInfo, out result);");
         }
 
         if ( model.EmitTryFromJsonUtf8 )
         {
             Line(builder, depth, GENERATED_CODE);
-            Line(builder, depth, $"public static bool TryFromJson( global::System.ReadOnlySpan<byte> utf8Json, {notNull}out {outType} result ) => global::Jakar.Extensions.JsonModel.TryFromJson(utf8Json, JsonTypeInfo, out result);");
+            Line(builder, depth, hybrid
+                                 ? $"public static bool TryFromJson( global::System.ReadOnlySpan<byte> utf8Json, {notNull}out {outType} result ) => {codec}.TryFromJson<{self}>(utf8Json, out result);"
+                                 : $"public static bool TryFromJson( global::System.ReadOnlySpan<byte> utf8Json, {notNull}out {outType} result ) => {stj}.TryFromJson(utf8Json, JsonTypeInfo, out result);");
         }
 
         if ( model.EmitFromJsonAsync )
         {
             Line(builder, depth, GENERATED_CODE);
-            Line(builder, depth, $"public static global::System.Threading.Tasks.ValueTask<{self}> FromJsonAsync( global::System.IO.Stream stream, global::System.Threading.CancellationToken token = default ) => global::Jakar.Extensions.JsonModel.FromJsonAsync(stream, JsonTypeInfo, token);");
+            Line(builder, depth, hybrid
+                                 ? $"public static global::System.Threading.Tasks.ValueTask<{self}> FromJsonAsync( global::System.IO.Stream stream, global::System.Threading.CancellationToken token = default ) => {codec}.FromJsonAsync<{self}>(stream, null, token);"
+                                 : $"public static global::System.Threading.Tasks.ValueTask<{self}> FromJsonAsync( global::System.IO.Stream stream, global::System.Threading.CancellationToken token = default ) => {stj}.FromJsonAsync(stream, JsonTypeInfo, token);");
         }
 
-        if ( model.EmitToString )
+        if ( hybrid )
+        {
+            // value.ToJson() / ToUtf8Json() / WriteToAsync(...) reach these through IJsonModel<TSelf>; explicit, so they don't add to the type's surface.
+            builder.AppendLine();
+            Line(builder, depth, GENERATED_CODE);
+            Line(builder, depth, $"static string global::Jakar.Extensions.IJsonModel<{self}>.SerializeJson( {self} value, bool? indented ) => indented is {{ }} layout ? {codec}.ToJson(in value, layout) : {codec}.ToJson(in value);");
+            Line(builder, depth, GENERATED_CODE);
+            Line(builder, depth, $"static byte[] global::Jakar.Extensions.IJsonModel<{self}>.SerializeJsonUtf8( {self} value ) => {codec}.ToJsonUtf8(in value);");
+            Line(builder, depth, GENERATED_CODE);
+            Line(builder, depth, $"static global::System.Threading.Tasks.Task global::Jakar.Extensions.IJsonModel<{self}>.SerializeJsonAsync( {self} value, global::System.IO.Stream stream, global::System.Threading.CancellationToken token ) => {codec}.ToJsonAsync(value, stream, null, token).AsTask();");
+        }
+        else if ( model.EmitToString ) // with Jakar.Json, its part emits ToString() (GenerateToString = On)
         {
             builder.AppendLine();
             Line(builder, depth, GENERATED_CODE);

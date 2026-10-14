@@ -61,7 +61,7 @@ public sealed class JsonModelGenerator_Tests
         Result result = Run(PRELUDE +
                             """
                             namespace App;
-                            [JsonModel(typeof(Ctx), GenerateToString = true)]
+                            [JsonModel(typeof(Ctx), GenerateToString = Jakar.Json.JsonToggle.On)]
                             public readonly partial record struct Point( int X, int Y );
                             """     +
                             Context("Ctx", ( "Point", "Point", null )));
@@ -71,7 +71,8 @@ public sealed class JsonModelGenerator_Tests
         Assert.That(source, Does.Contain("readonly partial record struct Point"));
         Assert.That(source, Does.Contain("out global::App.Point result"));
         Assert.That(source, Does.Not.Contain("out global::App.Point? result"));
-        Assert.That(source, Does.Contain("public override string ToString()"));
+        Assert.That(source, Does.Not.Contain("public override string ToString()"), "a Jakar.Json-capable model gets ToString() from that part");
+        Assert.That(result.Sources.Single(static pair => pair.Key.EndsWith("Point.Json.g.cs", StringComparison.Ordinal)).Value, Does.Contain("public override string ToString() => global::Jakar.Json.JsonCodec.ToJson(this);"));
     }
 
 
@@ -128,7 +129,7 @@ public sealed class JsonModelGenerator_Tests
                                 public override string ToString() => "base";
                             }
 
-                            [JsonModel(typeof(Ctx), GenerateToString = true)]
+                            [JsonModel(typeof(Ctx), GenerateToString = Jakar.Json.JsonToggle.On)]
                             public sealed partial class Invoice : ModelBase<Invoice>;
                             """     +
                             Context("Ctx", ( "Invoice", "Invoice", null )));
@@ -214,14 +215,25 @@ public sealed class JsonModelGenerator_Tests
     }
 
 
-    [TestCase("[JsonModel(typeof(string))]", "isn't a JsonSerializerContext")] [TestCase("[JsonModel]", "no [assembly: JsonModelContext")]
+    [TestCase("[JsonModel(typeof(string))]", "isn't a JsonSerializerContext")] [TestCase("[JsonModel(Implementation = JsonModelImplementation.SystemTextJson)]", "needs a JsonSerializerContext")]
     public void JAKAR_JSON004_InvalidOrMissingContext( string attribute, string message )
     {
         Result result = Run(PRELUDE + $"{attribute}\npublic partial class Invoice;\n");
 
-        Diagnostic diagnostic = result.GeneratorDiagnostics.Single();
+        Diagnostic diagnostic = result.GeneratorDiagnostics.Single(static d => d.Id.StartsWith("JAKAR_JSON", StringComparison.Ordinal));
         Assert.That(diagnostic.Id,           Is.EqualTo("JAKAR_JSON004"));
         Assert.That(diagnostic.GetMessage(), Does.Contain(message));
+    }
+
+
+    [Test] public void NoContext_IsJakarJsonOnly_NotAnError()
+    {
+        Result result = Run(PRELUDE + "[JsonModel]\npublic partial class Invoice { public decimal Total { get; set; } }\n");
+
+        Assert.That(result.CompileErrors,                Is.Empty, Errors(result));
+        Assert.That(result.Ids,                          Is.Empty);
+        Assert.That(result.Sources.Keys,                 Does.Contain("Invoice.Json.g.cs").And.Not.Contain("Invoice.JsonModel.g.cs"));
+        Assert.That(result.Sources["Invoice.Json.g.cs"], Does.Contain(" FromJson(").And.Contain(" ToJson("), "Jakar.Json's own helpers");
     }
 
 

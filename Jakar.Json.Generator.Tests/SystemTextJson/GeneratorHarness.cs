@@ -69,7 +69,7 @@ internal static class GeneratorHarness
 
     public sealed record Result( Compilation Output, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<Diagnostic> CompileErrors, ImmutableDictionary<string, string> Sources )
     {
-        public string Model( string hintStart ) => Sources.Single(pair => pair.Key.StartsWith(hintStart, StringComparison.Ordinal)).Value;
+        public string Model( string hintStart ) => Sources.Single(pair => pair.Key.StartsWith(hintStart, StringComparison.Ordinal) && pair.Key.EndsWith(".JsonModel.g.cs", StringComparison.Ordinal)).Value; // the IJsonModel part (a Jakar.Json-capable type also has "{hint}.Json.g.cs")
 
         public string? Registrations => Sources.TryGetValue("JsonModelRegistrations.g.cs", out string? text)
                                             ? text

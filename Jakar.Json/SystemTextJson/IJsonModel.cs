@@ -14,12 +14,26 @@ namespace Jakar.Extensions;
 ///     A type that knows its own source-generated System.Text.Json metadata.
 ///     <para> Don't implement this by hand: put <see cref="JsonModelAttribute"/> on a <see langword="partial"/> type and the generator implements it. Open generic types (which can't be source generated) implement <see cref="JsonTypeInfo"/> with a runtime lookup instead (<see cref="JsonModel.GetRequiredTypeInfo{T}"/>). </para>
 /// </summary>
-/// <remarks> Only <see cref="JsonTypeInfo"/> is abstract. Everything else has a default built on it, which generic code reaches through the type parameter (<c> T.FromJson(json) </c>). C# doesn't let callers reach a <see langword="static virtual"/> default through the concrete type name, which is why the generator also emits these methods on the type. </remarks>
+/// <remarks>
+///     Only <see cref="JsonTypeInfo"/> is abstract. Everything else has a System.Text.Json default built on it, which generic code reaches through the type parameter (<c> T.FromJson(json) </c>).
+///     C# doesn't let callers reach a <see langword="static virtual"/> default through the concrete type name, which is why the generator also emits these methods on the type.
+///     <para> When Jakar.Json can serialize the type, <c> [JsonModel] </c> implements the reading members and <see cref="SerializeJson"/> / <see cref="SerializeJsonUtf8"/> / <see cref="SerializeJsonAsync"/> with it instead (faster, fewer allocations); <see cref="JsonTypeInfo"/> stays System.Text.Json's. </para>
+/// </remarks>
 public interface IJsonModel<TSelf>
     where TSelf : IJsonModel<TSelf>
 {
     /// <summary> Source-generated metadata for <typeparamref name="TSelf"/>. Emitted by [JsonModel]; open generic types implement it with <see cref="JsonModel.GetRequiredTypeInfo{T}"/>. </summary>
     public abstract static JsonTypeInfo<TSelf> JsonTypeInfo { get; }
+
+
+    /// <summary> What <c> value.ToJson(indented) </c> returns. <paramref name="indented"/> overrides the default layout for this call. </summary>
+    public virtual static string SerializeJson( TSelf value, bool? indented ) => JsonModel.ToJson(value, TSelf.JsonTypeInfo, indented);
+
+    /// <summary> What <c> value.ToUtf8Json() </c> returns. </summary>
+    public virtual static byte[] SerializeJsonUtf8( TSelf value ) => JsonSerializer.SerializeToUtf8Bytes(value, TSelf.JsonTypeInfo);
+
+    /// <summary> What <c> value.WriteToAsync(stream, token) </c> does. </summary>
+    public virtual static Task SerializeJsonAsync( TSelf value, Stream stream, CancellationToken token ) => JsonSerializer.SerializeAsync(stream, value, TSelf.JsonTypeInfo, token);
 
 
     /// <summary>

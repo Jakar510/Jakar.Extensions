@@ -277,7 +277,7 @@ public readonly struct JsonParsableConverter<T> : IJsonConverter<T>
 
 
 
-/// <summary> A <c>[GenerateJson]</c> type (or any <see cref="IJsonSerializable{TSelf}"/>). Non-nullable: reading <c>null</c> fails. </summary>
+/// <summary> A <c>[JsonModel]</c> type (or any <see cref="IJsonSerializable{TSelf}"/>). Non-nullable: reading <c>null</c> fails. </summary>
 public readonly struct JsonModelConverter<T> : IJsonConverter<T>
     where T : IJsonSerializable<T>
 {

@@ -56,7 +56,10 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
     }
 
     /// <summary> Writes to <paramref name="stream"/> in <see cref="FLUSH_THRESHOLD"/>-byte chunks through a pooled buffer; call <see cref="Flush"/> at the end. </summary>
-    public JsonUtf8Writer( Stream stream, JsonWriterOptions options ) : this(Span<byte>.Empty, options)
+    public JsonUtf8Writer( Stream stream, JsonWriterOptions options ) : this(Span<byte>.Empty, stream, options) { }
+
+    /// <summary> Like <see cref="JsonUtf8Writer(Stream, JsonWriterOptions)"/>, buffering in <paramref name="buffer"/> first (typically <c>stackalloc byte[N]</c>): a document that fits goes to the stream in one write, with no pooled arrays. </summary>
+    public JsonUtf8Writer( Span<byte> buffer, Stream stream, JsonWriterOptions options ) : this(buffer, options)
     {
         ArgumentNullException.ThrowIfNull(stream);
         __stream = stream;

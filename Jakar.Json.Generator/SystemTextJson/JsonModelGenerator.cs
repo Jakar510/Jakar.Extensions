@@ -30,24 +30,6 @@ internal static class JsonModelGenerator
     internal const string JSON_SERIALIZABLE_ATTRIBUTE  = "System.Text.Json.Serialization.JsonSerializableAttribute";
     internal const string JSON_SERIALIZER_CONTEXT      = "System.Text.Json.Serialization.JsonSerializerContext";
     internal const string VERSION                      = "1.0.0";
-
-
-    public static void Initialize( IncrementalGeneratorInitializationContext context )
-    {
-        IncrementalValuesProvider<ModelInfo> models = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_MODEL_ATTRIBUTE, static ( node, _ ) => node is TypeDeclarationSyntax, static ( ctx, token ) => ModelExtractor.Extract(ctx, token));
-
-        IncrementalValueProvider<ImmutableArray<ContextInfo>> contexts = context.SyntaxProvider.ForAttributeWithMetadataName(JSON_SERIALIZABLE_ATTRIBUTE, static ( node, _ ) => node is ClassDeclarationSyntax, static ( ctx, token ) => ContextExtractor.Extract(ctx, token)).Collect();
-
-        IncrementalValueProvider<DefaultContextInfo> defaultContext = context.CompilationProvider.Select(static ( compilation, _ ) => ContextExtractor.GetDefault(compilation));
-
-        IncrementalValuesProvider<(ModelInfo Model, (ImmutableArray<ContextInfo> Contexts, DefaultContextInfo Default) Lookup)> combined = models.Combine(contexts.Combine(defaultContext));
-
-        context.RegisterSourceOutput(combined, static ( spc, pair ) => Emitter.EmitModel(spc, pair.Model, pair.Lookup.Contexts, pair.Lookup.Default));
-
-        IncrementalValueProvider<ImmutableArray<RegistrationEntry>> registrations = combined.Select(static ( pair, _ ) => Emitter.GetRegistration(pair.Model, pair.Lookup.Contexts, pair.Lookup.Default)).Where(static entry => entry.HasValue).Select(static ( entry, _ ) => entry!.Value).Collect();
-
-        context.RegisterSourceOutput(registrations, static ( spc, entries ) => Emitter.EmitRegistrations(spc, entries));
-    }
 }
 
 
@@ -111,7 +93,8 @@ internal static class ModelExtractor
 
         foreach ( KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments )
         {
-            if ( argument is { Key: "GenerateToString", Value.Value: bool value } ) { generateToString = value; }
+            // JsonToggle.On (1): [JsonModel] shares Jakar.Json's settings, where GenerateToString is a toggle.
+            if ( argument is { Key: "GenerateToString", Value.Value: { } value } && System.Convert.ToInt32(value, System.Globalization.CultureInfo.InvariantCulture) == 1 ) { generateToString = true; }
         }
 
         // JAKAR_JSON005: a hand-written JsonTypeInfo wins.

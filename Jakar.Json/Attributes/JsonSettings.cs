@@ -159,7 +159,7 @@ public enum JsonIndentChar : byte
 
 
 
-/// <summary> The settings shared by <see cref="JsonDefaultsAttribute"/> (assembly) and <see cref="GenerateJsonAttribute"/> (type). See SPEC.md §4.2. </summary>
+/// <summary> The settings shared by <see cref="JsonDefaultsAttribute"/> (assembly) and <c>[JsonModel]</c> (type, <c>Jakar.Extensions.JsonModelAttribute</c>). See SPEC.md §4.2. </summary>
 public abstract class JsonSettingsAttribute : Attribute
 {
     public JsonNaming               Naming               { get; set; } = JsonNaming.CamelCase;
@@ -194,28 +194,10 @@ public abstract class JsonSettingsAttribute : Attribute
 
 
 
-/// <summary> Assembly-wide defaults for every <c>[GenerateJson]</c> type in this assembly. </summary>
+/// <summary> Assembly-wide Jakar.Json defaults for every <c>[JsonModel]</c> type in this assembly (a type's context options and its own settings win). </summary>
 [AttributeUsage(AttributeTargets.Assembly)]
 [Conditional("JAKAR_JSON_KEEP_ATTRIBUTES")]
 public sealed class JsonDefaultsAttribute : JsonSettingsAttribute;
-
-
-
-/// <summary>
-///     Source-generates JSON reading and writing for a <see langword="partial"/> class, struct, record or record struct: <see cref="IJsonSerializable{TSelf}"/>,
-///     <see cref="ISpanFormattable"/> / <see cref="ISpanParsable{TSelf}"/> (and their UTF-8 counterparts), and <c>ToJson</c> / <c>FromJson</c> helpers.
-///     <code>
-///     [GenerateJson(Naming = JsonNaming.CamelCase)]
-///     public sealed partial record Invoice( Guid Id, decimal Total );
-///     </code>
-/// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-[Conditional("JAKAR_JSON_KEEP_ATTRIBUTES")]
-public sealed class GenerateJsonAttribute : JsonSettingsAttribute
-{
-    /// <summary> The member that names the concrete type when <see cref="JsonDerivedAttribute"/>s are present (default <c>"$type"</c>). </summary>
-    public string? Discriminator { get; set; }
-}
 
 
 
@@ -253,7 +235,7 @@ public sealed class JsonMemberAttribute : Attribute
 
 
 
-/// <summary> A concrete type of a polymorphic <c>[GenerateJson]</c> base, and the discriminator value that names it. </summary>
+/// <summary> A concrete type of a polymorphic <c>[JsonModel]</c> base, and the discriminator value that names it. </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
 [Conditional("JAKAR_JSON_KEEP_ATTRIBUTES")]
 public sealed class JsonDerivedAttribute( Type type, string tag ) : Attribute
