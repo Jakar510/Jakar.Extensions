@@ -25,7 +25,7 @@ internal static partial class JsonText
     /// <summary> Keeps the kind: <c>Z</c> → UTC, an offset → local (converted), none → unspecified. Never culture- or machine-dependent parsing. </summary>
     public readonly struct DateTimeText : IParser<DateTime>
     {
-        public static bool TryParse( scoped ReadOnlySpan<char> text, out DateTime value ) => DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out value);
+        public static bool TryParse( scoped ReadOnlySpan<char> text, out DateTime value ) => JsonFastDates.TryParseDateTime(text, out value) || DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out value);
     }
 
 
@@ -33,7 +33,7 @@ internal static partial class JsonText
     /// <summary> A value without an offset is read as UTC, never as the machine's local time. </summary>
     public readonly struct DateTimeOffsetText : IParser<DateTimeOffset>
     {
-        public static bool TryParse( scoped ReadOnlySpan<char> text, out DateTimeOffset value ) => DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out value);
+        public static bool TryParse( scoped ReadOnlySpan<char> text, out DateTimeOffset value ) => JsonFastDates.TryParseDateTimeOffset(text, out value) || DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out value);
     }
 
 

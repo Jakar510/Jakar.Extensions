@@ -30,11 +30,16 @@ public static partial class JsonCodec
     public static string ToJson<T>( in T value, JsonWriterOptions? options = null )
         where T : IJsonSerializable<T>
     {
+        // One writer over the stack, given pooled room up front only for types whose documents outgrow it (a conditional between two
+        // constructors would build and copy the whole writer, inline stacks included, on every call).
         JsonWriter writer = new(stackalloc char[STACK_CHARS], options ?? T.DefaultWriterOptions);
+        int        hint   = JsonSizeHints<T>.Utf16;
+        if ( hint > STACK_CHARS ) { writer.Reserve(JsonSizeHints.Capacity(hint)); }
 
         try
         {
             T.WriteJson(ref writer, in value);
+            JsonSizeHints<T>.Utf16 = writer.Written.Length;
             return writer.ToString();
         }
         finally { writer.Dispose(); }
@@ -48,11 +53,14 @@ public static partial class JsonCodec
     public static byte[] ToJsonUtf8<T>( in T value, JsonWriterOptions? options = null )
         where T : IJsonSerializable<T>
     {
-        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options ?? T.DefaultWriterOptions);
+        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options ?? T.DefaultWriterOptions); // see ToJson
+        int            hint   = JsonSizeHints<T>.Utf8;
+        if ( hint > STACK_CHARS ) { writer.Reserve(JsonSizeHints.Capacity(hint)); }
 
         try
         {
             T.WriteJson(ref writer, in value);
+            JsonSizeHints<T>.Utf8 = writer.Written.Length;
             return writer.ToArray();
         }
         finally { writer.Dispose(); }
@@ -162,24 +170,44 @@ public static partial class JsonCodec
     }
 
     /// <summary> Serializes into pooled memory synchronously (ref struct writers can't cross an <see langword="await"/>), then awaits the stream write. </summary>
-    [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))] public static async ValueTask ToJsonAsync<T>( T value, Stream stream, JsonWriterOptions? options = null, CancellationToken token = default )
+    public static ValueTask ToJsonAsync<T>( T value, Stream stream, JsonWriterOptions? options = null, CancellationToken token = default )
         where T : IJsonSerializable<T>
     {
         ArgumentNullException.ThrowIfNull(stream);
         ( byte[] buffer, int length ) = Buffer(value, options ?? T.DefaultWriterOptions);
+        ValueTask write;
 
-        try { await stream.WriteAsync(buffer.AsMemory(0, length), token).ConfigureAwait(false); }
-        finally { ArrayPool<byte>.Shared.Return(buffer); }
+        try { write = stream.WriteAsync(buffer.AsMemory(0, length), token); }
+        catch
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+            throw;
+        }
+
+        // Most streams (memory, buffered files, pipes with room) finish synchronously: no state machine then.
+        if ( !write.IsCompleted ) { return Awaited(write, buffer); }
+
+        ArrayPool<byte>.Shared.Return(buffer);
+        return write;
+
+        [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))] static async ValueTask Awaited( ValueTask write, byte[] buffer )
+        {
+            try { await write.ConfigureAwait(false); }
+            finally { ArrayPool<byte>.Shared.Return(buffer); }
+        }
     }
 
     private static (byte[] Buffer, int Length) Buffer<T>( in T value, in JsonWriterOptions options )
         where T : IJsonSerializable<T>
     {
-        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options);
+        JsonUtf8Writer writer = new(stackalloc byte[STACK_CHARS], options); // see ToJson
+        int            hint   = JsonSizeHints<T>.Utf8;
+        if ( hint > STACK_CHARS ) { writer.Reserve(JsonSizeHints.Capacity(hint)); }
 
         try
         {
             T.WriteJson(ref writer, in value);
+            JsonSizeHints<T>.Utf8 = writer.Written.Length;
             ReadOnlySpan<byte> written = writer.Written;
             byte[]             buffer  = ArrayPool<byte>.Shared.Rent(Math.Max(written.Length, 1));
             written.CopyTo(buffer);

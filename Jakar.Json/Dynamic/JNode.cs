@@ -121,28 +121,45 @@ public abstract partial class JNode
                                                            ? node
                                                            : throw new JsonReadException(error);
 
+    /// <summary> Member names repeat across objects; a small cache of them (per parse) turns each repeat into a lookup. </summary>
+    private const int NAME_CACHE = 64;
+
+
     internal static bool TryFromItem( JsonItem item, out JNode? node, out JsonError error )
     {
-        RuntimeHelpers.EnsureSufficientExecutionStack();
+        int index = item.Index;
+        return TryBuild(item.Tape, item.Tape.Entries, ref index, new string?[NAME_CACHE], out node, out error);
+    }
+
+    /// <summary>
+    ///     Builds the node for the entry at <paramref name="index"/> and moves past its subtree. The tape is in document order (a container, then its contents), so the whole tree is one
+    ///     forward walk over <paramref name="entries"/>: no item or enumerator per value.
+    /// </summary>
+    private static bool TryBuild( JsonTape tape, JsonTape.Entry[] entries, ref int index, string?[] names, out JNode? node, out JsonError error )
+    {
+        ref readonly JsonTape.Entry entry = ref entries[index++];
         error = default;
 
-        switch ( item.Kind )
+        switch ( entry.Kind )
         {
             case JsonTokenKind.Object:
             {
-                JObjectNode obj = new(item.GetPropertyCount());
+                RuntimeHelpers.EnsureSufficientExecutionStack();
+                JObjectNode obj = new(entry.Count);
 
-                foreach ( JsonTapeProperty member in item.EnumerateObject() )
+                for ( int i = 0; i < entry.Count; i++ )
                 {
-                    if ( !TryFromItem(member.Value, out JNode? value, out error) )
+                    ref readonly JsonTape.Entry name = ref entries[index++];
+
+                    if ( !TryBuild(tape, entries, ref index, names, out JNode? value, out error) )
                     {
                         node = null;
                         return false;
                     }
 
-                    if ( !obj.TryAddNew(member.Name.GetString(), value) )
+                    if ( !obj.TryAddNew(tape.GetName(in name, names), value) )
                     {
-                        error = item.Tape.CreateError(JsonErrorKind.DuplicateMember, member.Name.Position); // DuplicateMembers = Error (§4.2)
+                        error = tape.CreateError(JsonErrorKind.DuplicateMember, name.Start - 1); // DuplicateMembers = Error (§4.2); the name's opening quote
                         node  = null;
                         return false;
                     }
@@ -154,11 +171,12 @@ public abstract partial class JNode
 
             case JsonTokenKind.Array:
             {
-                JArrayNode array = new(item.GetArrayLength());
+                RuntimeHelpers.EnsureSufficientExecutionStack();
+                JArrayNode array = new(entry.Count);
 
-                foreach ( JsonItem element in item.EnumerateArray() )
+                for ( int i = 0; i < entry.Count; i++ )
                 {
-                    if ( !TryFromItem(element, out JNode? value, out error) )
+                    if ( !TryBuild(tape, entries, ref index, names, out JNode? value, out error) )
                     {
                         node = null;
                         return false;
@@ -172,11 +190,11 @@ public abstract partial class JNode
             }
 
             case JsonTokenKind.String:
-                node = new JValueNode(item.GetString());
+                node = new JValueNode(tape.GetString(in entry));
                 return true;
 
             case JsonTokenKind.Number:
-                node = JValueNode.FromValidatedNumberText(item.GetRawText()); // keeps the text: 1.10 stays 1.10
+                node = JValueNode.FromValidatedNumberText(tape.GetRawText(in entry)); // keeps the text: 1.10 stays 1.10
                 return true;
 
             case JsonTokenKind.True:

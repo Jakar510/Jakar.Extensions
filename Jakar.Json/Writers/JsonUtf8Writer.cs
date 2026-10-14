@@ -17,6 +17,7 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
     private          ValueUtf8Builder   __builder;
     private readonly Stream?            __stream;
     private readonly SearchValues<char> __escape;
+    private readonly SearchValues<byte> __escapeUtf8;
     private readonly bool               __asciiOnly;
     private readonly bool               __indented;
     private readonly byte               __indentChar;
@@ -41,6 +42,10 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
 
     public JsonUtf8Writer( JsonWriterOptions options ) : this(Span<byte>.Empty, options) { }
 
+    /// <param name="initialCapacity"> Pooled storage of about this many bytes up front (e.g. the size of the last document of the same type), so a large document doesn't grow by doubling. </param>
+    /// <param name="options"> Layout, escaping and depth. </param>
+    public JsonUtf8Writer( int initialCapacity, JsonWriterOptions options ) : this(Span<byte>.Empty, options) => __builder = new ValueUtf8Builder(initialCapacity);
+
     /// <param name="buffer"> Initial storage (typically <c>stackalloc byte[N]</c>); replaced by pooled arrays only if the output outgrows it. </param>
     /// <param name="options"> Layout, escaping and depth. </param>
     public JsonUtf8Writer( Span<byte> buffer, JsonWriterOptions options )
@@ -48,6 +53,7 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
         __builder    = new ValueUtf8Builder(buffer);
         __stream     = null;
         __escape     = JsonEscaper.For(options.Escaping);
+        __escapeUtf8 = JsonEscaper.ForUtf8(options.Escaping);
         __asciiOnly  = options.Escaping == JsonEscaping.AsciiOnly;
         __indented   = options.Indented;
         __indentChar = (byte)options.IndentCharacter;
@@ -64,6 +70,10 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
         ArgumentNullException.ThrowIfNull(stream);
         __stream = stream;
     }
+
+
+    /// <summary> Makes room for at least <paramref name="capacity"/> bytes in total before writing (pooled storage once the initial buffer is too small), so a large document doesn't grow by doubling. </summary>
+    internal void Reserve( int capacity ) => __builder.EnsureCapacity(capacity);
 
 
     // ─── Structure ───────────────────────────────────────────────────────────
@@ -159,6 +169,20 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
         where T : ISpanFormattable
     {
         BeforeValue();
+
+        // Guids, dates, times and integers format straight to UTF-8, into the output: no UTF-16 pass, no transcoding. The bytes are checked
+        // once (a custom format could produce anything); if one needs escaping, nothing is kept and the general path below writes it.
+        __builder.EnsureCapacity(__builder.Length + 72);
+        Span<byte> next = __builder.Next;
+
+        if ( TryFormatUtf8(value, next[1..], format, out int bytes) && next.Slice(1, bytes).IndexOfAny(__escapeUtf8) < 0 )
+        {
+            next[0]         = (byte)'"';
+            next[bytes + 1] = (byte)'"';
+            __builder.Length += bytes + 2;
+            return;
+        }
+
         Span<char> buffer = stackalloc char[128];
 
         if ( value.TryFormat(buffer, out int written, format, CultureInfo.InvariantCulture) )
@@ -175,6 +199,29 @@ public ref struct JsonUtf8Writer : IJsonWriter, IDisposable
             JsonEscaper.Write(ref __builder, text.Values, __escape, __asciiOnly);
         }
         finally { text.Dispose(); }
+    }
+
+    /// <summary> <see cref="IUtf8SpanFormattable"/> for the types converters format as strings (the JIT keeps only the matching branch); <see langword="false"/> for anything else or if it doesn't fit. Leaves room for the closing quote. </summary>
+    private static bool TryFormatUtf8<T>( T value, Span<byte> destination, scoped ReadOnlySpan<char> format, out int written )
+        where T : ISpanFormattable
+    {
+        destination = destination[..^1];
+        IFormatProvider culture = CultureInfo.InvariantCulture;
+
+        if ( typeof(T) == typeof(Guid) ) { return Unsafe.As<T, Guid>(ref value).TryFormat(destination, out written, format); }
+        if ( typeof(T) == typeof(DateTimeOffset) ) { return Unsafe.As<T, DateTimeOffset>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(DateTime) ) { return Unsafe.As<T, DateTime>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(DateOnly) ) { return Unsafe.As<T, DateOnly>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(TimeOnly) ) { return Unsafe.As<T, TimeOnly>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(TimeSpan) ) { return Unsafe.As<T, TimeSpan>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(int) ) { return Unsafe.As<T, int>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(long) ) { return Unsafe.As<T, long>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(ulong) ) { return Unsafe.As<T, ulong>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(Int128) ) { return Unsafe.As<T, Int128>(ref value).TryFormat(destination, out written, format, culture); }
+        if ( typeof(T) == typeof(UInt128) ) { return Unsafe.As<T, UInt128>(ref value).TryFormat(destination, out written, format, culture); }
+
+        written = 0;
+        return false;
     }
 
     public void WriteRawNumber( scoped ReadOnlySpan<char> number )

@@ -18,6 +18,29 @@ internal static class JsonEscaper
     private static readonly SearchValues<char> __htmlSafe  = SearchValues.Create(Build(static c => c < 0x20 || c is '"' or '\\' or '<' or '>' or '&' or '\'' or '+' || char.IsSurrogate(c)));
 
 
+    // UTF-8 stops for text formatted straight to bytes: any non-ASCII byte as well, so only plain ASCII passes (the UTF-16 path handles the rest).
+    private static readonly SearchValues<byte> __minimalUtf8  = SearchValues.Create(BuildUtf8(static c => c < 0x20 || c is '"' or '\\'                                     || c >= 0x7F));
+    private static readonly SearchValues<byte> __htmlSafeUtf8 = SearchValues.Create(BuildUtf8(static c => c < 0x20 || c is '"' or '\\' or '<' or '>' or '&' or '\'' or '+' || c >= 0x7F));
+
+
+    /// <summary> The bytes that keep ASCII text from being written as is, under <paramref name="escaping"/>. </summary>
+    public static SearchValues<byte> ForUtf8( JsonEscaping escaping ) => escaping == JsonEscaping.HtmlSafe
+                                                                             ? __htmlSafeUtf8
+                                                                             : __minimalUtf8;
+
+    private static byte[] BuildUtf8( Func<int, bool> include )
+    {
+        List<byte> bytes = [];
+
+        for ( int c = 0; c <= byte.MaxValue; c++ )
+        {
+            if ( include(c) ) { bytes.Add((byte)c); }
+        }
+
+        return [.. bytes];
+    }
+
+
     public static SearchValues<char> For( JsonEscaping escaping ) => escaping switch
                                                                      {
                                                                          JsonEscaping.AsciiOnly => __asciiOnly,
@@ -220,6 +243,8 @@ internal static class JsonNumbers
         where T : IFloatingPoint<T>
         where TChar : unmanaged, IBinaryInteger<TChar>
     {
+        if ( typeof(T) == typeof(decimal) && TryFormatDecimal(Unsafe.As<T, decimal>(ref value), destination, out written) ) { return true; }
+
         ReadOnlySpan<char> format = typeof(T) == typeof(decimal)
                                         ? default
                                         : "R"; // decimal keeps its scale (1.10 stays 1.10) and never uses an exponent
@@ -232,6 +257,74 @@ internal static class JsonNumbers
 
         return formatted;
     }
+
+    /// <summary>
+    ///     A <see cref="decimal"/> whose 96-bit mantissa fits a <see cref="ulong"/>, written as the BCL writes it with the invariant culture and no format: the digits, with a point
+    ///     <c>scale</c> digits from the right (<c>1.10</c> keeps its zero, <c>0.005</c> gets its leading zeros). <see langword="false"/> (nothing written) for anything else, including zero
+    ///     (the BCL decides its sign) and a destination that's too small: the caller falls back to <see cref="decimal.TryFormat(Span{char}, out int, ReadOnlySpan{char}, IFormatProvider?)"/>.
+    /// </summary>
+    private static bool TryFormatDecimal<TChar>( decimal value, Span<TChar> destination, out int written )
+        where TChar : unmanaged, IBinaryInteger<TChar>
+    {
+        written = 0;
+
+        Span<int> bits = stackalloc int[4];
+        decimal.GetBits(value, bits);
+        if ( bits[2] != 0 ) { return false; }
+
+        ulong mantissa = (uint)bits[1] * ( 1UL << 32 ) + (uint)bits[0];
+        if ( mantissa == 0 ) { return false; }
+
+        int  scale    = ( bits[3] >> 16 ) & 0xFF;
+        bool negative = bits[3] < 0;
+
+        Span<byte> digits = stackalloc byte[20]; // ulong.MaxValue has 20 digits; filled from the right
+        int        count  = 0;
+
+        while ( mantissa != 0 )
+        {
+            ( mantissa, ulong digit ) = Math.DivRem(mantissa, 10UL);
+            digits[19 - count++] = (byte)( '0' + digit );
+        }
+
+        ReadOnlySpan<byte> text = digits[( 20 - count )..];
+
+        int length = ( negative ? 1 : 0 ) + ( scale == 0
+                                                  ? count
+                                                  : count > scale
+                                                      ? count + 1
+                                                      : 2 + scale );
+
+        if ( destination.Length < length ) { return false; }
+
+        int at = 0;
+        if ( negative ) { destination[at++] = TChar.CreateTruncating('-'); }
+
+        if ( scale == 0 )
+        {
+            for ( int i = 0; i < count; i++ ) { destination[at++] = TChar.CreateTruncating(text[i]); }
+        }
+        else if ( count > scale )
+        {
+            int whole = count - scale;
+            for ( int i = 0; i < whole; i++ ) { destination[at++] = TChar.CreateTruncating(text[i]); }
+
+            destination[at++] = TChar.CreateTruncating('.');
+            for ( int i = whole; i < count; i++ ) { destination[at++] = TChar.CreateTruncating(text[i]); }
+        }
+        else
+        {
+            destination[at++] = TChar.CreateTruncating('0');
+            destination[at++] = TChar.CreateTruncating('.');
+            for ( int i = count; i < scale; i++ ) { destination[at++] = TChar.CreateTruncating('0'); }
+
+            for ( int i = 0; i < count; i++ ) { destination[at++] = TChar.CreateTruncating(text[i]); }
+        }
+
+        written = at;
+        return true;
+    }
+
 
     /// <summary> <c>1E+20</c> → <c>1e+20</c>, <c>1E-07</c> → <c>1e-7</c>: lowercase <c>e</c>, explicit sign, no zero padding. Returns the new length. </summary>
     public static int CanonicalizeExponent<TChar>( Span<TChar> text )

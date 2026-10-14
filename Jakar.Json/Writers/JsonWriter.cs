@@ -38,6 +38,10 @@ public ref struct JsonWriter : IJsonWriter, IDisposable
 
     public JsonWriter( JsonWriterOptions options ) : this(Span<char>.Empty, options) { }
 
+    /// <param name="initialCapacity"> Pooled storage of about this many chars up front (e.g. the size of the last document of the same type), so a large document doesn't grow by doubling. </param>
+    /// <param name="options"> Layout, escaping and depth. </param>
+    public JsonWriter( int initialCapacity, JsonWriterOptions options ) : this(Span<char>.Empty, options) => __builder = new ValueStringBuilder(initialCapacity);
+
     /// <param name="buffer"> Initial storage (typically <c>stackalloc char[N]</c>); replaced by pooled arrays only if the output outgrows it. </param>
     /// <param name="options"> Layout, escaping and depth. </param>
     public JsonWriter( Span<char> buffer, JsonWriterOptions options )
@@ -50,6 +54,10 @@ public ref struct JsonWriter : IJsonWriter, IDisposable
         __indentSize = options.IndentSize;
         __maxDepth   = options.MaxDepth;
     }
+
+
+    /// <summary> Makes room for at least <paramref name="capacity"/> chars in total before writing (pooled storage once the initial buffer is too small), so a large document doesn't grow by doubling. </summary>
+    internal void Reserve( int capacity ) => __builder.EnsureCapacity(capacity);
 
 
     // ─── Structure ───────────────────────────────────────────────────────────

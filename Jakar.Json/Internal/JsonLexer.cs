@@ -1,6 +1,8 @@
 // Jakar.Json
 // 10/07/2026
 
+using System.Runtime.Intrinsics;
+
 namespace Jakar.Json;
 
 
@@ -45,11 +47,21 @@ internal static class JsonLexer<TChar>
 
 
     /// <summary> Whitespace, and <c>//</c> / <c>/* */</c> comments when they're allowed. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JsonErrorKind SkipTrivia( ref ValueSpanReader<TChar> reader, bool comments )
+    {
+        // Compact JSON (most of it) has nothing between tokens: one inlined check, no call.
+        if ( !reader.TryPeek(out TChar next) || U(next) > ' ' && U(next) != '/' ) { return JsonErrorKind.None; }
+
+        return SkipTriviaSlow(ref reader, comments);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static JsonErrorKind SkipTriviaSlow( ref ValueSpanReader<TChar> reader, bool comments )
     {
         while ( true )
         {
-            reader.SkipWhile(Whitespace);
+            SkipWhitespace(ref reader);
             if ( !comments || !reader.IsNext(Char('/')) ) { return JsonErrorKind.None; }
 
             if ( reader.TryReadExact(Literal("//"u8, "//")) )
@@ -73,6 +85,33 @@ internal static class JsonLexer<TChar>
     }
 
 
+    /// <summary>
+    ///     Skips whitespace. Before most tokens there's none, or a single space (Jakar.Json's own <c>" : "</c>), so a scalar loop handles the first few characters
+    ///     and only a longer run (indentation) goes to the vectorized search, whose setup costs more than it saves on short runs.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void SkipWhitespace( ref ValueSpanReader<TChar> reader )
+    {
+        ReadOnlySpan<TChar> rest = reader.Remaining;
+        int                 i    = 0;
+
+        while ( (uint)i < (uint)rest.Length && IsWhitespace(U(rest[i])) )
+        {
+            if ( ++i < 8 ) { continue; }
+
+            reader.Advance(i);
+            reader.SkipWhile(Whitespace);
+            return;
+        }
+
+        reader.Advance(i);
+    }
+
+    /// <summary> Space, tab, line feed or carriage return: one comparison for anything above a space, then a bit test. </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsWhitespace( uint c ) => c <= ' ' && ( ( 1UL << (int)c ) & ( 1UL << ' ' | 1UL << '\t' | 1UL << '\n' | 1UL << '\r' ) ) != 0;
+
+
     /// <summary> Reads a string from its opening quote. Escapes are validated, not decoded. <paramref name="start"/> / <paramref name="length"/> are the content, without quotes. </summary>
     public static JsonErrorKind ReadString( ref ValueSpanReader<TChar> reader, int maxLength, out int start, out int length, out bool escaped )
     {
@@ -83,7 +122,7 @@ internal static class JsonLexer<TChar>
 
         while ( true )
         {
-            int stop = reader.IndexOfAny(StringStops); // vectorized: everything up to the next quote, backslash or control char is plain text
+            int stop = IndexOfStop(reader.Remaining);
 
             if ( stop < 0 )
             {
@@ -134,6 +173,47 @@ internal static class JsonLexer<TChar>
                     return JsonErrorKind.InvalidEscape;
             }
         }
+    }
+
+
+    /// <summary>
+    ///     The next quote, backslash or control character. Most JSON strings (member names, short values) end within a few characters, so a scalar scan covers the first 16
+    ///     before the vectorized search takes over.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int IndexOfStop( ReadOnlySpan<TChar> rest )
+    {
+        // UTF-8 with 16+ bytes left: one vector compare covers the first 16 (most strings end within them).
+        if ( IsUtf8 && Vector128.IsHardwareAccelerated && rest.Length >= 16 )
+        {
+            Vector128<byte> chunk = Vector128.LoadUnsafe(ref Unsafe.As<TChar, byte>(ref MemoryMarshal.GetReference(rest)));
+
+            uint found = ( Vector128.Equals(chunk, Vector128.Create((byte)'"')) | Vector128.Equals(chunk, Vector128.Create((byte)'\\')) | Vector128.LessThan(chunk, Vector128.Create((byte)0x20)) ).ExtractMostSignificantBits();
+
+            if ( found != 0 ) { return BitOperations.TrailingZeroCount(found); }
+
+            int after = rest[16..].IndexOfAny(StringStops);
+
+            return after < 0
+                       ? -1
+                       : 16 + after;
+        }
+
+        int limit = Math.Min(rest.Length, 16);
+
+        for ( int i = 0; i < limit; i++ )
+        {
+            uint c = U(rest[i]);
+            if ( c == '"' || c == '\\' || c < 0x20 ) { return i; }
+        }
+
+        if ( limit == rest.Length ) { return -1; }
+
+        int stop = rest[limit..].IndexOfAny(StringStops);
+
+        return stop < 0
+                   ? -1
+                   : limit + stop;
     }
 
 

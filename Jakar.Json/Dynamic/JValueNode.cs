@@ -250,7 +250,7 @@ public sealed class JValueNode : JNode
 
         if ( __number == NumberKind.Text )
         {
-            if ( T.TryParse(__text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) && !T.IsInfinity(value) ) { return true; }
+            if ( JsonFastNumbers.TryParse(__text.AsSpan(), out value) || T.TryParse(__text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) && !T.IsInfinity(value) ) { return true; }
 
             error = JsonErrorKind.NumberOverflow;
             return false;
@@ -287,6 +287,11 @@ public sealed class JValueNode : JNode
     private static T ParseFloat<T>( string text )
         where T : IFloatingPoint<T>
     {
+        // The exact fast paths for plain numbers (the JIT folds the type checks and the casts).
+        if ( typeof(T) == typeof(decimal) && JsonFastNumbers.TryParse(text.AsSpan(), out decimal m) ) { return (T)(object)m; }
+        if ( typeof(T) == typeof(double)  && JsonFastNumbers.TryParse(text.AsSpan(), out double d) ) { return (T)(object)d; }
+        if ( typeof(T) == typeof(float)   && JsonFastNumbers.TryParse(text.AsSpan(), out float f) ) { return (T)(object)f; }
+
         T value = T.Parse(text, NumberStyles.Float, CultureInfo.InvariantCulture);
 
         return T.IsInfinity(value)

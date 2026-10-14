@@ -207,6 +207,47 @@ public sealed class CodecTests
         }
     }
 
+    /// <summary> UTF-8 formats Guids, dates and integers straight to bytes; the result must match the UTF-16 path, escaping included (HtmlSafe escapes an offset's <c>+</c>). </summary>
+    [Test] public void Utf8Writer_FormattedValuesMatchUtf16()
+    {
+        DateTimeOffset offset = new(2026, 10, 7, 12, 30, 15, 123, TimeSpan.FromHours(5.5));
+
+        foreach ( JsonEscaping escaping in new[] { JsonEscaping.Minimal, JsonEscaping.AsciiOnly, JsonEscaping.HtmlSafe } )
+        {
+            JsonWriterOptions options = new() { Escaping = escaping };
+
+            Assert.That(Utf8(options), Is.EqualTo(Utf16(options)), escaping.ToString());
+        }
+
+        Assert.That(Utf16(new JsonWriterOptions { Escaping = JsonEscaping.HtmlSafe }), Does.Contain("\\u002B05:30"), "HtmlSafe escapes the offset's +");
+
+        string Utf16( JsonWriterOptions options )
+        {
+            JsonWriter writer = new(options);
+            writer.WriteStartArray();
+            writer.WriteFormatted(offset, "O");
+            writer.WriteFormatted(Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e"), "D");
+            writer.WriteFormatted(TimeSpan.FromMinutes(-90), "c");
+            writer.WriteFormatted(long.MinValue);
+            writer.WriteFormatted(new DateOnly(2026, 1, 2), "yyyy'\"'MM"); // a custom format with a quote: escaped on both paths
+            writer.WriteEndArray();
+            return writer.ToString();
+        }
+
+        string Utf8( JsonWriterOptions options )
+        {
+            JsonUtf8Writer writer = new(options);
+            writer.WriteStartArray();
+            writer.WriteFormatted(offset, "O");
+            writer.WriteFormatted(Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e"), "D");
+            writer.WriteFormatted(TimeSpan.FromMinutes(-90), "c");
+            writer.WriteFormatted(long.MinValue);
+            writer.WriteFormatted(new DateOnly(2026, 1, 2), "yyyy'\"'MM");
+            writer.WriteEndArray();
+            return Encoding.UTF8.GetString(writer.ToArray());
+        }
+    }
+
     [Test] public void Writer_CanonicalNumbers()
     {
         Assert.That(Write(1e20),      Is.EqualTo("1e+20"));

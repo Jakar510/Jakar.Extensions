@@ -203,7 +203,7 @@ public sealed class JsonTape : IDisposable
     private bool TryBuild<TChar>( ReadOnlySpan<TChar> input, in JsonReaderOptions options, out JsonError error )
         where TChar : unmanaged, IBinaryInteger<TChar>
     {
-        __entries = ArrayPool<Entry>.Shared.Rent(Math.Clamp(input.Length / 8, 16, 1 << 16));
+        __entries = ArrayPool<Entry>.Shared.Rent(Math.Max(input.Length / 10, 16)); // ~1 entry per 10 chars of typical JSON: big documents don't grow (each growth copies every entry)
         __count   = 0;
         return Parser<TChar>.TryParse(this, input, options, out error);
     }
@@ -263,6 +263,34 @@ public sealed class JsonTape : IDisposable
         return builder.ToString();
     }
 
+    /// <summary>
+    ///     <see cref="GetString(in Entry)"/> for member names, through <paramref name="cache"/> (one slot per hash of the name): documents repeat the same few names in every object,
+    ///     and each repeat then reuses the first string instead of allocating and transcoding again. Unescaped names only; a collision just replaces the slot.
+    /// </summary>
+    internal string GetName( in Entry entry, string?[] cache )
+    {
+        if ( entry.Escaped ) { return GetString(in entry); }
+
+        int slot;
+
+        if ( __utf8 )
+        {
+            ReadOnlySpan<byte> name = InputUtf8.Slice(entry.Start, entry.Length);
+            slot = Slot(name.Length, name.IsEmpty ? 0 : name[0], name.IsEmpty ? 0 : name[^1], cache.Length);
+            if ( cache[slot] is { } cached && Ascii.Equals(name, cached) ) { return cached; }
+        }
+        else
+        {
+            ReadOnlySpan<char> name = InputUtf16.Slice(entry.Start, entry.Length);
+            slot = Slot(name.Length, name.IsEmpty ? 0 : name[0], name.IsEmpty ? 0 : name[^1], cache.Length);
+            if ( cache[slot] is { } cached && name.SequenceEqual(cached) ) { return cached; }
+        }
+
+        return cache[slot] = GetString(in entry);
+
+        static int Slot( int length, int first, int last, int size ) => (int)( (uint)( length * 31 + first * 7 + last ) % (uint)size );
+    }
+
     internal bool TryCopyString( in Entry entry, Span<char> destination, out int charsWritten )
     {
         if ( !entry.Escaped )
@@ -301,13 +329,18 @@ public sealed class JsonTape : IDisposable
     ///     Compares a string or property name with a value, without allocating. An unescaped UTF-8 entry is compared with <paramref name="utf8"/>;
     ///     every other entry is compared with <paramref name="utf16"/>, unescaping into a stack buffer first if it has to.
     /// </summary>
+    /// <param name="utf8"> The name as UTF-8 for a UTF-8 tape; empty when <paramref name="utf16"/> is ASCII, which is then compared against the UTF-8 input directly. </param>
     internal bool StringEquals( in Entry entry, ReadOnlySpan<char> utf16, ReadOnlySpan<byte> utf8 )
     {
         if ( !entry.Escaped )
         {
-            return __utf8
-                       ? InputUtf8.Slice(entry.Start, entry.Length).SequenceEqual(utf8)
-                       : InputUtf16.Slice(entry.Start, entry.Length).SequenceEqual(utf16);
+            if ( !__utf8 ) { return InputUtf16.Slice(entry.Start, entry.Length).SequenceEqual(utf16); }
+
+            ReadOnlySpan<byte> input = InputUtf8.Slice(entry.Start, entry.Length);
+
+            return utf8.IsEmpty && !utf16.IsEmpty
+                       ? Ascii.Equals(input, utf16)
+                       : input.SequenceEqual(utf8);
         }
 
         if ( utf16.Length > entry.Length ) { return false; } // unescaping (and UTF-8 → UTF-16) only ever shrinks the text
@@ -444,15 +477,11 @@ public sealed class JsonTape : IDisposable
 
                             bool isObject = JsonLexer<TChar>.U(next) == '{';
 
-                            stack[depth] = AddValue(tape,
-                                                    stack,
-                                                    depth,
-                                                    isObject
-                                                        ? JsonTokenKind.Object
-                                                        : JsonTokenKind.Array,
-                                                    start,
-                                                    0,
-                                                    false);
+                            int opened = AddValue(tape, stack, depth, isObject ? JsonTokenKind.Object : JsonTokenKind.Array, start, 0, false);
+
+                            stack[depth] = isObject
+                                               ? opened
+                                               : ~opened; // arrays as ~index: the kind without reading the entry back
 
                             depth++;
                             if ( depth > tape.__maxDepthSeen ) { tape.__maxDepthSeen = depth; }
@@ -465,7 +494,7 @@ public sealed class JsonTape : IDisposable
                                                                                ? '}'
                                                                                : ']')) ) // an empty container is a complete value
                             {
-                                Close(tape, stack[--depth], reader.Position);
+                                Close(tape, Index(stack[--depth]), reader.Position);
                                 expectValue = false;
                                 continue;
                             }
@@ -526,7 +555,8 @@ public sealed class JsonTape : IDisposable
                 }
 
                 int  container = stack[depth - 1];
-                bool inObject  = tape.Entries[container].Kind == JsonTokenKind.Object;
+                bool inObject  = container >= 0;
+                container = Index(container);
 
                 char close = inObject
                                  ? '}'
@@ -570,16 +600,18 @@ public sealed class JsonTape : IDisposable
 
 
         /// <summary> Adds a value; a value directly inside an array counts as one of its elements (object members are counted by their names). </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int AddValue( JsonTape tape, Span<int> stack, int depth, JsonTokenKind kind, int start, int length, bool escaped )
         {
-            if ( depth > 0 )
-            {
-                ref Entry parent = ref tape.Entries[stack[depth - 1]];
-                if ( parent.Kind == JsonTokenKind.Array ) { parent.Count++; } // before Add, which may move the entries
-            }
+            if ( depth > 0 && stack[depth - 1] < 0 ) { tape.__entries![~stack[depth - 1]].Count++; } // before Add, which may move the entries
 
             return tape.Add(kind, start, length, escaped);
         }
+
+        /// <summary> The entry index of a depth-stack slot (arrays are stored as <c>~index</c>). </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] private static int Index( int slot ) => slot < 0
+                                                                                                     ? ~slot
+                                                                                                     : slot;
 
         private static void Close( JsonTape tape, int container, int end )
         {
@@ -633,6 +665,7 @@ public readonly struct JsonItem
 
 
     internal             JsonTape       Tape => __tape ?? throw new InvalidOperationException("default(JsonItem) doesn't belong to a tape.");
+    internal             int            Index => __index;
     private ref readonly JsonTape.Entry Data => ref Tape.Entries[__index];
 
     public JsonTokenKind Kind => Data.Kind;
@@ -658,6 +691,9 @@ public readonly struct JsonItem
     public bool TryGetProperty( ReadOnlySpan<char> name, out JsonItem value )
     {
         if ( !Tape.IsUtf8 ) { return Find(name, default, out value); }
+
+        // ASCII names (nearly all) compare against the UTF-8 input directly (Ascii.Equals): nothing to transcode.
+        if ( !name.IsEmpty && Ascii.IsValid(name) ) { return Find(name, default, out value); }
 
         // A UTF-8 tape compares unescaped names byte for byte: encode the name once, not once per member.
         int     max    = name.Length * 3;
@@ -760,6 +796,9 @@ public readonly struct JsonItem
     /// <summary> Allocates the string (escapes decoded). Works on property names too. </summary>
     public string GetString() => Tape.GetString(in ExpectText());
 
+    /// <summary> <see cref="GetString"/> for a member name, reusing a string from <paramref name="cache"/> when the same name was read before (see <see cref="JsonTape.GetName"/>). </summary>
+    internal string GetName( string?[] cache ) => Tape.GetName(in ExpectText(), cache);
+
     /// <summary> Decodes the string into <paramref name="destination"/>, without allocating; <see langword="false"/> if it doesn't fit. </summary>
     public bool TryCopyString( Span<char> destination, out int charsWritten ) => Tape.TryCopyString(in ExpectText(), destination, out charsWritten);
 
@@ -835,7 +874,18 @@ public readonly struct JsonItem
 
     /// <summary> <see langword="false"/> for values that would overflow to infinity (spec: overflow is an error, never saturated). </summary>
     public bool TryGetFloat<T>( out T value )
-        where T : struct, IFloatingPoint<T> => TryParseNumber(NumberStyles.Float, out value) && !T.IsInfinity(value);
+        where T : struct, IFloatingPoint<T>
+    {
+        ref readonly JsonTape.Entry entry = ref Expect(JsonTokenKind.Number);
+        JsonTape                    tape  = __tape!;
+
+        // Exact fast paths for the common shapes first (JsonFastNumbers), then the BCL.
+        bool fast = tape.IsUtf8
+                        ? JsonFastNumbers.TryParse(tape.InputUtf8.Slice(entry.Start, entry.Length),  out value)
+                        : JsonFastNumbers.TryParse(tape.InputUtf16.Slice(entry.Start, entry.Length), out value);
+
+        return fast || TryParseNumber(NumberStyles.Float, out value) && !T.IsInfinity(value);
+    }
 
     private bool TryParseNumber<T>( NumberStyles style, out T value )
         where T : struct, INumberBase<T>

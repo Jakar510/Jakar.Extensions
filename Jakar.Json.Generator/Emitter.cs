@@ -454,6 +454,16 @@ internal static class Emitter
         string? discriminator = model.OwnTag?.TypeName;
         if ( discriminator is not null && Naming.CanPreEncode(discriminator) ) { code.Line($"private static {J}JsonName __JsonDiscriminator => new({EncodedName(discriminator)}, {EncodedName(discriminator)}u8);"); }
 
+        // The name expected at each position when reading (declaration order); default where a name can't be pre-encoded, or past the last member.
+        using ( code.Block($"private static {J}JsonName __JsonExpected( int index ) => index switch") )
+        {
+            foreach ( Resolved member in members.Where(static m => Naming.CanPreEncode(m.JsonName)) ) { code.Line($"{member.Index} => __JsonName{member.Index},"); }
+
+            code.Line("_ => default");
+        }
+
+        code.Line(";");
+
         code.Line();
     }
 
@@ -661,12 +671,32 @@ internal static class Emitter
 
         if ( extension is not null ) { code.Line($"{extension.TypeName.TrimEnd('?')}? __extension = null;"); }
 
+        // Members usually arrive in declaration order: the reader compares the next expected name first and skips matching when it's there.
+        code.Line("int __next = 0;");
+
         using ( code.Block("while ( true )") )
         {
-            code.Line($"if ( !reader.TryReadProperty(out {J}JsonSpan __name, out bool __end) ) {{ return false; }}");
+            code.Line($"if ( !reader.TryReadProperty(__JsonExpected(__next), out bool __matched, out {J}JsonSpan __name, out bool __end) ) {{ return false; }}");
             code.Line("if ( __end ) { break; }");
 
-            using ( code.Block("switch ( __name.IsUtf8 ? __JsonMatch(__name.Utf8) : __JsonMatch(__name.Utf16) )") )
+            // Up to 64 members (one word), the seen bit and the duplicate check are shared by every member, ahead of the switch: each case is only its read,
+            // which keeps the method small enough for the JIT to treat well (per-case checks cost ~10% on UTF-8 reads). Bigger types keep them per case.
+            bool shared = words == 1;
+            code.Line("int __index = __matched ? __next : __name.IsUtf8 ? __JsonMatch(__name.Utf8) : __JsonMatch(__name.Utf16);");
+            code.Line("if ( __index >= 0 ) { __next = __index + 1; }");
+
+            if ( shared )
+            {
+                using ( code.Block("if ( __index >= 0 )") )
+                {
+                    code.Line("ulong __bit = 1UL << __index;");
+                    if ( duplicates ) { code.Line($"if ( ( __seen0 & __bit ) != 0 ) {{ return reader.Fail({J}JsonErrorKind.DuplicateMember); }}"); }
+
+                    code.Line("__seen0 |= __bit;"); // set before the read: a failed read returns false anyway
+                }
+            }
+
+            using ( code.Block("switch ( __index )") )
             {
                 foreach ( Resolved member in members )
                 {
@@ -675,10 +705,11 @@ internal static class Emitter
 
                     using ( code.Block($"case {member.Index}:") )
                     {
-                        if ( duplicates ) { code.Line($"if ( ( {bit} & {mask} ) != 0 ) {{ return reader.Fail({J}JsonErrorKind.DuplicateMember); }}"); }
+                        if ( !shared && duplicates ) { code.Line($"if ( ( {bit} & {mask} ) != 0 ) {{ return reader.Fail({J}JsonErrorKind.DuplicateMember); }}"); }
 
                         code.Line($"if ( !{member.Converter}.TryRead(ref reader, out {member.Local}) ) {{ return false; }}");
-                        code.Line($"{bit} |= {mask};");
+                        if ( !shared ) { code.Line($"{bit} |= {mask};"); }
+
                         code.Line("break;");
                     }
                 }

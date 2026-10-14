@@ -67,6 +67,13 @@ public ref struct JNodeReader : IJsonReader, IDisposable
         return true;
     }
 
+    /// <summary> Names are already parsed here, so <paramref name="expected"/> isn't compared: <paramref name="matched"/> is always <see langword="false"/>. </summary>
+    public bool TryReadProperty( JsonName expected, out bool matched, out JsonSpan name, out bool end )
+    {
+        matched = false;
+        return TryReadProperty(out name, out end);
+    }
+
     public bool TryReadProperty( out JsonSpan name, out bool end )
     {
         name = default;

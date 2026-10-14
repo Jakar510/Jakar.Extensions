@@ -186,6 +186,14 @@ public interface IJsonReader
     /// <summary> Reads the next member's name, or the end of the object (<paramref name="end"/>; the <c>}</c> is consumed). Call after <see cref="TryReadStartObject"/> and after each member value. </summary>
     bool TryReadProperty( out JsonSpan name, out bool end );
 
+    /// <summary>
+    ///     <see cref="TryReadProperty(out JsonSpan, out bool)"/>, trying <paramref name="expected"/> first: when the next member's name is written exactly as <paramref name="expected"/>
+    ///     writes it (the quoted name), it's consumed with one comparison and <paramref name="matched"/> is <see langword="true"/> (<paramref name="name"/> isn't set). Otherwise the name is
+    ///     read as usual. Generated readers pass the member that follows the last one read, so JSON in declaration order (what any writer of the type produces) skips name matching.
+    /// </summary>
+    /// <param name="expected"> A pre-encoded name (<c>"name" : </c>); <see langword="default"/> to skip the check. </param>
+    bool TryReadProperty( JsonName expected, out bool matched, out JsonSpan name, out bool end );
+
     bool TryReadStartArray();
 
     /// <summary> Moves to the next element, or reads the end of the array (<paramref name="end"/>; the <c>]</c> is consumed). Call before each element. </summary>

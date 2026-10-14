@@ -11,6 +11,8 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<!-- Allocation tests (AllocationTests.cs) need fully optimized code from the first call: tier-0 code can allocate where tier-1 doesn't. -->
 		<TieredCompilation>false</TieredCompilation>
+		<!-- The allocation tests compare against hand-built allocations (_ = new byte[n]); optimized test code would drop those as dead, so the test code itself stays unoptimized (the library under test is whatever its own configuration builds). -->
+		<Optimize>false</Optimize>
 	</PropertyGroup>
 
 	<ItemGroup>

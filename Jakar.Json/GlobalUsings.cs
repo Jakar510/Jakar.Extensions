@@ -21,3 +21,7 @@ global using System.Text.Unicode;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Jakar.Extensions;
+
+
+// Stack buffers (stackalloc) aren't zeroed: every one is written before it's read, and each serialize/parse call would otherwise clear hundreds of bytes it never uses.
+[module: System.Runtime.CompilerServices.SkipLocalsInit]

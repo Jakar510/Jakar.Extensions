@@ -105,6 +105,43 @@ public ref struct JsonReader<TChar> : IJsonReader, IDisposable
         return __reader.TryReadExact(JsonLexer<TChar>.Char(':')) || FailToken();
     }
 
+    public bool TryReadProperty( JsonName expected, out bool matched, out JsonSpan name, out bool end )
+    {
+        name    = default;
+        end     = false;
+        matched = false;
+        if ( !Begin() ) { return false; }
+
+        if ( __depth == 0 || !__isObject.Get(__depth) ) { return Fail(JsonErrorKind.UnexpectedToken); }
+
+        if ( TryClose('}', out end) ) { return true; }
+
+        if ( end ) { return false; } // a separator error was recorded
+
+        if ( !__reader.IsNext(JsonLexer<TChar>.Char('"')) ) { return FailToken(); }
+
+        if ( __depth <= PathStack.LENGTH ) { __marks[__depth - 1] = __reader.Position; }
+
+        // The quoted name: the pre-encoded "name" : up to its closing quote (the separator after it has none).
+        ReadOnlySpan<TChar> quoted = IsUtf8
+                                         ? MemoryMarshal.Cast<byte, TChar>(expected.Utf8)
+                                         : MemoryMarshal.Cast<char, TChar>(expected.Utf16);
+
+        quoted = quoted[..( quoted.LastIndexOf(JsonLexer<TChar>.Char('"')) + 1 )];
+
+        if ( quoted.Length > 2 && quoted.Length - 2 <= __maxStringLength && __reader.Remaining.StartsWith(quoted) )
+        {
+            __reader.Advance(quoted.Length);
+            matched = true;
+        }
+        else if ( !TryReadStringContent(out name) ) { return false; }
+
+        JsonErrorKind trivia = JsonLexer<TChar>.SkipTrivia(ref __reader, __comments);
+        if ( trivia != JsonErrorKind.None ) { return Fail(trivia); }
+
+        return __reader.TryReadExact(JsonLexer<TChar>.Char(':')) || FailToken();
+    }
+
     public bool TryReadNextElement( out bool end )
     {
         end = false;
@@ -203,7 +240,7 @@ public ref struct JsonReader<TChar> : IJsonReader, IDisposable
 
         if ( !TryReadNumberToken(out ReadOnlySpan<TChar> number) ) { return false; }
 
-        if ( TryParse(number, NumberStyles.Float, out value) && !T.IsInfinity(value) ) { return true; }
+        if ( JsonFastNumbers.TryParse(number, out value) || TryParse(number, NumberStyles.Float, out value) && !T.IsInfinity(value) ) { return true; }
 
         return FailAt(start, JsonErrorKind.NumberOverflow);
     }
