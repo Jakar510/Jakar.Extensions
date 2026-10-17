@@ -63,18 +63,18 @@ public static class UnitConverters
 
     /// <summary> International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure. </summary>
     public static double InternationalFeetToMeters( double internationalFeet ) => internationalFeet * INTERNATIONAL_FOOT_DEFINITION;
-    public static double KelvinToCelsius( double           kelvin )     => kelvin - CELSIUS_TO_KELVIN;
-    public static double KilogramsToPounds( double         kilograms )  => kilograms  * KG_TO_POUNDS;
-    public static double KilometersToMiles( double         kilometers ) => kilometers * KILOMETERS_TO_MILES;
-    public static double KilopascalsToHectopascals( double kpa )        => kpa        * 10.0;
-    public static double KilopascalsToPascals( double      kpa )        => kpa        * 1000.0;
+    public static double KelvinToCelsius( double           kelvin )            => kelvin - CELSIUS_TO_KELVIN;
+    public static double KilogramsToPounds( double         kilograms )         => kilograms  * KG_TO_POUNDS;
+    public static double KilometersToMiles( double         kilometers )        => kilometers * KILOMETERS_TO_MILES;
+    public static double KilopascalsToHectopascals( double kpa )               => kpa        * 10.0;
+    public static double KilopascalsToPascals( double      kpa )               => kpa        * 1000.0;
 
 
     /// <summary> International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure. </summary>
     public static double MetersToInternationalFeet( double meters ) => meters / INTERNATIONAL_FOOT_DEFINITION;
 
     /// <summary> Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable over large survey distances. </summary>
-    public static double MetersToUsSurveyFeet( double meters ) => meters / US_SURVEY_FOOT_DEFINITION;
+    public static double MetersToUsSurveyFeet( double               meters )  => meters  / US_SURVEY_FOOT_DEFINITION;
     public static double MilesToKilometers( double                  miles )   => miles   * MILES_TO_KILOMETERS;
     public static double MilesToMeters( double                      miles )   => miles   * MILES_TO_METERS;
     public static double PascalsToAtmospheres( double               pascals ) => pascals / ATMOSPHERE_PASCALS;

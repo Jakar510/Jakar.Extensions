@@ -1,4 +1,4 @@
-﻿namespace Jakar.Extensions.Experiments.Benchmarks;
+﻿namespace Experiments.Benchmarks;
 
 
 /*

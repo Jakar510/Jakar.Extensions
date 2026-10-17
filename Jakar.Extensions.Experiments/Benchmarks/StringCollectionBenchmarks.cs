@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/24/2023  8:37 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*
@@ -62,7 +62,7 @@ public class StringCollectionBenchmarks
         {
             field    = value;
             __values = GetArray(10000);
-            __array  = [..__values];
+            __array  = [.. __values];
             __memory = __values;
         }
     }

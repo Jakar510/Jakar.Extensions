@@ -142,6 +142,7 @@ public class Command<TValue>( Command<TValue>.Executable execute, Func<TValue?, 
 
         /// <inheritdoc cref="Execute(object?, TValue?, CancellationToken)"/>
         public ValueTask Execute( object? sender, TValue? parameter ) => Execute(sender, parameter, CancellationToken.None);
+
         /// <summary>
         ///     Invokes the handler. Synchronous handlers complete without allocating; asynchronous handlers' tasks are returned (not awaited here), so no state machine is created.
         ///     <paramref name="token"/> is passed to the cancellable handler shapes; if it is already cancelled, no handler runs. A default or null handler is a no-op.

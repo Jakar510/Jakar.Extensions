@@ -14,12 +14,13 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
 
     /// <summary> Every RFC 7807 member except <see cref="StatusCode"/> is optional, so the nullable ones must NOT be marked <c> [JsonRequired] </c> : Newtonsoft maps that to <c> Required.Always </c> , which rejects a <see langword="null"/> on write as well as on read - which is what made every factory-built error throw on serialization. </summary>
-    public                string?    Description { get;            init; }
-    [JsonRequired] public StringTags Details     { get => details; init => details = value; }
-    public                string?    Instance    { get;            init; }
-    [JsonRequired] public Status     StatusCode  { get;            init; }
-    public                string?    Title       { get;            init; }
-    public                string?    Type        { get;            init; }
+    public string? Description { get; init; }
+
+    [JsonRequired] public StringTags Details    { get => details; init => details = value; }
+    public                string?    Instance   { get;            init; }
+    [JsonRequired] public Status     StatusCode { get;            init; }
+    public                string?    Title      { get;            init; }
+    public                string?    Type       { get;            init; }
 
 
     public Error() : base() { }
@@ -50,7 +51,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     public static Error Create( Status status, string? title = null, string? description = null, string? instance = null, StringTags details = default, string? type = null ) => new(status, description, instance, details, title, type);
 
 
-    public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.MethodSignature(), in details, status, type);
+    public static Error Create( Exception e, in StringTags details = default, Status? status = null, string? type = null ) => Create(e, e.Source, e.TryGetMethodSignature(), in details, status, type);
     public static Error Create( Exception e, string? title, string? instance, in StringTags details = default, Status? status = null, string? type = null )
     {
         string classType = e.GetType().Name;
@@ -70,7 +71,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
         if ( e is not null )
         {
-            error = Error.Create(e, title, response.URL?.OriginalString, in StringTags.Empty, response.StatusCode);
+            error = Create(e, title, response.URL?.OriginalString, in StringTags.Empty, response.StatusCode);
             return true;
         }
 

@@ -39,6 +39,7 @@ public static class Guids
     public static bool TryWriteBytes( in this Guid value, [MustDisposeResource] out Buffer<byte> result )
     {
         result = new Buffer<byte>(16);
+
         if ( value.TryWriteBytes(result.Span) )
         {
             // TryWriteBytes writes to the underlying array but does not update _length.
@@ -166,11 +167,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
 
         // Reverse of AsInt128: upper 64 bits → span[0..8], lower 64 bits → span[8..16].
-        if ( !BitConverter.TryWriteBytes(span[..SIZE],  (ulong)( value >> 64 )) ||
-             !BitConverter.TryWriteBytes(span[SIZE..],  (ulong)value) )
-        {
-            throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
-        }
+        if ( !BitConverter.TryWriteBytes(span[..SIZE], (ulong)( value >> 64 )) || !BitConverter.TryWriteBytes(span[SIZE..], (ulong)value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }
@@ -180,11 +177,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
 
         // Reverse of AsUInt128: upper 64 bits → span[0..8], lower 64 bits → span[8..16].
-        if ( !BitConverter.TryWriteBytes(span[..SIZE],  (ulong)( value >> 64 )) ||
-             !BitConverter.TryWriteBytes(span[SIZE..],  (ulong)value) )
-        {
-            throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
-        }
+        if ( !BitConverter.TryWriteBytes(span[..SIZE], (ulong)( value >> 64 )) || !BitConverter.TryWriteBytes(span[SIZE..], (ulong)value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }
@@ -226,6 +219,7 @@ public static class Guids
             Guard.IsGreaterThanOrEqualTo(result.Length, 22);
             Span<byte> base64Bytes = stackalloc byte[24];
             Span<byte> idBytes     = stackalloc byte[16];
+
             // Use the basic overload: it writes bytes in the same layout that new Guid(ReadOnlySpan<byte>) expects.
             // The bigEndian overload with BitConverter.IsLittleEndian passes bigEndian=true on x86, producing
             // full big-endian bytes that new Guid() cannot round-trip back to the same value.
@@ -235,6 +229,7 @@ public static class Guids
 
             // URL-safe base64 without padding: 16 GUID bytes → 24 base64 bytes, strip 2 '=' → 22 chars.
             const int OUTPUT_LEN = 22;
+
             for ( int i = 0; i < OUTPUT_LEN; i++ )
             {
                 result[i] = base64Bytes[i] switch

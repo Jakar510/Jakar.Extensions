@@ -103,7 +103,7 @@ public static partial class Spans
     {
         [Pure] public bool TryAsSegment( out ArraySegment<T> result ) => MemoryMarshal.TryGetArray(self, out result);
 
-        [Pure] public ImmutableArray<T> AsImmutableArray() => [..self.Span];
+        [Pure] public ImmutableArray<T> AsImmutableArray() => [.. self.Span];
     }
 
 
@@ -112,7 +112,7 @@ public static partial class Spans
     {
         [Pure] public bool TryAsSegment( out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray(self, out result);
 
-        [Pure] public ImmutableArray<TValue> AsImmutableArray() => [..self.Span];
+        [Pure] public ImmutableArray<TValue> AsImmutableArray() => [.. self.Span];
     }
 
 
@@ -121,8 +121,8 @@ public static partial class Spans
     /// <typeparam name="TValue"> The type of elements in the sequence. </typeparam>
     extension<TValue>( IEnumerable<TValue> self )
     {
-        [Pure] public Memory<TValue>         ToMemory()         => self as TValue[] ?? [..self];
-        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => self as TValue[] ?? [..self];
+        [Pure] public Memory<TValue>         ToMemory()         => self as TValue[] ?? [.. self];
+        [Pure] public ReadOnlyMemory<TValue> ToReadOnlyMemory() => self as TValue[] ?? [.. self];
 
 
         /// <summary> Tries to divine the number of elements in a sequence without actually enumerating each element. </summary>

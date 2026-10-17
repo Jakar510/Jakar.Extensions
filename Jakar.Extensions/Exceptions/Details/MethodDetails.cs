@@ -5,7 +5,8 @@
 namespace Jakar.Extensions;
 
 
-public sealed class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<MethodDetails>, IJsonModel<MethodDetails>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<MethodDetails>, IJsonModel<MethodDetails>
 {
     public MethodAttributes   Attributes          { get; init; }
     public string?            DeclaringType       { get; init; }

@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -18,7 +14,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
+public sealed partial class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
     public ObservableCollection() : this(Comparer<TValue>.Default) { }
@@ -61,7 +57,7 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
 
 
 [Serializable]
-public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TSelf, TValue>, IObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
     where TValue : IEquatable<TValue>
     where TSelf : ObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
@@ -101,7 +97,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    public virtual TValue[] ToArray() => buffer.ToArray();
+    public virtual TValue[] ToArray() => [.. buffer];
 
 
     // ─── Change notifications ────────────────────────────────────────────────
@@ -111,7 +107,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     {
         switch ( count )
         {
-            case <= 0: return;
+            case <= 0:
+                return;
 
             case 1:
                 Added(in CollectionsMarshal.AsSpan(buffer)[index], index);
@@ -147,6 +144,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         if ( (uint)index > (uint)buffer.Count ) { ThrowOutOfRange(index, nameof(index)); }
     }
     [DoesNotReturn] private void ThrowOutOfRange( int index, string? name, int count = 1 ) => throw new ArgumentOutOfRangeException(name, index, $"[{index}, {index + count}) is outside of [0, {buffer.Count})");
+
     /// <summary> The inclusive range <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>; empty when the collection is empty. </summary>
     private ReadOnlySpan<TValue> Range( int start, int endInclusive )
     {
@@ -241,7 +239,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
         switch ( count )
         {
-            case 0: return;
+            case 0:
+                return;
 
             case 1:
                 InternalRemoveAt(start, out _);
@@ -264,6 +263,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         Removed(in removed, index);
         return true;
     }
+
     /// <summary> Removes every item matching <paramref name="match"/> in a single pass. </summary>
     protected internal virtual int InternalRemove( RefCheck<TValue> match )
     {
@@ -471,12 +471,14 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     /// <summary> First index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindIndex( RefCheck<TValue> match, int start = 0 ) => FindIndex(match, start, buffer.Count - 1);
+
     /// <summary> First index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindIndexCore(match, start, endInclusive);
 
 
     /// <summary> Last index matching <paramref name="match"/> at or after <paramref name="start"/>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 ) => FindLastIndex(match, start, buffer.Count - 1);
+
     /// <summary> Last index matching <paramref name="match"/> in <c>[<paramref name="start"/>, <paramref name="endInclusive"/>]</c>, or <see cref="NOT_FOUND"/>. </summary>
     public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive ) => FindLastIndexCore(match, start, endInclusive);
 
@@ -487,6 +489,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         ThrowIfInvalidInsert(start);
         return buffer.IndexOf(value, start);
     }
+
     /// <summary> First index of <paramref name="value"/> in the <paramref name="count"/> items starting at <paramref name="start"/>. </summary>
     public virtual int IndexOf( TValue value, int start, int count )
     {
@@ -496,6 +499,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
 
     public virtual int LastIndexOf( TValue value ) => buffer.LastIndexOf(value);
+
     /// <summary> Last index of <paramref name="value"/> searching backwards from <paramref name="start"/>. </summary>
     public virtual int LastIndexOf( TValue value, int start )
     {
@@ -504,6 +508,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
         ThrowIfOutOfRange(start);
         return buffer.LastIndexOf(value, start);
     }
+
     /// <summary> Last index of <paramref name="value"/> in the <paramref name="count"/> items ending at <paramref name="start"/>, searching backwards. </summary>
     public virtual int LastIndexOf( TValue value, int start, int count )
     {
@@ -561,7 +566,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
             if ( match(in value) ) { values.Add(in value); }
         }
 
-        return values.ToArray();
+        return [.. values];
     }
     private int FindIndexCore( RefCheck<TValue> match, int start, int endInclusive )
     {
@@ -738,10 +743,11 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     void IList.Remove( object?   value ) => Remove(Cast(value));
     int IList. Add( object?      value ) => AddAndGetIndex(Cast(value));
     bool IList.Contains( object? value ) => value is TValue x && Contains(x);
-    int IList. IndexOf( object?  value ) => value is TValue x
-                                                ? IndexOf(x)
-                                                : NOT_FOUND;
+    int IList.IndexOf( object? value ) => value is TValue x
+                                              ? IndexOf(x)
+                                              : NOT_FOUND;
     void IList.Insert( int index, object? value ) => Insert(index, Cast(value));
+
     /// <summary> Adds <paramref name="value"/> and returns its index (<see cref="IList.Add"/>). </summary>
     protected virtual int AddAndGetIndex( TValue value )
     {

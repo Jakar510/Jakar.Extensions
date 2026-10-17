@@ -1,0 +1,26 @@
+{
+  "Description": "must be 5 characters or fewer",
+  "Details": {
+    "Tags": [
+      {
+        "Key": "field",
+        "Value": "notes",
+        "HasValue": true
+      },
+      {
+        "Key": "nullable",
+        "Value": null,
+        "HasValue": false
+      }
+    ],
+    "Entries": [
+      "must be 5 characters or fewer",
+      "required"
+    ],
+    "IsEmpty": false
+  },
+  "Instance": "/items/1",
+  "StatusCode": 400,
+  "Title": "Validation",
+  "Type": "Client.BadRequest"
+}

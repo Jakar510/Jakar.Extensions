@@ -1,0 +1,7 @@
+{
+  "IsNotValid": false,
+  "IsValid": true,
+  "Message": "Something happened",
+  "Title": "Heads up",
+  "TTL": "00:00:30"
+}

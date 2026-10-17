@@ -1,18 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/23/2024  11:04
 
-using ZLinq;
-using ZLinq.Linq;
-
-
-
 namespace Jakar.Extensions;
 
 
 [Serializable]
 [DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
 {
     private static readonly Error[] __details = [];
     public static readonly Errors Empty = new()
@@ -22,7 +18,7 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
                                           };
 
 
-    public                required Alert?  Alert       { get; init; }
+    public required                Alert?  Alert       { get; init; }
     public                         string  Description => Details.GetMessage();
     [JsonRequired] public required Error[] Details     { get; init; }
     public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
@@ -57,9 +53,9 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
     public static implicit operator Errors( Alert                 details ) => Create(details);
     public static implicit operator Errors( Error                 details ) => Create(details);
     public static implicit operator Errors( Error[]               details ) => Create(null, details);
-    public static implicit operator Errors( List<Error>           details ) => Create(details.ToArray());
-    public static implicit operator Errors( Span<Error>           details ) => Create(details.ToArray());
-    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create(details.ToArray());
+    public static implicit operator Errors( List<Error>           details ) => Create([.. details]);
+    public static implicit operator Errors( Span<Error>           details ) => Create([.. details]);
+    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create([.. details]);
 
 
     public        ValueEnumerable<FromArray<Error>, Error> AsValueEnumerable()         => new(new FromArray<Error>(Details));

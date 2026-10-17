@@ -38,6 +38,7 @@ public static class UriExtensions
             AppendQuery(ref sb, parameters, false);
             return sb.ToString();
         }
+
         /// <summary> <c>/segment/segment</c> </summary>
         public string Parameterize()
         {
@@ -132,10 +133,10 @@ public static class UriExtensions
     {
         text = value switch
                {
-                   null              => null,
-                   string s          => s,
-                   IFormattable f    => f.ToString(null, CultureInfo.InvariantCulture),
-                   _                 => value.ToString()
+                   null           => null,
+                   string s       => s,
+                   IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
+                   _              => value.ToString()
                };
 
         // Skip blanks and objects without a meaningful ToString (which returns the type name).

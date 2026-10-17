@@ -1,7 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -29,10 +28,7 @@ internal sealed class StubHandler( Func<HttpRequestMessage, int, HttpResponseMes
         token.ThrowIfCancellationRequested();
         int index = Interlocked.Increment(ref __count) - 1;
 
-        lock ( Requests )
-        {
-            Requests.Add(request);
-        }
+        lock ( Requests ) { Requests.Add(request); }
 
         string? body = request.Content is null
                            ? null
@@ -54,10 +50,10 @@ internal sealed class StubHandler( Func<HttpRequestMessage, int, HttpResponseMes
 /// <summary> A minimal HTTP/1.1 server on a loopback port (keep-alive, Content-Length bodies), answering each request with <c>respond(request, index)</c>. </summary>
 internal sealed class LoopbackServer : IAsyncDisposable
 {
-    private readonly TcpListener                                                   __listener = new(IPAddress.Loopback, 0);
-    private readonly CancellationTokenSource                                       __cts      = new();
-    private readonly Func<LoopbackServer.Request, int, LoopbackServer.Response> __respond;
-    private readonly Task                                                          __loop;
+    private readonly TcpListener                  __listener = new(IPAddress.Loopback, 0);
+    private readonly CancellationTokenSource      __cts      = new();
+    private readonly Func<Request, int, Response> __respond;
+    private readonly Task                         __loop;
 
     public readonly List<Request> Requests = [];
     public          Uri           Url { get; }
@@ -156,7 +152,7 @@ internal sealed class LoopbackServer : IAsyncDisposable
                         pending.AddRange(chunk.AsSpan(0, read));
                     }
 
-                    byte[] body = pending.GetRange(0, length).ToArray();
+                    byte[] body = [.. pending.GetRange(0, length)];
                     pending.RemoveRange(0, length);
 
                     Request request = new(start[0], start[1], headers, body);
@@ -170,12 +166,16 @@ internal sealed class LoopbackServer : IAsyncDisposable
 
                     Response      response = __respond(request, index);
                     StringBuilder head     = new($"HTTP/1.1 {response.Status} X\r\nContent-Length: {response.Body.Length}\r\n");
-                    if ( response.Headers is not null ) { foreach ( ( string key, string headerValue ) in response.Headers ) { head.Append($"{key}: {headerValue}\r\n"); } }
+
+                    if ( response.Headers is not null )
+                    {
+                        foreach ( ( string key, string headerValue ) in response.Headers ) { head.Append($"{key}: {headerValue}\r\n"); }
+                    }
 
                     head.Append("\r\n");
 
                     await stream.WriteAsync(Encoding.ASCII.GetBytes(head.ToString()), __cts.Token);
-                    await stream.WriteAsync(response.Body, __cts.Token);
+                    await stream.WriteAsync(response.Body,                            __cts.Token);
                     await stream.FlushAsync(__cts.Token);
                 }
             }

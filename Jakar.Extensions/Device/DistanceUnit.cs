@@ -11,6 +11,7 @@ public enum DistanceUnit
     ///     <summary> Kilometers </summary>
     /// </Docs>
     Kilometers,
+
     /// <Docs>
     ///     <summary> Miles </summary>
     /// </Docs>

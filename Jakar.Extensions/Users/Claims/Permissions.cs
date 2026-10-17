@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/14/2025  22:34
 
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -67,6 +63,7 @@ public readonly struct Permissions<TEnum> : IDisposable
     public override string ToString()
     {
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(Count);
+
         // Rent returns a buffer of AT LEAST Count chars (usually larger, bucket-rounded); slice to Count so the un-filled tail is not serialized as embedded '\0'.
         Span<char> chars = owner.Memory.Span[..Count];
 

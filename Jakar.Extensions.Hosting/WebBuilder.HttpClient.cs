@@ -442,6 +442,7 @@ public partial class WebBuilder
     public static IHttpClientBuilder AddHttpClient<TClient, TImplementation>( this WebApplicationBuilder builder, string name, Func<HttpClient, IServiceProvider, TImplementation> factory ) where TClient : class
                                                                                                                                                                                              where TImplementation : class, TClient =>
         builder.Services.AddHttpClient<TClient, TImplementation>( name, factory );
+
     /// <summary> Adds the <see cref="IHttpClientFactory"/> and related builder to the <see cref="WebApplicationBuilder"/> . </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> . </param>
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>

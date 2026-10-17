@@ -3,10 +3,10 @@
 
 /// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
 [Serializable]
-[JsonConverter(typeof(AppVersionJsonConverter))]
-[MsJsonConverter(typeof(AppVersionMsJsonConverter))]
+[JsonConverter(typeof(SerializeAsStringJsonConverter<AppVersion>))]
 [TypeConverter(typeof(AppVersionTypeConverter))]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char       SEPARATOR = '.';
     public static readonly AppVersion Default   = new(0);
@@ -408,27 +408,6 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     public override int  GetHashCode()         => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags);
 
 
-    public static bool TryFromJson( string? json, [NotNullWhen(true)] out AppVersion? result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = null;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = null;
-        return false;
-    }
-    public static AppVersion FromJson( string json ) => json.FromJson<AppVersion>();
-
-
     // ---------------------------------------------------------------------------------------------------------------------------------
 }
 
@@ -457,14 +436,10 @@ public enum AppVersionFormat
 
 
 
-public sealed class AppVersionJsonConverter : SerializeAsStringJsonConverter<AppVersionJsonConverter, AppVersion>;
-
-
-
 /// <summary> Lets configuration binding and other <see cref="TypeDescriptor"/> consumers convert strings to <see cref="AppVersion"/>. </summary>
 public sealed class AppVersionTypeConverter : TypeConverter
 {
-    public override bool CanConvertFrom( ITypeDescriptorContext? context, Type                                  sourceType )      => sourceType == typeof(string)      || base.CanConvertFrom(context, sourceType);
+    public override bool CanConvertFrom( ITypeDescriptorContext? context, Type                      sourceType )      => sourceType      == typeof(string) || base.CanConvertFrom(context, sourceType);
     public override bool CanConvertTo( ITypeDescriptorContext?   context, [NotNullWhen(true)] Type? destinationType ) => destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
 
     // Version strings are not localized, so always parse with the invariant culture.
@@ -472,6 +447,6 @@ public sealed class AppVersionTypeConverter : TypeConverter
                                                                                                                       ? AppVersion.Parse(text, CultureInfo.InvariantCulture)
                                                                                                                       : base.ConvertFrom(context, culture, value);
     public override object? ConvertTo( ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType ) => destinationType == typeof(string) && value is AppVersion version
-                                                                                                                                          ? version.ToString()
-                                                                                                                                          : base.ConvertTo(context, culture, value, destinationType);
+                                                                                                                                           ? version.ToString()
+                                                                                                                                           : base.ConvertTo(context, culture, value, destinationType);
 }

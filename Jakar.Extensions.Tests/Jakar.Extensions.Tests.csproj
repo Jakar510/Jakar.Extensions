@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -19,6 +19,10 @@
 	  <Compile Remove="Http\Requests\**" />
 	  <EmbeddedResource Remove="Http\Requests\**" />
 	  <None Remove="Http\Requests\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Golden\v10\*.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>

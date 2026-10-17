@@ -6,7 +6,7 @@ using System.Linq;
 
 
 
-namespace Jakar.Extensions.Tests.Collections;
+namespace Jakar.Extensions.Tests.Observable;
 
 
 [TestFixture]
@@ -35,18 +35,18 @@ public class ObservableCollection_Tests : Assert
 
     [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
         ObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         collection.Clear();
         collection.Add(array.Span);
         collection.Sort(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
     private static ReadOnlyMemory<TValue> GetSorted<TValue>( scoped in ReadOnlySpan<TValue> array )
     {

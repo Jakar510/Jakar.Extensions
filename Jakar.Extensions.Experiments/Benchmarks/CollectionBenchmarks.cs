@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/26/2023  2:02 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*
@@ -91,25 +91,25 @@ public class CollectionBenchmarks
 
     private static KeyValuePair<int, double[]> GetArray( int size )
     {
-        double[] array = Enumerable.Range(0, size).Select(i => __random.NextDouble()).ToArray();
+        double[] array = [.. Enumerable.Range(0, size).Select(i => __random.NextDouble())];
 
         return new KeyValuePair<int, double[]>(size, array);
     }
     private static KeyValuePair<int, List<double>> GetList( int size )
     {
-        List<double> array = Enumerable.Range(0, size).Select(i => __random.NextDouble()).ToList();
+        List<double> array = [.. Enumerable.Range(0, size).Select(i => __random.NextDouble())];
 
         return new KeyValuePair<int, List<double>>(size, array);
     }
     private static KeyValuePair<int, ImmutableArray<double>> GetImmutableArray( int size )
     {
-        ImmutableArray<double> array = [..Enumerable.Range(0, size).Select(i => __random.NextDouble())];
+        ImmutableArray<double> array = [.. Enumerable.Range(0, size).Select(i => __random.NextDouble())];
 
         return new KeyValuePair<int, ImmutableArray<double>>(size, array);
     }
     private static KeyValuePair<int, ImmutableList<double>> GetImmutableList( int size )
     {
-        ImmutableList<double> array = Enumerable.Range(0, size).Select(i => __random.NextDouble()).ToImmutableList();
+        ImmutableList<double> array = [.. Enumerable.Range(0, size).Select(i => __random.NextDouble())];
 
         return new KeyValuePair<int, ImmutableList<double>>(size, array);
     }
@@ -121,12 +121,12 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetArray()          => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToArray();
+    [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetArray()          => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
     [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetSizedArray()     => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToArray(Size);
-    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableArray<double> GetImmutableArray() => [..Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
-    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableList<double>  GetImmutableList()  => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToImmutableList();
+    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableArray<double> GetImmutableArray() => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
+    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableList<double>  GetImmutableList()  => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
     [BenchmarkCategory("Construct")] [Benchmark] public FrozenSet<double>      GetFrozenSet()      => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToFrozenSet();
-    [BenchmarkCategory("Construct")] [Benchmark] public List<double>           GetList()           => Enumerable.Range(0, Size).Select(i => __random.NextDouble()).ToList();
+    [BenchmarkCategory("Construct")] [Benchmark] public List<double>           GetList()           => [.. Enumerable.Range(0, Size).Select(i => __random.NextDouble())];
 
     // [ BenchmarkCategory( "Construct" ), Benchmark ] public List<double>           GetSizedList()      => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToList( Size );
 

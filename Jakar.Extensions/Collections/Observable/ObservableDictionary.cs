@@ -5,7 +5,7 @@
 
 
 
-public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<ObservableDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
+public sealed partial class ObservableDictionary<TKey, TValue> : ObservableDictionary<ObservableDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
     public ObservableDictionary() : this(DEFAULT_CAPACITY) { }

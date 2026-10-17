@@ -57,6 +57,7 @@ public class Randoms : BaseClass
     /// <summary> <paramref name="length"/> uniformly random letters A-Z from <see cref="RandomNumberGenerator"/>. </summary>
     /// <remarks> One <see cref="RandomNumberGenerator.GetString"/> call instead of one <see cref="RandomNumberGenerator.GetInt32(int, int)"/> call per character. </remarks>
     public static string RandomString( int length ) => RandomNumberGenerator.GetString(LATIN_UPPER, length);
+
     /// <summary> <paramref name="length"/> uniformly random letters a-z from <see cref="RandomNumberGenerator"/>, each passed through <paramref name="converter"/>. </summary>
     public static string RandomString( int length, Func<char, char> converter )
     {

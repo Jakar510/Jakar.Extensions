@@ -2,6 +2,7 @@
 // 08/15/2022  11:35 AM
 
 using Microsoft.Extensions.DependencyInjection;
+using JsonWriterOptions = System.Text.Json.JsonWriterOptions;
 
 
 
@@ -129,13 +130,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public static WebRequester       Get( IServiceProvider            provider )                                                                   => provider.GetRequiredService<WebRequester>();
     public static WebRequester       Create( IHttpClientFactory       factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(nameof(WebRequester)), host, logger, encoding);
     public static WebRequester       Create( HttpClient               client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
+
     /// <summary>
     ///     Builds a requester from DI: the default (or, for the overload taking a name, the named) <see cref="WebRequesterOptions"/> (see <see cref="WebRequesterServiceCollectionExtensions.AddWebRequester(IServiceCollection, Action{WebRequesterOptions})"/>),
     ///     the registered <see cref="ILoggerFactory"/> (if any), and <see cref="WebRequesterOptions.BaseAddress"/> or else the registered <see cref="IHostInfo"/>.
     ///     Requests are not retried unless <see cref="WebRequesterOptions.Retry"/> is set.
     /// </summary>
     /// <exception cref="OptionsValidationException"> The options are invalid. </exception>
-    public static WebRequester       Create( IServiceProvider         provider ) => Create(provider, Options.DefaultName);
+    public static WebRequester Create( IServiceProvider provider ) => Create(provider, Options.DefaultName);
+
     /// <remarks> When an <see cref="IOptionsMonitor{TOptions}"/> is registered, the requester reloads whenever the named options change (see <see cref="WebRequester"/>). </remarks>
     public static WebRequester Create( IServiceProvider provider, string name )
     {
@@ -165,33 +168,90 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
 
 
     /// <summary>
-    ///     Serializes <paramref name="value"/> as compact JSON (same <see cref="JsonConvert.DefaultSettings"/> as <c>ToJson()</c>, without indentation) straight to bytes in
-    ///     <paramref name="encoding"/> (default <see cref="Encoding.Default"/>), with no intermediate string. The body is a byte array, so it can be re-sent by retries.
-    ///     Content-Type: <c>application/json; charset={encoding.WebName}</c>.
+    ///     Serializes <paramref name="value"/> with Jakar.Json straight to bytes in <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8).
+    ///     The body is a byte array, so it can be re-sent by retries. Content-Type: <c>application/json; charset={encoding.WebName}</c>.
     /// </summary>
-    /// <remarks> No byte order mark is ever sent (RFC 8259 §8.1), even for encodings that write one, such as <see cref="Encoding.UTF8"/> or <see cref="Encoding.Unicode"/>. </remarks>
-    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, Encoding? encoding = null )
+    /// <param name="value"> The body. </param>
+    /// <param name="options"> Writer settings; <see langword="null"/>: the type's own, written compact. </param>
+    /// <param name="encoding"> The body's charset; <see langword="null"/>: <see cref="Encoding.Default"/>. </param>
+    /// <remarks>
+    ///     No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (Jakar.Json's minimal escaping, as Newtonsoft did): the body is never embedded in HTML,
+    ///     and the declared charset carries it.
+    /// </remarks>
+    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, Jakar.Json.JsonWriterOptions? options = null, Encoding? encoding = null )
+        where TValue : IJsonSerializable<TValue>
     {
         encoding ??= Encoding.Default;
-        MemoryStream stream = new(); // its buffer is handed to the content; nothing to dispose
+        Jakar.Json.JsonWriterOptions settings = options ?? TValue.DefaultWriterOptions with { Indented = false }; // compact unless the caller asks otherwise
+        Buffer<byte>                 output   = new();
 
-        using ( StreamWriter writer = new(stream, encoding, 1024, true) )
-        using ( JsonTextWriter json = new(writer) { Formatting = Formatting.None } )
+        try
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(Json.Settings);
-            jsonSerializer.Serialize(json, value);
+            JsonCodec.WriteJson(in value, ref output, settings); // UTF-8
+
+            byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
+                              ? output.ToArray()
+                              : encoding.GetBytes(Encoding.UTF8.GetString(output.Values)); // GetBytes never writes a preamble
+
+            ByteArrayContent content = new(body);
+            content.Headers.ContentType = new MediaTypeHeaderValue(MimeTypeNames.Application.JSON) { CharSet = encoding.WebName };
+            return content;
         }
+        finally { output.Dispose(); }
+    }
 
-        // StreamWriter writes the encoding's preamble (BOM) first; start the content after it instead of copying.
-        byte[]             buffer   = stream.GetBuffer();
-        int                length   = (int)stream.Length;
-        ReadOnlySpan<byte> preamble = encoding.Preamble;
+    /// <summary> Serializes <paramref name="value"/> with System.Text.Json and <paramref name="info"/>, compact, straight to bytes in <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8). </summary>
+    /// <remarks> No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (<see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>). </remarks>
+    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, JsonTypeInfo<TValue> info, Encoding? encoding = null ) =>
+        CreateContent(info.Options, ( value, info ), static ( writer, state ) => JsonSerializer.Serialize(writer, state.value, state.info), encoding);
 
-        int offset = buffer.AsSpan(0, length).StartsWith(preamble)
-                         ? preamble.Length
-                         : 0;
+    /// <summary> A JSON array body, written element by element with only the element's metadata (no collection type needs registering). </summary>
+    public static ByteArrayContent CreateJsonArrayContent<TValue>( IEnumerable<TValue> values, JsonTypeInfo<TValue> info, Encoding? encoding = null ) =>
+        CreateContent(info.Options, ( values, info ), static ( writer, state ) => JsonModel.WriteArray(writer, state.values, state.info), encoding);
 
-        ByteArrayContent content = new(buffer, offset, length - offset);
+    /// <summary> Serializes <paramref name="value"/> as its <b> runtime </b> type (e.g. a <see cref="BaseClass"/>-typed argument holding a <c> UserModel </c>), resolved with <see cref="Json.GetTypeInfo(Type)"/>. </summary>
+    public static ByteArrayContent CreateJsonContentOfRuntimeType( object value, Encoding? encoding = null )
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        JsonTypeInfo info = Json.GetTypeInfo(value.GetType());
+        return CreateContent(info.Options, ( value, info ), static ( writer, state ) => JsonSerializer.Serialize(writer, state.value, state.info), encoding);
+    }
+
+    /// <summary> A JSON array of <paramref name="values"/>, each serialized as its <b> runtime </b> type. </summary>
+    public static ByteArrayContent CreateJsonArrayContentOfRuntimeType( IEnumerable<object?> values, Encoding? encoding = null ) =>
+        CreateContent(Json.Options,
+                      values,
+                      static ( writer, values ) =>
+                      {
+                          writer.WriteStartArray();
+
+                          foreach ( object? value in values )
+                          {
+                              if ( value is null ) { writer.WriteNullValue(); }
+                              else { JsonSerializer.Serialize(writer, value, Json.GetTypeInfo(value.GetType())); }
+                          }
+
+                          writer.WriteEndArray();
+                      },
+                      encoding);
+
+
+    private static ByteArrayContent CreateContent<TState>( JsonSerializerOptions options, TState state, Action<Utf8JsonWriter, TState> write, Encoding? encoding )
+    {
+        encoding ??= Encoding.Default;
+
+        // System.Text.Json writes UTF-8 natively; always compact, whatever the context's WriteIndented.
+        JsonWriterOptions writerOptions = options.GetWriterOptions(false);
+        writerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+
+        ArrayBufferWriter<byte> buffer = new(256);
+        using ( Utf8JsonWriter writer = new(buffer, writerOptions) ) { write(writer, state); }
+
+        byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
+                          ? [.. buffer.WrittenSpan]
+                          : encoding.GetBytes(Encoding.UTF8.GetString(buffer.WrittenSpan)); // GetBytes never writes a preamble
+
+        ByteArrayContent content = new(body);
         content.Headers.ContentType = new MediaTypeHeaderValue(MimeTypeNames.Application.JSON) { CharSet = encoding.WebName };
         return content;
     }
@@ -210,15 +270,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Delete( string relativePath, MultipartFormDataContent    content ) => Delete(relativePath,            (HttpContent)content);
     public WebHandler Delete( string relativePath, MultipartContent            content ) => Delete(relativePath,            (HttpContent)content);
     public WebHandler Delete( string relativePath, string                      value )   => Delete(relativePath,            new StringContent(value, Encoding));
-    public WebHandler Delete( string relativePath, BaseClass                   value )   => Delete(relativePath,            CreateJsonContent(value, Encoding));
-    public WebHandler Delete( string relativePath, IEnumerable<BaseClass>      value )   => Delete(relativePath,            CreateJsonContent(value, Encoding));
+    public WebHandler Delete( string relativePath, BaseClass                   value )   => Delete(relativePath,            CreateJsonContentOfRuntimeType(value, Encoding));
+    public WebHandler Delete( string relativePath, IEnumerable<BaseClass>      value )   => Delete(relativePath,            CreateJsonArrayContentOfRuntimeType(value, Encoding));
     public WebHandler Delete( string relativePath, HttpContent                 value )   => Delete(CreateUrl(relativePath), value);
     public WebHandler Delete( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Delete, value);
     public WebHandler Delete( Uri    url ) => CreateHandler(url, HttpMethod.Delete);
     public WebHandler Delete<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
     public WebHandler Delete<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
 
 
     public WebHandler Get( Uri    url )          => CreateHandler(url, HttpMethod.Get);
@@ -232,15 +292,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Patch( string relativePath, MultipartFormDataContent    content ) => Patch(relativePath,            (HttpContent)content);
     public WebHandler Patch( string relativePath, MultipartContent            content ) => Patch(relativePath,            (HttpContent)content);
     public WebHandler Patch( string relativePath, string                      value )   => Patch(relativePath,            new StringContent(value, Encoding));
-    public WebHandler Patch( string relativePath, BaseClass                   value )   => Patch(relativePath,            CreateJsonContent(value, Encoding));
-    public WebHandler Patch( string relativePath, IEnumerable<BaseClass>      value )   => Patch(relativePath,            CreateJsonContent(value, Encoding));
+    public WebHandler Patch( string relativePath, BaseClass                   value )   => Patch(relativePath,            CreateJsonContentOfRuntimeType(value, Encoding));
+    public WebHandler Patch( string relativePath, IEnumerable<BaseClass>      value )   => Patch(relativePath,            CreateJsonArrayContentOfRuntimeType(value, Encoding));
     public WebHandler Patch( string relativePath, HttpContent                 value )   => Patch(CreateUrl(relativePath), value);
     public WebHandler Patch( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Patch, value);
     public WebHandler Patch( Uri    url ) => CreateHandler(url, HttpMethod.Patch);
     public WebHandler Patch<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
     public WebHandler Patch<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
 
 
     public WebHandler Post( string relativePath, byte[]                      value )   => Post(relativePath,            new ByteArrayContent(value));
@@ -250,15 +310,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Post( string relativePath, MultipartFormDataContent    content ) => Post(relativePath,            (HttpContent)content);
     public WebHandler Post( string relativePath, MultipartContent            content ) => Post(relativePath,            (HttpContent)content);
     public WebHandler Post( string relativePath, string                      value )   => Post(relativePath,            new StringContent(value, Encoding));
-    public WebHandler Post( string relativePath, BaseClass                   value )   => Post(relativePath,            CreateJsonContent(value, Encoding));
-    public WebHandler Post( string relativePath, IEnumerable<BaseClass>      value )   => Post(relativePath,            CreateJsonContent(value, Encoding));
+    public WebHandler Post( string relativePath, BaseClass                   value )   => Post(relativePath,            CreateJsonContentOfRuntimeType(value, Encoding));
+    public WebHandler Post( string relativePath, IEnumerable<BaseClass>      value )   => Post(relativePath,            CreateJsonArrayContentOfRuntimeType(value, Encoding));
     public WebHandler Post( string relativePath, HttpContent                 value )   => Post(CreateUrl(relativePath), value);
     public WebHandler Post( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Post, value);
     public WebHandler Post( Uri    url ) => CreateHandler(url, HttpMethod.Post);
     public WebHandler Post<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
     public WebHandler Post<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
 
 
     public WebHandler Put( string relativePath, byte[]                      value )   => Put(relativePath,            new ByteArrayContent(value));
@@ -268,15 +328,15 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Put( string relativePath, MultipartFormDataContent    content ) => Put(relativePath,            (HttpContent)content);
     public WebHandler Put( string relativePath, MultipartContent            content ) => Put(relativePath,            (HttpContent)content);
     public WebHandler Put( string relativePath, string                      value )   => Put(relativePath,            new StringContent(value, Encoding));
-    public WebHandler Put( string relativePath, BaseClass                   value )   => Put(relativePath,            CreateJsonContent(value, Encoding));
-    public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value )   => Put(relativePath,            CreateJsonContent(value, Encoding));
+    public WebHandler Put( string relativePath, BaseClass                   value )   => Put(relativePath,            CreateJsonContentOfRuntimeType(value, Encoding));
+    public WebHandler Put( string relativePath, IEnumerable<BaseClass>      value )   => Put(relativePath,            CreateJsonArrayContentOfRuntimeType(value, Encoding));
     public WebHandler Put( string relativePath, HttpContent                 value )   => Put(CreateUrl(relativePath), value);
     public WebHandler Put( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Put, value);
     public WebHandler Put( Uri    url ) => CreateHandler(url, HttpMethod.Put);
     public WebHandler Put<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
     public WebHandler Put<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, Encoding));
+        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
 
 
 

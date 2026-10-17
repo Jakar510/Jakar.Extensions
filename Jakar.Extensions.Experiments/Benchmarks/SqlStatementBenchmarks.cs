@@ -2,7 +2,7 @@
 // using CommunityToolkit.HighPerformance.Enumerables;
 
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*

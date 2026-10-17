@@ -1,0 +1,19 @@
+{
+  "Tags": [
+    {
+      "Key": "field",
+      "Value": "notes",
+      "HasValue": true
+    },
+    {
+      "Key": "nullable",
+      "Value": null,
+      "HasValue": false
+    }
+  ],
+  "Entries": [
+    "must be 5 characters or fewer",
+    "required"
+  ],
+  "IsEmpty": false
+}

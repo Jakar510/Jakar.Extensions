@@ -5,7 +5,8 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualComparable<ParameterDetails>, IJsonModel<ParameterDetails>
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class ParameterDetails : BaseClass<ParameterDetails>, IEqualComparable<ParameterDetails>, IJsonModel<ParameterDetails>
 {
     public bool    HasDefaultValue { get; init; }
     public bool    IsIn            { get; init; }
@@ -30,7 +31,7 @@ public sealed class ParameterDetails : BaseClass<ParameterDetails>, IEqualCompar
 
 
     public static ParameterDetails[] Create( MethodBase                 method ) => Create(method.GetParameters());
-    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items )  => items.Select(static x => new ParameterDetails(x)).ToArray();
+    public static ParameterDetails[] Create( IEnumerable<ParameterInfo> items )  => [.. items.Select(static x => new ParameterDetails(x))];
 
 
     public override int CompareTo( ParameterDetails? other )

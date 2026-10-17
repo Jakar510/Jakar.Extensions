@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 04/12/2022  1:54 PM
 
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -82,14 +78,14 @@ public delegate bool FilterDelegate<TValue>( int index, ref readonly TValue? val
 public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, ICollectionAlerts<TValue>, INotificationSuspendable
     where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
 {
-// ReSharper disable StaticMemberInGenericType
+    // ReSharper disable StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs       = new(NotifyCollectionChangedAction.Reset);
     private static readonly   PropertyChangedEventArgs         __countArgs      = new(nameof(Count));
     private static readonly   PropertyChangedEventArgs         __isEmptyArgs    = new(nameof(IsEmpty));
     private static readonly   PropertyChangedEventArgs         __isNotEmptyArgs = new(nameof(IsNotEmpty));
     private static readonly   PropertyChangedEventArgs         __capacityArgs   = new(nameof(Capacity));
 
-// ReSharper restore StaticMemberInGenericType
+    // ReSharper restore StaticMemberInGenericType
 
     private FilterDelegate<TValue>? __filter;
     private sbyte                   __filterOverridden    = -1; // -1 unknown, 0 no, 1 yes
@@ -122,6 +118,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
             return __filterOverridden == 1;
         }
     }
+
     /// <summary> Whether change args have to be built: someone subscribed to <see cref="CollectionChanged"/>, or a subclass overrides <see cref="OnChanged"/>. </summary>
     private bool NeedsChangeArgs
     {
@@ -186,7 +183,10 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     [MethodImpl(MethodImplOptions.AggressiveInlining)] private bool Deferred() => Volatile.Read(ref __suspended) != 0 && Defer();
     private bool Defer()
     {
-        Volatile.Write(ref __pending, 1);
+        // A full fence, not Volatile.Write: a store followed by a load of another field may be reordered (the store waits in the store buffer), so this thread could
+        // still read __suspended == 1 while the closing scope, already at 0, reads __pending == 0 and raises nothing; the change would never be notified. With fences on
+        // both sides (ResumeNotifications uses Interlocked too), either the closing scope sees this flag and raises the Reset, or this thread sees __suspended == 0.
+        Interlocked.Exchange(ref __pending, 1);
         if ( Volatile.Read(ref __suspended) != 0 ) { return true; }
 
         // The last scope closed meanwhile. If it already consumed the flag it raised the Reset; otherwise raise this change ourselves.
@@ -230,6 +230,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         if ( NeedsChangeArgs ) { OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, value, index)); }
         else { CountChanged(); }
     }
+
     /// <summary> Items were removed but are no longer available: raised as a reset. </summary>
     protected void Removed( int index ) => Reset();
     protected void Moved( TValue[] value, ref readonly int index, ref readonly int oldIndex )
@@ -251,6 +252,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         if ( NeedsChangeArgs ) { OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old, index)); }
     }
     protected void OnCapacityChanged() => OnPropertyChanged(__capacityArgs);
+
     /// <summary> Raises <see cref="Count"/>, <see cref="IsEmpty"/> and <see cref="IsNotEmpty"/>. </summary>
     protected void OnCountChanged()
     {
@@ -259,6 +261,7 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 
         CountChanged();
     }
+
     /// <summary> Raises <see cref="Count"/> when it changed, and <see cref="IsEmpty"/> / <see cref="IsNotEmpty"/> when emptiness changed (e.g. a sort raises neither). </summary>
     private void CountChanged()
     {
@@ -270,7 +273,10 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
 
         OnPropertyChanged(__countArgs);
 
-        if ( last >= 0 && ( last == 0 ) == ( count == 0 ) ) { return; }
+        // IsEmpty / IsNotEmpty only change when the collection goes from empty to non-empty or back. (last < 0: the previous count is unknown, so raise them.)
+        bool wasEmpty = last  == 0;
+        bool isEmpty  = count == 0;
+        if ( last >= 0 && wasEmpty == isEmpty ) { return; }
 
         OnPropertyChanged(__isEmptyArgs);
         OnPropertyChanged(__isNotEmptyArgs);

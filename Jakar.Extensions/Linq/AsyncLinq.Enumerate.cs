@@ -78,7 +78,7 @@ public static partial class AsyncLinq
 
             if ( sorted )
             {
-                List<TKey> list = new(self.Keys);
+                List<TKey> list = [.. self.Keys];
                 list.Sort();
                 keys = list;
             }
@@ -102,7 +102,7 @@ public static partial class AsyncLinq
 
             if ( sorted )
             {
-                List<TKey> list = new(self.Keys);
+                List<TKey> list = [.. self.Keys];
                 list.Sort();
                 keys = list;
             }

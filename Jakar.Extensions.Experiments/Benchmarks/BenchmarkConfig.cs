@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 11/18/2023  10:43 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 [MarkdownExporterAttribute.GitHub]

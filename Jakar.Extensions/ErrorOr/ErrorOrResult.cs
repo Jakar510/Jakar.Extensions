@@ -34,8 +34,9 @@ public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrRes
 
     /// <summary> <see langword="true"/> when this result carries at least one error. Never inferred from the value; see <c> Errors.IsValid </c> . </summary>
     [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true;
-    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Error?.IsValid is not true && Value is not null;
-    [MemberNotNullWhen(true, nameof(Value))] public bool Passed    => Error?.IsValid is not true && Value is true;
+
+    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue => Error?.IsValid is not true && Value is not null;
+    [MemberNotNullWhen(true, nameof(Value))] public bool Passed   => Error?.IsValid is not true && Value is true;
 
 
     public static ErrorOrResult Create( bool   value )  => new(value, Errors.Empty);
@@ -156,7 +157,8 @@ public readonly struct ErrorOrResult<TValue>( TValue? value, Errors? error ) : I
     ///     <para> This must NOT be inferred from the value: for a value type <c> TValue </c> , <c> default(TValue) </c> is never <see langword="null"/> , so a null check silently reports "no errors" for every result built from <c> Errors </c> . </para>
     /// </summary>
     [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true;
-    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue  => Error?.IsValid is not true && Value is not null;
+
+    [MemberNotNullWhen(true, nameof(Value))] public bool HasValue => Error?.IsValid is not true && Value is not null;
 
 
     public static ErrorOrResult<TValue> Create( TValue value )  => new(value, Errors.Empty);
