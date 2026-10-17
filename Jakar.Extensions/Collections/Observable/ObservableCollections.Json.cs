@@ -18,6 +18,7 @@ namespace Jakar.Extensions;
 ///     </para>
 /// </summary>
 public class CollectionAlertsJsonConverter<TSelf, TValue> : JsonConverter<TSelf>
+    where TValue : notnull
     where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>, IJsonArraySource<TValue>, IEqualComparable<TSelf>
 {
     public override TSelf? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
@@ -44,19 +45,22 @@ public sealed class ConcurrentObservableCollectionJsonConverter<TValue> : Collec
 
 
 
-public sealed class ObservableHashSetJsonConverter<TValue> : CollectionAlertsJsonConverter<ObservableHashSet<TValue>, TValue>;
+public sealed class ObservableHashSetJsonConverter<TValue> : CollectionAlertsJsonConverter<ObservableHashSet<TValue>, TValue>
+    where TValue : notnull;
 
 
 
 internal static class ObservableJson
 {
     /// <summary> The element's metadata: from the serializer's own options when they have it (inside a converter), otherwise <see cref="Json.GetTypeInfo{T}"/>. </summary>
-    public static JsonTypeInfo<TValue> ElementInfo<TValue>( JsonSerializerOptions? options = null ) => options is not null && options.TryGetTypeInfo(typeof(TValue), out JsonTypeInfo? info) && info is JsonTypeInfo<TValue> typed
-                                                                                                           ? typed
-                                                                                                           : Json.GetTypeInfo<TValue>();
+    public static JsonTypeInfo<TValue> ElementInfo<TValue>( JsonSerializerOptions? options = null )
+        where TValue : notnull => options is not null && options.TryGetTypeInfo(typeof(TValue), out JsonTypeInfo? info) && info is JsonTypeInfo<TValue> typed
+                                      ? typed
+                                      : Json.GetTypeInfo<TValue>();
 
 
     public static TSelf FromJson<TSelf, TValue>( string json )
+        where TValue : notnull
         where TSelf : ICollectionAlerts<TSelf, TValue>
     {
         using RentedArray<TValue> values = JsonModel.FromJsonArrayPooled(json, ElementInfo<TValue>());
@@ -64,6 +68,7 @@ internal static class ObservableJson
     }
 
     public static TSelf FromJson<TSelf, TValue>( ReadOnlySpan<byte> utf8Json )
+        where TValue : notnull
         where TSelf : ICollectionAlerts<TSelf, TValue>
     {
         using RentedArray<TValue> values = JsonModel.FromJsonArrayPooled(utf8Json, ElementInfo<TValue>());
@@ -71,6 +76,7 @@ internal static class ObservableJson
     }
 
     public static async ValueTask<TSelf> FromJsonAsync<TSelf, TValue>( Stream stream, CancellationToken token )
+        where TValue : notnull
         where TSelf : ICollectionAlerts<TSelf, TValue>
     {
         using RentedArray<TValue> values = await JsonModel.FromJsonArrayPooledAsync(stream, ElementInfo<TValue>(), token).ConfigureAwait(false);
@@ -79,6 +85,7 @@ internal static class ObservableJson
 
     /// <summary> <see langword="false"/> for blank or malformed JSON. A missing registration (<see cref="NotSupportedException"/>) is a configuration error and propagates. </summary>
     public static bool TryFromJson<TSelf, TValue>( string? json, [NotNullWhen(true)] out TSelf? result )
+        where TValue : notnull
         where TSelf : class, ICollectionAlerts<TSelf, TValue>
     {
         result = null;
@@ -93,6 +100,7 @@ internal static class ObservableJson
     }
 
     public static bool TryFromJson<TSelf, TValue>( ReadOnlySpan<byte> utf8Json, [NotNullWhen(true)] out TSelf? result )
+        where TValue : notnull
         where TSelf : class, ICollectionAlerts<TSelf, TValue>
     {
         result = null;
@@ -108,6 +116,7 @@ internal static class ObservableJson
 
 
     public static string ToString<TValue>( IEnumerable<TValue> collection, int count )
+        where TValue : notnull
     {
         try { return JsonModel.ToJson(collection, Json.GetTypeInfo<TValue>()); }
         catch ( NotSupportedException ) { return $"{collection.GetType().Name}[{count}]"; }
@@ -120,15 +129,15 @@ internal static class ObservableJson
 
 
 
-public abstract partial class ObservableCollection<TSelf, TValue> : IJsonArraySource<TValue>, Jakar.Json.IJsonCollection<TSelf, TValue>
+public abstract partial class ObservableCollection<TSelf, TValue> : IJsonArraySource<TValue>, IJsonCollection<TSelf, TValue>
 {
     /// <summary> Writes the unfiltered backing list. </summary>
     public virtual void WriteJsonArray( Utf8JsonWriter writer, JsonTypeInfo<TValue> info ) => JsonModel.WriteArray(writer, CollectionsMarshal.AsSpan(buffer), info);
 
     /// <summary> Jakar.Json: the unfiltered backing list, like <see cref="WriteJsonArray"/>. </summary>
     public virtual void WriteJsonElements<TWriter, TConverter>( ref TWriter writer )
-        where TWriter : Jakar.Json.IJsonWriter, allows ref struct
-        where TConverter : Jakar.Json.IJsonConverter<TValue>
+        where TWriter : IJsonWriter, allows ref struct
+        where TConverter : IJsonConverter<TValue>
     {
         foreach ( ref readonly TValue value in CollectionsMarshal.AsSpan(buffer) ) { TConverter.Write(ref writer, in value); }
     }
@@ -163,12 +172,12 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue>
 
 
 
-public abstract partial class ObservableHashSet<TSelf, TValue> : IJsonArraySource<TValue>, Jakar.Json.IJsonCollection<TSelf, TValue>
+public abstract partial class ObservableHashSet<TSelf, TValue> : IJsonArraySource<TValue>, IJsonCollection<TSelf, TValue>
 {
     /// <summary> Jakar.Json: the unfiltered backing set, in its enumeration order (like <see cref="WriteJsonArray"/>). </summary>
     public virtual void WriteJsonElements<TWriter, TConverter>( ref TWriter writer )
-        where TWriter : Jakar.Json.IJsonWriter, allows ref struct
-        where TConverter : Jakar.Json.IJsonConverter<TValue>
+        where TWriter : IJsonWriter, allows ref struct
+        where TConverter : IJsonConverter<TValue>
     {
         foreach ( TValue value in buffer ) { TConverter.Write(ref writer, in value); }
     }

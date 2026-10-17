@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 04/12/2022  1:54 PM
 
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -187,7 +183,10 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     [MethodImpl(MethodImplOptions.AggressiveInlining)] private bool Deferred() => Volatile.Read(ref __suspended) != 0 && Defer();
     private bool Defer()
     {
-        Volatile.Write(ref __pending, 1);
+        // A full fence, not Volatile.Write: a store followed by a load of another field may be reordered (the store waits in the store buffer), so this thread could
+        // still read __suspended == 1 while the closing scope, already at 0, reads __pending == 0 and raises nothing; the change would never be notified. With fences on
+        // both sides (ResumeNotifications uses Interlocked too), either the closing scope sees this flag and raises the Reset, or this thread sees __suspended == 0.
+        Interlocked.Exchange(ref __pending, 1);
         if ( Volatile.Read(ref __suspended) != 0 ) { return true; }
 
         // The last scope closed meanwhile. If it already consumed the flag it raised the Reset; otherwise raise this change ourselves.

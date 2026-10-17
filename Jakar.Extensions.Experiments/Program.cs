@@ -1,13 +1,7 @@
-// dotnet run -c Release -- [--bench] [BenchmarkDotNet arguments, e.g. --filter *JakarJson*]
-// dotnet run -c Release -- --profile [JakarJson_Benchmarks method] [lines] [seconds]   (a hot loop for dotnet-trace; see JsonProfile)
+// dotnet run -c Release -- [--bench] [BenchmarkDotNet arguments, e.g. --filter *Hash*]
+// The Jakar.Json benchmarks are in the Jakar.Json repository (Jakar.Json.Benchmarks).
 
-if ( args is ["--profile", ..] )
-{
-    Experiments.JsonProfile.Run(args[1..]);
-    return;
-}
-
-BenchmarkSwitcher.FromAssembly(typeof(JakarJson_Benchmarks).Assembly)
+BenchmarkSwitcher.FromAssembly(typeof(BenchmarkConfig).Assembly)
                  .Run(args is ["--bench", ..]
                           ? args[1..]
                           : args);

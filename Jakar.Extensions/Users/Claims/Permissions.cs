@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/14/2025  22:34
 
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 

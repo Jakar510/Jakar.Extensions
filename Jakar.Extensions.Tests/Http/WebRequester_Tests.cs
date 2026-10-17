@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using JsonTape = Jakar.Json.JsonTape;
 
 
 
@@ -69,13 +70,14 @@ public partial class WebRequester_Tests : Assert
         StubHandler  handler   = new(static ( _, _ ) => StubHandler.Text(HttpStatusCode.OK, """{"Name":"widget","Count":3}"""));
         WebRequester requester = Create(handler);
 
-        WebResponse<Item>                            typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
-        WebResponse<Item>                            info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
-        WebResponse<System.Text.Json.Nodes.JsonNode> token = await requester.Get("item").AsJson(CancellationToken.None);
+        WebResponse<Item>     typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
+        WebResponse<Item>     info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
+        WebResponse<JsonTape> token = await requester.Get("item").AsJson(CancellationToken.None);
+        using JsonTape?       tape  = token.Payload; // pooled: dispose it
 
         this.AreEqual(new Item("widget", 3), typed.Payload);
         this.AreEqual(new Item("widget", 3), info.Payload);
-        this.AreEqual(3,                     token.Payload!["Count"]!.GetValue<int>());
+        this.AreEqual(3,                     tape!.Root["Count"].GetInt32());
     }
 
     [Test] public async Task Bytes_Memory_Stream_ReturnTheBody()
@@ -260,7 +262,7 @@ public partial class WebRequester_Tests : Assert
 
         this.AreEqual("created",                    response.Payload);
         this.AreEqual(2,                            server.Requests.Count);
-        this.AreEqual("""{"Name":"a","Count":1}""", server.Requests[0].Text);
+        this.AreEqual("""{"Name" : "a","Count" : 1}""", server.Requests[0].Text); // Jakar.Json's compact form
         this.AreEqual(server.Requests[0].Text,      server.Requests[1].Text);
     }
 
@@ -271,9 +273,10 @@ public partial class WebRequester_Tests : Assert
     {
         using ByteArrayContent content = WebRequester.CreateJsonContent(new Item("ü", 2));
 
-        this.AreEqual("application/json",           content.Headers.ContentType!.MediaType);
-        this.AreEqual("utf-8",                      content.Headers.ContentType.CharSet);
-        this.AreEqual("""{"Name":"ü","Count":2}""", Encoding.UTF8.GetString(await content.ReadAsByteArrayAsync()));
+        // Jakar.Json's compact form: no newlines or indentation, and its " : " name separator.
+        this.AreEqual("application/json",                 content.Headers.ContentType!.MediaType);
+        this.AreEqual("utf-8",                            content.Headers.ContentType.CharSet);
+        this.AreEqual("""{"Name" : "ü","Count" : 2}""", Encoding.UTF8.GetString(await content.ReadAsByteArrayAsync()));
     }
 
 
@@ -289,7 +292,7 @@ public partial class WebRequester_Tests : Assert
                                 _         => Encoding.UTF32
                             };
 
-        using ByteArrayContent content = WebRequester.CreateJsonContent(new Item(TEXT, 1), encoding);
+        using ByteArrayContent content = WebRequester.CreateJsonContent(new Item(TEXT, 1), encoding: encoding);
         byte[]                 bytes   = await content.ReadAsByteArrayAsync();
         byte[]                 bom     = encoding.GetPreamble();
 

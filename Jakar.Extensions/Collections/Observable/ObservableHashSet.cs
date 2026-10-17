@@ -5,6 +5,7 @@ namespace Jakar.Extensions;
 
 
 public partial class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHashSet<ObservableHashSet<TValue>, TValue>(values), ICollectionAlerts<ObservableHashSet<TValue>, TValue>
+    where TValue : notnull
 {
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
     public ObservableHashSet( int                         capacity ) : this(new HashSet<TValue>(capacity)) { }
@@ -35,6 +36,7 @@ public partial class ObservableHashSet<TValue>( HashSet<TValue> values ) : Obser
 
 
 public abstract partial class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values ) : CollectionAlerts<TSelf, TValue>, ISet<TValue>, IReadOnlySet<TValue>
+    where TValue : notnull
     where TSelf : ObservableHashSet<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly HashSet<TValue> buffer = values;

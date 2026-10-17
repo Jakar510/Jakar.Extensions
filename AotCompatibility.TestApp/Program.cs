@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using AotCompatibility.TestApp;
 using Jakar.Extensions;
+using Jakar.Json;
 using Jakar.Extensions.UserGuid;
 
 
@@ -122,8 +123,24 @@ Check("Encoding",                  () => Json.Serialize(new LocalFile(Path.Combi
 Check("OTP QR code (ZXing)", () => OneTimePassword.Create("Jakar").GetContent("ada").StartsWith("otpauth://"));
 Check("IPAddress parse",     () => IPAddress.Parse("127.0.0.1").ToString() == "127.0.0.1");
 
-// ─── Jakar.Json (reflection-free serializer) ─────────────────────────────────
-foreach ( ( string name, Func<bool> test ) in JakarJsonChecks.All() ) { Check(name, test); }
+// ─── Hybrid [JsonModel]: Jakar.Json behind IJsonModel ───────────────────────
+// The user models' IJsonModel members run on Jakar.Json (static virtual dispatch through IJsonModel<TSelf>); JsonTypeInfo stays System.Text.Json's. Covers init-only
+// members of generic bases, observable collections (IJsonCollection) and the Dictionary<string, JsonElement> extension-data bag. Jakar.Json's own checks are in its repository.
+Check("[JsonModel] hybrid: Jakar.Json behind IJsonModel", () =>
+                                                                           {
+                                                                               UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
+                                                                               user.Addresses.Add(new UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
+
+                                                                               string                              json  = user.ToJson(indented: false);
+                                                                               UserModel back  = UserModel.FromJson(json[..^1] + ",\"extra\":[1,2.50]}");
+                                                                               UserModel stj   = JsonSerializer.Deserialize(json, UserModel.JsonTypeInfo)!;
+
+                                                                               return json == JsonCodec.ToJson(user, Jakar.Json.JsonWriterOptions.Default)
+                                                                                   && back.Addresses.Single().ID == user.Addresses.Single().ID
+                                                                                   && stj.UserName == "ada"
+                                                                                   && back.AdditionalData!["extra"][1].GetRawText() == "2.50"
+                                                                                   && back.ToJson(indented: false).EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
+                                                                           });
 
 
 Console.WriteLine(failures == 0

@@ -37,13 +37,15 @@ public static partial class Json
             return self.AdditionalData?.TryGetValue(key, out JsonElement element) is true && element.TryConvert(info, out value);
         }
 
-        public bool TryGet<T>( string key, out T? value ) => self.TryGet(key, GetTypeInfo<T>(), out value);
+        public bool TryGet<T>( string key, out T? value )
+            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value);
 
         public T? Get<T>( string key, JsonTypeInfo<T> info ) => self.TryGet(key, info, out T? value)
                                                                     ? value
                                                                     : default;
 
-        public T? Get<T>( string key ) => self.Get(key, GetTypeInfo<T>());
+        public T? Get<T>( string key )
+            where T : notnull => self.Get(key, GetTypeInfo<T>());
 
         public JsonElement? Get( string key ) => self.AdditionalData?.TryGetValue(key, out JsonElement element) is true
                                                      ? element
@@ -53,7 +55,8 @@ public static partial class Json
         /// <summary> Adds or updates. </summary>
         public void Set<T>( string key, T value, JsonTypeInfo<T> info ) => self.GetAdditionalData()[key] = JsonSerializer.SerializeToElement(value, info);
 
-        public void Set<T>( string key, T value ) => self.Set(key, value, GetTypeInfo<T>());
+        public void Set<T>( string key, T value )
+            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
 
         public void Set( string key, JsonElement value ) => self.GetAdditionalData()[key] = value;
 
@@ -110,7 +113,8 @@ public static partial class Json
                                                                     ? value
                                                                     : default;
 
-        public T? Get<T>( string key ) => self.Get(key, GetTypeInfo<T>());
+        public T? Get<T>( string key )
+            where T : notnull => self.Get(key, GetTypeInfo<T>());
 
 
         public void Set<T>( string key, T value, JsonTypeInfo<T> info )
@@ -120,7 +124,8 @@ public static partial class Json
             self.SetAdditionalData(data);
         }
 
-        public void Set<T>( string key, T value ) => self.Set(key, value, GetTypeInfo<T>());
+        public void Set<T>( string key, T value )
+            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
 
 
         public bool Remove( string key )

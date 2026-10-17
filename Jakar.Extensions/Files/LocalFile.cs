@@ -943,7 +943,8 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
+            where TValue : notnull;
     }
 
 
@@ -989,7 +990,8 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        TValue AsJson<TValue>( in TelemetrySpan parent = default );
+        TValue AsJson<TValue>( in TelemetrySpan parent = default )
+            where TValue : notnull;
     }
 
 

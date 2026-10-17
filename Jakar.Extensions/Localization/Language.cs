@@ -1,9 +1,4 @@
-﻿using ZLinq;
-using ZLinq.Linq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]

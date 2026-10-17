@@ -2,6 +2,7 @@
 // 08/15/2022  11:35 AM
 
 using Microsoft.Extensions.DependencyInjection;
+using JsonWriterOptions = System.Text.Json.JsonWriterOptions;
 
 
 
@@ -167,17 +168,40 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
 
 
     /// <summary>
-    ///     Serializes <paramref name="value"/> as compact JSON (metadata from <see cref="Json.GetTypeInfo{T}"/>) straight to bytes in
-    ///     <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8). The body is a byte array, so it can be re-sent by retries.
-    ///     Content-Type: <c>application/json; charset={encoding.WebName}</c>.
+    ///     Serializes <paramref name="value"/> with Jakar.Json straight to bytes in <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8).
+    ///     The body is a byte array, so it can be re-sent by retries. Content-Type: <c>application/json; charset={encoding.WebName}</c>.
     /// </summary>
+    /// <param name="value"> The body. </param>
+    /// <param name="options"> Writer settings; <see langword="null"/>: the type's own, written compact. </param>
+    /// <param name="encoding"> The body's charset; <see langword="null"/>: <see cref="Encoding.Default"/>. </param>
     /// <remarks>
-    ///     No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (<see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>, as Newtonsoft did):
-    ///     the body is never embedded in HTML, and the declared charset carries it.
+    ///     No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (Jakar.Json's minimal escaping, as Newtonsoft did): the body is never embedded in HTML,
+    ///     and the declared charset carries it.
     /// </remarks>
-    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, Encoding? encoding = null ) => CreateJsonContent(value, Json.GetTypeInfo<TValue>(), encoding);
+    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, Jakar.Json.JsonWriterOptions? options = null, Encoding? encoding = null )
+        where TValue : IJsonSerializable<TValue>
+    {
+        encoding ??= Encoding.Default;
+        Jakar.Json.JsonWriterOptions settings = options ?? TValue.DefaultWriterOptions with { Indented = false }; // compact unless the caller asks otherwise
+        Buffer<byte>                 output   = new();
 
-    /// <inheritdoc cref="CreateJsonContent{TValue}(TValue, Encoding)"/>
+        try
+        {
+            JsonCodec.WriteJson(in value, ref output, settings); // UTF-8
+
+            byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
+                              ? output.ToArray()
+                              : encoding.GetBytes(Encoding.UTF8.GetString(output.Values)); // GetBytes never writes a preamble
+
+            ByteArrayContent content = new(body);
+            content.Headers.ContentType = new MediaTypeHeaderValue(MimeTypeNames.Application.JSON) { CharSet = encoding.WebName };
+            return content;
+        }
+        finally { output.Dispose(); }
+    }
+
+    /// <summary> Serializes <paramref name="value"/> with System.Text.Json and <paramref name="info"/>, compact, straight to bytes in <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8). </summary>
+    /// <remarks> No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (<see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>). </remarks>
     public static ByteArrayContent CreateJsonContent<TValue>( TValue value, JsonTypeInfo<TValue> info, Encoding? encoding = null ) =>
         CreateContent(info.Options, ( value, info ), static ( writer, state ) => JsonSerializer.Serialize(writer, state.value, state.info), encoding);
 

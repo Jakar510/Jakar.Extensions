@@ -47,8 +47,10 @@ public readonly partial struct ErrorResponse( string? text ) : IParsable<ErrorRe
         token = AsJson();
         return token is not null;
     }
-    public TValue? AsJson<TValue>() => Text.TryFromJson<TValue>();
+    public TValue? AsJson<TValue>()
+        where TValue : notnull => Text.TryFromJson<TValue>();
     public bool AsErrors<TValue>( [NotNullWhen(true)] out TValue? token )
+        where TValue : notnull
     {
         token = AsJson<TValue>();
         return token is not null;

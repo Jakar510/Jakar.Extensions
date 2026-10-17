@@ -34,7 +34,8 @@ public static partial class Json
             return TryConvert(node, info, out value);
         }
 
-        public bool TryGet<T>( string key, out T? value ) => self.TryGet(key, GetTypeInfo<T>(), out value);
+        public bool TryGet<T>( string key, out T? value )
+            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value);
 
 
         public bool TryGet<T>( int index, JsonTypeInfo<T> info, out T? value )
@@ -45,7 +46,8 @@ public static partial class Json
             return TryConvert(array[index], info, out value);
         }
 
-        public bool TryGet<T>( int index, out T? value ) => self.TryGet(index, GetTypeInfo<T>(), out value);
+        public bool TryGet<T>( int index, out T? value )
+            where T : notnull => self.TryGet(index, GetTypeInfo<T>(), out value);
 
 
         /// <exception cref="KeyNotFoundException"> <paramref name="key"/> is missing. </exception>
@@ -57,20 +59,23 @@ public static partial class Json
             return Convert(node, info);
         }
 
-        public T? Get<T>( string key ) => self.Get(key, GetTypeInfo<T>());
+        public T? Get<T>( string key )
+            where T : notnull => self.Get(key, GetTypeInfo<T>());
 
 
         public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default ) => self.TryGet(key, info, out T? value) && value is not null
                                                                                                         ? value
                                                                                                         : defaultValue;
 
-        public T? GetOrDefault<T>( string key, T? defaultValue = default ) => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue);
+        public T? GetOrDefault<T>( string key, T? defaultValue = default )
+            where T : notnull => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue);
 
 
         /// <summary> The node itself as <typeparamref name="T"/>. </summary>
         public T? As<T>( JsonTypeInfo<T> info ) => Convert(self, info);
 
-        public T? As<T>() => self.As(GetTypeInfo<T>());
+        public T? As<T>()
+            where T : notnull => self.As(GetTypeInfo<T>());
     }
 
 
@@ -90,7 +95,8 @@ public static partial class Json
             return true;
         }
 
-        public bool TryAdd<T>( string key, T value ) => self.TryAdd(key, value, GetTypeInfo<T>());
+        public bool TryAdd<T>( string key, T value )
+            where T : notnull => self.TryAdd(key, value, GetTypeInfo<T>());
 
 
         /// <summary> <see langword="false"/> if <paramref name="key"/> is missing. </summary>
@@ -102,13 +108,15 @@ public static partial class Json
             return true;
         }
 
-        public bool TryUpdate<T>( string key, T value ) => self.TryUpdate(key, value, GetTypeInfo<T>());
+        public bool TryUpdate<T>( string key, T value )
+            where T : notnull => self.TryUpdate(key, value, GetTypeInfo<T>());
 
 
         /// <summary> Adds or updates. </summary>
         public void Set<T>( string key, T value, JsonTypeInfo<T> info ) => self[key] = ToNode(value, info);
 
-        public void Set<T>( string key, T value ) => self.Set(key, value, GetTypeInfo<T>());
+        public void Set<T>( string key, T value )
+            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
 
 
         public bool Remove( string key, out JsonNode? removed ) => self.Remove(key, out removed, out _);
@@ -135,9 +143,12 @@ public static partial class Json
         public void Insert<T>( int index, T               value, JsonTypeInfo<T> info ) => self.Insert(index, ToNode(value, info));
         public void Set<T>( int    index, T               value, JsonTypeInfo<T> info ) => self[index] = ToNode(value, info);
 
-        public void Add<T>( T      value )          => self.Add(value, GetTypeInfo<T>());
-        public void Insert<T>( int index, T value ) => self.Insert(index, value, GetTypeInfo<T>());
-        public void Set<T>( int    index, T value ) => self.Set(index, value, GetTypeInfo<T>());
+        public void Add<T>( T value )
+            where T : notnull => self.Add(value, GetTypeInfo<T>());
+        public void Insert<T>( int index, T value )
+            where T : notnull => self.Insert(index, value, GetTypeInfo<T>());
+        public void Set<T>( int index, T value )
+            where T : notnull => self.Set(index, value, GetTypeInfo<T>());
     }
 
 
@@ -154,10 +165,11 @@ public static partial class Json
         public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value, StringComparison comparison = StringComparison.Ordinal )
         {
             value = default;
-            return self.TryFind(key, comparison, out JsonElement element) && TryConvert(element, info, out value);
+            return self.TryFind(key, comparison, out JsonElement element) && TryConvert(in element, info, out value);
         }
 
-        public bool TryGet<T>( string key, out T? value, StringComparison comparison = StringComparison.Ordinal ) => self.TryGet(key, GetTypeInfo<T>(), out value, comparison);
+        public bool TryGet<T>( string key, out T? value, StringComparison comparison = StringComparison.Ordinal )
+            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value, comparison);
 
 
         public bool TryGet<T>( int index, JsonTypeInfo<T> info, out T? value )
@@ -169,7 +181,8 @@ public static partial class Json
             return element.TryConvert(info, out value);
         }
 
-        public bool TryGet<T>( int index, out T? value ) => self.TryGet(index, GetTypeInfo<T>(), out value);
+        public bool TryGet<T>( int index, out T? value )
+            where T : notnull => self.TryGet(index, GetTypeInfo<T>(), out value);
 
 
         /// <exception cref="KeyNotFoundException"> <paramref name="key"/> is missing. </exception>
@@ -178,18 +191,21 @@ public static partial class Json
                                                                                                                             ? element.Deserialize(info)
                                                                                                                             : throw new KeyNotFoundException(key);
 
-        public T? Get<T>( string key, StringComparison comparison = StringComparison.Ordinal ) => self.Get(key, GetTypeInfo<T>(), comparison);
+        public T? Get<T>( string key, StringComparison comparison = StringComparison.Ordinal )
+            where T : notnull => self.Get(key, GetTypeInfo<T>(), comparison);
 
 
         public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal ) => self.TryGet(key, info, out T? value, comparison) && value is not null
                                                                                                                                                                 ? value
                                                                                                                                                                 : defaultValue;
 
-        public T? GetOrDefault<T>( string key, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal ) => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue, comparison);
+        public T? GetOrDefault<T>( string key, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal )
+            where T : notnull => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue, comparison);
 
 
         public T? As<T>( JsonTypeInfo<T> info ) => self.Deserialize(info);
-        public T? As<T>()                       => self.Deserialize(GetTypeInfo<T>());
+        public T? As<T>()
+            where T : notnull => self.Deserialize(GetTypeInfo<T>());
 
 
         public JsonObject? ToJsonObject() => self.ValueKind == JsonValueKind.Object
@@ -318,10 +334,14 @@ public static partial class Json
             return true;
         }
 
-        public bool TryAdd<T>( string    key, T value ) => self.TryAdd(key, value, GetTypeInfo<T>());
-        public bool TryUpdate<T>( string key, T value ) => self.TryUpdate(key, value, GetTypeInfo<T>());
-        public void Set<T>( string       key, T value ) => self.Set(key, value, GetTypeInfo<T>());
-        public void Add<T>( T            value ) => self.Add(value, GetTypeInfo<T>());
+        public bool TryAdd<T>( string key, T value )
+            where T : notnull => self.TryAdd(key, value, GetTypeInfo<T>());
+        public bool TryUpdate<T>( string key, T value )
+            where T : notnull => self.TryUpdate(key, value, GetTypeInfo<T>());
+        public void Set<T>( string key, T value )
+            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
+        public void Add<T>( T value )
+            where T : notnull => self.Add(value, GetTypeInfo<T>());
 
 
         /// <summary> Copies every property except <paramref name="key"/>, then writes <paramref name="replacement"/> under it (or nothing, to remove). The result owns its memory. </summary>

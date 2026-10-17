@@ -22,9 +22,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
-		<!-- A ProjectReference doesn't carry package analyzers; consumers of the Jakar.Json package get the generator ([GenerateJson] and [JsonModel]) automatically. -->
-		<ProjectReference Include="..\Jakar.Json\Jakar.Json.csproj" />
-		<ProjectReference Include="..\Jakar.Json.Generator\Jakar.Json.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<!-- Jakar.Json and Jakar.Spans (and the [JsonModel] generator) come with Jakar.Extensions as packages. -->
 	</ItemGroup>
 
 	<!-- RootLibraries=true (default): analyze the whole libraries, not just what Main touches. RootLibraries=false: trim from Main, like a real app. -->

@@ -28,6 +28,7 @@ public static class ConsoleExtensions
 
 
     public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
+        where TValue : notnull
     {
         string wrapper = c.Repeat(length);
 

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
 
+using JsonReaderOptions = Jakar.Json.JsonReaderOptions;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -62,11 +66,15 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         Execute(( func, arg1, arg2 ), static ( response, state, token ) => state.func(response, state.arg1, state.arg2, token), HttpCompletionOption.ResponseContentRead, token);
 
 
-    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                         => CreateResponse(AsBool,         token);
-    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                         => CreateResponse(AsBytes,        token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken            token )                         => CreateResponse(AsJson,         token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( CancellationToken    token )                         => CreateResponse(AsJson<TValue>, token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJson,         info, token);
+    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                            => CreateResponse(AsBool,  token);
+    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                            => CreateResponse(AsBytes, token);
+    public ValueTask<WebResponse<JsonTape>> AsJson( CancellationToken            token )                            => AsJson(null, token);
+    public ValueTask<WebResponse<JsonTape>> AsJson( JsonReaderOptions?           options, CancellationToken token ) => CreateResponse(AsJson, options, token);
+    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
+
+    /// <summary> The body read by Jakar.Json into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
+    public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
+        where TValue : IJsonSerializable<TValue> => CreateResponse(AsJson<TValue>, token);
 
     /// <summary> A root-level JSON array, read element by element with only <paramref name="info"/> (the element's metadata): no collection type needs registering. </summary>
     public ValueTask<WebResponse<TValue[]>> AsJsonArray<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonArray, info, token);
@@ -228,17 +236,25 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
     // ─── Body readers ────────────────────────────────────────────────────────
 
-    public static async ValueTask<JsonNode> AsJson( HttpResponseMessage response, CancellationToken token )
+    public static async ValueTask<JsonTape> AsJson( HttpResponseMessage response, JsonReaderOptions? options, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
 
         await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-        return await stream.FromJson(token).ConfigureAwait(false);
+        return await JsonTape.ParseAsync(stream, options, token).ConfigureAwait(false);
     }
 
     /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> with <see cref="Json.GetTypeInfo{T}"/> (no intermediate DOM). </summary>
-    public static ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token ) => AsJson(response, Json.GetTypeInfo<TValue>(), token);
+    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
+        where TValue : IJsonSerializable<TValue>
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
+
+        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+        return await stream.FromJson<TValue>(token).ConfigureAwait(false);
+    }
 
     /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
     public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
@@ -268,8 +284,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string content = await AsString(response, token).ConfigureAwait(false);
+        string              content       = await AsString(response, token).ConfigureAwait(false);
 
         return bool.TryParse(content, out bool result) && result;
     }

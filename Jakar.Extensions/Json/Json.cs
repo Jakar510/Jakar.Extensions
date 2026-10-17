@@ -55,9 +55,10 @@ public static partial class Json
 
     /// <summary> Metadata for <typeparamref name="T"/>: a [JsonModel] registration first (<see cref="JsonModelRegistry"/>), then <see cref="Options"/>' resolver chain. Cached per type. </summary>
     /// <exception cref="NotSupportedException"> <typeparamref name="T"/> isn't registered anywhere. </exception>
-    public static JsonTypeInfo<T> GetTypeInfo<T>() => TypeInfoCache<T>.Value ??= JsonModelRegistry.TryGet(out JsonTypeInfo<T>? info)
-                                                                                     ? info
-                                                                                     : Options.GetRequiredTypeInfo<T>();
+    public static JsonTypeInfo<T> GetTypeInfo<T>()
+        where T : notnull => TypeInfoCache<T>.Value ??= JsonModelRegistry.TryGet(out JsonTypeInfo<T>? info)
+                                                            ? info
+                                                            : Options.GetRequiredTypeInfo<T>();
 
 
     /// <summary> Metadata for a runtime <paramref name="type"/> (e.g. the actual type behind a base-class reference): a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. </summary>
@@ -72,6 +73,7 @@ public static partial class Json
 
 
     public static bool TryGetTypeInfo<T>( [NotNullWhen(true)] out JsonTypeInfo<T>? info )
+        where T : notnull
     {
         try
         {
@@ -99,13 +101,20 @@ public static partial class Json
     // ─── Serialize ────────────────────────────────────────────────────────────
 
     /// <summary> Serializes with <see cref="GetTypeInfo{T}"/>. For <see cref="IJsonModel{TSelf}"/> types prefer <c> value.ToJson() </c>. </summary>
-    public static string      Serialize<T>( T                      value, bool? indented = null ) => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
-    public static byte[]      SerializeToUtf8Bytes<T>( T           value )                                                  => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
-    public static JsonNode?   SerializeToNode<T>( T                value )                                                  => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
-    public static JsonElement SerializeToElement<T>( T             value )                                                  => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
-    public static string      Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented                       = null )    => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
-    public static string      Serialize<T>( IEnumerable<T>         values, bool? indented                       = null )    => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
-    public static Task        SerializeAsync<T>( Stream            stream, T     value, CancellationToken token = default ) => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
+    public static string Serialize<T>( T value, bool? indented = null )
+        where T : notnull => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
+    public static byte[] SerializeToUtf8Bytes<T>( T value )
+        where T : notnull => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
+    public static JsonNode? SerializeToNode<T>( T value )
+        where T : notnull => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
+    public static JsonElement SerializeToElement<T>( T value )
+        where T : notnull => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
+    public static string Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented = null )
+        where T : notnull => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static string Serialize<T>( IEnumerable<T> values, bool? indented = null )
+        where T : notnull => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+    public static Task SerializeAsync<T>( Stream stream, T value, CancellationToken token = default )
+        where T : notnull => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
 
 
     public static string ToJson( this JsonNode node, bool indented = true ) => node.ToJsonString(Options.GetIndented(indented));
@@ -156,7 +165,8 @@ public static partial class Json
 
 
         /// <summary> Deserializes with <see cref="GetTypeInfo{T}"/>; <c> default </c> for blank input, invalid JSON, or a JSON <c> null </c> root. </summary>
-        public TValue? TryFromJson<TValue>() => self.TryFromJson(GetTypeInfo<TValue>());
+        public TValue? TryFromJson<TValue>()
+            where TValue : notnull => self.TryFromJson(GetTypeInfo<TValue>());
 
 
         public TValue? TryFromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.TryFromJson(self, info, out TValue? result)
@@ -172,7 +182,8 @@ public static partial class Json
         public JsonNode FromJson() => JsonNode.Parse(self, NodeOptions, DocumentOptions) ?? throw new JsonException("The JSON root is null.");
 
         /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
-        public TValue FromJson<TValue>() => JsonModel.FromJson(self, GetTypeInfo<TValue>());
+        public TValue FromJson<TValue>()
+            where TValue : notnull => JsonModel.FromJson(self, GetTypeInfo<TValue>());
 
         /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
         public TValue FromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.FromJson(self, info);
@@ -185,13 +196,15 @@ public static partial class Json
         /// <summary> Reads a JSON document. The caller owns (and disposes) the stream. </summary>
         public async ValueTask<JsonNode> FromJson( CancellationToken token = default ) => await JsonNode.ParseAsync(self, NodeOptions, DocumentOptions, token).ConfigureAwait(false) ?? throw new JsonException("The JSON root is null.");
 
-        public ValueTask<T> FromJson<T>( CancellationToken token = default ) => JsonModel.FromJsonAsync(self, GetTypeInfo<T>(), token);
+        public ValueTask<T> FromJson<T>( CancellationToken token = default )
+            where T : notnull => JsonModel.FromJsonAsync(self, GetTypeInfo<T>(), token);
 
         public ValueTask<T> FromJson<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonModel.FromJsonAsync(self, info, token);
 
 
         /// <summary> Streams the elements of a root-level JSON array, deserializing each as it arrives. </summary>
-        public IAsyncEnumerable<T?> FromJsonAsync<T>( CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, GetTypeInfo<T>(), token);
+        public IAsyncEnumerable<T?> FromJsonAsync<T>( CancellationToken token = default )
+            where T : notnull => JsonSerializer.DeserializeAsyncEnumerable(self, GetTypeInfo<T>(), token);
 
         /// <inheritdoc cref="FromJsonAsync{T}(Stream, CancellationToken)"/>
         public IAsyncEnumerable<T?> FromJsonAsync<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, info, token);

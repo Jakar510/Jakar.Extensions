@@ -13,6 +13,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="Directory.Packages.props" />
+    <File Path="nuget.config" />
     <File Path="images/icon.png" />
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
@@ -23,17 +24,8 @@
   <Project Path="Jakar.Extensions.Bogus/Jakar.Extensions.Bogus.csproj" />
   <Project Path="Jakar.Extensions.Experiments/Experiments.csproj" />
   <Project Path="Jakar.Extensions.SignalR/Jakar.Extensions.SignalR.csproj" />
-  <Project Path="Jakar.Json.Tests.WebApi/Jakar.Json.Tests.WebApi.csproj" />
   <Project Path="Jakar.Extensions.Tests/Jakar.Extensions.Tests.csproj" />
   <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />
   <Project Path="Jakar.Extensions/Jakar.Extensions.csproj" />
-  <Project Path="Jakar.Spans/Jakar.Spans.csproj" />
-  <Project Path="Jakar.Json.AspNetCore.Tests/Jakar.Json.AspNetCore.Tests.csproj" />
-  <Project Path="Jakar.Json.AspNetCore/Jakar.Json.AspNetCore.csproj" />
-  <Project Path="Jakar.Json.Generator.CodeFixes/Jakar.Json.Generator.CodeFixes.csproj" />
-  <Project Path="Jakar.Json.Generator.Tests/Jakar.Json.Generator.Tests.csproj" />
-  <Project Path="Jakar.Json.Generator/Jakar.Json.Generator.csproj" />
-  <Project Path="Jakar.Json.Tests/Jakar.Json.Tests.csproj" />
-  <Project Path="Jakar.Json/Jakar.Json.csproj" />
   <Project Path="Jakar.Permissions.Generator/src/Jakar.Permissions.Generator.csproj" />
 </Solution>
