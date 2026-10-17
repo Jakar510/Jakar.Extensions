@@ -1,30 +1,23 @@
 # Jakar.Extensions.Blazor.Syncfusion
 
-**Contributions and Ideas are Welcome.**
-
-## Overview
-
-`Jakar.Extensions.Blazor.Syncfusion` is a .NET library that includes a variety of extensions and helper methods designed to streamline and
-enhance the development process. This package provides utility functions for common tasks, making your code cleaner and
-more maintainable.
-
-## Features
-
-TBD
+[Syncfusion Blazor](https://www.syncfusion.com/blazor-components) setup for Jakar Blazor apps. **Contributions and ideas are welcome.**
 
 ## Installation
-
-You can install the `Jakar.Extensions.Blazor.Syncfusion` package via [Nuget](https://www.nuget.org/packages/Jakar.Extensions.Blazor.Syncfusion/):
 
 ```sh
 dotnet add package Jakar.Extensions.Blazor.Syncfusion
 ```
 
-Alternatively, you can use the NuGet Package Manager in Visual Studio.
+## Features
 
-### License
+- `services.AddSyncfusion()`: registers Syncfusion Blazor (`AddSyncfusionBlazor()`) and a scoped `SfDialogService`.
 
-This project is licensed under the MIT License. See the LICENSE.txt file for details.
-Contributing
+Syncfusion components need a Syncfusion license.
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+## Versioning
+
+9.0.0 predates the repository's versioning scheme, `<.NET major>.<library major>.<library minor>`; the next release moves to `10.x`. See the [repository README](https://github.com/Jakar510/Jakar.Extensions#versioning).
+
+## License
+
+MIT. See [LICENSE.txt](https://github.com/Jakar510/Jakar.Extensions/blob/master/LICENSE.txt). Contributions are welcome: open an issue or a pull request on [GitHub](https://github.com/Jakar510/Jakar.Extensions).

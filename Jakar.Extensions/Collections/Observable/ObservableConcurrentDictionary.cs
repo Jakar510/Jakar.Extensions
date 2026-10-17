@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 
 
 
-public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableConcurrentDictionary<ObservableConcurrentDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableConcurrentDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
+public sealed partial class ObservableConcurrentDictionary<TKey, TValue> : ObservableConcurrentDictionary<ObservableConcurrentDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableConcurrentDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
     public ObservableConcurrentDictionary() : this(DEFAULT_CAPACITY) { }
@@ -162,6 +162,7 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
 
     /// <remarks> An atomic snapshot. </remarks>
     public void CopyTo( KeyValuePair<TKey, TValue>[] array, int startIndex ) => ( (ICollection<KeyValuePair<TKey, TValue>>)buffer ).CopyTo(array, startIndex);
+
     /// <remarks> Not atomic: items added or removed while copying may or may not be included. </remarks>
     public void CopyTo( Span<KeyValuePair<TKey, TValue>> array, int startIndex )
     {
@@ -176,7 +177,8 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     protected internal override ArrayBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         // items may be added while enumerating, so the buffer grows when needed (previously it overflowed)
-        ArrayBuffer<KeyValuePair<TKey, TValue>>     values = new(buffer.Count + 4);
+        ArrayBuffer<KeyValuePair<TKey, TValue>> values = new(buffer.Count + 4);
+
         FilterDelegate<KeyValuePair<TKey, TValue>>? filter = HasFilter
                                                                  ? GetFilter()
                                                                  : null;

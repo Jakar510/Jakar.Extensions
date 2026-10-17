@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
-using ZLinq;
-using ZLinq.Linq;
 using ZLinq.Traversables;
 
 
@@ -10,8 +8,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-[JsonObject]
-public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
+[JsonConverter(typeof(LocalDirectoryJsonConverter))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
@@ -19,11 +18,11 @@ public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFi
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
-    public DateTime               CreationTimeUtc { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public bool                   DoesNotExist    => !Exists;
-    public bool                   Exists          => Info.Exists;
-    public IEnumerable<LocalFile> Files           { [Pure] get => GetFiles(); }
+    public static LocalDirectory         CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
+    public        DateTime               CreationTimeUtc  { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public        bool                   DoesNotExist     => !Exists;
+    public        bool                   Exists           => Info.Exists;
+    public        IEnumerable<LocalFile> Files            { [Pure] get => GetFiles(); }
     [JsonIgnore] public DirectoryInfo Info
     {
         get
@@ -175,8 +174,8 @@ public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFi
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory(Path.Combine(paths));
-    protected virtual LocalDirectory? GetParent() => TryCreate(Info.Parent);
+    public            LocalDirectory  CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory(Path.Combine(paths));
+    protected virtual LocalDirectory? GetParent()                                             => TryCreate(Info.Parent);
 
 
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
@@ -246,6 +245,7 @@ public class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFi
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
+
     /// <summary> </summary>
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>

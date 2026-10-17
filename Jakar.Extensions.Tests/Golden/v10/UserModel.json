@@ -1,0 +1,58 @@
+{
+  "Addresses": [
+    {
+      "Address": "1 Main St Apt 2. Springfield, . US. 62701",
+      "City": "Springfield",
+      "Country": "US",
+      "ID": "11111111-1111-1111-1111-111111111111",
+      "IsPrimary": false,
+      "Line1": "1 Main St",
+      "Line2": "Apt 2",
+      "PostalCode": "62701",
+      "StateOrProvince": ""
+    }
+  ],
+  "Company": "Jakar",
+  "CreatedBy": null,
+  "Department": "R&D",
+  "Description": "Engineer at Jakar",
+  "Email": "tyler@example.test",
+  "EscalateTo": null,
+  "Ext": null,
+  "FirstName": "Tyler",
+  "FullName": "Tyler Stegmaier",
+  "Gender": null,
+  "Groups": [
+    {
+      "CreatedBy": "22222222-2222-2222-2222-222222222222",
+      "ID": "33333333-3333-3333-3333-333333333333",
+      "NameOfGroup": "Admins",
+      "OwnerID": "11111111-1111-1111-1111-111111111111",
+      "Rights": {
+        "Value": "rights"
+      }
+    }
+  ],
+  "ID": "00000000-0000-0000-0000-000000000000",
+  "ImageID": null,
+  "LastName": "Stegmaier",
+  "PhoneNumber": "555-0100",
+  "PreferredLanguage": 0,
+  "Rights": {
+    "Value": ""
+  },
+  "Roles": [
+    {
+      "ID": "22222222-2222-2222-2222-222222222222",
+      "NameOfRole": "Admin",
+      "Rights": {
+        "Value": "rights"
+      }
+    }
+  ],
+  "SubscriptionExpires": null,
+  "Title": "Engineer",
+  "UserID": "00000000-0000-0000-0000-000000000000",
+  "UserName": "tyler",
+  "Website": "https://example.test"
+}

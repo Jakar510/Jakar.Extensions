@@ -19,6 +19,7 @@ public class HeaderCollection : Dictionary<string, object>
                    : null;
         set => this[CONTENT_ENCODING] = value ?? EMPTY;
     }
+
     /// <summary> <c>Content-Type</c>, including any <c>charset</c> parameter. </summary>
     public string? ContentType
     {
@@ -27,6 +28,7 @@ public class HeaderCollection : Dictionary<string, object>
                    : null;
         set => this[CONTENT_TYPE] = value ?? EMPTY;
     }
+
     /// <summary> The <c>charset</c> parameter of <see cref="ContentType"/> (set on <c>text/plain</c> if no content type has been set yet); <see langword="null"/> if absent or unknown. </summary>
     public Encoding? Encoding
     {
@@ -98,17 +100,19 @@ public class HeaderCollection : Dictionary<string, object>
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="request"/>: content headers (e.g. <c>Content-Type</c>) go to <see cref="HttpRequestMessage.Content"/> when it has content, all others to <see cref="HttpRequestMessage.Headers"/>. Existing values are replaced. </summary>
     public HeaderCollection Merge( HttpRequestMessage request )
     {
         foreach ( ( string key, object value ) in this )
         {
-            if ( !IsContentHeader(key) ) { Set(request.Headers, key, value); }
+            if ( !IsContentHeader(key) ) { Set(request.Headers,                    key, value); }
             else if ( request.Content is not null ) { Set(request.Content.Headers, key, value); }
         }
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="headers"/>, replacing existing values. Headers that don't belong to that collection (e.g. <c>Content-Type</c> on request headers) are skipped. </summary>
     public HeaderCollection Merge( HttpHeaders headers )
     {
@@ -116,6 +120,7 @@ public class HeaderCollection : Dictionary<string, object>
 
         return this;
     }
+
     /// <summary> Applies these headers to <paramref name="headers"/>, replacing existing values. Non-content headers are skipped. </summary>
     public HeaderCollection Merge( HttpContentHeaders headers ) => Merge((HttpHeaders)headers);
 
@@ -123,7 +128,16 @@ public class HeaderCollection : Dictionary<string, object>
     /// <summary> Headers that belong to <see cref="HttpContentHeaders"/> rather than request/response headers. </summary>
     private static readonly FrozenSet<string> __contentHeaders = new[]
                                                                  {
-                                                                     "Allow", "Content-Disposition", CONTENT_ENCODING, "Content-Language", "Content-Length", "Content-Location", "Content-MD5", "Content-Range", CONTENT_TYPE, "Expires",
+                                                                     "Allow",
+                                                                     "Content-Disposition",
+                                                                     CONTENT_ENCODING,
+                                                                     "Content-Language",
+                                                                     "Content-Length",
+                                                                     "Content-Location",
+                                                                     "Content-MD5",
+                                                                     "Content-Range",
+                                                                     CONTENT_TYPE,
+                                                                     "Expires",
                                                                      "Last-Modified"
                                                                  }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
@@ -139,9 +153,9 @@ public class HeaderCollection : Dictionary<string, object>
 
         return value switch
                {
-                   string text                  => headers.TryAddWithoutValidation(key, text),
-                   IEnumerable<string> values   => headers.TryAddWithoutValidation(key, values),
-                   _                            => headers.TryAddWithoutValidation(key, Format(value))
+                   string text                => headers.TryAddWithoutValidation(key, text),
+                   IEnumerable<string> values => headers.TryAddWithoutValidation(key, values),
+                   _                          => headers.TryAddWithoutValidation(key, Format(value))
                };
     }
     private static string? Format( object? value ) => value switch

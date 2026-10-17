@@ -76,10 +76,10 @@ public static partial class Tasks
                                   };
 
         ConcurrentBag<TResult>                        results = [];
-        Func<CancellationToken, ValueTask<TResult>>[] tasks   = funcs.ToArray();
+        Func<CancellationToken, ValueTask<TResult>>[] tasks   = [.. funcs];
         await Parallel.ForAsync(0, tasks.Length, options, executor).ConfigureAwait(false);
 
-        return results.ToArray();
+        return [.. results];
 
         async ValueTask executor( int i, CancellationToken cancellationToken )
         {
@@ -101,7 +101,7 @@ public static partial class Tasks
 
         public async IAsyncEnumerable<TResult> WheneverAny( [EnumeratorCancellation] CancellationToken token = default )
         {
-            List<Task<TResult>> list = [..self];
+            List<Task<TResult>> list = [.. self];
 
             while ( token.ShouldContinue() && list.Count > 0 )
             {
@@ -120,7 +120,7 @@ public static partial class Tasks
         public void WaitAll( CancellationToken token = default ) => self.WhenAll().Wait(token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
-        public int WaitAny( CancellationToken token = default ) => Task.WaitAny(self.ToArray(), token);
+        public int WaitAny( CancellationToken token = default ) => Task.WaitAny([.. self], token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] [RequiresDynamicCode("Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()")]
         public Task WhenAny() => Task.WhenAny(self.GetInternalArray());
@@ -133,15 +133,15 @@ public static partial class Tasks
 
     extension( IEnumerable<ValueTask> self )
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void WaitAll( CancellationToken token = default ) => Task.WaitAll(self.Select(static x => x.AsTask()).ToArray(), token);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int  WaitAny( CancellationToken token = default ) => Task.WaitAny(self.Select(static x => x.AsTask()).ToArray(), token);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public void WaitAll( CancellationToken token = default ) => Task.WaitAll([.. self.Select(static x => x.AsTask())], token);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public int  WaitAny( CancellationToken token = default ) => Task.WaitAny([.. self.Select(static x => x.AsTask())], token);
 
         /// <summary>
         ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
         /// </summary>
         /// <exception cref="AggregateException"> </exception>
-        public async ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
+        public async                                              ValueTask WhenAll() => await Task.WhenAll(self.Select(static x => x.AsTask())).ConfigureAwait(false);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] public Task      WhenAny() => Task.WhenAny(self.Select(static x => x.AsTask()));
     }
 
 

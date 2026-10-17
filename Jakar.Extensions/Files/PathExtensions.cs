@@ -7,7 +7,7 @@ public static class PathExtensions
     {
         public string[] Directories()                                     => Directory.GetDirectories(root.FullName);
         public string[] FilePaths()                                       => Directory.GetFiles(root.FullName);
-        public string[] SubFolderNames()                                  => root.EnumerateDirectories().Select(static x => x.Name).ToArray();
+        public string[] SubFolderNames()                                  => [.. root.EnumerateDirectories().Select(static x => x.Name)];
         public string   Combine( string                      fileName )   => Path.Combine(root.FullName, fileName);
         public string   Combine( params ReadOnlySpan<string> subFolders ) => root.FullName.Combine(subFolders);
     }
@@ -25,12 +25,15 @@ public static class PathExtensions
 
             return Path.Combine(results);
         }
+
         /// <summary> extension method for <see cref="Path.GetExtension(string)"/> </summary>
         /// <returns> </returns>
         public string GetExtension() => Path.GetExtension(path);
+
         /// <summary> extension method for <see cref="Path.GetFileName(string)"/> </summary>
         /// <returns> </returns>
         public string GetFileName() => Path.GetFileName(path);
+
         /// <summary> extension method for <see cref="Path.GetFileNameWithoutExtension(string)"/> </summary>
         /// <returns> </returns>
         public string GetFileNameWithoutExtension() => Path.GetFileNameWithoutExtension(path);

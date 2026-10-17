@@ -44,11 +44,17 @@ public static class Base64
 
 
     extension<TValue>( TValue jsonSerializablePayload )
+        where TValue : notnull
     {
         public string ToBase64() => jsonSerializablePayload.ToBase64(Encoding.Default);
         public string ToBase64( Encoding encoding )
         {
-            string temp = jsonSerializablePayload.ToJson();
+            string temp = Json.Serialize(jsonSerializablePayload, false);
+            return temp.ToBase64(encoding);
+        }
+        public string ToBase64( Encoding encoding, JsonTypeInfo<TValue> info )
+        {
+            string temp = JsonModel.ToJson(jsonSerializablePayload, info, false);
             return temp.ToBase64(encoding);
         }
     }
@@ -57,13 +63,15 @@ public static class Base64
 
     extension( string b64 )
     {
-        public TValue JsonFromBase64String<TValue>() => b64.JsonFromBase64String<TValue>(Encoding.Default);
+        public TValue JsonFromBase64String<TValue>()
+            where TValue : notnull => b64.JsonFromBase64String<TValue>(Encoding.Default);
         public TValue JsonFromBase64String<TValue>( Encoding encoding )
-
+            where TValue : notnull => b64.JsonFromBase64String(Json.GetTypeInfo<TValue>(), encoding);
+        public TValue JsonFromBase64String<TValue>( JsonTypeInfo<TValue> info, Encoding? encoding = null )
         {
             byte[] bytes = b64.FromBase64String();
-            string temp  = encoding.GetString(bytes);
-            return temp.FromJson<TValue>();
+            string temp  = ( encoding ?? Encoding.Default ).GetString(bytes);
+            return temp.FromJson(info);
         }
     }
 }

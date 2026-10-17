@@ -48,6 +48,7 @@ public static partial class WebBuilder
                             suppressStatusMessages
                                 ? "true"
                                 : "false" );
+
     /// <summary> Use the given configuration settings on the web host. </summary>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to configure. </param>
     /// <param name="configuration"> The <see cref="IConfiguration"/> containing settings to be used. </param>

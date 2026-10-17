@@ -8,8 +8,8 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
 {
     private readonly ConcurrentBag<IDisposable> __disposables = [];
     public Disposables() : base() { }
-    public Disposables( IEnumerable<IDisposable>         enumerable ) => __disposables = [..enumerable];
-    public Disposables( params ReadOnlySpan<IDisposable> enumerable ) => __disposables = [..enumerable];
+    public Disposables( IEnumerable<IDisposable>         enumerable ) => __disposables = [.. enumerable];
+    public Disposables( params ReadOnlySpan<IDisposable> enumerable ) => __disposables = [.. enumerable];
     public void Dispose()
     {
         foreach ( IDisposable disposable in __disposables ) { disposable.Dispose(); }
@@ -64,8 +64,8 @@ public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisp
 {
     private readonly ConcurrentBag<IAsyncDisposable> __disposables = [];
     public AsyncDisposables() : base() { }
-    public AsyncDisposables( IEnumerable<IAsyncDisposable>         enumerable ) => __disposables = [..enumerable];
-    public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => __disposables = [..enumerable];
+    public AsyncDisposables( IEnumerable<IAsyncDisposable>         enumerable ) => __disposables = [.. enumerable];
+    public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => __disposables = [.. enumerable];
     public async ValueTask DisposeAsync()
     {
         foreach ( IAsyncDisposable disposable in __disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }

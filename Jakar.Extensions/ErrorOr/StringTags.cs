@@ -2,8 +2,6 @@
 // 09/19/2025  18:42
 
 using Microsoft.Extensions.Primitives;
-using ZLinq;
-using ZLinq.Linq;
 
 
 
@@ -11,9 +9,10 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Empty))]
-[MsJsonConverter(typeof(StringTagsMsJsonConverter))]
+[JsonConverter(typeof(StringTagsJsonConverter))]
 [method: JsonConstructor]
-public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
+[JsonModel(typeof(JakarExtensionsContext))]
+public readonly partial struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
 {
     public static readonly StringTags Empty   = new();
     public readonly        Pair[]     Tags    = tags;
@@ -83,7 +82,7 @@ public readonly struct StringTags( Pair[] tags, string[] entries ) : IValueEnume
     {
         ReadOnlySpan<Pair>   tags    = Tags;
         ReadOnlySpan<string> entries = Entries;
-        return GetBufferLength() + ( format.Length * ( tags.Length + entries.Length ) );
+        return GetBufferLength() + format.Length * ( tags.Length + entries.Length );
     }
 
 

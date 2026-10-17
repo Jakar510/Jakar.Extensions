@@ -1,9 +1,4 @@
-﻿using ZLinq;
-using ZLinq.Linq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -141,7 +136,9 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
 
 [Serializable]
-public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
+[JsonConverter(typeof(CollectionAlertsJsonConverter<LanguageCollection, Language>))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public partial class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
 {
     public LanguageCollection() : base(DEFAULT_CAPACITY) { }
     public LanguageCollection( int                           capacity ) : base(capacity) { }

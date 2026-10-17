@@ -1,7 +1,7 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 // 4/1/2024  10:45
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Text;
 
 
 [TestFixture]

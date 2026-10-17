@@ -44,8 +44,8 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     }
 
     [StringLength(               DESCRIPTION)] public string? Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                           set => SetProperty(ref _email,      value); }
-    [StringLength(               PHONE_EXT)]   public string? Ext         { get => _ext;                             set => SetProperty(ref _ext,        value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string? Email       { get => _email;                            set => SetProperty(ref _email,       value); }
+    [StringLength(               PHONE_EXT)]   public string? Ext         { get => _ext;                              set => SetProperty(ref _ext,         value); }
 
     [Required] [StringLength(FIRST_NAME)] public string? FirstName
     {
@@ -60,7 +60,7 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
     }
 
     [StringLength(FULL_NAME)] public         string? FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)]    public         string? Gender             { get => _gender;                    set => SetProperty(ref _gender,  value); }
+    [StringLength(GENDER)]    public         string? Gender             { get => _gender;                     set => SetProperty(ref _gender,   value); }
     [JsonIgnore]              public virtual bool    IsValid            => IsValidEmail                      && IsValidName;
     [JsonIgnore]              public virtual bool    IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
     [JsonIgnore]              public virtual bool    IsValidName        => !string.IsNullOrWhiteSpace(FullName);

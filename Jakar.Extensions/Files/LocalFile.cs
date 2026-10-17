@@ -12,7 +12,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
+[JsonConverter(typeof(LocalFileJsonConverter))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     [JsonIgnore] public readonly FileInfo Info         = info;
@@ -254,6 +256,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     ///     <see cref="FileStream"/>
     /// </returns>
     public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
+
     /// <summary> Opens file for write only actions. If it doesn't exist, file will be created. </summary>
     /// <param name="mode"> </param>
     /// <param name="bufferSize"> </param>
@@ -306,12 +309,16 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public string Hash_MD5() => Hash(MD5.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public string Hash_SHA1() => Hash(SHA1.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public string Hash_SHA256() => Hash(SHA256.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public string Hash_SHA384() => Hash(SHA384.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public string Hash_SHA512() => Hash(SHA512.Create());
 
@@ -637,11 +644,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
-        using ArrayBuffer<char>  owner         = new(payload.Length);
 
-        payload.CopyTo(owner.Span);
-
-        await writer.WriteAsync(owner.Memory, token).ConfigureAwait(false);
+        // (It used to copy into an ArrayBuffer<char> and write its Memory, which is Length-long, and Length was never set: every file came out empty.)
+        await writer.WriteAsync(payload.AsMemory(), token).ConfigureAwait(false);
 
         Info.Refresh();
     }
@@ -871,12 +876,16 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public ValueTask<string> HashAsync_MD5() => HashAsync(MD5.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public ValueTask<string> HashAsync_SHA1() => HashAsync(SHA1.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public ValueTask<string> HashAsync_SHA256() => HashAsync(SHA256.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public ValueTask<string> HashAsync_SHA384() => HashAsync(SHA384.Create());
+
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public ValueTask<string> HashAsync_SHA512() => HashAsync(SHA512.Create());
 
@@ -898,6 +907,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public interface IAsyncReadHandler
     {
         IAsyncEnumerable<string> AsLines( CancellationToken token = default );
+
         /// <summary> Reads the contents of the file as a byte array. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
@@ -933,7 +943,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
+            where TValue : notnull;
     }
 
 
@@ -979,7 +990,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        TValue AsJson<TValue>( in TelemetrySpan parent = default );
+        TValue AsJson<TValue>( in TelemetrySpan parent = default )
+            where TValue : notnull;
     }
 
 

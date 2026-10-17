@@ -1,18 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net10.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
-		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
+		<WarningsAsErrors>Nullable;CS0114;CS9113;IL2026;IL2046;IL2057;IL2067;IL2070;IL2072;IL2075;IL2087;IL2091;IL2111;IL3050;IL3051</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>10.11.0</Version>
+		<Version>10.10.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageIcon>icon.png</PackageIcon>
 		<Company></Company>
-		<PackageReleaseNotes>10.11.0: BREAKING: IIObservableCollection&lt;TValue&gt; renamed to IObservableCollection&lt;TValue&gt;. BREAKING: Command&lt;TValue&gt; now follows CommunityToolkit.Mvvm AsyncRelayCommand&lt;T&gt; semantics and implements the new IAsyncCommand&lt;TValue&gt;: ExecutionTask, IsRunning, CanBeCanceled, IsCancellationRequested (with PropertyChanged), ExecuteAsync returning Task, Cancel(), NotifyCanExecuteChanged() (CanExecute no longer raises CanExecuteChanged itself), CommandOptions (AllowConcurrentExecutions, FlowExceptionsToTaskScheduler), CreateCancelCommand(); CanExecute is false while running by default; starting a cancellable handler cancels the previous token; Execute rethrows handler failures on the calling context unless FlowExceptionsToTaskScheduler; object parameters of the wrong type throw ArgumentException. Command&lt;TValue&gt;.Executable accepts CancellationToken-taking handlers, adds Execute(object?, TValue?, CancellationToken), is 16 bytes instead of 72, and no longer drops the Task from Func&lt;TValue?, Task&gt; handlers (it is now awaited). Fixed SelfLogger.WriteLine throwing FormatException for named template holes such as {Error}. Internal folder restructure. Removed the unused Portable.BouncyCastle dependency and System.* package references that are part of the net10.0 shared framework. 10.10.0: TelemetrySource uses W3C activity IDs: the process-wide hierarchical default is gone and the StartActivity idFormat default is now Unknown (default parameter values are compiled into call sites, so recompile callers). StartActivity respects the sampler: it returns null instead of throwing when sampled out, no longer forces IsAllDataRequested, the Recorded trace flag (traceFlags is now ActivityTraceFlags?) or Ok status, and keeps the parent tracestate. Constructing a TelemetrySource no longer clears Activity.Current. AppVersion has a TypeConverter, so it binds from configuration strings. TelemetrySpan can target a specific TelemetrySource via TelemetrySpan.Create(TelemetrySource, string).</PackageReleaseNotes>
+		<PackageReleaseNotes>10.10.0: ValueStringBuilder and Sizes moved to the new dependency Jakar.Spans (same namespace, type-forwarded, so no source or binary change); Jakar.Spans adds ValueUtf8Builder and ValueSpanReader&lt;T&gt;. BREAKING: System.Text.Json replaces Newtonsoft.Json; the library is trim and Native AOT compatible (source-generated metadata only). New dependency Jakar.Json (IJsonModel&lt;TSelf&gt;, the [JsonModel] source generator and analyzers, pooled element-wise JSON arrays, SerializeAsStringJsonConverter&lt;T&gt;, plus the Jakar.Json serializer, which [JsonModel] uses behind IJsonModel when it supports the type: most models' ToJson/FromJson now run on it, laid out as Jakar.Json writes ("name" : value) with the context's options mirrored; JsonTypeInfo stays System.Text.Json's); types stay in the Jakar.Extensions namespace. IJsonModel&lt;TSelf&gt; requires static JsonTypeInfo (add [JsonModel]). JToken/JObject/JValue removed: AdditionalData is Dictionary&lt;string, JsonElement&gt;?, ErrorResponse/WebHandler.AsJson/FeedBackTrackerException use JsonNode, ExceptionDetails.Data is JsonObject, LoginRequestValue uses JsonElement. Json.Settings/LoadSettings replaced by Json.Options/AddResolver/GetTypeInfo; generic ToJson&lt;T&gt;(this T) only for IJsonModel types (else Json.Serialize). Typed JsonNode/JsonElement get/add/update/remove helpers. JSON written by 10.x still reads (case-insensitive names, numbers in strings, comments, trailing commas); output keeps PascalCase. PreferenceFile stores {TSelf}.json and imports an existing .ini. Observable collections serialize their unfiltered contents and read in bulk. LocalFile/LocalDirectory serialize as {"FullPath"}. ExceptionDetails(Exception, bool) became Create / CreateWithMethodInfo. WebRequester: AsJson(JsonTypeInfo), AsJsonArray/AsJsonList, BaseClass bodies serialized as their runtime type. Fixes: Json.ToJson(ReadOnlySpan) serialized the whole pooled rental; LocalFile.WriteAsync(string) wrote empty files; LoginRequest copy constructors passed the login as the password; Email.TryParse returned the inverse; GcInfo did not deserialize MemoryInfo. Removed the unused ValueOf package. 10.11.0: BREAKING: IIObservableCollection&lt;TValue&gt; renamed to IObservableCollection&lt;TValue&gt;. BREAKING: Command&lt;TValue&gt; now follows CommunityToolkit.Mvvm AsyncRelayCommand&lt;T&gt; semantics and implements the new IAsyncCommand&lt;TValue&gt;: ExecutionTask, IsRunning, CanBeCanceled, IsCancellationRequested (with PropertyChanged), ExecuteAsync returning Task, Cancel(), NotifyCanExecuteChanged() (CanExecute no longer raises CanExecuteChanged itself), CommandOptions (AllowConcurrentExecutions, FlowExceptionsToTaskScheduler), CreateCancelCommand(); CanExecute is false while running by default; starting a cancellable handler cancels the previous token; Execute rethrows handler failures on the calling context unless FlowExceptionsToTaskScheduler; object parameters of the wrong type throw ArgumentException. Command&lt;TValue&gt;.Executable accepts CancellationToken-taking handlers, adds Execute(object?, TValue?, CancellationToken), is 16 bytes instead of 72, and no longer drops the Task from Func&lt;TValue?, Task&gt; handlers (it is now awaited). Fixed SelfLogger.WriteLine throwing FormatException for named template holes such as {Error}. Internal folder restructure. Removed the unused Portable.BouncyCastle dependency and System.* package references that are part of the net10.0 shared framework. 10.10.0: TelemetrySource uses W3C activity IDs: the process-wide hierarchical default is gone and the StartActivity idFormat default is now Unknown (default parameter values are compiled into call sites, so recompile callers). StartActivity respects the sampler: it returns null instead of throwing when sampled out, no longer forces IsAllDataRequested, the Recorded trace flag (traceFlags is now ActivityTraceFlags?) or Ok status, and keeps the parent tracestate. Constructing a TelemetrySource no longer clears Activity.Current. AppVersion has a TypeConverter, so it binds from configuration strings. TelemetrySpan can target a specific TelemetrySource via TelemetrySpan.Create(TelemetrySource, string).</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -40,9 +40,14 @@
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>link</TrimMode>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Jakar.Json (github.com/Jakar510/Jakar.Json) brings the [JsonModel] generator; PrivateAssets="none" passes it on to this package's consumers and to the projects referencing this one. -->
+		<PackageReference Include="Jakar.Json" PrivateAssets="none" />
+		<!-- ValueStringBuilder, ValueUtf8Builder, ValueSpanReader<T> and Sizes live in Jakar.Spans (github.com/Jakar510/Jakar.Spans), type-forwarded from here. -->
+		<PackageReference Include="Jakar.Spans" PrivateAssets="none" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
@@ -64,10 +69,6 @@
 		</None>
 	</ItemGroup>
 
-	<PropertyGroup>
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</IsAotCompatible>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DocumentationFile>bin\Release\Jakar.Extensions.xml</DocumentationFile>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -86,7 +87,7 @@
 		<!-- <PackageReference Include="AsyncAwaitBestPractices" /> -->
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" /> <!-- ResxString derives from Microsoft.CodeAnalysis.LocalizableString -->
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Http" />
@@ -94,7 +95,6 @@
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
-		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
@@ -111,7 +111,6 @@
 		<PackageReference Include="OneOf" />
 		<PackageReference Include="OneOf.Extended" />
 		<PackageReference Include="OneOf.SourceGenerator" />
-		<PackageReference Include="ValueOf" />
 		<PackageReference Include="ZLinq" />
 		<PackageReference Include="ZLinq.DropInGenerator">
 			<PrivateAssets>all</PrivateAssets>

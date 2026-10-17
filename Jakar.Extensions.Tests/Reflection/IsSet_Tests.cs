@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 
 
-namespace Jakar.Extensions.Tests.Reflections;
+namespace Jakar.Extensions.Tests;
 
 
 [TestFixture]

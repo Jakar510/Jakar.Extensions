@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 09/15/2022  11:39 AM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*

@@ -5,7 +5,7 @@
 
 
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 /*
@@ -99,7 +99,7 @@ public class SpansBenchmarks
     [Benchmark] public bool EndsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return span.EndsWith('1');
+        return Spans.EndsWith(span, '1');
     }
     [Benchmark] public bool IsNullOrWhiteSpace()
     {
@@ -109,7 +109,7 @@ public class SpansBenchmarks
     [Benchmark] public bool StartsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return span.StartsWith('1');
+        return Spans.StartsWith(span, '1');
     }
 
 

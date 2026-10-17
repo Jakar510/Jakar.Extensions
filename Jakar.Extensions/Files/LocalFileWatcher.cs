@@ -1,18 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 09/19/2025  12:55
 
-
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
 #pragma warning disable CS1066, CS1584
 /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
 [NotSerializable]
-public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>
+[JsonConverter(typeof(CollectionAlertsJsonConverter<LocalFileWatcher, LocalFile>))]
+[JsonModel(typeof(JakarExtensionsContext))]
+public sealed partial class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>
 {
     private FileSystemWatcher? __watcher;
 

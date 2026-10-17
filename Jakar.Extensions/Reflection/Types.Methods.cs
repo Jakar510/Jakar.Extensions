@@ -1,8 +1,4 @@
-﻿using ZLinq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static partial class Types

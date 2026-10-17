@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Experiments
 // 10/16/2025  22:16
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
 public enum TestRight

@@ -119,14 +119,14 @@ public static partial class AsyncLinq
     {
         public IEnumerable<TElement> Consolidate()
         {
-            List<TElement> results = new();
+            List<TElement> results = [];
             foreach ( IEnumerable<TElement> element in values ) { results.AddRange(element); }
 
             return results;
         }
         public IEnumerable<TElement> ConsolidateUnique()
         {
-            HashSet<TElement> results = new();
+            HashSet<TElement> results = [];
 
             foreach ( IEnumerable<TElement> element in values )
             {
@@ -150,7 +150,7 @@ public static partial class AsyncLinq
         }
         public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
         {
-            HashSet<TElement> results = new();
+            HashSet<TElement> results = [];
 
             await foreach ( TElement element in source.Consolidate().WithCancellation(token).ConfigureAwait(false) ) { results.Add(element); }
 
@@ -177,7 +177,7 @@ public static partial class AsyncLinq
         }
         public async IAsyncEnumerable<TElement> ConsolidateUnique( [EnumeratorCancellation] CancellationToken token = default )
         {
-            HashSet<TElement> results = new();
+            HashSet<TElement> results = [];
 
             await foreach ( TElement element in source.Consolidate().WithCancellation(token).ConfigureAwait(false) ) { results.Add(element); }
 

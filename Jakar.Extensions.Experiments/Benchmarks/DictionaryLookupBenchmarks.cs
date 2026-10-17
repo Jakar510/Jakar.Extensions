@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 11/18/2023  10:37 PM
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 /*
 
    BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
@@ -439,7 +439,7 @@ public class DictionaryLookupBenchmarks
 
     [GlobalSetup] public void GlobalSetup()
     {
-        __items = Enumerable.Range(0, Items).Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7().ToString(), Random.Shared.Next())).ToArray();
+        __items = [.. Enumerable.Range(0, Items).Select(static _ => new KeyValuePair<string, int>(Guid.CreateVersion7().ToString(), Random.Shared.Next()))];
 
         __firstKey = __items.First().Key;
 

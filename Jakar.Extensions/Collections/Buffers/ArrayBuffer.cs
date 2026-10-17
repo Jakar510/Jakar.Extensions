@@ -1,9 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/12/2025  17:03
 
-using ZLinq;
 using ZLinq.Internal;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 
@@ -88,7 +86,7 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
 
     [HandlesResourceDisposal] public TValue[] ToArray()
     {
-        TValue[] array = Values.ToArray();
+        TValue[] array = [.. Values];
         Dispose();
         return array;
     }

@@ -1,10 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Experiments
 // 09/19/2025  17:14
 
-namespace Jakar.Extensions.Experiments.Benchmarks;
+namespace Experiments.Benchmarks;
 
 
-public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
+[JsonModel(typeof(ExperimentsJsonContext))]
+public sealed partial record Node : BaseRecord<Node>, IJsonModel<Node>
 {
     private static readonly Node[]         __empty = [];
     public                  Node[]         Children    { get; init; } = __empty;
@@ -57,7 +58,7 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
             uint depth = __depth;
             __depth = depth / 2;
 
-            return Generate((int)depth).ToArray();
+            return [.. Generate((int)depth)];
         }
     }
 }
@@ -65,11 +66,12 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
-public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
+[JsonModel(typeof(ExperimentsJsonContext))]
+public sealed partial class TestJson : BaseClass<TestJson>
 {
     internal static readonly TestJson Debug = new()
                                               {
-                                                  Nodes  = Node.NodeFaker.Instance.Generate(5).ToArray(),
+                                                  Nodes  = [.. Node.NodeFaker.Instance.Generate(5)],
                                                   Errors = Errors.Create(Error.Accepted(), Error.BadRequest()),
                                                   Files  = [new FileData(0, "Hash", "payload", new FileMetaData("file.dat", MimeTypeNames.Application.BINARY, MimeType.Binary))],
                                                   Location = new CurrentLocation
@@ -110,12 +112,12 @@ public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
     public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
 
 
-    public CreateUserModel                CreateUser { get; set; } = new();
-    public Errors                         Errors     { get; set; } = Errors.Empty;
-    public ObservableCollection<FileData> Files      { get; set; } = [];
-    public CurrentLocation                Location   { get; set; } = new();
-    public Node[]                         Nodes      { get; set; } = [];
-    public UserModel                      User       { get; set; } = new();
+    public CreateUserModel                                 CreateUser { get; set; } = new();
+    public Errors                                          Errors     { get; set; } = Errors.Empty;
+    public Jakar.Extensions.ObservableCollection<FileData> Files      { get; set; } = [];
+    public CurrentLocation                                 Location   { get; set; } = new();
+    public Node[]                                          Nodes      { get; set; } = [];
+    public UserModel                                       User       { get; set; } = new();
 
 
     public static void Print()

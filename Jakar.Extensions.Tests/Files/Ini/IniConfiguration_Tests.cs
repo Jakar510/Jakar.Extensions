@@ -5,7 +5,7 @@ using System.Net;
 
 
 
-namespace Jakar.Extensions.Tests.Collections;
+namespace Jakar.Extensions.Tests.Ini;
 
 
 [TestFixture]

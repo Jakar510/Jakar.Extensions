@@ -7,8 +7,7 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat(100);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
-    public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
         where TValue : Exception
     {
         StringBuilder builder = new();
@@ -29,6 +28,7 @@ public static class ConsoleExtensions
 
 
     public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
+        where TValue : notnull
     {
         string wrapper = c.Repeat(length);
 
@@ -38,7 +38,7 @@ public static class ConsoleExtensions
         builder.AppendLine(typeof(TValue).FullName);
         builder.AppendLine();
         builder.AppendLine();
-        builder.AppendLine(self.ToJson());
+        builder.AppendLine(Json.Serialize(self));
         builder.AppendLine();
         builder.AppendLine();
         builder.AppendLine(wrapper);

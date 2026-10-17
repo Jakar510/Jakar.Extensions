@@ -1,5 +1,9 @@
-// Jakar.Extensions :: Jakar.Extensions
+﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:36 AM
+
+using JsonReaderOptions = Jakar.Json.JsonReaderOptions;
+
+
 
 namespace Jakar.Extensions;
 
@@ -18,7 +22,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     public const           string  NO_RESPONSE = "NO RESPONSE";
     public static readonly EventId EventId     = new(69420, nameof(SendAsync));
 
-    private static readonly Action<ILogger, int, string?, Exception?> __logResponse = LoggerMessage.Define<int, string?>(LogLevel.Debug, EventId, "Response StatusCode: {StatusCode} for {Uri}");
+    private static readonly Action<ILogger, int, string?, Exception?> __logResponse = LoggerMessage.Define<int, string?>(LogLevel.Debug,       EventId, "Response StatusCode: {StatusCode} for {Uri}");
     private static readonly Action<ILogger, int, string?, Exception?> __logRetry    = LoggerMessage.Define<int, string?>(LogLevel.Information, EventId, "Retry {Retry} for {Uri}");
 
 
@@ -62,10 +66,21 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         Execute(( func, arg1, arg2 ), static ( response, state, token ) => state.func(response, state.arg1, state.arg2, token), HttpCompletionOption.ResponseContentRead, token);
 
 
-    public ValueTask<WebResponse<bool>>   AsBool( CancellationToken         token ) => CreateResponse(AsBool,         token);
-    public ValueTask<WebResponse<byte[]>> AsBytes( CancellationToken        token ) => CreateResponse(AsBytes,        token);
-    public ValueTask<WebResponse<JToken>> AsJson( CancellationToken         token ) => CreateResponse(AsJson,         token);
-    public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token ) => CreateResponse(AsJson<TValue>, token);
+    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                            => CreateResponse(AsBool,  token);
+    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                            => CreateResponse(AsBytes, token);
+    public ValueTask<WebResponse<JsonTape>> AsJson( CancellationToken            token )                            => AsJson(null, token);
+    public ValueTask<WebResponse<JsonTape>> AsJson( JsonReaderOptions?           options, CancellationToken token ) => CreateResponse(AsJson, options, token);
+    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
+
+    /// <summary> The body read by Jakar.Json into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
+    public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
+        where TValue : IJsonSerializable<TValue> => CreateResponse(AsJson<TValue>, token);
+
+    /// <summary> A root-level JSON array, read element by element with only <paramref name="info"/> (the element's metadata): no collection type needs registering. </summary>
+    public ValueTask<WebResponse<TValue[]>> AsJsonArray<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonArray, info, token);
+
+    /// <inheritdoc cref="AsJsonArray{TValue}(JsonTypeInfo{TValue}, CancellationToken)"/>
+    public ValueTask<WebResponse<List<TValue>>> AsJsonList<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonList, info, token);
 
     // Files are streamed straight from the socket to disk (headers-read), instead of buffering the whole body in memory first.
     public ValueTask<WebResponse<LocalFile>> AsFile( CancellationToken token ) =>
@@ -150,7 +165,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                 }
                 finally { response?.Dispose(); }
 
-            Retry:
+                Retry:
                 retry++;
                 if ( Logger is not null ) { __logRetry(Logger, retry, request.RequestUri?.OriginalString, null); }
 
@@ -221,36 +236,55 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
     // ─── Body readers ────────────────────────────────────────────────────────
 
-    public static async ValueTask<JToken> AsJson( HttpResponseMessage response, CancellationToken token )
+    public static async ValueTask<JsonTape> AsJson( HttpResponseMessage response, JsonReaderOptions? options, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
 
         await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-
-        JToken result = await stream.FromJson(token).ConfigureAwait(false);
-        return ThrowIfNull(result);
+        return await JsonTape.ParseAsync(stream, options, token).ConfigureAwait(false);
     }
-    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> with <see cref="Json.Settings"/> (no intermediate <see cref="JToken"/>). </summary>
+
+    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> with <see cref="Json.GetTypeInfo{T}"/> (no intermediate DOM). </summary>
     public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
+        where TValue : IJsonSerializable<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
 
-        // Buffer first (a no-op for the default completion option) so the synchronous Newtonsoft reader never blocks on the network.
-        await response.Content.LoadIntoBufferAsync(token).ConfigureAwait(false);
         await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+        return await stream.FromJson<TValue>(token).ConfigureAwait(false);
+    }
 
-        using StreamReader   textReader = new(stream, leaveOpen: true);
-        using JsonTextReader reader     = new(textReader) { CloseInput = false };
+    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
+    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
 
-        return ThrowIfNull(JsonSerializer.Create(Json.Settings).Deserialize<TValue>(reader));
+        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+        return await JsonModel.FromJsonAsync(stream, info, token).ConfigureAwait(false);
+    }
+    public static async ValueTask<TValue[]> AsJsonArray<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
+
+        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+        return await JsonModel.FromJsonArrayAsync(stream, info, token).ConfigureAwait(false);
+    }
+    public static async ValueTask<List<TValue>> AsJsonList<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
+
+        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+        return await JsonModel.FromJsonListAsync(stream, info, token).ConfigureAwait(false);
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string content = await AsString(response, token).ConfigureAwait(false);
+        string              content       = await AsString(response, token).ConfigureAwait(false);
 
         return bool.TryParse(content, out bool result) && result;
     }
@@ -264,6 +298,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                    ? result
                    : Guid.Empty;
     }
+
     /// <summary> The body as one array (a single copy of the buffered content). </summary>
     public static async ValueTask<byte[]> AsBytes( HttpResponseMessage response, CancellationToken token )
     {
@@ -281,6 +316,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await CopyBody(response, fs, token).ConfigureAwait(false);
         return file;
     }
+
     /// <summary> Saves the body to a temp file whose extension comes from the <see cref="MimeType"/> named by header <paramref name="fileNameHeader"/> (response or content headers), if present. </summary>
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader, CancellationToken token )
     {
@@ -295,6 +331,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         return await AsFile(response, token).ConfigureAwait(false);
     }
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path, CancellationToken token ) => await AsFile(response, new LocalFile(path), token).ConfigureAwait(false);
+
     /// <summary> Saves the body to <paramref name="file"/>, replacing its contents. </summary>
     public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file, CancellationToken token )
     {
@@ -314,6 +351,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         await CopyBody(response, fs, token).ConfigureAwait(false);
         return file;
     }
+
     /// <summary> The body as a seekable <see cref="MemoryStream"/> over a single copy of the content (fixed size: it can be overwritten but not grown). </summary>
     public static async ValueTask<MemoryStream> AsStream( HttpResponseMessage response, CancellationToken token )
     {

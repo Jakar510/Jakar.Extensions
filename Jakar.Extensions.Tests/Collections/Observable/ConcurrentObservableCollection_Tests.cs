@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 
 
-namespace Jakar.Extensions.Tests.Collections;
+namespace Jakar.Extensions.Tests.Observable;
 
 
 [TestFixture]
@@ -102,34 +102,34 @@ public class ConcurrentObservableCollection_Tests : Assert
 
     [Test] public void Sort()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         collection.Clear();
         collection.Add(array.Span);
         collection.Sort(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
 
     [Test] public async Task SortAsync()
     {
-        ReadOnlyMemory<int> array = new([..Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
+        ReadOnlyMemory<int> array = new([.. Enumerable.Range(0, 100).Select(static x => Random.Shared.Next(1000))]);
 
         ReadOnlyMemory<int> sorted = GetSorted(array.Span);
 
         ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         await collection.SortAsync();
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
 
         await collection.ClearAsync();
         collection.Add(array.Span);
         await collection.SortAsync(Sorter);
-        this.AreEqual(sorted.Span, collection.ToArray());
+        this.AreEqual(sorted.Span, [.. collection]);
     }
     private static ReadOnlyMemory<TValue> GetSorted<TValue>( scoped in ReadOnlySpan<TValue> array )
     {

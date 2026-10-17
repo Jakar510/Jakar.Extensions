@@ -79,6 +79,7 @@ public static partial class WebBuilder
     /// <returns> A reference to this instance after the operation has completed. </returns>
     /// <seealso cref="ServiceLifetime.Scoped"/>
     public static WebApplicationBuilder AddScoped( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd( builder, serviceType, implementationFactory, ServiceLifetime.Scoped );
+
     /// <summary>
     ///     Adds a scoped service of the type specified in <typeparamref name="TService"/> with an implementation type specified in <typeparamref name="TImplementation"/> using the factory specified in
     ///     <paramref
@@ -250,6 +251,7 @@ public static partial class WebBuilder
     /// <returns> A reference to this instance after the operation has completed. </returns>
     /// <seealso cref="ServiceLifetime.Singleton"/>
     public static WebApplicationBuilder AddSingleton( this WebApplicationBuilder builder, Type serviceType, Func<IServiceProvider, object> implementationFactory ) => TryAdd( builder, serviceType, implementationFactory, ServiceLifetime.Singleton );
+
     /// <summary> Adds a transient service of the type specified in <typeparamref name="TService"/> to the specified <see cref="WebApplicationBuilder"/> . </summary>
     /// <typeparam name="TService"> The type of the service to add. </typeparam>
     /// <param name="builder"> The <see cref="WebApplicationBuilder"/> to add the service to. </param>

@@ -1,27 +1,15 @@
-﻿Console.WriteLine(DateTimeOffset.UtcNow.ToString());
+// dotnet run -c Release -- [--bench] [BenchmarkDotNet arguments, e.g. --filter *Hash*]
+// The Jakar.Json benchmarks are in the Jakar.Json repository (Jakar.Json.Benchmarks).
 
-ReadOnlySpan<string> span = ["one", "two", "three"];
-
-ReadOnlySpan<int> numbers =
-[
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10
-];
+BenchmarkSwitcher.FromAssembly(typeof(BenchmarkConfig).Assembly)
+                 .Run(args is ["--bench", ..]
+                          ? args[1..]
+                          : args);
 
 
-span.Hash().WriteToConsole();
+// SharedUserModel model = new();
+// Console.WriteLine(model.ToJson());                     // [JsonModel] part: System.Text.Json
+// Console.WriteLine(Jakar.Json.JsonCodec.ToJson(model)); // [GenerateJson] part: Jakar.Json
 
-span.Hash128().WriteToConsole();
 
-
-numbers.Hash().WriteToConsole();
-
-numbers.Hash128().WriteToConsole();
+// Console.WriteLine(SharedUserModel.FromJson(Jakar.Json.JsonCodec.ToJson(model)).UserID == Jakar.Json.JsonCodec.FromJson<SharedUserModel>(model.ToJson()).UserID); // each reads the other's output

@@ -1,4 +1,4 @@
-namespace Jakar.Permissions.Generator.Runtime;
+namespace Jakar.Permissions.Generator;
 
 
 /// <summary> Represents a permission identifier with a stable integer index. </summary>

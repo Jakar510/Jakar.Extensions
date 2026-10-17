@@ -1,7 +1,3 @@
-using ZLinq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -15,7 +11,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
+public sealed partial class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
     public ConcurrentObservableCollection() : base() { }
@@ -59,7 +55,7 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
 
 
 [Serializable]
-public abstract class ConcurrentObservableCollection<TSelf, TValue> : ObservableCollection<TSelf, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
+public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : ObservableCollection<TSelf, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
     where TSelf : ConcurrentObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
     where TValue : IEquatable<TValue>
 {
@@ -548,7 +544,7 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
 
     public override TValue[] ToArray()
     {
-        using ( AcquireLock() ) { return base.ToArray(); }
+        using ( AcquireLock() ) { return [.. buffer]; }
     }
     public override int IndexOf( TValue value )
     {
@@ -618,7 +614,7 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     {
         using ( AcquireLock() ) { return base.FilteredValues(); }
     }
-    [MustDisposeResource] [MethodImpl(MethodImplOptions.AggressiveInlining)] public Lock.Scope            AcquireLock()                                  => locker.EnterScope();
+    [MustDisposeResource] [MethodImpl(MethodImplOptions.AggressiveInlining)] public Lock.Scope            AcquireLock()                               => locker.EnterScope();
     [MustDisposeResource]                                                    public LockCloser            AcquireLock( CancellationToken      token ) => LockCloser.Enter(locker, token);
     [MustDisposeResource]                                                    public ValueTask<LockCloser> AcquireLockAsync( CancellationToken token ) => LockCloser.EnterAsync(locker, token);
 
@@ -633,9 +629,9 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     }
 
 
-    [Pure] [MustDisposeResource] protected internal ArrayBuffer<TValue> Copy() => FilteredValues();
-    [Pure] [MustDisposeResource] ArrayBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
-    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token).ConfigureAwait(false);
+    [Pure] [MustDisposeResource] protected internal ArrayBuffer<TValue>                                                                     Copy()                               => FilteredValues();
+    [Pure] [MustDisposeResource]                    ArrayBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
+    [Pure] [MustDisposeResource]                    ConfiguredValueTaskAwaitable<ArrayBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token).ConfigureAwait(false);
     [Pure] [MustDisposeResource] protected async ValueTask<ArrayBuffer<TValue>> CopyAsync( CancellationToken token )
     {
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FilteredValues(); }

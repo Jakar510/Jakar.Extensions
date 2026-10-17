@@ -11,10 +11,10 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     public static readonly TelemetrySpan    Empty = new(EMPTY, null);
     private readonly       TelemetrySource? __source;
     private readonly       Activity?        __parent;
-    private readonly       Activity?     __activity;
-    private readonly       long          __start;
-    private readonly       string        __id;
-    public readonly        string        DisplayName;
+    private readonly       Activity?        __activity;
+    private readonly       long             __start;
+    private readonly       string           __id;
+    public readonly        string           DisplayName;
 
 
     public static int             RandomIDLength { get; set; } = 16;
@@ -67,10 +67,10 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
                                                                            : new ActivityLink(__activity.Context, tags);
 
 
-    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( string                           name )                                           => new(__source, name, __activity);
-    [Pure] [MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName] string         name                                   = EMPTY ) => new(name, Activity.Current);
-    [Pure] [MustDisposeResource] public static TelemetrySpan Create( TelemetrySource                   source, [CallerMemberName] string name = EMPTY ) => new(source, name, Activity.Current);
-    [Pure] [MustDisposeResource] public static TelemetrySpan Create( ref readonly       TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
+    [Pure] [MustDisposeResource] public        TelemetrySpan SubSpan( string                     name )                                           => new(__source, name, __activity);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName] string   name                                   = EMPTY ) => new(name, Activity.Current);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( TelemetrySource             source, [CallerMemberName] string name = EMPTY ) => new(source, name, Activity.Current);
+    [Pure] [MustDisposeResource] public static TelemetrySpan Create( ref readonly TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
 
 
     public TelemetrySpan AddTag( string key, string? value )

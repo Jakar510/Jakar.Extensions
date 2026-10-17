@@ -18,7 +18,7 @@ public static class AsyncCommandExtensions
 
         public CancelCommand( IAsyncCommand command )
         {
-            __command                =  command;
+            __command               =  command;
             command.PropertyChanged += OnPropertyChanged;
         }
 

@@ -18,7 +18,7 @@ public sealed class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnriche
     public const    string           SPAN_ID_KEY   = "Serilog.SpanId";
     public const    string           TRACE_ID      = "TraceId";
     public const    string           TRACE_ID_KEY  = "Serilog.TraceId";
-    public readonly LogEventProperty AppInfo      = source.Info.GetProperty();
+    public readonly LogEventProperty AppInfo       = source.Info.GetProperty();
 
 
     /// <summary> Enrich the log event. </summary>

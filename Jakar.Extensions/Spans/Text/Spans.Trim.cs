@@ -16,6 +16,7 @@ public static partial class Spans
             int                  length = span.ClampEnd(start, trimElement);
             return memory.Slice(start, length);
         }
+
         /// <summary> Removes all leading occurrences of a specified element from the memory. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public Memory<TValue> TrimStart( TValue trimElement )
@@ -23,6 +24,7 @@ public static partial class Spans
             ReadOnlySpan<TValue> span = memory.Span;
             return memory[span.ClampStart(trimElement)..];
         }
+
         /// <summary> Removes all trailing occurrences of a specified element from the memory. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public Memory<TValue> TrimEnd( TValue trimElement )
@@ -47,6 +49,7 @@ public static partial class Spans
             int                  length = span.ClampEnd(start, trimElement);
             return memory.Slice(start, length);
         }
+
         /// <summary> Removes all leading occurrences of a specified element from the memory. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public ReadOnlyMemory<TValue> TrimStart( TValue trimElement )
@@ -54,6 +57,7 @@ public static partial class Spans
             ReadOnlySpan<TValue> span = memory.Span;
             return memory[span.ClampStart(trimElement)..];
         }
+
         /// <summary> Removes all trailing occurrences of a specified element from the memory. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public ReadOnlyMemory<TValue> TrimEnd( TValue trimElement )
@@ -78,6 +82,7 @@ public static partial class Spans
             int                  length = values.ClampEnd(start, trimElement);
             return span.Slice(start, length);
         }
+
         /// <summary> Removes all leading occurrences of a specified element from the span. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public Span<TValue> TrimStart( TValue trimElement )
@@ -85,6 +90,7 @@ public static partial class Spans
             ReadOnlySpan<TValue> temp = span;
             return span[temp.ClampStart(trimElement)..];
         }
+
         /// <summary> Removes all trailing occurrences of a specified element from the span. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public Span<TValue> TrimEnd( TValue trimElement )
@@ -108,10 +114,12 @@ public static partial class Spans
             int length = span.ClampEnd(start, trimElement);
             return span.Slice(start, length);
         }
+
         /// <summary> Removes all leading occurrences of a specified element from the span. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public ReadOnlySpan<TValue> TrimStart( TValue trimElement ) =>
             span[span.ClampStart(trimElement)..];
+
         /// <summary> Removes all trailing occurrences of a specified element from the span. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public ReadOnlySpan<TValue> TrimEnd( TValue trimElement )
@@ -119,6 +127,7 @@ public static partial class Spans
             ReadOnlySpan<TValue> values = span;
             return span[..values.ClampEnd(0, trimElement)];
         }
+
         /// <summary> Delimits all leading occurrences of a specified element from the span. </summary>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
         public int ClampStart( TValue trimElement )
@@ -142,6 +151,7 @@ public static partial class Spans
 
             return start;
         }
+
         /// <summary> Delimits all trailing occurrences of a specified element from the span. </summary>
         /// <param name="start"> The start index from which to being searching. </param>
         /// <param name="trimElement"> The specified element to look for and remove. </param>
@@ -199,6 +209,7 @@ public static partial class Spans
                     return memory;
             }
         }
+
         /// <summary> Removes all leading occurrences of a set of elements specified in a readonly span from the memory. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the memory is returned unaltered. </remarks>
@@ -219,6 +230,7 @@ public static partial class Spans
                     return memory;
             }
         }
+
         /// <summary> Removes all trailing occurrences of a set of elements specified in a readonly span from the memory. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the memory is returned unaltered. </remarks>
@@ -269,6 +281,7 @@ public static partial class Spans
                     return memory;
             }
         }
+
         /// <summary> Removes all leading occurrences of a set of elements specified in a readonly span from the memory. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the memory is returned unaltered. </remarks>
@@ -289,6 +302,7 @@ public static partial class Spans
                     return memory;
             }
         }
+
         /// <summary> Removes all trailing occurrences of a set of elements specified in a readonly span from the memory. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the memory is returned unaltered. </remarks>
@@ -339,6 +353,7 @@ public static partial class Spans
                     return span;
             }
         }
+
         /// <summary> Removes all leading occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the span is returned unaltered. </remarks>
@@ -359,6 +374,7 @@ public static partial class Spans
                     return span;
             }
         }
+
         /// <summary> Removes all trailing occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the span is returned unaltered. </remarks>
@@ -409,6 +425,7 @@ public static partial class Spans
                     return span;
             }
         }
+
         /// <summary> Removes all leading occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the span is returned unaltered. </remarks>
@@ -419,6 +436,7 @@ public static partial class Spans
                 1   => span.TrimStart(trimElements[0]),
                 _   => span
             };
+
         /// <summary> Removes all trailing occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         /// <remarks> If <paramref name="trimElements"/> is empty, the span is returned unaltered. </remarks>
@@ -429,6 +447,7 @@ public static partial class Spans
                 1   => span.TrimStart(trimElements[0]),
                 _   => span
             };
+
         /// <summary> Delimits all leading occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
         public int ClampStart( params ReadOnlySpan<TValue> trimElements )
@@ -442,6 +461,7 @@ public static partial class Spans
 
             return start;
         }
+
         /// <summary> Delimits all trailing occurrences of a set of elements specified in a readonly span from the span. </summary>
         /// <param name="start"> The start index from which to being searching. </param>
         /// <param name="trimElements"> The span which contains the set of elements to remove. </param>
@@ -474,12 +494,14 @@ public static partial class Spans
             int                length = values.ClampEnd(start);
             return memory.Slice(start, length);
         }
+
         /// <summary> Removes all leading white-space characters from the memory. </summary>
         public Memory<char> TrimStart()
         {
             ReadOnlySpan<char> values = memory.Span;
             return memory[values.ClampStart()..];
         }
+
         /// <summary> Removes all trailing white-space characters from the memory. </summary>
         public Memory<char> TrimEnd()
         {
@@ -501,12 +523,14 @@ public static partial class Spans
             int                length = values.ClampEnd(start);
             return memory.Slice(start, length);
         }
+
         /// <summary> Removes all leading white-space characters from the memory. </summary>
         public ReadOnlyMemory<char> TrimStart()
         {
             ReadOnlySpan<char> values = memory.Span;
             return memory[values.ClampStart()..];
         }
+
         /// <summary> Removes all trailing white-space characters from the memory. </summary>
         public ReadOnlyMemory<char> TrimEnd()
         {
@@ -548,6 +572,7 @@ public static partial class Spans
                 return span.Slice(start, end - start + 1);
             }
         }
+
         /// <summary> Removes all leading white-space characters from the span. </summary>
         public ReadOnlySpan<char> TrimStart()
         {
@@ -560,6 +585,7 @@ public static partial class Spans
 
             return span[start..];
         }
+
         /// <summary> Removes all trailing white-space characters from the span. </summary>
         public ReadOnlySpan<char> TrimEnd()
         {
@@ -572,6 +598,7 @@ public static partial class Spans
 
             return span[..( end + 1 )];
         }
+
         /// <summary> Removes all leading and trailing occurrences of a specified character from the span. </summary>
         /// <param name="trimChar"> The specified character to look for and remove. </param>
         public ReadOnlySpan<char> Trim( char trimChar )
@@ -592,6 +619,7 @@ public static partial class Spans
 
             return span.Slice(start, end - start + 1);
         }
+
         /// <summary> Removes all leading occurrences of a specified character from the span. </summary>
         /// <param name="trimChar"> The specified character to look for and remove. </param>
         public ReadOnlySpan<char> TrimStart( char trimChar )
@@ -605,6 +633,7 @@ public static partial class Spans
 
             return span[start..];
         }
+
         /// <summary> Removes all trailing occurrences of a specified character from the span. </summary>
         /// <param name="trimChar"> The specified character to look for and remove. </param>
         public ReadOnlySpan<char> TrimEnd( char trimChar )
@@ -618,6 +647,7 @@ public static partial class Spans
 
             return span[..( end + 1 )];
         }
+
         /// <summary> Removes all leading and trailing occurrences of a set of characters specified in a readonly span from the span. </summary>
         /// <param name="trimChars"> The span which contains the set of characters to remove. </param>
         /// <remarks> If <paramref name="trimChars"/> is empty, white-space characters are removed instead. </remarks>
@@ -626,6 +656,7 @@ public static partial class Spans
             ReadOnlySpan<char> values = span.TrimStart(trimChars);
             return values.TrimEnd(trimChars);
         }
+
         /// <summary> Removes all leading occurrences of a set of characters specified in a readonly span from the span. </summary>
         /// <param name="trimChars"> The span which contains the set of characters to remove. </param>
         /// <remarks> If <paramref name="trimChars"/> is empty, white-space characters are removed instead. </remarks>
@@ -652,6 +683,7 @@ public static partial class Spans
 
             return span[start..];
         }
+
         /// <summary> Removes all trailing occurrences of a set of characters specified in a readonly span from the span. </summary>
         /// <param name="trimChars"> The span which contains the set of characters to remove. </param>
         /// <remarks> If <paramref name="trimChars"/> is empty, white-space characters are removed instead. </remarks>
@@ -713,12 +745,14 @@ public static partial class Spans
                 return span.Slice(start, end - start + 1);
             }
         }
+
         /// <summary> Removes all leading white-space characters from the span. </summary>
         public Span<char> TrimStart()
         {
             ReadOnlySpan<char> values = span;
             return span[values.ClampStart()..];
         }
+
         /// <summary> Removes all trailing white-space characters from the span. </summary>
         public Span<char> TrimEnd()
         {
@@ -744,6 +778,7 @@ public static partial class Spans
 
             return start;
         }
+
         /// <summary> Delimits all trailing occurrences of whitespace characters from the span. </summary>
         /// <param name="start"> The start index from which to being searching. </param>
         public int ClampEnd( int start )

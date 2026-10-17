@@ -1,34 +1,27 @@
 # Jakar.Extensions.Blazor
 
-**Contributions and Ideas are Welcome.**
-
-## Overview
-
-`Jakar.Extensions.Blazor` is a .NET library that includes a variety of extensions and helper methods designed to streamline and
-enhance the development process. This package provides utility functions for common tasks, making your code cleaner and
-more maintainable.
+Base components and services for Blazor apps built on [Jakar.Extensions](https://www.nuget.org/packages/Jakar.Extensions/). **Contributions and ideas are welcome.**
 
 ## Installation
-
-You can install the `Jakar.Extensions.Blazor` package via [Nuget](https://www.nuget.org/packages/Jakar.Extensions.Blazor/):
 
 ```sh
 dotnet add package Jakar.Extensions.Blazor
 ```
 
-Alternatively, you can use the NuGet Package Manager in Visual Studio.
-
 ## Features
 
-- `Widget` : Provides a common interface for all components. It also includes a `Errors` property `ErrorState`, and a `User` property `LoginState`. It also includes a `StateHasChanged` method for updating the UI asyncronously. Inherites from `ComponentBase`.
-- `Page` : Intented for use as a page in a Blazor application. Inherits from `Widget`.
-- `LoginProvider` : Allows a common interface for login and user management.
-- `ModelStateProvider` : Provides a `ModelStateDictionary` for all `Widgets` to easily handle errors.
-- `BlazorServices` : All in one class for blazor services -- makes it easier to inject services into components.
+- `AddBlazorServices(...)`: registers the package's services, including authorization and authentication options.
+- `Widget`: a `ComponentBase` with the cascading model error state (`State`, a `ModelErrorState`) and login state (`User`, a `LoginUserState`).
+- `Page`: a `Widget` for routable pages, with `BlazorServices` injected and a `Title` parameter.
+- `LoginUserState` / `ILoginUserState`: the signed-in user, shared with every component as a cascading value.
+- `ModelErrorState` / `IModelErrorState`: model and validation errors shared with every component.
+- `BlazorServices`: one injectable bundle of common services: protected local and session storage, `NavigationManager`, and the Blazored, Radzen and MudBlazor services.
+- `NotifyPropertyChangedCascadingValueSource<T>` and the `CascadingValueNameExtensions`: cascading values that re-render subscribers when the value raises `PropertyChanged`.
 
-### License
+## Versioning
 
-This project is licensed under the MIT License. See the LICENSE.txt file for details.
-Contributing
+9.1.0 predates the repository's versioning scheme, `<.NET major>.<library major>.<library minor>`; the next release moves to `10.x`. See the [repository README](https://github.com/Jakar510/Jakar.Extensions#versioning).
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+## License
+
+MIT. See [LICENSE.txt](https://github.com/Jakar510/Jakar.Extensions/blob/master/LICENSE.txt). Contributions are welcome: open an issue or a pull request on [GitHub](https://github.com/Jakar510/Jakar.Extensions).
