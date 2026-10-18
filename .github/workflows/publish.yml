@@ -1,0 +1,125 @@
+name: Publish
+
+# Every push to master runs CI, then packs these packages and pushes them to nuget.org, in dependency order:
+#   Jakar.Extensions
+# A version that's already on nuget.org is skipped, so a release is a commit that bumps <Version> in a project file.
+# Versions are <.NET major>.<library major>.<library minor>: the pack step stops (and nothing is pushed) when a package's
+# first number isn't its target's .NET major, which also catches a project with no <Version> (MSBuild's default is 1.0.0).
+#
+# nuget.org Trusted Publishing (no stored API key): the repository needs
+#   - a Trusted Publishing policy on nuget.org: owner Jakar510, repository Jakar.Extensions, workflow file publish.yml, environment production
+#     (the publish job runs in the GitHub environment "production", which GitHub creates on first use);
+#   - NUGET_USER: the nuget.org profile name (not the email address), as a repository variable or a secret.
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Pack and push to nuget.org
+    needs: ci
+    runs-on: ubuntu-latest
+    # Must match the environment in the nuget.org Trusted Publishing policy: the OIDC token carries it, and the policy rejects any other.
+    environment: production
+    permissions:
+      contents: read
+      id-token: write # GitHub OIDC token for nuget.org Trusted Publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+
+      # nuget.config may list a local feed that only exists on the dev machine; CI restores from nuget.org.
+      - name: Use nuget.org only
+        shell: bash
+        run: |
+          if [ -f nuget.config ] && grep -q 'key="LocalNuGet"' nuget.config; then dotnet nuget remove source LocalNuGet --configfile nuget.config; fi
+
+      # Checks every version first, so a bad one stops the run before anything is packed or pushed.
+      - name: Check versions and pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(
+            Jakar.Extensions/Jakar.Extensions.csproj
+          )
+
+          failed=0
+          for csproj in "${packages[@]}"; do
+            json=$(dotnet msbuild "$csproj" -nologo -getProperty:PackageId -getProperty:Version -getProperty:TargetFramework -getProperty:TargetFrameworks)
+            id=$(jq -r '.Properties.PackageId' <<< "$json")
+            version=$(jq -r '.Properties.Version' <<< "$json")
+            frameworks=$(jq -r '.Properties.TargetFrameworks // empty' <<< "$json")
+            [ -n "$frameworks" ] || frameworks=$(jq -r '.Properties.TargetFramework' <<< "$json")
+            net=$(sed -E 's/^net([0-9]+)\..*/\1/' <<< "${frameworks%%;*}")
+
+            if [ "${version%%.*}" != "$net" ]; then
+              echo "::error file=$csproj,title=$id $version::Version must be <.NET major>.<library major>.<library minor> with .NET major $net (targets: $frameworks). Set <Version> in $csproj."
+              failed=1
+            else
+              echo "$id $version (net$net)"
+            fi
+          done
+          [ "$failed" = 0 ] || exit 1
+
+          index=0
+          for csproj in "${packages[@]}"; do
+            index=$((index + 1))
+            dotnet pack "$csproj" -c Release -o "artifacts/$(printf '%02d' "$index")"
+          done
+
+          echo "Packed:"
+          find artifacts -name '*.nupkg' | sort
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: artifacts/**
+
+      # The nuget.org profile name isn't a secret: a repository variable (Settings → Secrets and variables → Actions → Variables) or a secret both work.
+      - name: Check the nuget.org user is configured
+        shell: bash
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER || secrets.NUGET_USER }}
+        run: |
+          if [ -z "$NUGET_USER" ]; then
+            echo "::error title=NUGET_USER is not set::Add a repository variable (or secret) named NUGET_USER holding your nuget.org profile name (not your email), then re-run this workflow."
+            exit 1
+          fi
+
+      - name: NuGet login (OIDC → short-lived API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER || secrets.NUGET_USER }}
+
+      # In dependency order (artifacts/01, 02, ...); each push also sends the .snupkg next to the .nupkg.
+      - name: Push
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          set -euo pipefail
+          for package in $(find artifacts -name '*.nupkg' | sort); do
+            dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done

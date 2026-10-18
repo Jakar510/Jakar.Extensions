@@ -224,6 +224,90 @@ public class AppVersion_Tests : Assert
     public void FuzzyEquals_Test( string left, string right, bool expected = true ) => this.AreEqual(expected, AppVersion.Parse(left).FuzzyEquals(AppVersion.Parse(right)));
 
 
+    // ─── Prereleases: <.NET major>.<library major>.<library minor>-<label>.<iteration> ──────────────────────────────────────
+
+    [Test]
+    [TestCase("10.1.0-beta.1",  "beta",    1u)]
+    [TestCase("10.1.0-beta",    "beta",    0u)]
+    [TestCase("10.1.0-rc.2",    "rc",      2u)]
+    [TestCase("10.1.0-alpha.3", "alpha",   3u)]
+    [TestCase("1.0.0-preview.4", "preview", 4u)]
+    [TestCase("10.1.0",         "",        0u)]
+    public void Prerelease_RoundTrips( string input, string label, uint iteration )
+    {
+        AppVersion version = AppVersion.Parse(input);
+
+        this.AreEqual(input, version.ToString());
+        this.AreEqual(new AppVersion(10, 1, 0).Scheme, version.Scheme);
+        this.AreEqual(label,     version.Flags.IsEmpty ? "" : version.Flags.Flag);
+        this.AreEqual(iteration, version.Flags.Iteration);
+    }
+
+    /// <summary> Older spellings still parse, and are written the current way. </summary>
+    [Test]
+    [TestCase("10.1.0-beta1",          "10.1.0-beta.1")]
+    [TestCase("10.1.0-BETA.1",         "10.1.0-beta.1")]
+    [TestCase("1.1rc",                 "1.1-rc")]
+    [TestCase("1.1-rc",                "1.1-rc")]
+    [TestCase("1.1beta",               "1.1-beta")]
+    [TestCase("1.1beta2",              "1.1-beta.2")]
+    [TestCase("1.1alpha",              "1.1-alpha")]
+    [TestCase("1.1b",                  "1.1-beta")]
+    [TestCase("1.1a",                  "1.1-alpha")]
+    [TestCase("1.1-b",                 "1.1-beta")]
+    [TestCase("10.1.0-beta.1+abc1234", "10.1.0-beta.1")] // SemVer build metadata is ignored
+    [TestCase("10.1.0+abc1234",        "10.1.0")]
+    public void Prerelease_LegacySpellings( string input, string expected ) => this.AreEqual(expected, AppVersion.Parse(input).ToString());
+
+    /// <summary> SemVer / NuGet order: alpha &lt; beta &lt; rc &lt; release, iterations numerically (beta.2 &lt; beta.10), no iteration first. </summary>
+    [Test] public void Prerelease_Ordering()
+    {
+        string[] ordered = ["10.0.9", "10.1.0-alpha.1", "10.1.0-beta", "10.1.0-beta.1", "10.1.0-beta.2", "10.1.0-beta.10", "10.1.0-rc.1", "10.1.0", "10.1.1-beta.1", "10.1.1"];
+
+        for ( int i = 1; i < ordered.Length; i++ )
+        {
+            AppVersion lower  = AppVersion.Parse(ordered[i - 1]);
+            AppVersion higher = AppVersion.Parse(ordered[i]);
+
+            this.IsTrue(lower < higher);
+            this.IsTrue(higher > lower);
+            this.IsFalse(lower == higher);
+        }
+
+        this.IsTrue(AppVersion.Parse("10.1.0-beta.1") == AppVersion.Parse("10.1.0-beta1"));
+        this.AreEqual(AppVersion.Parse("10.1.0-beta.1").GetHashCode(), AppVersion.Parse("10.1.0-BETA.1").GetHashCode());
+    }
+
+    [Test]
+    [TestCase("10.1.0-")]
+    [TestCase("10.1.0-.1")]
+    [TestCase("10.1.0-beta.x")]
+    [TestCase("10.1.0-beta.1.2")]
+    [TestCase("10.1.0-beta.-1")]
+    [TestCase("1.")]
+    [TestCase("1..2")]
+    public void Prerelease_Invalid( string input ) => this.IsFalse(AppVersion.TryParse(input, out _));
+
+    [Test] public void Prerelease_Flags()
+    {
+        this.IsTrue(default(AppVersionFlags) == AppVersionFlags.Stable); // default and Stable are both a release
+        this.AreEqual("-beta.1", AppVersionFlags.Beta(1).ToString());
+        this.AreEqual("-rc",     AppVersionFlags.ReleaseCandidate().ToString());
+        this.IsTrue(AppVersionFlags.Alpha(5) < AppVersionFlags.Beta(1));
+        this.IsTrue(AppVersionFlags.Beta(9)  < AppVersionFlags.ReleaseCandidate(1));
+        this.IsTrue(AppVersionFlags.ReleaseCandidate(9) < AppVersionFlags.Stable);
+    }
+
+    [Test] public void Prerelease_Json()
+    {
+        AppVersion version = AppVersion.Parse("10.1.0-beta.1");
+        string     json    = version.ToJson();
+
+        this.AreEqual("\"10.1.0-beta.1\"", json);
+        this.AreEqual(version,             AppVersion.FromJson(json));
+    }
+
+
     [Test] public void TypeConverter_RoundTrip()
     {
         TypeConverter converter = TypeDescriptor.GetConverter(typeof(AppVersion));

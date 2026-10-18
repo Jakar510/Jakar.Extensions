@@ -162,14 +162,15 @@ public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormatta
             if ( int.TryParse(value, NumberStyles.Integer, provider, out int n) ) { return new AppVersion(n); }
 
             AppVersionFlags flags  = AppVersionFlags.Parse(ref value);
+
+            // An empty part (1..2, 1., or 1. before a dash-less suffix such as 1.a1) isn't a version; SplitOn would skip it.
+            if ( value.IsEmpty || value[0] == SEPARATOR || value[^1] == SEPARATOR || value.Contains("..", StringComparison.Ordinal) ) { throw new FormatException($"'{original}' has an empty version part."); }
+
             int             count  = value.Count(SEPARATOR);
             Span<int>       result = stackalloc int[count + 1];
             int             i      = 0;
 
-            foreach ( ReadOnlySpan<char> span in value.SplitOn(SEPARATOR) )
-            {
-                if ( span.Length > 0 ) { result[i++] = int.Parse(span, NumberStyles.Number, provider); }
-            }
+            foreach ( ReadOnlySpan<char> span in value.SplitOn(SEPARATOR) ) { result[i++] = int.Parse(span, NumberStyles.Number, provider); }
 
             return new AppVersion(flags, result);
         }
