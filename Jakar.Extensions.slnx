@@ -1,15 +1,9 @@
-<Solution>
+ <Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="iPhone" />
     <Platform Name="iPhoneSimulator" />
   </Configurations>
-  <Folder Name="/nuget/">
-    <File Path="nuget/LICENSE.txt" />
-    <File Path="nuget/nuget.exe" />
-    <File Path="nuget/pack.bat" />
-    <File Path="nuget/pack.sh" />
-  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="Directory.Packages.props" />
@@ -19,13 +13,7 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="AotCompatibility.TestApp/AotCompatibility.TestApp.csproj" />
-  <Project Path="Jakar.Extensions.Blazor.Syncfusion/Jakar.Extensions.Blazor.Syncfusion.csproj" />
-  <Project Path="Jakar.Extensions.Blazor/Jakar.Extensions.Blazor.csproj" />
-  <Project Path="Jakar.Extensions.Bogus/Jakar.Extensions.Bogus.csproj" />
   <Project Path="Jakar.Extensions.Experiments/Experiments.csproj" />
-  <Project Path="Jakar.Extensions.SignalR/Jakar.Extensions.SignalR.csproj" />
   <Project Path="Jakar.Extensions.Tests/Jakar.Extensions.Tests.csproj" />
-  <Project Path="Jakar.Extensions.Wpf/Jakar.Extensions.Wpf.csproj" />
   <Project Path="Jakar.Extensions/Jakar.Extensions.csproj" />
-  <Project Path="Jakar.Permissions.Generator/src/Jakar.Permissions.Generator.csproj" />
 </Solution>
