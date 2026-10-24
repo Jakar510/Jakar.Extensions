@@ -134,5 +134,5 @@ public partial class Base64_Tests : Assert
 
 
 
-    [JsonModel(typeof(TestJsonContext))] internal sealed partial record SampleRecord( string Name, int Age );
+    [JsonModel] internal sealed partial record SampleRecord( string Name, int Age );
 }

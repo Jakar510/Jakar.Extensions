@@ -8,7 +8,7 @@ BenchmarkSwitcher.FromAssembly(typeof(BenchmarkConfig).Assembly)
 
 
 // SharedUserModel model = new();
-// Console.WriteLine(model.ToJson());                     // [JsonModel] part: System.Text.Json
+// Console.WriteLine(model.ToJson());                     // [JsonModel]: Jakar.Json
 // Console.WriteLine(Jakar.Json.JsonCodec.ToJson(model)); // [GenerateJson] part: Jakar.Json
 
 

@@ -85,10 +85,10 @@ public class EmbeddedResources<TValue>
 
 
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName )
-        where T : IJsonModel<T> => await GetResourceJsonAsync<T>(fileName, Encoding.Default).ConfigureAwait(false);
+        where T : IJsonSerializable<T> => await GetResourceJsonAsync<T>(fileName, Encoding.Default).ConfigureAwait(false);
 
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
-        where T : IJsonModel<T>
+        where T : IJsonSerializable<T>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         string              text          = await GetResourceTextAsync(fileName, encoding).ConfigureAwait(false);

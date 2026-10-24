@@ -70,17 +70,18 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                            => CreateResponse(AsBytes, token);
     public ValueTask<WebResponse<JsonTape>> AsJson( CancellationToken            token )                            => AsJson(null, token);
     public ValueTask<WebResponse<JsonTape>> AsJson( JsonReaderOptions?           options, CancellationToken token ) => CreateResponse(AsJson, options, token);
-    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
 
     /// <summary> The body read by Jakar.Json into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
     public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
         where TValue : IJsonSerializable<TValue> => CreateResponse(AsJson<TValue>, token);
 
-    /// <summary> A root-level JSON array, read element by element with only <paramref name="info"/> (the element's metadata): no collection type needs registering. </summary>
-    public ValueTask<WebResponse<TValue[]>> AsJsonArray<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonArray, info, token);
+    /// <summary> A root-level JSON array of <typeparamref name="TValue"/>, read by Jakar.Json. </summary>
+    public ValueTask<WebResponse<TValue[]>> AsJsonArray<TValue>( CancellationToken token )
+        where TValue : IJsonSerializable<TValue> => CreateResponse(AsJsonArray<TValue>, token);
 
-    /// <inheritdoc cref="AsJsonArray{TValue}(JsonTypeInfo{TValue}, CancellationToken)"/>
-    public ValueTask<WebResponse<List<TValue>>> AsJsonList<TValue>( JsonTypeInfo<TValue> info, CancellationToken token ) => CreateResponse(AsJsonList, info, token);
+    /// <inheritdoc cref="AsJsonArray{TValue}(CancellationToken)"/>
+    public ValueTask<WebResponse<List<TValue>>> AsJsonList<TValue>( CancellationToken token )
+        where TValue : IJsonSerializable<TValue> => CreateResponse(AsJsonList<TValue>, token);
 
     // Files are streamed straight from the socket to disk (headers-read), instead of buffering the whole body in memory first.
     public ValueTask<WebResponse<LocalFile>> AsFile( CancellationToken token ) =>
@@ -245,7 +246,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         return await JsonTape.ParseAsync(stream, options, token).ConfigureAwait(false);
     }
 
-    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> with <see cref="Json.GetTypeInfo{T}"/> (no intermediate DOM). </summary>
+    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
     public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
         where TValue : IJsonSerializable<TValue>
     {
@@ -256,30 +257,23 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         return await stream.FromJson<TValue>(token).ConfigureAwait(false);
     }
 
-    /// <summary> Deserializes the body straight into <typeparamref name="TValue"/> (no intermediate DOM). </summary>
-    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
+    public static async ValueTask<TValue[]> AsJsonArray<TValue>( HttpResponseMessage response, CancellationToken token )
+        where TValue : IJsonSerializable<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
 
-        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-        return await JsonModel.FromJsonAsync(stream, info, token).ConfigureAwait(false);
+        byte[] utf8 = await response.Content.ReadAsByteArrayAsync(token).ConfigureAwait(false);
+        return JsonCodec.FromJsonArray<TValue>(utf8);
     }
-    public static async ValueTask<TValue[]> AsJsonArray<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
+    public static async ValueTask<List<TValue>> AsJsonList<TValue>( HttpResponseMessage response, CancellationToken token )
+        where TValue : IJsonSerializable<TValue>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
 
-        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-        return await JsonModel.FromJsonArrayAsync(stream, info, token).ConfigureAwait(false);
-    }
-    public static async ValueTask<List<TValue>> AsJsonList<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        response.EnsureSuccessStatusCode();
-
-        await using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-        return await JsonModel.FromJsonListAsync(stream, info, token).ConfigureAwait(false);
+        byte[] utf8 = await response.Content.ReadAsByteArrayAsync(token).ConfigureAwait(false);
+        return JsonCodec.FromJsonList<TValue>(utf8);
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
     {

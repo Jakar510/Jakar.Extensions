@@ -2,11 +2,8 @@
 // 03/13/2025  13:03
 
 namespace Jakar.Extensions;
-
-
-[JsonConverter(typeof(PairJsonConverter))]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
+[method: JsonCreator]
+[JsonModel(ReadOnlyMembers = JsonReadOnlyMembers.Ignore)]
 public readonly partial struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable, ISpanFormattable
 {
     public readonly string  Key   = key;
@@ -66,7 +63,7 @@ public readonly partial struct Pair( string key, string? value ) : IEquatable<Pa
 
 
 
-[method: JsonConstructor]
+[method: JsonCreator]
 public readonly struct Pair<TValue>( string key, TValue value ) : IEquatable<Pair<TValue>>, IComparable<Pair<TValue>>, IComparable
     where TValue : IComparable<TValue>, IEquatable<TValue>, IComparisonOperators<TValue, TValue, bool>
 {

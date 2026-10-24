@@ -4,11 +4,18 @@
 namespace Jakar.Extensions.Tests;
 
 
-[JsonModel(typeof(TestJsonContext))]
+[JsonModel]
 public sealed partial class TestPreferences : PreferenceFile<TestPreferences>, IEqualComparable<TestPreferences>
 {
     public GeneralSection General { get; set => SetProperty(ref field, value); } = new();
     public ServerSection  Server  { get; set => SetProperty(ref field, value); } = new();
+
+
+    protected override void CopyFrom( TestPreferences loaded )
+    {
+        General = loaded.General;
+        Server  = loaded.Server;
+    }
 
 
     public override bool Equals( TestPreferences? other ) => ReferenceEquals(this, other);
@@ -27,7 +34,8 @@ public sealed partial class TestPreferences : PreferenceFile<TestPreferences>, I
 
 
 
-    public sealed class GeneralSection
+    [JsonModel]
+    public sealed partial class GeneralSection
     {
         public string Theme   { get; set; } = "Dark";
         public bool   Enabled { get; set; }
@@ -35,7 +43,8 @@ public sealed partial class TestPreferences : PreferenceFile<TestPreferences>, I
 
 
 
-    public sealed class ServerSection
+    [JsonModel]
+    public sealed partial class ServerSection
     {
         public string Host { get; set; } = "localhost";
         public int    Port { get; set; } = 80;
@@ -44,5 +53,6 @@ public sealed partial class TestPreferences : PreferenceFile<TestPreferences>, I
 
 
 
-/// <summary> A plain (non-[JsonModel]) type for the value-helper tests. </summary>
-public sealed record Point( int X, int Y );
+/// <summary> A small [JsonModel] type for the value-helper tests. </summary>
+[JsonModel]
+public sealed partial record Point( int X, int Y );

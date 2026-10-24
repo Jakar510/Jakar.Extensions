@@ -5,7 +5,6 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-[JsonConverter(typeof(SerializeAsStringJsonConverter<Email>))]
 public readonly record struct Email( string Value ) : ISpanParsable<Email>, ISpanFormattable
 {
     public static readonly          Email Empty = new(EMPTY);

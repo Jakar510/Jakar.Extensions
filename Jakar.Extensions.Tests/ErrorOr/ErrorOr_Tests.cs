@@ -193,34 +193,19 @@ public class ErrorOr_Tests : Assert
         this.NotNull(json);
     }
 
-    [Test] public void Error_SystemTextJsonRoundTrip()
-    {
-        Error  error = CreateValidationError();
-        string json  = System.Text.Json.JsonSerializer.Serialize(error);
-        this.NotNull(json);
-
-        Error? back = System.Text.Json.JsonSerializer.Deserialize<Error>(json);
-        this.NotNull(back);
-        this.AreEqual(DESCRIPTION,       back!.Description);
-        this.AreEqual(TITLE,             back.Title);
-        this.AreEqual(Status.BadRequest, back.StatusCode);
-    }
-
-
-    // ─── StringTags / Pair carry their payload in public fields, which System.Text.Json
-    //     ignores unless it is handed an explicit contract. Without the converters these
-    //     assertions fail silently: Details survives as an empty bag. ──────────────────
+    // ─── StringTags / Pair carry their payload in public fields ───────────────
 
     private static StringTags CreateTags() => new([new Pair(FIELD, "notes"), new Pair("nullable", null)], [DESCRIPTION, "required"]);
 
 
-    [Test] public void StringTags_SystemTextJsonRoundTrip()
+    [Test] public void StringTags_JakarJsonRoundTrip()
     {
         StringTags tags = CreateTags();
-        string     json = System.Text.Json.JsonSerializer.Serialize(tags);
-        this.NotNull(json);
+        string     json = tags.ToJson();
+        this.IsTrue(json.StartsWith("{\"Tags\" : [{\"Key\" : \"" + FIELD, StringComparison.Ordinal));
+        this.IsFalse(json.Contains(nameof(StringTags.IsEmpty), StringComparison.Ordinal)); // computed members aren't written
 
-        StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(json);
+        StringTags back = StringTags.FromJson(json);
         this.AreEqual(2,       back.Tags.Length);
         this.AreEqual(2,       back.Entries.Length);
         this.AreEqual(FIELD,   back.Tags[0].Key);
@@ -230,59 +215,11 @@ public class ErrorOr_Tests : Assert
         this.IsFalse(back.IsEmpty);
     }
 
-    [Test] public void StringTags_SystemTextJsonRoundTrip_WebDefaults()
+    [Test] public void StringTags_ToleratesMissingAndNullMembers()
     {
-        // Minimal API uses JsonSerializerDefaults.Web ( camelCase ) - the converter must follow the naming policy.
-        System.Text.Json.JsonSerializerOptions options = new(System.Text.Json.JsonSerializerDefaults.Web);
-
-        StringTags tags = CreateTags();
-        string     json = System.Text.Json.JsonSerializer.Serialize(tags, options);
-        this.IsTrue(json.Contains("\"tags\"", StringComparison.Ordinal));
-
-        StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(json, options);
-        this.AreEqual(2,       back.Tags.Length);
-        this.AreEqual(FIELD,   back.Tags[0].Key);
-        this.AreEqual("notes", back.Tags[0].Value);
-    }
-
-    [Test] public void StringTags_ReflectionSerializerReadsTheGeneratedShape()
-    {
-        StringTags back = System.Text.Json.JsonSerializer.Deserialize<StringTags>(CreateTags().ToJson());
-        this.AreEqual(2,     back.Tags.Length);
-        this.AreEqual(2,     back.Entries.Length);
-        this.AreEqual(FIELD, back.Tags[0].Key);
-    }
-
-    [Test] public void StringTags_SystemTextJsonToleratesMissingAndNullMembers()
-    {
-        this.IsTrue(System.Text.Json.JsonSerializer.Deserialize<StringTags>("{}").IsEmpty);
-        this.IsTrue(System.Text.Json.JsonSerializer.Deserialize<StringTags>("""{"Tags":null,"Entries":null}""").IsEmpty);
-        this.AreEqual(1, System.Text.Json.JsonSerializer.Deserialize<StringTags>("""{"Unknown":{"nested":[1,2]},"Entries":["x"]}""").Entries.Length);
-    }
-
-    [Test] public void Error_SystemTextJsonKeepsDetails()
-    {
-        Error  error = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
-        string json  = System.Text.Json.JsonSerializer.Serialize(error);
-
-        Error? back = System.Text.Json.JsonSerializer.Deserialize<Error>(json);
-        this.NotNull(back);
-        this.AreEqual(2,     back!.Details.Tags.Length);
-        this.AreEqual(2,     back.Details.Entries.Length);
-        this.AreEqual(FIELD, back.Details.Tags[0].Key);
-    }
-
-    [Test] public void Errors_SystemTextJsonRoundTrip()
-    {
-        Errors errors = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
-        string json   = System.Text.Json.JsonSerializer.Serialize(errors);
-        this.NotNull(json);
-
-        Errors? back = System.Text.Json.JsonSerializer.Deserialize<Errors>(json);
-        this.NotNull(back);
-        this.IsTrue(back!.IsValid);
-        this.AreEqual(1,     back.Details.Length);
-        this.AreEqual(FIELD, back.Details[0].Details.Tags[0].Key);
+        this.IsTrue(StringTags.FromJson("{}").IsEmpty);
+        this.IsTrue(StringTags.FromJson("""{"Tags":null,"Entries":null}""").IsEmpty);
+        this.AreEqual(1, StringTags.FromJson("""{"Unknown":{"nested":[1,2]},"entries":["x"]}""").Entries.Length);
     }
 
     [Test] public void Error_JakarJsonKeepsDetails()
@@ -291,31 +228,29 @@ public class ErrorOr_Tests : Assert
         Error? back  = Json.Serialize(error).FromJson<Error>();
         this.NotNull(back);
         this.AreEqual(2,     back!.Details.Tags.Length);
+        this.AreEqual(2,     back.Details.Entries.Length);
         this.AreEqual(FIELD, back.Details.Tags[0].Key);
     }
 
-
-    // ─── LoginRequest must survive System.Text.Json model binding ─────────────
-
-    [Test] public void LoginRequest_SystemTextJsonRoundTrip()
+    [Test] public void Errors_JakarJsonKeepsDetails()
     {
-        LoginRequest request = new("tyler", "hunter2");
-        string       json    = System.Text.Json.JsonSerializer.Serialize(request);
-        this.NotNull(json);
-
-        LoginRequest? back = System.Text.Json.JsonSerializer.Deserialize<LoginRequest>(json);
+        Errors  errors = Error.Validation(CreateTags(), description: DESCRIPTION, title: TITLE);
+        Errors? back   = Errors.FromJson(errors.ToJson());
         this.NotNull(back);
-        this.AreEqual("tyler",   back!.UserLogin);
-        this.AreEqual("hunter2", back.UserPassword);
+        this.IsTrue(back!.IsValid);
+        this.AreEqual(1,     back.Details.Length);
+        this.AreEqual(FIELD, back.Details[0].Details.Tags[0].Key);
     }
 
-    [Test] public void LoginRequest_SystemTextJsonBindsRawBody()
-    {
-        const string BODY = """{"UserLogin":"tyler","UserPassword":"hunter2"}""";
 
-        LoginRequest? back = System.Text.Json.JsonSerializer.Deserialize<LoginRequest>(BODY);
-        this.NotNull(back);
-        this.AreEqual("tyler",   back!.UserLogin);
+    // ─── LoginRequest must bind from a raw request body ───────────────────────
+
+    [Test] public void LoginRequest_BindsRawBody()
+    {
+        const string BODY = """{"userLogin":"tyler","UserPassword":"hunter2"}""";
+
+        LoginRequest back = LoginRequest.FromJson(BODY);
+        this.AreEqual("tyler",   back.UserLogin);
         this.AreEqual("hunter2", back.UserPassword);
     }
 

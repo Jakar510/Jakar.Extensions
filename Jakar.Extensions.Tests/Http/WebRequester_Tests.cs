@@ -30,11 +30,11 @@ public partial class WebRequester_Tests : Assert
 
 
 
-    [JsonModel(typeof(TestJsonContext))] public sealed partial record Item( string Name, int Count );
+    [JsonModel] public sealed partial record Item( string Name, int Count );
 
 
 
-    [JsonModel(typeof(TestJsonContext))]
+    [JsonModel]
     public sealed partial class JsonItem( string text ) : BaseClass
     {
         public string Text { get; set; } = text;
@@ -71,12 +71,10 @@ public partial class WebRequester_Tests : Assert
         WebRequester requester = Create(handler);
 
         WebResponse<Item>     typed = await requester.Get("item").AsJson<Item>(CancellationToken.None);
-        WebResponse<Item>     info  = await requester.Get("item").AsJson(Item.JsonTypeInfo, CancellationToken.None);
         WebResponse<JsonTape> token = await requester.Get("item").AsJson(CancellationToken.None);
         using JsonTape?       tape  = token.Payload; // pooled: dispose it
 
         this.AreEqual(new Item("widget", 3), typed.Payload);
-        this.AreEqual(new Item("widget", 3), info.Payload);
         this.AreEqual(3,                     tape!.Root["Count"].GetInt32());
     }
 
@@ -318,9 +316,9 @@ public partial class WebRequester_Tests : Assert
 
         this.AreEqual("utf-16", handler.Requests[0].Content!.Headers.ContentType!.CharSet);
 
-        // The stub reads the body via the declared charset. Compare decoded values: System.Text.Json \u-escapes characters outside the BMP (😀), Newtonsoft didn't.
-        this.AreEqual(TEXT, JsonItem.FromJson(handler.Bodies[0]).Text);
-        this.IsTrue(handler.Bodies[0].Contains("日本語", StringComparison.Ordinal)); // BMP text is written as-is (relaxed escaping)
+        // The stub reads the body via the declared charset. Compare decoded values: Jakar.Json writes them as-is (minimal escaping), as Newtonsoft did.
+        this.AreEqual(TEXT, JsonItem.FromJson(handler.Bodies[0]!).Text);
+        this.IsTrue(handler.Bodies[0]!.Contains("日本語", StringComparison.Ordinal)); // BMP text is written as-is (relaxed escaping)
     }
 
 

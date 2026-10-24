@@ -143,3 +143,18 @@ public abstract partial class ObservableHashSet<TSelf, TValue>( HashSet<TValue> 
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
+
+
+
+public static class ObservableHashSetJson
+{
+    extension<TValue>( ObservableHashSet<TValue> )
+        where TValue : IJsonSerializable<TValue>
+    {
+        /// <exception cref="JsonReadException"> Invalid JSON, or JSON that isn't an array of <typeparamref name="TValue"/>. </exception>
+        public static ObservableHashSet<TValue> FromJson( string json ) => ObservableJson.FromJson<ObservableHashSet<TValue>, TValue>(json);
+
+        /// <summary> <see langword="false"/> for blank or malformed JSON. </summary>
+        public static bool TryFromJson( [NotNullWhen(true)] string? json, [NotNullWhen(true)] out ObservableHashSet<TValue>? result ) => ObservableJson.TryFromJson<ObservableHashSet<TValue>, TValue>(json, out result);
+    }
+}

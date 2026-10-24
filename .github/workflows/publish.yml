@@ -81,10 +81,11 @@ jobs:
           done
           [ "$failed" = 0 ] || exit 1
 
+          # GeneratePackageOnBuild=true makes Pack skip Build (it assumes the build packs), so a clean checkout packs a dll that was never compiled (NU5026).
           index=0
           for csproj in "${packages[@]}"; do
             index=$((index + 1))
-            dotnet pack "$csproj" -c Release -o "artifacts/$(printf '%02d' "$index")"
+            dotnet pack "$csproj" -c Release -o "artifacts/$(printf '%02d' "$index")" -p:GeneratePackageOnBuild=false
           done
 
           echo "Packed:"

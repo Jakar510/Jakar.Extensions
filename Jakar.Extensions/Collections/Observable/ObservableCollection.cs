@@ -803,3 +803,18 @@ public abstract partial class ObservableCollection<TSelf, TValue>( Comparer<TVal
     public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity(buffer.Count + capacity);
     public virtual void TrimExcess()                   => buffer.TrimExcess();
 }
+
+
+
+public static class ObservableCollectionJson
+{
+    extension<TValue>( ObservableCollection<TValue> )
+        where TValue : IEquatable<TValue>, IJsonSerializable<TValue>
+    {
+        /// <exception cref="JsonReadException"> Invalid JSON, or JSON that isn't an array of <typeparamref name="TValue"/>. </exception>
+        public static ObservableCollection<TValue> FromJson( string json ) => ObservableJson.FromJson<ObservableCollection<TValue>, TValue>(json);
+
+        /// <summary> <see langword="false"/> for blank or malformed JSON. </summary>
+        public static bool TryFromJson( [NotNullWhen(true)] string? json, [NotNullWhen(true)] out ObservableCollection<TValue>? result ) => ObservableJson.TryFromJson<ObservableCollection<TValue>, TValue>(json, out result);
+    }
+}

@@ -4,8 +4,8 @@
 namespace Experiments.Benchmarks;
 
 
-[JsonModel(typeof(ExperimentsJsonContext))]
-public sealed partial record Node : BaseRecord<Node>, IJsonModel<Node>
+[JsonModel]
+public sealed partial record Node : BaseRecord<Node>
 {
     private static readonly Node[]         __empty = [];
     public                  Node[]         Children    { get; init; } = __empty;
@@ -66,7 +66,7 @@ public sealed partial record Node : BaseRecord<Node>, IJsonModel<Node>
 
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
-[JsonModel(typeof(ExperimentsJsonContext))]
+[JsonModel]
 public sealed partial class TestJson : BaseClass<TestJson>
 {
     internal static readonly TestJson Debug = new()

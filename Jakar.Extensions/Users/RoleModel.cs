@@ -12,7 +12,7 @@ public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, IJsonModel
 
 
 
-public interface IRoleModel<TSelf, TID> : IRoleModel<TID>, IJsonModel<TSelf>
+public interface IRoleModel<TSelf, TID> : IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : class, IRoleModel<TSelf, TID>
 {
@@ -22,10 +22,10 @@ public interface IRoleModel<TSelf, TID> : IRoleModel<TID>, IJsonModel<TSelf>
 
 
 [Serializable]
-[method: JsonConstructor]
+[method: JsonCreator]
 public class RoleModel<TSelf, TID>( string nameOfRole, UserRights rights, TID id ) : BaseClass<TSelf>(), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
+    where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>
 {
     private   string     __name   = nameOfRole;
     protected TID        _id      = id;

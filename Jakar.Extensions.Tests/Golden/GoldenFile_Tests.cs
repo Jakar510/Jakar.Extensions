@@ -10,7 +10,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Nodes;
 using Jakar.Extensions.UserGuid;
 
 
@@ -48,7 +47,7 @@ public sealed class GoldenFile_Tests
     /// <summary> Property names (at any depth) that may differ, with the reason. Keep this list short and justified. </summary>
     private static readonly Dictionary<string, string> __knownDifferences = new()
                                                                             {
-                                                                                // Computed, read-only values Newtonsoft wrote and nothing reads back. The STJ converters for Pair / StringTags write only the data.
+                                                                                // Computed, read-only values Newtonsoft wrote and nothing reads back. Pair / StringTags write only the data (ReadOnlyMembers = Ignore).
                                                                                 ["HasValue"] = "Pair.HasValue: computed from Value",
                                                                                 ["IsEmpty"]  = "StringTags.IsEmpty: computed from Tags/Entries"
                                                                             };
@@ -79,28 +78,28 @@ public sealed class GoldenFile_Tests
 
     private static void AssertSameJson( string name, string expected, string actual )
     {
-        JsonNode? left  = Strip(JsonNode.Parse(expected));
-        JsonNode? right = Strip(JsonNode.Parse(actual));
+        JNode? left  = Strip(JNode.Parse(expected));
+        JNode? right = Strip(JNode.Parse(actual));
 
-        Assert.That(JsonNode.DeepEquals(left, right), Is.True, $"{name}: JSON differs.\n--- 10.x ---\n{left?.ToJsonString()}\n--- 11.0 ---\n{right?.ToJsonString()}");
+        Assert.That(JNode.DeepEquals(left, right), Is.True, $"{name}: JSON differs.\n--- 10.x ---\n{left?.ToJson()}\n--- 11.0 ---\n{right?.ToJson()}");
     }
 
 
-    private static JsonNode? Strip( JsonNode? node )
+    private static JNode? Strip( JNode? node )
     {
         switch ( node )
         {
-            case JsonObject obj:
-                foreach ( string key in obj.Select(static pair => pair.Key).Where(__knownDifferences.ContainsKey).ToArray() ) { obj.Remove(key); }
+            case JObjectNode obj:
+                foreach ( string key in obj.Keys.Where(__knownDifferences.ContainsKey).ToArray() ) { obj.Remove(key); }
 
-                foreach ( string key in obj.Where(static pair => pair.Value is null && __nullEqualsEmpty.Contains(pair.Key)).Select(static pair => pair.Key).ToArray() ) { obj[key] = new JsonArray(); }
+                foreach ( string key in obj.Where(static pair => pair.Value is null && __nullEqualsEmpty.Contains(pair.Key)).Select(static pair => pair.Key).ToArray() ) { obj[key] = new JArrayNode(); }
 
-                foreach ( KeyValuePair<string, JsonNode?> pair in obj.ToArray() ) { Strip(pair.Value); }
+                foreach ( KeyValuePair<string, JNode?> pair in obj.ToArray() ) { Strip(pair.Value); }
 
                 break;
 
-            case JsonArray array:
-                foreach ( JsonNode? item in array ) { Strip(item); }
+            case JArrayNode array:
+                foreach ( JNode? item in array ) { Strip(item); }
 
                 break;
         }

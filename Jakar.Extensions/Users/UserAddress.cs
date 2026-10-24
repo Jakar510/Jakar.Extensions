@@ -19,7 +19,7 @@ public interface IAddress<out TID> : IUniqueID<TID>, IJsonModel
 
 
 
-public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>, IJsonModel<TSelf>
+public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : class, IAddress<TSelf, TID>
 {
@@ -33,7 +33,7 @@ public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>, IJsonMo
 [Serializable]
 public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IEqualComparable<TSelf>
 {
     private bool    __isPrimary;
     private string  __city            = EMPTY;
@@ -71,7 +71,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     public bool IsPrimary { get => __isPrimary; set => SetProperty(ref __isPrimary, value); }
 
 
-    [JsonIgnore] public bool IsValidAddress
+    [JsonSkip] public bool IsValidAddress
     {
         get
         {

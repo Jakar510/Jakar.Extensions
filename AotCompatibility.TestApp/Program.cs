@@ -1,10 +1,6 @@
 // Native AOT smoke test (AOT-plan §5.2). Every check runs in the published native executable; any failure exits non-zero.
 
-using System.Collections.Immutable;
 using System.Net;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using AotCompatibility.TestApp;
 using Jakar.Extensions;
 using Jakar.Json;
@@ -34,7 +30,7 @@ Check("AppVersion",     () => AppVersion.FromJson(new AppVersion(1, 2, 3).ToJson
 Check("AppInformation", () => AppInformation.FromJson(new AppInformation(new AppVersion(1), Guid.NewGuid(), "app", null).ToJson()).AppName == "app");
 Check("StringTags",     () => StringTags.FromJson(new StringTags([new Pair("k", "v")], ["e"]).ToJson()).Tags[0].Value                      == "v");
 Check("Error/Errors",   () => Errors.FromJson(Errors.Create(Error.Validation(description: "bad")).ToJson()).Details[0].Description         == "bad");
-Check("Error (tier 2)", () => Json.Serialize(Error.NotFound()).FromJson<Error>().StatusCode                                                == Status.NotFound);
+Check("Error (generic)", () => Json.Serialize(Error.NotFound()).FromJson<Error>().StatusCode                                               == Status.NotFound);
 Check("GcInfo",         () => GcInfo.FromJson(GcInfo.Create().ToJson()).TotalMemory                                                        >= 0);
 
 Check("UserModel",
@@ -46,7 +42,7 @@ Check("UserModel",
           return back.UserName == "ada" && back.Addresses.Count == 1;
       });
 
-Check("LoginRequestValue", () => LoginRequestValue.FromJson(new LoginRequestValue("u", "p", "{\"A\":1}".FromJson<JsonElement>()).ToJson()).Data.Get<int>("A") == 1);
+Check("LoginRequestValue", () => LoginRequestValue.FromJson(new LoginRequestValue("u", "p", "{\"A\":1}".FromJson()).ToJson()).Data.TryGetValue("A", out int a) && a == 1);
 
 Check("Extension data",
       () =>
@@ -65,44 +61,27 @@ Check("App [JsonModel]",
                    .Total ==
             9.5m);
 
-Check("Registry lookup",   () => Json.GetTypeInfo<Invoice>() == Invoice.JsonTypeInfo);
-Check("Runtime-type body", () => WebRequester.CreateJsonContentOfRuntimeType(new Alert("t")).ReadAsStringAsync().Result.Contains("\"Title\":\"t\""));
+Check("Registry lookup",   () => JsonCodecRegistry.IsRegistered(typeof(Invoice)) && JsonCodecRegistry.IsRegistered(typeof(UserModel)));
+Check("Runtime-type body", () => WebRequester.CreateJsonContentOfRuntimeType(new Alert("t")).ReadAsStringAsync().Result.Contains("\"Title\" : \"t\""));
 
-// ─── Element-wise arrays, pooled buffers, collections ───────────────────────
-Check("FromJsonList (no List<T> metadata)", () => JsonModel.FromJsonList("[{\"Id\":\"a\"},{\"Id\":\"b\"}]", Invoice.JsonTypeInfo).Count                                                         == 2);
-Check("ImmutableArray build",               () => JsonModel.FromJsonArray("[1,2,3]", JakarExtensionsContext.Default.Int32, static ImmutableArray<int> ( ReadOnlySpan<int> s ) => [.. s]).Length == 3);
-
-Check("RentedArray",
-      () =>
-      {
-          using RentedArray<int> values = JsonModel.FromJsonArrayPooled("[1,2,3,4]"u8, JakarExtensionsContext.Default.Int32);
-          return values.Count == 4 && values.Span[3] == 4;
-      });
-
-Check("Array ToJson", () => new[] { new Invoice { Id = "x" } }.ToJson(false).StartsWith("[{"));
+// ─── Root arrays, collections ───────────────────────────────────────────────
+Check("FromJsonList", () => JsonCodec.FromJsonList<Invoice>("[{\"Id\":\"a\"},{\"Id\":\"b\"}]").Count == 2);
+Check("Array ToJson", () => Json.Serialize([new Invoice { Id = "x" }], false).StartsWith("[{"));
 
 Check("ObservableCollection unfiltered",
       () =>
       {
-          ObservableCollection<int> numbers = new(1, 2, 3, 4) { OverrideFilter = static ( int _, ref readonly int v ) => v > 2 };
-          return numbers.ToJson(false) == "[1,2,3,4]" && ObservableCollection<int>.FromJson("[5,6]").Count == 2;
+          ObservableCollection<Invoice> invoices = new(new Invoice { Id = "a" }, new Invoice { Id = "b" }) { OverrideFilter = static ( int _, ref readonly Invoice? v ) => v?.Id == "b" };
+          return invoices.ToJson().Contains("\"a\"") && ObservableCollection<Invoice>.FromJson("[{\"Id\":\"c\"}]").Count == 1;
       });
 
 // ─── DOM helpers ─────────────────────────────────────────────────────────────
-Check("JsonNode helpers",
+Check("JNode helpers",
       () =>
       {
-          JsonObject obj = "{\"A\":1}".FromJson().AsObject();
-          obj.Set("B", "two");
-          return obj.Get<int>("A") == 1 && obj.Get<string>("B") == "two";
-      });
-
-Check("JsonElement helpers",
-      () =>
-      {
-          JsonElement element = "{\"A\":1}".FromJson<JsonElement>();
-          element.Set("B", 2, JakarExtensionsContext.Default.Int32);
-          return element.Get<int>("B") == 2;
+          JObjectNode obj = "{\"A\":1}".FromJson().AsObject();
+          obj.Set("B", new Invoice { Id = "two" });
+          return obj.TryGetValue("A", out int a) && a == 1 && obj.Get<Invoice>("B")!.Id == "two";
       });
 
 // ─── Exceptions (no reflection-based serialization) ─────────────────────────
@@ -110,37 +89,34 @@ Check("Exception.GetData",
       () =>
       {
           InvalidOperationException e = new("boom") { Data = { ["n"] = 5 } };
-          return e.GetData()["n"]!.GetValue<int>() == 5 && e.GetTags().Entries.Length > 0;
+          return (int)e.GetData()["n"] == 5 && e.GetTags().Entries.Length > 0;
       });
 
 Check("Error.Create(Exception)", () => Error.Create(new InvalidOperationException("boom")).Description == "boom");
 
 // ─── Converters ──────────────────────────────────────────────────────────────
-Check("SerializeAsString (Email)", () => Json.Serialize(new Email("a@b.test")) == "\"a@b.test\"");
-Check("Encoding",                  () => Json.Serialize(new LocalFile(Path.Combine(Path.GetTempPath(), "x.txt"))).Contains("FullPath"));
+Check("Email as a string", () => Json.Serialize<Email, JsonParsableConverter<Email>>(new Email("a@b.test")) == "\"a@b.test\"");
+Check("Encoding",          () => new LocalFile(Path.Combine(Path.GetTempPath(), "x.txt")).ToJson().Contains("\"FileEncoding\" : \"utf-8\""));
 
 // ─── Other dependencies ──────────────────────────────────────────────────────
 Check("OTP QR code (ZXing)", () => OneTimePassword.Create("Jakar").GetContent("ada").StartsWith("otpauth://"));
 Check("IPAddress parse",     () => IPAddress.Parse("127.0.0.1").ToString() == "127.0.0.1");
 
-// ─── Hybrid [JsonModel]: Jakar.Json behind IJsonModel ───────────────────────
-// The user models' IJsonModel members run on Jakar.Json (static virtual dispatch through IJsonModel<TSelf>); JsonTypeInfo stays System.Text.Json's. Covers init-only
-// members of generic bases, observable collections (IJsonCollection) and the Dictionary<string, JsonElement> extension-data bag. Jakar.Json's own checks are in its repository.
-Check("[JsonModel] hybrid: Jakar.Json behind IJsonModel", () =>
-                                                                           {
-                                                                               UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
-                                                                               user.Addresses.Add(new UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
+// ─── User models: init-only members of generic bases, observable collections (IJsonCollection), the JObjectNode extension-data bag ───
+Check("[JsonModel] user model",
+      () =>
+      {
+          UserModel user = new("Ada", "Lovelace") { UserName = "ada" };
+          user.Addresses.Add(new UserAddress("1 Main St", "", "Springfield", "IL", "62701", "US", Guid.NewGuid()));
 
-                                                                               string                              json  = user.ToJson(indented: false);
-                                                                               UserModel back  = UserModel.FromJson(json[..^1] + ",\"extra\":[1,2.50]}");
-                                                                               UserModel stj   = JsonSerializer.Deserialize(json, UserModel.JsonTypeInfo)!;
+          string    json = user.ToJson();
+          UserModel back = UserModel.FromJson(json[..^1] + ",\"extra\":[1,2.50]}");
 
-                                                                               return json == JsonCodec.ToJson(user, Jakar.Json.JsonWriterOptions.Default)
-                                                                                   && back.Addresses.Single().ID == user.Addresses.Single().ID
-                                                                                   && stj.UserName == "ada"
-                                                                                   && back.AdditionalData!["extra"][1].GetRawText() == "2.50"
-                                                                                   && back.ToJson(indented: false).EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
-                                                                           });
+          return json == JsonCodec.ToJson(user, Jakar.Json.JsonWriterOptions.Default)
+              && back.Addresses.Single().ID == user.Addresses.Single().ID
+              && back.AdditionalData!["extra"]![1]!.ToJson() == "2.50"
+              && back.ToJson().EndsWith("\"extra\" : [1,2.50]}", StringComparison.Ordinal);
+      });
 
 
 Console.WriteLine(failures == 0
@@ -155,14 +131,15 @@ return failures == 0
 
 namespace AotCompatibility.TestApp
 {
-    [JsonSerializable(typeof(Invoice))] public sealed partial class AppJsonContext : JsonSerializerContext;
-
-
-
-    [JsonModel(typeof(AppJsonContext))]
-    public sealed partial class Invoice
+    [JsonModel]
+    public sealed partial class Invoice : IEquatable<Invoice>
     {
         public string  Id    { get; init; } = "";
         public decimal Total { get; init; }
+
+
+        public bool Equals( Invoice? other ) => other is not null && Id == other.Id && Total == other.Total;
+        public override bool Equals( object? obj ) => obj is Invoice other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(Id, Total);
     }
 }

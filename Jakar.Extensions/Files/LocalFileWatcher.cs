@@ -7,8 +7,6 @@ namespace Jakar.Extensions;
 #pragma warning disable CS1066, CS1584
 /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
 [NotSerializable]
-[JsonConverter(typeof(CollectionAlertsJsonConverter<LocalFileWatcher, LocalFile>))]
-[JsonModel(typeof(JakarExtensionsContext))]
 public sealed partial class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>
 {
     private FileSystemWatcher? __watcher;

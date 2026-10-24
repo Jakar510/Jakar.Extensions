@@ -11,9 +11,9 @@ namespace Jakar.Extensions;
 [StructLayout(LayoutKind.Auto)]
 [Serializable]
 [DefaultValue(nameof(Invalid))]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public readonly partial struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName ) : IJsonModel<AppInformation>
+[method: JsonCreator]
+[JsonModel]
+public readonly partial struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName )
 {
     public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, EMPTY, null);
     public readonly        AppVersion     Version     = version;

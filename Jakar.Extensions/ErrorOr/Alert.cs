@@ -6,8 +6,8 @@ namespace Jakar.Extensions;
 
 [Serializable]
 [DefaultValue(nameof(Empty))]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class Alert() : BaseClass<Alert>, IJsonModel<Alert>, IEqualComparable<Alert>
+[JsonModel]
+public sealed partial class Alert() : BaseClass<Alert>, IEqualComparable<Alert>
 {
     public static readonly Alert     Empty = new(null);
     public                 bool      IsNotValid => !CheckIsValid(Title, Message);

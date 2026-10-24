@@ -177,7 +177,7 @@ public static partial class Types
         public bool IsGenericType( ReadOnlySpan<Type> types ) => self.IsAnyBuiltInType() || self.IsOneOf(types) || self.IsJsonNode();
         public bool IsNullableType()                          => self.IsGenericType && self.GetGenericTypeDefinition() == typeof(Nullable<>);
         public bool IsAnyBuiltInType()                        => self.IsGenericType && ( self.IsBuiltInType() || self.IsBuiltInNullableType() );
-        public bool IsJsonNode()                              => self.IsAssignableTo(typeof(JsonNode)) || self == typeof(JsonElement) || self == typeof(JsonDocument);
+        public bool IsJsonNode()                              => self.IsAssignableTo(typeof(JNode)) || self == typeof(JsonTape);
     }
 
 

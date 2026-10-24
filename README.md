@@ -15,7 +15,7 @@ Jakar.Extensions builds on two packages that have their own repositories:
 | Package | Repository | What it is |
 |---|---|---|
 | Jakar.Spans 10.1.0 | [Jakar510/Jakar.Spans](https://github.com/Jakar510/Jakar.Spans) | Allocation-free span primitives: `ValueStringBuilder`, `ValueUtf8Builder`, `ValueSpanReader<T>`. |
-| Jakar.Json 10.1.0, Jakar.Json.AspNetCore 10.1.0 | [Jakar510/Jakar.Json](https://github.com/Jakar510/Jakar.Json) | Reflection-free, allocation-free JSON with a `[JsonModel]` source generator (and the System.Text.Json models, formerly Jakar.SystemTextJson); ASP.NET Core integration. |
+| Jakar.Json 10.3.0, Jakar.Json.AspNetCore 10.3.0 | [Jakar510/Jakar.Json](https://github.com/Jakar510/Jakar.Json) | Standalone, reflection-free, allocation-free JSON with a `[JsonModel]` source generator; ASP.NET Core integration. |
 
 They're referenced as NuGet packages. Until they're on nuget.org, `nuget.config` also reads the local feed `W:\WorkSpace\LocalNuGet`.
 
@@ -32,8 +32,8 @@ Every package version is **`<.NET major>.<library major>.<library minor>`**:
 | Library minor | New features and fixes that don't break existing code. | 10.10.**0** → 10.10.**1** |
 
 - A new package starts at `<.NET major>.1.0`: Jakar.Spans, Jakar.Json and Jakar.Json.AspNetCore start at 10.1.0.
-- Packages released together depend on each other at the versions they were released with, as a minimum: Jakar.Extensions 10.10.0 needs Jakar.Json 10.1.0 or later.
-- Jakar.Extensions.Blazor 9.1.0 and Jakar.Extensions.Blazor.Syncfusion 9.0.0 predate this scheme; their next releases move to `10.x`.
+- Packages released together depend on each other at the versions they were released with, as a minimum: Jakar.Extensions 10.11.0 needs Jakar.Json 10.3.0 or later.
+- Jakar.Extensions.Blazor 9.1.0 and Jakar.Extensions.Blazor.Syncfusion 9.0.0 predate this scheme; their next releases are 10.1.0.
 
 ## Repository
 

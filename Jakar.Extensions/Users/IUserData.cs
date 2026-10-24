@@ -89,7 +89,7 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
     public TSelf With( params ReadOnlySpan<TGroupModel>          values );
     public TSelf With( IEnumerable<TRoleModel>                   values );
     public TSelf With( params ReadOnlySpan<TRoleModel>           values );
-    public TSelf With( IReadOnlyDictionary<string, JsonElement>? data );
+    public TSelf With( JObjectNode? data );
 
 
     public abstract static TSelf Create<TValue>( TValue value )
@@ -101,7 +101,7 @@ public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>
 
 
 
-public interface ICreateUserModel<TSelf, TID> : IUserData<TID>, IJsonModel<TSelf>
+public interface ICreateUserModel<TSelf, TID> : IUserData<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : class, ICreateUserModel<TSelf, TID>
 {

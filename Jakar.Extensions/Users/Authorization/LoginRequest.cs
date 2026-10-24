@@ -43,7 +43,7 @@ public interface IChangePassword<out TValue> : ILoginRequest<TValue>, IChangePas
 
 
 public interface ILoginRequestProvider<out TRequest>
-    where TRequest : ILoginRequest, IJsonModel<TRequest>, IEqualComparable<TRequest>
+    where TRequest : ILoginRequest, IEqualComparable<TRequest>
 {
     public TRequest GetLoginRequest();
 }
@@ -109,11 +109,11 @@ public static class LoginRequestExtensions
 
 
 [Serializable]
-[method: JsonConstructor]
+[method: JsonCreator]
 public abstract class LoginRequest<TSelf>( string userLogin, string userPassword ) : BaseClass<TSelf>, ILoginRequest
-    where TSelf : LoginRequest<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+    where TSelf : LoginRequest<TSelf>, IEqualComparable<TSelf>
 {
-    [JsonIgnore] public virtual bool       IsValid      => this.IsValid();
+    [JsonSkip] public virtual bool       IsValid      => this.IsValid();
     [Required]   public         string     UserLogin    { get; init; } = userLogin;
     [Required]   public         string     UserPassword { get; init; } = userPassword;
     public                      AppVersion Version      { get; init; } = AppVersion.Default;
@@ -138,12 +138,12 @@ public abstract class LoginRequest<TSelf>( string userLogin, string userPassword
 
 
 [Serializable]
-[method: JsonConstructor]
+[method: JsonCreator]
 public abstract class LoginRequest<TSelf, TValue>( string userName, string password, TValue data ) : LoginRequest<TSelf>(userName, password), ILoginRequest<TValue>
-    where TSelf : LoginRequest<TSelf, TValue>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+    where TSelf : LoginRequest<TSelf, TValue>, IEqualComparable<TSelf>
 {
     [Required]   public          TValue Data    { get; init; } = data;
-    [JsonIgnore] public override bool   IsValid => this.IsValid();
+    [JsonSkip] public override bool   IsValid => this.IsValid();
 
 
     protected LoginRequest() : this(EMPTY, EMPTY, default!) { }
@@ -182,9 +182,9 @@ public abstract class LoginRequest<TSelf, TValue>( string userName, string passw
 
 
 [Serializable]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class LoginRequestVersion( string userLogin, string userPassword, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userLogin, userPassword, data), IJsonModel<LoginRequestVersion>, IEqualComparable<LoginRequestVersion>
+[method: JsonCreator]
+[JsonModel]
+public sealed partial class LoginRequestVersion( string userLogin, string userPassword, AppVersion data ) : LoginRequest<LoginRequestVersion, AppVersion>(userLogin, userPassword, data), IEqualComparable<LoginRequestVersion>
 {
     public LoginRequestVersion() : this(EMPTY, EMPTY, AppVersion.Default) { }
     public LoginRequestVersion( ILoginRequest             request, AppVersion data ) : this(request.UserLogin, request.UserPassword, data) { }
@@ -204,16 +204,16 @@ public sealed partial class LoginRequestVersion( string userLogin, string userPa
 
 
 [Serializable]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class LoginRequestValue( string userLogin, string userPassword, JsonElement data ) : LoginRequest<LoginRequestValue, JsonElement>(userLogin, userPassword, data), IJsonModel<LoginRequestValue>, IEqualComparable<LoginRequestValue>
+[method: JsonCreator]
+[JsonModel]
+public sealed partial class LoginRequestValue( string userLogin, string userPassword, JNode? data ) : LoginRequest<LoginRequestValue, JNode?>(userLogin, userPassword, data), IEqualComparable<LoginRequestValue>
 {
-    public LoginRequestValue() : this(EMPTY, EMPTY, Json.NullElement) { }
-    public LoginRequestValue( ILoginRequest              request, JsonElement data ) : this(request.UserLogin, request.UserPassword, data) { }
-    public LoginRequestValue( ILoginRequest<JsonElement> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
+    public LoginRequestValue() : this(EMPTY, EMPTY, null) { }
+    public LoginRequestValue( ILoginRequest          request, JNode? data ) : this(request.UserLogin, request.UserPassword, data) { }
+    public LoginRequestValue( ILoginRequest<JNode?> request ) : this(request.UserLogin, request.UserPassword, request.Data) { }
 
 
-    public static LoginRequestValue Create( ILoginRequest request, JsonElement data ) => new(request.UserLogin, request.UserPassword, data);
+    public static LoginRequestValue Create( ILoginRequest request, JNode? data ) => new(request.UserLogin, request.UserPassword, data);
 
 
     public override int  GetHashCode()                                                    => HashCode.Combine(UserLogin, UserPassword, Data);
@@ -229,9 +229,9 @@ public sealed partial class LoginRequestValue( string userLogin, string userPass
 
 
 [Serializable]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class LoginRequest( string userLogin, string userPassword ) : LoginRequest<LoginRequest>(userLogin, userPassword), IJsonModel<LoginRequest>, IEqualComparable<LoginRequest>
+[method: JsonCreator]
+[JsonModel]
+public sealed partial class LoginRequest( string userLogin, string userPassword ) : LoginRequest<LoginRequest>(userLogin, userPassword), IEqualComparable<LoginRequest>
 {
     public LoginRequest() : this(EMPTY, EMPTY) { }
     public LoginRequest( ILoginRequest request ) : this(request.UserLogin, request.UserPassword) { }

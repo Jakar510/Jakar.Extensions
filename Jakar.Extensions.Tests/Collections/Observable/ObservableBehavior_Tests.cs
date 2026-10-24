@@ -466,8 +466,7 @@ public sealed class ObservableBehavior_Tests : Assert
 
     private sealed class Recording() : ObservableCollection<Recording, int>(Comparer<int>.Default), ICollectionAlerts<Recording, int>
     {
-        public static   System.Text.Json.Serialization.Metadata.JsonTypeInfo<Recording> JsonTypeInfo => Json.GetTypeInfo<Recording>();
-        public readonly List<NotifyCollectionChangedAction>                             Actions = [];
+        public readonly List<NotifyCollectionChangedAction> Actions = [];
 
 
         protected override void OnChanged( NotifyCollectionChangedEventArgs e )

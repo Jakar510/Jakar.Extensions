@@ -61,11 +61,11 @@ public class UserDetails : BaseClass, IUserDetails, IUserID
 
     [StringLength(FULL_NAME)] public         string? FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
     [StringLength(GENDER)]    public         string? Gender             { get => _gender;                     set => SetProperty(ref _gender,   value); }
-    [JsonIgnore]              public virtual bool    IsValid            => IsValidEmail                      && IsValidName;
-    [JsonIgnore]              public virtual bool    IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
-    [JsonIgnore]              public virtual bool    IsValidName        => !string.IsNullOrWhiteSpace(FullName);
-    [JsonIgnore]              public virtual bool    IsValidPhoneNumber => !string.IsNullOrWhiteSpace(PhoneNumber);
-    [JsonIgnore]              public virtual bool    IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
+    [JsonSkip]              public virtual bool    IsValid            => IsValidEmail                      && IsValidName;
+    [JsonSkip]              public virtual bool    IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
+    [JsonSkip]              public virtual bool    IsValidName        => !string.IsNullOrWhiteSpace(FullName);
+    [JsonSkip]              public virtual bool    IsValidPhoneNumber => !string.IsNullOrWhiteSpace(PhoneNumber);
+    [JsonSkip]              public virtual bool    IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
 
     [Required] [StringLength(LAST_NAME)] public string? LastName
     {

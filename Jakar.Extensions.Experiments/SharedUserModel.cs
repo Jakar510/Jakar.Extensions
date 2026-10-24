@@ -9,7 +9,7 @@ namespace Experiments;
 
 
 [Serializable]
-[JsonModel(typeof(SharedUserJsonContext))]
+[JsonModel]
 public sealed partial class SharedUserModel : UserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<SharedUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public SharedUserModel() : base() { }

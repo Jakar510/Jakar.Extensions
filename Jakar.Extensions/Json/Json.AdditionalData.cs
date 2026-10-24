@@ -4,20 +4,16 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> Helpers for the <see cref="IJsonModel.AdditionalData"/> / <see cref="IJsonStringModel.AdditionalData"/> extension-data bags. Keys are case-insensitive. </summary>
+/// <summary> Helpers for the <see cref="IJsonModel.AdditionalData"/> / <see cref="IJsonStringModel.AdditionalData"/> extension-data bags. Keys are ordinal, in insertion order. </summary>
 public static partial class Json
 {
-    /// <summary> A new, case-insensitive extension-data bag. </summary>
-    public static Dictionary<string, JsonElement> CreateAdditionalData() => new(StringComparer.OrdinalIgnoreCase);
-
-
-    /// <summary> Copies <paramref name="source"/> into <paramref name="destination"/> (creating it if needed), replacing existing keys. <see cref="JsonElement"/>s are immutable, so nothing is cloned. </summary>
-    public static Dictionary<string, JsonElement>? Merge( this Dictionary<string, JsonElement>? destination, IReadOnlyDictionary<string, JsonElement>? source )
+    /// <summary> Copies <paramref name="source"/> into <paramref name="destination"/> (creating it if needed), replacing existing keys. Values are cloned, so neither bag shares nodes with the other. </summary>
+    public static JObjectNode? Merge( this JObjectNode? destination, JObjectNode? source )
     {
         if ( source is null || source.Count == 0 ) { return destination; }
 
-        destination ??= CreateAdditionalData();
-        foreach ( ( string key, JsonElement value ) in source ) { destination[key] = value; }
+        destination ??= [];
+        foreach ( ( string key, JNode? value ) in source ) { destination[key] = value?.DeepClone(); }
 
         return destination;
     }
@@ -26,51 +22,42 @@ public static partial class Json
 
     extension( IJsonModel self )
     {
-        public Dictionary<string, JsonElement> GetAdditionalData() => self.AdditionalData ??= CreateAdditionalData();
+        public JObjectNode GetAdditionalData() => self.AdditionalData ??= [];
 
         public bool Contains( string key ) => self.AdditionalData?.ContainsKey(key) is true;
 
 
-        public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value )
-        {
-            value = default;
-            return self.AdditionalData?.TryGetValue(key, out JsonElement element) is true && element.TryConvert(info, out value);
-        }
-
-        public bool TryGet<T>( string key, out T? value )
-            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value);
-
-        public T? Get<T>( string key, JsonTypeInfo<T> info ) => self.TryGet(key, info, out T? value)
-                                                                    ? value
-                                                                    : default;
+        public bool TryGet<T>( string key, [NotNullWhen(true)] out T? value )
+            where T : IJsonSerializable<T> => self.AdditionalData.TryGet(key, out value);
 
         public T? Get<T>( string key )
-            where T : notnull => self.Get(key, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.TryGet(key, out T? value)
+                                                  ? value
+                                                  : default;
 
-        public JsonElement? Get( string key ) => self.AdditionalData?.TryGetValue(key, out JsonElement element) is true
-                                                     ? element
-                                                     : null;
+        public JNode? Get( string key ) => self.AdditionalData?.TryGetValue(key, out JNode? node) is true
+                                               ? node
+                                               : null;
 
 
         /// <summary> Adds or updates. </summary>
-        public void Set<T>( string key, T value, JsonTypeInfo<T> info ) => self.GetAdditionalData()[key] = JsonSerializer.SerializeToElement(value, info);
-
         public void Set<T>( string key, T value )
-            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.GetAdditionalData()[key] = JNode.FromModel(value);
 
-        public void Set( string key, JsonElement value ) => self.GetAdditionalData()[key] = value;
+        /// <summary> Adds or updates. A node that already has a parent is cloned. </summary>
+        public void Set( string key, JNode? value ) => self.GetAdditionalData()[key] = value.Adopt();
 
 
         public bool Remove( string key ) => self.AdditionalData?.Remove(key) is true;
 
-        public bool Remove( string key, out JsonElement value )
+        public bool Remove( string key, out JNode? value )
         {
-            value = default;
+            value = null;
             return self.AdditionalData?.Remove(key, out value) is true;
         }
 
 
-        public void SetAdditionalData( IReadOnlyDictionary<string, JsonElement>? data ) => self.AdditionalData = Merge(null, data);
+        public void SetAdditionalData( JObjectNode? data ) => self.AdditionalData = Merge(null, data);
     }
 
 
@@ -78,60 +65,38 @@ public static partial class Json
     extension( IJsonStringModel self )
     {
         /// <summary> Parses the stored bag; an empty one when there's nothing stored or it isn't a JSON object. </summary>
-        [Pure] public Dictionary<string, JsonElement> GetAdditionalData()
-        {
-            Dictionary<string, JsonElement> result = CreateAdditionalData();
-            if ( string.IsNullOrWhiteSpace(self.AdditionalData) ) { return result; }
-
-            try
-            {
-                using JsonDocument document = JsonDocument.Parse(self.AdditionalData, DocumentOptions);
-                if ( document.RootElement.ValueKind != JsonValueKind.Object ) { return result; }
-
-                foreach ( JsonProperty property in document.RootElement.EnumerateObject() ) { result[property.Name] = property.Value.Clone(); }
-            }
-            catch ( JsonException e ) { SelfLogger.WriteLine("Json parsing error: {Error}", e); }
-
-            return result;
-        }
+        [Pure] public JObjectNode GetAdditionalData() => self.AdditionalData.TryFromJson() as JObjectNode ?? [];
 
 
-        public void SetAdditionalData( IReadOnlyDictionary<string, JsonElement>? data ) => self.AdditionalData = data is null || data.Count == 0
-                                                                                                                     ? null
-                                                                                                                     : JsonModel.ToJson(Merge(null, data), JakarExtensionsContext.Default.DictionaryStringJsonElement, false);
+        public void SetAdditionalData( JObjectNode? data ) => self.AdditionalData = data is null || data.Count == 0
+                                                                                         ? null
+                                                                                         : data.ToJson(false);
 
         public bool Contains( string key ) => self.GetAdditionalData().ContainsKey(key);
 
 
-        public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value )
-        {
-            value = default;
-            return self.GetAdditionalData().TryGetValue(key, out JsonElement element) && element.TryConvert(info, out value);
-        }
-
-        public T? Get<T>( string key, JsonTypeInfo<T> info ) => self.TryGet(key, info, out T? value)
-                                                                    ? value
-                                                                    : default;
+        public bool TryGet<T>( string key, [NotNullWhen(true)] out T? value )
+            where T : IJsonSerializable<T> => self.GetAdditionalData().TryGet(key, out value);
 
         public T? Get<T>( string key )
-            where T : notnull => self.Get(key, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.TryGet(key, out T? value)
+                                                  ? value
+                                                  : default;
 
-
-        public void Set<T>( string key, T value, JsonTypeInfo<T> info )
-        {
-            Dictionary<string, JsonElement> data = self.GetAdditionalData();
-            data[key] = JsonSerializer.SerializeToElement(value, info);
-            self.SetAdditionalData(data);
-        }
 
         public void Set<T>( string key, T value )
-            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T>
+        {
+            JObjectNode data = self.GetAdditionalData();
+            data[key] = JNode.FromModel(value);
+            self.SetAdditionalData(data);
+        }
 
 
         public bool Remove( string key )
         {
-            Dictionary<string, JsonElement> data   = self.GetAdditionalData();
-            bool                            result = data.Remove(key);
+            JObjectNode data   = self.GetAdditionalData();
+            bool        result = data.Remove(key);
             if ( result ) { self.SetAdditionalData(data); }
 
             return result;

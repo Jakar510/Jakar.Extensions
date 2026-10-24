@@ -83,12 +83,12 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     public                           ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
     public                           TID                               ID                 { get => _id;                         init => _id = value; }
     public                           TID?                              ImageID            { get => _imageID;                    set => SetProperty(ref _imageID, value); }
-    [JsonIgnore] public virtual      bool                              IsValid            => IsValidEmail                      && IsValidName && IsValidUserName;
-    [JsonIgnore] public virtual      bool                              IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
-    [JsonIgnore] public virtual      bool                              IsValidName        => !string.IsNullOrWhiteSpace(FullName);
-    [JsonIgnore] public virtual      bool                              IsValidPhoneNumber => !string.IsNullOrWhiteSpace(PhoneNumber);
-    [JsonIgnore] public virtual      bool                              IsValidUserName    => !string.IsNullOrWhiteSpace(UserName);
-    [JsonIgnore] public virtual      bool                              IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
+    [JsonSkip] public virtual      bool                              IsValid            => IsValidEmail                      && IsValidName && IsValidUserName;
+    [JsonSkip] public virtual      bool                              IsValidEmail       => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress();
+    [JsonSkip] public virtual      bool                              IsValidName        => !string.IsNullOrWhiteSpace(FullName);
+    [JsonSkip] public virtual      bool                              IsValidPhoneNumber => !string.IsNullOrWhiteSpace(PhoneNumber);
+    [JsonSkip] public virtual      bool                              IsValidUserName    => !string.IsNullOrWhiteSpace(UserName);
+    [JsonSkip] public virtual      bool                              IsValidWebsite     => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _);
 
     [Required] [StringLength(LAST_NAME)] public string? LastName
     {
@@ -215,7 +215,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         Rights            = value.Rights.Value;
         return With(value.AdditionalData);
     }
-    public TSelf With( IReadOnlyDictionary<string, JsonElement>? data )
+    public TSelf With( JObjectNode? data )
     {
         AdditionalData = Json.Merge(AdditionalData, data);
         return (TSelf)this;

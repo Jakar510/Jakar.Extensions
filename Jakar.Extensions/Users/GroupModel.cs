@@ -13,7 +13,7 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
 
 
 
-public interface IGroupModel<TSelf, TID> : IGroupModel<TID>, IJsonModel<TSelf>
+public interface IGroupModel<TSelf, TID> : IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : class, IGroupModel<TSelf, TID>
 {
@@ -23,10 +23,10 @@ public interface IGroupModel<TSelf, TID> : IGroupModel<TID>, IJsonModel<TSelf>
 
 
 [Serializable]
-[method: JsonConstructor]
+[method: JsonCreator]
 public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, UserRights rights ) : BaseClass<TSelf>, IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TSelf : GroupModel<TSelf, TID>, IGroupModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
+    where TSelf : GroupModel<TSelf, TID>, IGroupModel<TSelf, TID>, IEqualComparable<TSelf>
 {
     private   string     __nameOfGroup = nameOfGroup;
     protected TID        _id           = id;

@@ -11,7 +11,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TSelf : CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TSelf>, IJsonModel<TSelf>, new()
+    where TSelf : CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TSelf>, new()
 {
     private string __confirmPassword = EMPTY;
     private string __userPassword    = EMPTY;
@@ -25,11 +25,11 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
             if ( SetProperty(ref __confirmPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
         }
     }
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserLogin))] public virtual bool IsUserLogin => !string.IsNullOrWhiteSpace(UserLogin);
+    [JsonSkip] [MemberNotNullWhen(true, nameof(UserLogin))] public virtual bool IsUserLogin => !string.IsNullOrWhiteSpace(UserLogin);
 
 
-    [JsonIgnore]                                                                          public override bool IsValid         => base.IsValid                             && IsUserLogin                                                            && IsValidPassword;
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(UserPassword), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(UserPassword) && string.Equals(UserPassword, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(UserPassword);
+    [JsonSkip]                                                                          public override bool IsValid         => base.IsValid                             && IsUserLogin                                                            && IsValidPassword;
+    [JsonSkip] [MemberNotNullWhen(true, nameof(UserPassword), nameof(ConfirmPassword))] public virtual  bool IsValidPassword => !string.IsNullOrWhiteSpace(UserPassword) && string.Equals(UserPassword, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(UserPassword);
 
 
     [Required] [StringLength(USER_NAME)] public virtual string UserLogin
