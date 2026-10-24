@@ -8,7 +8,7 @@ using System.Linq;
 namespace Jakar.Extensions.Tests;
 
 
-/// <summary> Regression tests for bugs found while planning the System.Text.Json migration (AOT-plan.md §2.14). </summary>
+/// <summary> Regression tests for bugs found while planning the JSON migration (AOT-plan.md §2.14). </summary>
 [TestFixture]
 public sealed class JsonSpan_Tests : Assert
 {
@@ -18,8 +18,8 @@ public sealed class JsonSpan_Tests : Assert
     [Test] public void ToJson_Span_WritesExactlyTheSpan()
     {
         // ArrayPool.Shared.Rent(3) returns a 16-element array; the old implementation serialized all 16.
-        ReadOnlySpan<int> values = [1, 2, 3];
-        That(Compact(Json.Serialize(values)), Is.EqualTo("[1,2,3]"));
+        ReadOnlySpan<Point> values = [new Point(1, 1), new Point(2, 2), new Point(3, 3)];
+        That(Compact(Json.Serialize(values)), Is.EqualTo("[{\"X\":1,\"Y\":1},{\"X\":2,\"Y\":2},{\"X\":3,\"Y\":3}]"));
     }
 
 

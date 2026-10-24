@@ -5,188 +5,144 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     System.Text.Json helpers. Everything is AOT-safe: metadata comes from source-generated contexts, never from reflection.
-///     <para> Two tiers: members that take a <see cref="JsonTypeInfo{T}"/> (compile-time checked), and members without one that resolve it through <see cref="GetTypeInfo{T}"/>: a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. Those throw <see cref="NotSupportedException"/> naming the type when it isn't registered. </para>
-///     <para> <see cref="IJsonModel{TSelf}"/> types also get <c> value.ToJson() </c> / <c> T.FromJson(json) </c> from Jakar.Json's <c> [JsonModel] </c> generator. </para>
+///     Jakar.Json helpers. Everything is reflection-free and AOT-safe: <c> [JsonModel] </c> types (<see cref="IJsonSerializable{TSelf}"/>) carry their own generated readers and writers,
+///     any other shape goes through an <see cref="IJsonConverter{T}"/>, and untyped JSON is a <see cref="JNode"/> tree.
+///     <para> Models also get <c> value.ToJson() </c> / <c> T.FromJson(json) </c> from the generator; these are the generic versions. </para>
 /// </summary>
 public static partial class Json
 {
-    private static readonly Lock                        __lock      = new();
-    private static readonly List<IJsonTypeInfoResolver> __resolvers = [];
-    private static          JsonSerializerOptions?      __options;
+    /// <summary> Lenient reading for untyped JSON (<see cref="JNode"/>): comments and trailing commas allowed, like the models' <c> [assembly: JsonDefaults] </c>. </summary>
+    public static JsonReaderOptions ReaderOptions { get; } = new()
+                                                             {
+                                                                 AllowComments       = true,
+                                                                 AllowTrailingCommas = true
+                                                             };
 
 
-    /// <summary>
-    ///     Options for the tier without <see cref="JsonTypeInfo{T}"/>. Matches <see cref="JakarExtensionsContext"/>'s settings: lenient reading (case-insensitive names, numbers in strings,
-    ///     comments, trailing commas, public fields) so JSON written by Jakar.Extensions 10.x (Newtonsoft) still reads, PascalCase names, and indented output.
-    ///     <para> Frozen on first use; register resolvers before that with <see cref="AddResolver"/>. </para>
-    /// </summary>
-    public static JsonSerializerOptions Options => Volatile.Read(ref __options) ?? CreateOptions();
+    public static JsonWriterOptions GetWriterOptions( bool indented ) => indented
+                                                                             ? JsonWriterOptions.Indent
+                                                                             : JsonWriterOptions.Default;
 
-
-    /// <summary> Adds a source-generated context (or any resolver) to <see cref="Options"/>. Resolvers added later are consulted first, so an app can override library metadata. Call at startup, before any serialization. </summary>
-    /// <exception cref="InvalidOperationException"> <see cref="Options"/> is already in use. </exception>
-    public static void AddResolver( IJsonTypeInfoResolver resolver )
-    {
-        ArgumentNullException.ThrowIfNull(resolver);
-
-        lock ( __lock )
-        {
-            if ( __options is not null ) { throw new InvalidOperationException($"{nameof(Json)}.{nameof(Options)} is already in use; call {nameof(AddResolver)} at startup, before any serialization."); }
-
-            if ( !__resolvers.Contains(resolver) ) { __resolvers.Insert(0, resolver); }
-        }
-    }
-
-
-    private static JsonSerializerOptions CreateOptions()
-    {
-        lock ( __lock )
-        {
-            if ( __options is not null ) { return __options; }
-
-            JsonSerializerOptions options = new(JakarExtensionsContext.Default.Options) { TypeInfoResolver = JsonTypeInfoResolver.Combine([.. __resolvers, JakarExtensionsContext.Default, UserGuidJsonContext.Default, UserLongJsonContext.Default]) };
-            options.MakeReadOnly();
-            Volatile.Write(ref __options, options);
-            return options;
-        }
-    }
-
-
-    /// <summary> Metadata for <typeparamref name="T"/>: a [JsonModel] registration first (<see cref="JsonModelRegistry"/>), then <see cref="Options"/>' resolver chain. Cached per type. </summary>
-    /// <exception cref="NotSupportedException"> <typeparamref name="T"/> isn't registered anywhere. </exception>
-    public static JsonTypeInfo<T> GetTypeInfo<T>()
-        where T : notnull => TypeInfoCache<T>.Value ??= JsonModelRegistry.TryGet(out JsonTypeInfo<T>? info)
-                                                            ? info
-                                                            : Options.GetRequiredTypeInfo<T>();
-
-
-    /// <summary> Metadata for a runtime <paramref name="type"/> (e.g. the actual type behind a base-class reference): a [JsonModel] registration first, then <see cref="Options"/>' resolver chain. </summary>
-    /// <exception cref="NotSupportedException"> <paramref name="type"/> isn't registered anywhere. </exception>
-    public static JsonTypeInfo GetTypeInfo( Type type )
-    {
-        ArgumentNullException.ThrowIfNull(type);
-        if ( JsonModelRegistry.TryGet(type, out JsonTypeInfo? info) || Options.TryGetTypeInfo(type, out info) ) { return info; }
-
-        throw new NotSupportedException($"No JSON metadata is registered for '{type.Name}'. Add [JsonSerializable(typeof({type.Name}))] to a JsonSerializerContext and register it with Json.AddResolver(...) at startup, or put [JsonModel] on the type.");
-    }
-
-
-    public static bool TryGetTypeInfo<T>( [NotNullWhen(true)] out JsonTypeInfo<T>? info )
-        where T : notnull
-    {
-        try
-        {
-            info = GetTypeInfo<T>();
-            return true;
-        }
-        catch ( NotSupportedException )
-        {
-            info = null;
-            return false;
-        }
-    }
-
-
-
-    private static class TypeInfoCache<T>
-    {
-        // Benign race: concurrent first calls resolve the same metadata. Not a static readonly initializer, so a missing registration
-        // surfaces as NotSupportedException rather than TypeInitializationException.
-        public static JsonTypeInfo<T>? Value;
-    }
+    private static JsonWriterOptions? GetWriterOptions<T>( bool? indented )
+        where T : IJsonSerializable<T> => indented is { } value
+                                              ? T.DefaultWriterOptions with { Indented = value }
+                                              : null;
 
 
 
     // ─── Serialize ────────────────────────────────────────────────────────────
 
-    /// <summary> Serializes with <see cref="GetTypeInfo{T}"/>. For <see cref="IJsonModel{TSelf}"/> types prefer <c> value.ToJson() </c>. </summary>
-    public static string Serialize<T>( T value, bool? indented = null )
-        where T : notnull => JsonModel.ToJson(value, GetTypeInfo<T>(), indented);
-    public static byte[] SerializeToUtf8Bytes<T>( T value )
-        where T : notnull => JsonSerializer.SerializeToUtf8Bytes(value, GetTypeInfo<T>());
-    public static JsonNode? SerializeToNode<T>( T value )
-        where T : notnull => JsonSerializer.SerializeToNode(value, GetTypeInfo<T>());
-    public static JsonElement SerializeToElement<T>( T value )
-        where T : notnull => JsonSerializer.SerializeToElement(value, GetTypeInfo<T>());
+    /// <summary> Serializes a model. Same as <c> value.ToJson() </c>; <paramref name="indented"/> overrides the type's layout for this call. </summary>
+    public static string Serialize<T>( in T value, bool? indented = null )
+        where T : IJsonSerializable<T> => JsonCodec.ToJson(in value, GetWriterOptions<T>(indented));
+    public static byte[] SerializeToUtf8Bytes<T>( in T value )
+        where T : IJsonSerializable<T> => JsonCodec.ToJsonUtf8(in value);
+    public static JNode? SerializeToNode<T>( T value )
+        where T : IJsonSerializable<T> => JNode.FromModel(value);
     public static string Serialize<T>( scoped ReadOnlySpan<T> values, bool? indented = null )
-        where T : notnull => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
+        where T : IJsonSerializable<T> => JsonCodec.ToJsonArray(values, GetWriterOptions<T>(indented));
     public static string Serialize<T>( IEnumerable<T> values, bool? indented = null )
-        where T : notnull => JsonModel.ToJson(values, GetTypeInfo<T>(), indented);
-    public static Task SerializeAsync<T>( Stream stream, T value, CancellationToken token = default )
-        where T : notnull => JsonSerializer.SerializeAsync(stream, value, GetTypeInfo<T>(), token);
+        where T : IJsonSerializable<T> => JsonCodec.ToJsonArray(values, GetWriterOptions<T>(indented));
+    public static ValueTask SerializeAsync<T>( Stream stream, T value, CancellationToken token = default )
+        where T : IJsonSerializable<T> => JsonCodec.ToJsonAsync(value, stream, null, token);
 
 
-    public static string ToJson( this JsonNode node, bool indented = true ) => node.ToJsonString(Options.GetIndented(indented));
-    public static string ToJson( this JsonElement element, bool indented = true )
+    /// <summary> Any shape <typeparamref name="TConverter"/> handles, e.g. <c> JsonArrayConverter&lt;string, JsonStringConverter&gt; </c>. </summary>
+    public static string Serialize<T, TConverter>( in T value, bool indented = false )
+        where TConverter : IJsonConverter<T>
     {
-        if ( !indented ) { return element.GetRawText(); }
+        JsonWriter writer = new(stackalloc char[256], GetWriterOptions(indented));
 
-        ArrayBufferWriter<byte> buffer = new(256);
-        using ( Utf8JsonWriter writer = new(buffer, Options.GetWriterOptions(true)) ) { element.WriteTo(writer); }
+        try
+        {
+            TConverter.Write(ref writer, in value);
+            return writer.ToString();
+        }
+        finally { writer.Dispose(); }
+    }
 
-        return Encoding.UTF8.GetString(buffer.WrittenSpan);
+    /// <summary> A JSON array of strings. </summary>
+    public static string Serialize( scoped ReadOnlySpan<string?> values, bool indented = false )
+    {
+        JArrayNode array = new(values.Length);
+        foreach ( string? value in values ) { array.Add(value); }
+
+        return array.ToJson(indented);
     }
 
 
-    private static JsonSerializerOptions? __compact;
+    public static string ToJson( this JNode node, bool indented = true ) => node.ToJson(GetWriterOptions(indented));
 
-    private static JsonSerializerOptions GetIndented( this JsonSerializerOptions options, bool indented )
-    {
-        if ( indented == options.WriteIndented ) { return options; }
-
-        JsonSerializerOptions? compact = Volatile.Read(ref __compact);
-        if ( compact is not null ) { return compact; }
-
-        compact = new JsonSerializerOptions(options) { WriteIndented = indented };
-        compact.MakeReadOnly();
-        return Interlocked.CompareExchange(ref __compact, compact, null) ?? compact;
-    }
 
 
     // ─── Deserialize ──────────────────────────────────────────────────────────
+
+    /// <inheritdoc cref="Serialize{T, TConverter}"/>
+    /// <exception cref="JsonReadException"> Invalid JSON, or JSON that doesn't match <typeparamref name="T"/>. </exception>
+    public static T Deserialize<T, TConverter>( scoped ReadOnlySpan<char> json )
+        where TConverter : IJsonConverter<T>
+    {
+        JsonReader<char> reader = new(json, ReaderOptions);
+
+        try
+        {
+            return TConverter.TryRead(ref reader, out T? value) && reader.TryReadEnd()
+                       ? value
+                       : throw reader.CreateException();
+        }
+        finally { reader.Dispose(); }
+    }
+
+    /// <inheritdoc cref="Deserialize{T, TConverter}"/>
+    public static bool TryDeserialize<T, TConverter>( scoped ReadOnlySpan<char> json, [MaybeNullWhen(false)] out T value )
+        where TConverter : IJsonConverter<T>
+    {
+        JsonReader<char> reader = new(json, ReaderOptions);
+
+        try
+        {
+            if ( TConverter.TryRead(ref reader, out value) && reader.TryReadEnd() ) { return true; }
+
+            value = default;
+            return false;
+        }
+        finally { reader.Dispose(); }
+    }
 
 
 
     extension( string? self )
     {
-        /// <summary> Parses JSON into a <see cref="JsonNode"/>; <see langword="null"/> for blank input or invalid JSON. </summary>
-        public JsonNode? TryFromJson()
+        /// <summary> Parses JSON into a <see cref="JNode"/>; <see langword="null"/> for blank input, invalid JSON, or a JSON <c> null </c> root. </summary>
+        public JNode? TryFromJson()
         {
             if ( string.IsNullOrWhiteSpace(self) ) { return null; }
 
-            try { return JsonNode.Parse(self, NodeOptions, DocumentOptions); }
-            catch ( JsonException e )
-            {
-                SelfLogger.WriteLine("Json parsing error: {Error}", e);
-                return null;
-            }
+            if ( JNode.TryParse(self, out JNode? node, out JsonError error, ReaderOptions) ) { return node; }
+
+            SelfLogger.WriteLine("Json parsing error: {Error}", error);
+            return null;
         }
 
 
-        /// <summary> Deserializes with <see cref="GetTypeInfo{T}"/>; <c> default </c> for blank input, invalid JSON, or a JSON <c> null </c> root. </summary>
+        /// <summary> <c> default </c> for blank input, invalid JSON, or JSON that doesn't match <typeparamref name="TValue"/>. </summary>
         public TValue? TryFromJson<TValue>()
-            where TValue : notnull => self.TryFromJson(GetTypeInfo<TValue>());
-
-
-        public TValue? TryFromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.TryFromJson(self, info, out TValue? result)
-                                                                               ? result
-                                                                               : default;
+            where TValue : IJsonSerializable<TValue> => JsonCodec.TryFromJson<TValue>(self, out TValue? result)
+                                                            ? result
+                                                            : default;
     }
 
 
 
     extension( string self )
     {
-        /// <exception cref="JsonException"> Invalid JSON or a JSON <c> null </c> root. </exception>
-        public JsonNode FromJson() => JsonNode.Parse(self, NodeOptions, DocumentOptions) ?? throw new JsonException("The JSON root is null.");
+        /// <exception cref="JsonReadException"> Invalid JSON. </exception>
+        /// <exception cref="FormatException"> A JSON <c> null </c> root. </exception>
+        public JNode FromJson() => JNode.Parse(self, ReaderOptions) ?? throw new FormatException("The JSON root is null.");
 
-        /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
+        /// <exception cref="JsonReadException"> Invalid JSON, or JSON that doesn't match <typeparamref name="TValue"/>. </exception>
         public TValue FromJson<TValue>()
-            where TValue : notnull => JsonModel.FromJson(self, GetTypeInfo<TValue>());
-
-        /// <inheritdoc cref="JsonModel.FromJson{T}(string, JsonTypeInfo{T})"/>
-        public TValue FromJson<TValue>( JsonTypeInfo<TValue> info ) => JsonModel.FromJson(self, info);
+            where TValue : IJsonSerializable<TValue> => JsonCodec.FromJson<TValue>(self);
     }
 
 
@@ -194,46 +150,9 @@ public static partial class Json
     extension( Stream self )
     {
         /// <summary> Reads a JSON document. The caller owns (and disposes) the stream. </summary>
-        public async ValueTask<JsonNode> FromJson( CancellationToken token = default ) => await JsonNode.ParseAsync(self, NodeOptions, DocumentOptions, token).ConfigureAwait(false) ?? throw new JsonException("The JSON root is null.");
+        public async ValueTask<JNode> FromJson( CancellationToken token = default ) => await JNode.ParseAsync(self, ReaderOptions, token).ConfigureAwait(false) ?? throw new FormatException("The JSON root is null.");
 
         public ValueTask<T> FromJson<T>( CancellationToken token = default )
-            where T : notnull => JsonModel.FromJsonAsync(self, GetTypeInfo<T>(), token);
-
-        public ValueTask<T> FromJson<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonModel.FromJsonAsync(self, info, token);
-
-
-        /// <summary> Streams the elements of a root-level JSON array, deserializing each as it arrives. </summary>
-        public IAsyncEnumerable<T?> FromJsonAsync<T>( CancellationToken token = default )
-            where T : notnull => JsonSerializer.DeserializeAsyncEnumerable(self, GetTypeInfo<T>(), token);
-
-        /// <inheritdoc cref="FromJsonAsync{T}(Stream, CancellationToken)"/>
-        public IAsyncEnumerable<T?> FromJsonAsync<T>( JsonTypeInfo<T> info, CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, info, token);
-
-        /// <summary> Streams the elements of a root-level JSON array as <see cref="JsonNode"/>s. </summary>
-        public IAsyncEnumerable<JsonNode?> FromJsonAsync( CancellationToken token = default ) => JsonSerializer.DeserializeAsyncEnumerable(self, JakarExtensionsContext.Default.JsonNode, token);
-    }
-
-
-
-    /// <summary> A JSON <c> null </c> element (a <see langword="default"/> <see cref="JsonElement"/> is <see cref="JsonValueKind.Undefined"/> and can't be serialized). </summary>
-    public static JsonElement NullElement { get; } = JsonDocument.Parse("null").RootElement.Clone();
-
-
-    /// <summary> Case-insensitive property lookup, like the serializer options. </summary>
-    public static JsonNodeOptions NodeOptions { get; } = new() { PropertyNameCaseInsensitive = true };
-
-    /// <summary> Comments and trailing commas allowed, like the serializer options. </summary>
-    public static JsonDocumentOptions DocumentOptions { get; } = new()
-                                                                 {
-                                                                     AllowTrailingCommas = true,
-                                                                     CommentHandling     = JsonCommentHandling.Skip
-                                                                 };
-
-
-
-    extension( PropertyInfo self )
-    {
-        public bool   GetJsonIsRequired() => self.GetCustomAttribute<JsonRequiredAttribute>() is not null;
-        public string GetJsonKey()        => self.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? self.Name;
+            where T : IJsonSerializable<T> => JsonCodec.FromJsonAsync<T>(self, null, token);
     }
 }

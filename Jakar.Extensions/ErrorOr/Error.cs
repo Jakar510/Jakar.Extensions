@@ -7,20 +7,21 @@ namespace Jakar.Extensions;
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable]
 [DefaultValue(nameof(Empty))]
-public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
+[JsonModel]
+public sealed partial class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 {
-    public static readonly       Error      Empty = new(Status.NotSet);
-    [JsonIgnore] public readonly StringTags details;
+    public static readonly     Error      Empty = new(Status.NotSet);
+    [JsonSkip] public readonly StringTags details;
 
 
-    /// <summary> Every RFC 7807 member except <see cref="StatusCode"/> is optional, so the nullable ones must NOT be marked <c> [JsonRequired] </c> : Newtonsoft maps that to <c> Required.Always </c> , which rejects a <see langword="null"/> on write as well as on read - which is what made every factory-built error throw on serialization. </summary>
+    /// <summary> Every RFC 7807 member except <see cref="StatusCode"/> is optional, so the nullable ones must NOT be marked <c> [JsonMandatory] </c> : Newtonsoft maps that to <c> Required.Always </c> , which rejects a <see langword="null"/> on write as well as on read - which is what made every factory-built error throw on serialization. </summary>
     public string? Description { get; init; }
 
-    [JsonRequired] public StringTags Details    { get => details; init => details = value; }
-    public                string?    Instance   { get;            init; }
-    [JsonRequired] public Status     StatusCode { get;            init; }
-    public                string?    Title      { get;            init; }
-    public                string?    Type       { get;            init; }
+    public StringTags Details    { get => details; init => details = value; }
+    public string?    Instance   { get;            init; }
+    public Status     StatusCode { get;            init; }
+    public string?    Title      { get;            init; }
+    public string?    Type       { get;            init; }
 
 
     public Error() : base() { }

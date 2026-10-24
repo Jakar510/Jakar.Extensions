@@ -637,3 +637,18 @@ public abstract partial class ConcurrentObservableCollection<TSelf, TValue> : Ob
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FilteredValues(); }
     }
 }
+
+
+
+public static class ConcurrentObservableCollectionJson
+{
+    extension<TValue>( ConcurrentObservableCollection<TValue> )
+        where TValue : IEquatable<TValue>, IJsonSerializable<TValue>
+    {
+        /// <exception cref="JsonReadException"> Invalid JSON, or JSON that isn't an array of <typeparamref name="TValue"/>. </exception>
+        public static ConcurrentObservableCollection<TValue> FromJson( string json ) => ObservableJson.FromJson<ConcurrentObservableCollection<TValue>, TValue>(json);
+
+        /// <summary> <see langword="false"/> for blank or malformed JSON. </summary>
+        public static bool TryFromJson( [NotNullWhen(true)] string? json, [NotNullWhen(true)] out ConcurrentObservableCollection<TValue>? result ) => ObservableJson.TryFromJson<ConcurrentObservableCollection<TValue>, TValue>(json, out result);
+    }
+}

@@ -12,15 +12,12 @@ It brings in [Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) (JSON, inc
 
 ## JSON
 
-Since 10.10 the library serializes with **System.Text.Json source-generated metadata, and Jakar.Json where it supports the type**: no Newtonsoft.Json and no reflection-based serialization.
+Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) only**: source-generated readers and writers, no System.Text.Json, no Newtonsoft.Json and no reflection.
 
-- **Models** are `IJsonModel<TSelf>` types. Put `[JsonModel(typeof(YourContext))]` on a `partial` class, record or struct, and register it in your `JsonSerializerContext`. The generator implements the model's members with Jakar.Json when it supports the type (faster, fewer allocations), otherwise with System.Text.Json.
+- **Models** are `[JsonModel]` types (`IJsonSerializable<TSelf>`). Put `[JsonModel]` on a `partial` class, record or struct; the generator writes `ToJson()`, `FromJson(json)`, `TryFromJson`, UTF-8 and stream overloads, and `ISpanFormattable` / `ISpanParsable<TSelf>`.
 
   ```csharp
-  [JsonSerializable(typeof(Invoice))]
-  public sealed partial class AppJsonContext : JsonSerializerContext;
-
-  [JsonModel(typeof(AppJsonContext))]
+  [JsonModel]
   public sealed partial class Invoice : BaseClass<Invoice>
   {
       public decimal Total { get; init; }
@@ -30,24 +27,22 @@ Since 10.10 the library serializes with **System.Text.Json source-generated meta
   string  text    = invoice.ToJson();
   ```
 
-- **Other types:** register their context once at startup with `Json.AddResolver(AppJsonContext.Default)`, then use `Json.Serialize(value)` / `json.FromJson<T>()`, or pass a `JsonTypeInfo<T>` explicitly.
-- **Root-level arrays** never need a collection type registered: `JsonModel.FromJsonList(json, Invoice.JsonTypeInfo)`, `invoices.ToJson()`, `WebHandler.AsJsonList(Invoice.JsonTypeInfo, token)`.
-- **`JsonNode` / `JsonElement` helpers:** `Get<T>`, `TryGet<T>`, `GetOrDefault<T>`, `TryAdd`, `TryUpdate`, `Set`, `Remove`.
-- **Older JSON still reads.** JSON written by 10.9 and earlier (Newtonsoft.Json) is accepted: case-insensitive property names, numbers in strings, comments and trailing commas.
+- **Generic helpers:** `Json.Serialize(value)` / `json.FromJson<T>()` for models; `Json.Serialize<T, TConverter>` / `Json.Deserialize<T, TConverter>` for any other shape (e.g. `JsonArrayConverter<string, JsonStringConverter>`).
+- **Root-level arrays:** `Json.Serialize(invoices)`, `JsonCodec.FromJsonList<Invoice>(json)`, `WebHandler.AsJsonList<Invoice>(token)`.
+- **Untyped JSON** is a `JNode` tree (`JObjectNode`, `JArrayNode`, `JValueNode`): `json.FromJson()`, and the helpers `Get<T>`, `TryGet<T>`, `GetOrDefault<T>`, `As<T>`, `TryGetValue<T>`, `TryAdd`, `TryUpdate`, `Set`.
+- **Older JSON still reads.** The library's models accept JSON written by 10.10 and earlier: case-insensitive property names, numbers in strings, comments and trailing commas (`[assembly: JsonDefaults]`). Declare the same `JsonDefaults` in your assembly for your own models.
 
-### Migrating from 10.9 and earlier
+### Migrating from 10.10
 
-- `JToken` / `JObject` / `JValue` are gone:
-  - `AdditionalData` is `Dictionary<string, JsonElement>?`.
-  - `ErrorResponse`, `WebHandler.AsJson()` and `FeedBackTrackerException` use `JsonNode`.
-  - `ExceptionDetails.Data` is a `JsonObject`, and `LoginRequestValue.Data` is a `JsonElement`.
-- `value.ToJson()` works for `IJsonModel<TSelf>` types and arrays, lists and spans of them. For anything else, use `Json.Serialize(value)`.
-- Your own `IJsonModel<TSelf>` types must provide `static JsonTypeInfo<TSelf> JsonTypeInfo`: add `[JsonModel]`. Diagnostic JAKAR_JSON006 has a code fix.
-- `PreferenceFile<TSelf>` stores `{TSelf}.json` with typed properties. An existing `{TSelf}.ini` is imported on first load.
-- Observable collections serialize their unfiltered contents. For System.Text.Json to do the same when such a collection is a model *property*, register the closed converter in your context: `Converters = [typeof(ObservableCollectionJsonConverter<Address>)]`.
-- `Json.Settings` / `Json.LoadSettings` are replaced by `Json.Options` and `Json.AddResolver`.
-- `ValueStringBuilder` and `Sizes` moved to Jakar.Spans. They keep the same namespace and are type-forwarded, so no code changes.
-
+- `IJsonModel<TSelf>`, `JsonTypeInfo`, `JsonSerializerContext`s (`JakarExtensionsContext`, `UserGuidJsonContext`, `UserLongJsonContext`), `Json.Options`, `Json.AddResolver` and `Json.GetTypeInfo` are gone: put `[JsonModel]` on your types, and constrain generic code to `IJsonSerializable<T>`.
+- System.Text.Json attributes aren't read: `[JsonIgnore]` → `[JsonSkip]`, `[JsonConstructor]` → `[JsonCreator]`, `[JsonRequired]` → `[JsonMandatory]`, `[JsonPropertyName]` → `[JsonKey]`, `[JsonExtensionData]` → `[JsonOverflow]`.
+- `AdditionalData` is a `JObjectNode?` (ordinal keys). `ErrorResponse`, `FeedBackTrackerException`, `ExceptionDetails.Data` and `LoginRequestValue.Data` use `JNode` / `JObjectNode`.
+- Output is Jakar.Json's layout, compact by default (`{"Name" : "value"}`); preference files are written indented.
+- `PreferenceFile<TSelf>` subclasses implement `CopyFrom(TSelf loaded)`, which copies their declared preferences on load and reload.
+- `AppVersion` and `Email` are written as JSON strings (`ISpanFormattable` + `ISpanParsable<T>`); `AppVersion.ToJson()` / `AppVersion.FromJson(json)` remain.
+- Observable collections implement `IJsonCollection<TSelf, T>`: as `[JsonModel]` members they write their unfiltered contents and read in bulk. As a root, `ToJson()` / `FromJson(json)` need `[JsonModel]` elements; use `ObservableJson.ToJson<TSelf, TValue, TConverter>` for others.
+- `LocalFile` / `LocalDirectory` serialize as `{"FullPath", "FileEncoding"}` / `{"FullPath"}`; a plain path string no longer reads.
+- `WebRequester`: `CreateJsonContent` / `CreateJsonArrayContent` take Jakar.Json writer options; `WebHandler.AsJson<T>`, `AsJsonArray<T>` and `AsJsonList<T>` take no `JsonTypeInfo`.
 ## Base classes
 
 - `BaseClass` / `BaseClass<TSelf>`: a model base with property change notifications (`INotifyPropertyChanging`, `INotifyPropertyChanged`), JSON extension data (`AdditionalData`), and equality and comparison for `TSelf`.

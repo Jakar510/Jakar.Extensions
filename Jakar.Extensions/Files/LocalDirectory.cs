@@ -7,10 +7,10 @@ using ZLinq.Traversables;
 namespace Jakar.Extensions;
 
 
+/// <summary> JSON: <c> {"FullPath" : "..."} </c>. The computed members and the disk timestamps aren't serialized: reading them touches the disk, and setting them would change it. </summary>
 [Serializable]
-[JsonConverter(typeof(LocalDirectoryJsonConverter))]
-[JsonModel(typeof(JakarExtensionsContext))]
-public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
+[JsonModel(ReadOnlyMembers = JsonReadOnlyMembers.Ignore)]
+public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryContents, IFileProvider, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
@@ -18,12 +18,12 @@ public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryConte
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory         CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
-    public        DateTime               CreationTimeUtc  { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public        bool                   DoesNotExist     => !Exists;
-    public        bool                   Exists           => Info.Exists;
-    public        IEnumerable<LocalFile> Files            { [Pure] get => GetFiles(); }
-    [JsonIgnore] public DirectoryInfo Info
+    public static     LocalDirectory         CurrentDirectory { get => new(Environment.CurrentDirectory);      set => Environment.CurrentDirectory = value.FullPath; }
+    [JsonSkip] public DateTime               CreationTimeUtc  { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public            bool                   DoesNotExist     => !Exists;
+    public            bool                   Exists           => Info.Exists;
+    public            IEnumerable<LocalFile> Files            { [Pure] get => GetFiles(); }
+    [JsonSkip] public DirectoryInfo Info
     {
         get
         {
@@ -31,17 +31,17 @@ public partial class LocalDirectory : BaseClass<LocalDirectory>, IDirectoryConte
             return _info;
         }
     }
-    bool TempFile.ITempFile.                        IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
-    public              DateTime                    LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              DateTime                    LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              string                      Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory?             Parent            => GetParent();
-    public              string                      Root              => Directory.GetDirectoryRoot(FullPath);
-    public              IEnumerable<LocalDirectory> SubFolders        { [Pure] get => GetSubFolders(); }
+    bool TempFile.ITempFile.                      IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    [JsonSkip] public DateTime                    LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    [JsonSkip] public DateTime                    LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public            string                      Name              => Info.Name;
+    [JsonSkip] public LocalDirectory?             Parent            => GetParent();
+    public            string                      Root              => Directory.GetDirectoryRoot(FullPath);
+    public            IEnumerable<LocalDirectory> SubFolders        { [Pure] get => GetSubFolders(); }
 
 
-    public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
-    public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this(new DirectoryInfo(path.Combine(subFolders))) { }
+    [JsonCreator] public LocalDirectory( string fullPath ) : this(Directory.CreateDirectory(fullPath)) { }
+    public LocalDirectory( string               path, params ReadOnlySpan<string> subFolders ) : this(new DirectoryInfo(path.Combine(subFolders))) { }
     public LocalDirectory( DirectoryInfo info )
     {
         info.Create();

@@ -28,7 +28,7 @@ public static class ConsoleExtensions
 
 
     public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
-        where TValue : notnull
+        where TValue : IJsonSerializable<TValue>
     {
         string wrapper = c.Repeat(length);
 
@@ -38,7 +38,7 @@ public static class ConsoleExtensions
         builder.AppendLine(typeof(TValue).FullName);
         builder.AppendLine();
         builder.AppendLine();
-        builder.AppendLine(Json.Serialize(self));
+        builder.AppendLine(Json.Serialize(in self));
         builder.AppendLine();
         builder.AppendLine();
         builder.AppendLine(wrapper);

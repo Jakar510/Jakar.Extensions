@@ -2,9 +2,7 @@
 // 10/07/2026
 
 using System.Linq;
-using System.Text.Json;
 using Jakar.Extensions.UserGuid;
-using JJ = Jakar.Json;
 
 
 
@@ -12,14 +10,13 @@ namespace Jakar.Extensions.Tests;
 
 
 /// <summary>
-///     The user models are <c>[JsonModel(typeof(UserGuidJsonContext))]</c> types Jakar.Json supports, so their <see cref="IJsonModel{TSelf}"/> members run on Jakar.Json (hybrid, SPEC.md §7.7)
-///     with the context's options mirrored, while <see cref="IJsonModel{TSelf}.JsonTypeInfo"/> stays System.Text.Json's. Covers both serializers on one type and the shared member types:
-///     observable collections, <see cref="UserRights"/> and the <c>Dictionary&lt;string, JsonElement&gt;</c> extension-data bag.
+///     The user models are <c>[JsonModel]</c> types: Jakar.Json reads and writes them through generated code. Covers the shared member types:
+///     observable collections, <see cref="UserRights"/> and the <see cref="JObjectNode"/> extension-data bag.
 /// </summary>
 [TestFixture]
 public sealed class UserModelJson_Tests
 {
-    [Test] public void IJsonModelMembers_RunOnJakarJson()
+    [Test] public void Members_RunOnJakarJson()
     {
         UserModel user = GoldenSamples.User();
         user.Rights = "rights-value";
@@ -27,39 +24,26 @@ public sealed class UserModelJson_Tests
         string    json = user.ToJson();
         UserModel back = UserModel.FromJson(json);
 
-        Assert.That(json,                Is.EqualTo(JJ.JsonCodec.ToJson(user)), "ToJson() is Jakar.Json's");
-        Assert.That(json,                Does.StartWith("{\n  \"Addresses\" : [\n    {"), "the context's WriteIndented, as System.Text.Json lays it out (two spaces)");
-        Assert.That(user.ToUtf8Json(),   Is.EqualTo(System.Text.Encoding.UTF8.GetBytes(json)));
+        Assert.That(json,              Is.EqualTo(JsonCodec.ToJson(user)));
+        Assert.That(json,              Does.StartWith("{\"Addresses\" : [{"), "compact, in Jakar.Json's layout");
+        Assert.That(user.ToJsonUtf8(), Is.EqualTo(System.Text.Encoding.UTF8.GetBytes(json)));
         AssertSameUser(back, user);
-        Assert.That(back.Rights.Value,   Is.EqualTo("rights-value"));
-        Assert.That(back.ToJson(),       Is.EqualTo(json), "idempotent");
+        Assert.That(back.Rights.Value,                                      Is.EqualTo("rights-value"));
+        Assert.That(back.ToJson(),                                          Is.EqualTo(json), "idempotent");
         Assert.That(user.TryFormat(stackalloc char[8], out _, default, null), Is.False, "ISpanFormattable comes with it, and reports a short buffer");
-        Assert.Throws<JsonException>(static () => UserModel.FromJson("{\"UserName\": }"), "IJsonModel's contract: JsonException");
+        Assert.Throws<JsonReadException>(static () => UserModel.FromJson("{\"UserName\": }"));
     }
 
-    [Test] public void JsonTypeInfo_StaysSystemTextJson_AndBothReadEachOther()
-    {
-        UserModel user = GoldenSamples.User();
-        string    stj  = JsonSerializer.Serialize(user, UserModel.JsonTypeInfo);
-
-        Assert.That(stj, Does.Contain("\"Addresses\": ["), "System.Text.Json's layout");
-        AssertSameUser(UserModel.FromJson(stj),                                  user);
-        AssertSameUser(JsonSerializer.Deserialize(user.ToJson(), UserModel.JsonTypeInfo)!, user);
-    }
-
-    [Test] public void ExtensionData_IsOneBag_ForBothSerializers()
+    [Test] public void ExtensionData_KeepsUnknownMembers()
     {
         string json = GoldenSamples.User().ToJson().TrimEnd().TrimEnd('}') + ", \"custom\": {\"a\": [1, 2.50, \"x\", null, true]}}";
 
-        UserModel viaJakar = UserModel.FromJson(json);
-        UserModel viaStj   = JsonSerializer.Deserialize(json, UserModel.JsonTypeInfo)!;
+        UserModel back = UserModel.FromJson(json);
 
-        Assert.That(viaStj.AdditionalData!["custom"].GetRawText(),                      Is.EqualTo("{\"a\": [1, 2.50, \"x\", null, true]}"));
-        Assert.That(viaJakar.AdditionalData!.Keys,                                      Is.EqualTo(new[] { "custom" }), "Jakar.Json captures unknown members into the same Dictionary<string, JsonElement>");
-        Assert.That(viaJakar.AdditionalData["custom"].GetProperty("a")[1].GetRawText(), Is.EqualTo("2.50"),             "numbers keep their text");
-
-        Assert.That(viaJakar.ToJson(indented: false), Does.EndWith("\"custom\" : {\"a\" : [1,2.50,\"x\",null,true]}}"), "written after the declared members");
-        Assert.That(JsonSerializer.Deserialize(viaStj.ToJson(), UserModel.JsonTypeInfo)!.AdditionalData!["custom"].GetProperty("a").GetArrayLength(), Is.EqualTo(5), "filled by System.Text.Json, written by Jakar.Json, read back by System.Text.Json");
+        Assert.That(back.AdditionalData!.Keys,                                        Is.EqualTo(new[] { "custom" }), "unknown members are captured");
+        Assert.That(back.AdditionalData["custom"]!["a"]![1]!.ToJson(),                Is.EqualTo("2.50"),             "numbers keep their text");
+        Assert.That(back.ToJson(),                                                    Does.EndWith("\"custom\" : {\"a\" : [1,2.50,\"x\",null,true]}}"), "written after the declared members");
+        Assert.That(UserModel.FromJson(back.ToJson()).AdditionalData!["custom"]!["a"], Is.InstanceOf<JArrayNode>());
     }
 
     [Test] public void ObservableCollections_WriteUnfilteredContents_AndReadInBulk()

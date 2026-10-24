@@ -10,9 +10,9 @@ namespace Jakar.Extensions;
 
 [Serializable]
 [StructLayout(LayoutKind.Auto)]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public readonly partial struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture ) : IJsonModel<ThreadInformation>
+[method: JsonCreator]
+[JsonModel]
+public readonly partial struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture )
 {
     public ThreadInformation() : this(Thread.CurrentThread) { }
     public ThreadInformation( Thread                          thread ) : this(thread.Name ?? EMPTY, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }

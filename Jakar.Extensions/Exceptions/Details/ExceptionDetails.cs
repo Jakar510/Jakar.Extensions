@@ -1,21 +1,21 @@
 ﻿namespace Jakar.Extensions;
 
 
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
+[JsonModel]
+public sealed partial class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>
 {
-    [JsonIgnore] public Exception?        Value           { get; private init; }
-    public              JsonObject?       Data            { get; init; }
-    public              string?           HelpLink        { get; init; }
-    public              int               HResult         { get; init; }
-    public              ExceptionDetails? Inner           { get; init; }
-    public              string            Message         { get; init; } = EMPTY;
-    public              string?           MethodSignature { get; init; }
-    public              string?           Source          { get; init; }
-    public              string[]          StackTrace      { get; init; } = [];
-    public              string            Str             { get; init; } = EMPTY;
-    public              MethodDetails?    TargetSite      { get; init; }
-    public              string?           Type            { get; init; }
+    [JsonSkip] public Exception?        Value           { get; private init; }
+    public            JObjectNode?      Data            { get; init; }
+    public            string?           HelpLink        { get; init; }
+    public            int               HResult         { get; init; }
+    public            ExceptionDetails? Inner           { get; init; }
+    public            string            Message         { get; init; } = EMPTY;
+    public            string?           MethodSignature { get; init; }
+    public            string?           Source          { get; init; }
+    public            string[]          StackTrace      { get; init; } = [];
+    public            string            Str             { get; init; } = EMPTY;
+    public            MethodDetails?    TargetSite      { get; init; }
+    public            string?           Type            { get; init; }
 
 
     public ExceptionDetails() { }

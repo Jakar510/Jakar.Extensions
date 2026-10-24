@@ -14,7 +14,7 @@ public interface IFileMetaData : IJsonModel
 
 
 
-public interface IFileMetaData<TFileMetaData> : IFileMetaData, IJsonModel<TFileMetaData>, IEqualComparable<TFileMetaData>
+public interface IFileMetaData<TFileMetaData> : IFileMetaData, IEqualComparable<TFileMetaData>
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public abstract static TFileMetaData  Create( IFileMetaData                                      data );
@@ -57,7 +57,7 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 
 
 [SuppressMessage("ReSharper", "TypeParameterCanBeVariant")]
-public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IJsonModel<TSelf>
+public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TSelf : class, IFileData<TSelf, TID, TFileMetaData>
@@ -85,7 +85,7 @@ public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMeta
 public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass<TSelf>, IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
-    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>, IEqualComparable<TSelf>
 {
     public                          long          FileSize { get; init; } = fileSize;
     [StringLength(HASH)] public     string        Hash     { get; init; } = hash;
@@ -233,8 +233,8 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 [Serializable]
 [SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
+[method: JsonCreator]
+[JsonModel]
 public sealed partial class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
     [StringLength(DESCRIPTION)] public string?   FileDescription { get; set; }  = fileDescription;

@@ -96,17 +96,7 @@ public partial class IniConfig
         #region Gets
 
         public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
-            where TValue : notnull => ValueAs(key, Json.GetTypeInfo<TValue>(), out value);
-        public bool ValueAs<TValue>( string key, JsonTypeInfo<TValue> info, [NotNullWhen(true)] out TValue? value )
-        {
-            string? s = this[key];
-
-            value = string.IsNullOrEmpty(s)
-                        ? default
-                        : s.FromJson(info);
-
-            return value is not null;
-        }
+            where TValue : IJsonSerializable<TValue> => JsonCodec.TryFromJson<TValue>(this[key], out value);
 
 
         public bool ValueAsNumber<TNumber>( string key, [NotNullWhen(true)] out TNumber? value )
@@ -115,9 +105,9 @@ public partial class IniConfig
 
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
-            value = this[key]?.FromJson<string[]>();
-
-            return value is not null;
+            string? s = this[key];
+            value = null;
+            return !string.IsNullOrEmpty(s) && Json.TryDeserialize<string[], JsonArrayConverter<string, JsonStringConverter>>(s, out value);
         }
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value, char separator )
         {
@@ -166,10 +156,10 @@ public partial class IniConfig
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
         public void AddJson<TValue>( string key, TValue value )
-            where TValue : notnull => this[key] = Json.Serialize(value, false);
-        public void AddJson<TValue>( string key, TValue value, JsonTypeInfo<TValue> info ) => this[key] = JsonModel.ToJson(value, info, false);
+            where TValue : IJsonSerializable<TValue> => this[key] = Json.Serialize(in value, false);
         public void Add<TValue>( string key, params ReadOnlySpan<TValue> values )
-            where TValue : notnull => this[key] = Json.Serialize(values, false);
+            where TValue : IJsonSerializable<TValue> => this[key] = Json.Serialize(values, false);
+        public void Add( string key, params ReadOnlySpan<string> values ) => this[key] = Json.Serialize(values);
         public void Add( string key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
         public void Add( string key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
         public void Add( string key, TimeSpan            value ) => this[key] = value.ToString();

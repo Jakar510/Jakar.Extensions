@@ -1,11 +1,9 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 // 10/02/2026
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,10 +12,17 @@ using System.Threading.Tasks;
 namespace Jakar.Extensions.Tests;
 
 
-/// <summary> Library models through System.Text.Json: round trips, converters, observable collections (AOT-plan §2.13), preferences (§2.10). </summary>
+/// <summary> Library models through Jakar.Json: round trips, converters, observable collections, preferences. </summary>
 [TestFixture]
 public sealed class ModelJson_Tests
 {
+    private static string IntsToJson<TSelf>( TSelf collection )
+        where TSelf : IJsonCollection<TSelf, int> => ObservableJson.ToJson<TSelf, int, JsonIntegerConverter<int, JsonNumberModes.Flags0>>(collection);
+
+    private static TSelf IntsFromJson<TSelf>( string json )
+        where TSelf : IJsonCollection<TSelf, int> => ObservableJson.FromJson<TSelf, int, JsonIntegerConverter<int, JsonNumberModes.Flags0>>(json);
+
+
     // ─── Models ───────────────────────────────────────────────────────────────
 
     [Test] public void RoundTrip_NonDeterministicModels()
@@ -42,31 +47,32 @@ public sealed class ModelJson_Tests
                       {
                           ["Key"]   = 5,
                           ["When"]  = new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Utc),
-                          ["Other"] = new Point(1, 2)
+                          ["Other"] = new Opaque(1, 2)
                       }
                   };
         }
         catch ( Exception e ) { exception = e; }
 
         ExceptionDetails details = exception.FullDetails();
-        Assert.That(details.Data!["Key"]!.GetValue<int>(),     Is.EqualTo(5));
-        Assert.That(details.Data["Other"]!.GetValue<string>(), Is.EqualTo("Point { X = 1, Y = 2 }"), "unknown types become their ToString(): no reflection");
+        Assert.That((int)details.Data!["Key"],       Is.EqualTo(5));
+        Assert.That((string?)details.Data["Other"], Is.EqualTo("Opaque { X = 1, Y = 2 }"), "unknown types become their ToString(): no reflection");
 
         ExceptionDetails back = ExceptionDetails.FromJson(details.ToJson());
-        Assert.That(back.Message,                       Is.EqualTo("boom"));
-        Assert.That(back.Type,                          Is.EqualTo(typeof(InvalidOperationException).FullName));
-        Assert.That(back.Data!["Key"]!.GetValue<int>(), Is.EqualTo(5));
+        Assert.That(back.Message,            Is.EqualTo("boom"));
+        Assert.That(back.Type,               Is.EqualTo(typeof(InvalidOperationException).FullName));
+        Assert.That((int)back.Data!["Key"], Is.EqualTo(5));
     }
 
 
     [Test] public void LoginRequestValue_CarriesAnyJson()
     {
-        LoginRequestValue request = new("tyler", "hunter2", "{\"Token\":\"abc\",\"Ttl\":30}".FromJson<JsonElement>());
+        LoginRequestValue request = new("tyler", "hunter2", "{\"Token\":\"abc\",\"Ttl\":30}".FromJson());
         LoginRequestValue back    = LoginRequestValue.FromJson(request.ToJson());
 
-        Assert.That(back.UserPassword,                Is.EqualTo("hunter2"));
-        Assert.That(back.Data.Get<string>("Token"),   Is.EqualTo("abc"));
-        Assert.That(new LoginRequestValue().ToJson(), Does.Contain("\"Data\" : null"), "a default JsonElement is written as null (Jakar.Json's layout: this model's IJsonModel members run on Jakar.Json)");
+        Assert.That(back.UserPassword,                             Is.EqualTo("hunter2"));
+        Assert.That(back.Data.TryGetValue("Token", out string? token), Is.True);
+        Assert.That(token,                                         Is.EqualTo("abc"));
+        Assert.That(new LoginRequestValue().ToJson(),              Does.Contain("\"Data\" : null"));
     }
 
 
@@ -81,10 +87,10 @@ public sealed class ModelJson_Tests
 
     [Test] public void Email_SerializesAsAString_AndTryParseValidates()
     {
-        Assert.That(Json.Serialize(new Email("a@b.test")),   Is.EqualTo("\"a@b.test\""));
-        Assert.That("\"a@b.test\"".FromJson<Email>().Value,  Is.EqualTo("a@b.test"));
-        Assert.That(Email.TryParse("a@b.test", null, out _), Is.True);
-        Assert.That(Email.TryParse("nope",     null, out _), Is.False);
+        Assert.That(Json.Serialize<Email, JsonParsableConverter<Email>>(new Email("a@b.test")),     Is.EqualTo("\"a@b.test\""));
+        Assert.That(Json.Deserialize<Email, JsonParsableConverter<Email>>("\"a@b.test\"").Value, Is.EqualTo("a@b.test"));
+        Assert.That(Email.TryParse("a@b.test", null, out _),                                       Is.True);
+        Assert.That(Email.TryParse("nope",     null, out _),                                       Is.False);
     }
 
 
@@ -98,37 +104,40 @@ public sealed class ModelJson_Tests
             LocalFile file = dir.Join("missing.txt"); // doesn't exist: the 10.x contract threw on Length
             string    json = file.ToJson();
 
-            Assert.That(json,                                                                      Does.Contain("FullPath").And.Not.Contain("Length"));
-            Assert.That(LocalFile.FromJson(json).FullPath,                                         Is.EqualTo(file.FullPath));
-            Assert.That(LocalFile.FromJson($"\"{file.FullPath.Replace("\\", "\\\\")}\"").FullPath, Is.EqualTo(file.FullPath), "a plain path string reads too");
-            Assert.That(LocalDirectory.FromJson(dir.ToJson()).FullPath,                            Is.EqualTo(dir.FullPath));
+            Assert.That(json,                                           Does.Contain("FullPath").And.Contain("FileEncoding").And.Not.Contain("Length"));
+            Assert.That(LocalFile.FromJson(json).FullPath,              Is.EqualTo(file.FullPath));
+            Assert.That(LocalDirectory.FromJson(dir.ToJson()).FullPath, Is.EqualTo(dir.FullPath));
+            Assert.That(dir.ToJson(),                                   Does.Not.Contain("CreationTimeUtc").And.Not.Contain("Files"));
         }
         finally { Directory.Delete(directory, true); }
     }
 
 
-    // ─── Observable collections: unfiltered on every path (decision 14) ───────
+    // ─── Observable collections: unfiltered on every path ─────────────────────
 
     [Test] public void ObservableCollection_WritesUnfiltered_OnEveryPath()
     {
         ObservableCollection<int> collection = new(1, 2, 3, 4) { OverrideFilter = static ( int _, ref readonly int value ) => value % 2 == 0 };
 
-        Assert.That(collection.ToArray(),                                                                    Is.EqualTo([1, 2, 3, 4]));
-        Assert.That(collection.Where(static _ => true).ToArray(),                                            Is.EqualTo([2, 4]), "enumeration is filtered");
-        Assert.That(collection.ToJson(false),                                                                Is.EqualTo("[1,2,3,4]"));
-        Assert.That(JsonModel.ToJson((IEnumerable<int>)collection, TestJsonContext.Default.Int32),           Is.EqualTo("[1,2,3,4]"));
-        Assert.That(JsonSerializer.Serialize(collection, TestJsonContext.Default.ObservableCollectionInt32), Is.EqualTo("[1,2,3,4]"), "STJ itself, through the converter registered in the context");
+        Assert.That(collection.ToArray(),                         Is.EqualTo([1, 2, 3, 4]));
+        Assert.That(collection.Where(static _ => true).ToArray(), Is.EqualTo([2, 4]), "enumeration is filtered");
+        Assert.That(IntsToJson(collection),                       Is.EqualTo("[1,2,3,4]"));
+
+        ObservableCollection<Point> points = new(new Point(1, 1), new Point(2, 2)) { OverrideFilter = static ( int _, ref readonly Point? value ) => value?.X > 1 };
+        Assert.That(points.ToJson(), Is.EqualTo("[{\"X\" : 1,\"Y\" : 1},{\"X\" : 2,\"Y\" : 2}]"));
     }
 
 
     [Test] public void ObservableCollection_FromJson_InsertsInBulk()
     {
-        ObservableCollection<int> collection = ObservableCollection<int>.FromJson("[1,2,3]");
+        ObservableCollection<int> collection = IntsFromJson<ObservableCollection<int>>("[1,2,3]");
         Assert.That(collection.ToArray(), Is.EqualTo([1, 2, 3]));
 
-        Assert.That(ObservableCollection<int>.TryFromJson("[1,", out _),             Is.False);
-        Assert.That(ConcurrentObservableCollection<int>.FromJson("[4,5]").ToArray(), Is.EqualTo([4, 5]));
-        Assert.That(ObservableHashSet<int>.FromJson("[6,6,7]").Count,                Is.EqualTo(2));
+        Assert.That(ObservableCollection<Point>.TryFromJson("[1,", out _),                                   Is.False);
+        Assert.That(ObservableCollection<Point>.FromJson("[{\"X\":1,\"Y\":2}]").Single(),                     Is.EqualTo(new Point(1, 2)));
+        Assert.That(IntsFromJson<ConcurrentObservableCollection<int>>("[4,5]").ToArray(),                    Is.EqualTo([4, 5]));
+        Assert.That(IntsFromJson<ObservableHashSet<int>>("[6,6,7]").Count,                                   Is.EqualTo(2));
+        Assert.That(ObservableHashSet<Point>.FromJson("[{\"X\":1,\"Y\":2},{\"X\":1,\"Y\":2}]").Count,         Is.EqualTo(1));
     }
 
 
@@ -161,7 +170,7 @@ public sealed class ModelJson_Tests
         {
             for ( int i = 0; i < 50; i++ )
             {
-                int[] values = JsonModel.FromJsonArray(collection.ToJson(false), TestJsonContext.Default.Int32);
+                int[] values = IntsFromJson<ObservableCollection<int>>(IntsToJson(collection)).ToArray();
                 Assert.That(values.Count(static x => x >= 0), Is.EqualTo(1000));
             }
         }
@@ -181,12 +190,12 @@ public sealed class ModelJson_Tests
         using ByteArrayContent content = WebRequester.CreateJsonContentOfRuntimeType(model);
         string                 json    = await content.ReadAsStringAsync();
 
-        Assert.That(json, Does.Contain("\"Title\":\"Heads up\""), "serialized as Alert, not as BaseClass");
-        Assert.That(json, Does.Not.Contain("\n"),                 "compact");
+        Assert.That(json, Does.Contain("\"Title\" : \"Heads up\""), "serialized as Alert, not as BaseClass");
+        Assert.That(json, Does.Not.Contain("\n"),                   "compact");
     }
 
 
-    // ─── PreferenceFile (§2.10) ───────────────────────────────────────────────
+    // ─── PreferenceFile ───────────────────────────────────────────────────────
 
     [Test] public async Task Preferences_SaveLoad_KeepUnknownKeys()
     {
@@ -202,7 +211,7 @@ public sealed class ModelJson_Tests
             {
                 Assert.That(prefs.General.Theme,                Is.EqualTo("Light"));
                 Assert.That(prefs.Server.Port,                  Is.EqualTo(8080));
-                Assert.That(prefs.Contains("fromnewerversion"), Is.True, "unknown keys are kept, case-insensitively");
+                Assert.That(prefs.Contains("FromNewerVersion"), Is.True, "unknown keys are kept");
                 prefs.General.Theme = "Blue";
             }
 
@@ -236,14 +245,18 @@ public sealed class ModelJson_Tests
 
     [Test] public void IniConfig_JsonBridge_RoundTrips()
     {
-        IniConfig                         config = IniConfig.Parse("[A]\nx=1\ny=true\n[B]\nz=text\n");
-        System.Text.Json.Nodes.JsonObject json   = config.ToJsonObject();
+        IniConfig   config = IniConfig.Parse("[A]\nx=1\ny=true\n[B]\nz=text\n");
+        JObjectNode json   = config.ToJsonObject();
 
-        Assert.That(json["A"]!["y"]!.GetValue<bool>(),   Is.True);
-        Assert.That(json["A"]!["x"]!.GetValue<string>(), Is.EqualTo("1"));
+        Assert.That((bool)json["A"]!["y"],     Is.True);
+        Assert.That((string?)json["A"]!["x"], Is.EqualTo("1"));
 
         IniConfig back = IniConfig.FromJsonObject(json);
         Assert.That(back["B"]["z"], Is.EqualTo("text"));
         Assert.That(back["A"]["y"], Is.EqualTo("true"));
     }
+
+
+
+    private sealed record Opaque( int X, int Y );
 }

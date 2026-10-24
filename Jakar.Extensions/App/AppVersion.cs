@@ -3,10 +3,8 @@
 
 /// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
 [Serializable]
-[JsonConverter(typeof(SerializeAsStringJsonConverter<AppVersion>))]
 [TypeConverter(typeof(AppVersionTypeConverter))]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
+public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char       SEPARATOR = '.';
     public static readonly AppVersion Default   = new(0);
@@ -18,7 +16,7 @@ public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormatta
     int IReadOnlyCollection<int>.            Count          => (int)Scheme;
     public              AppVersionFlags      Flags          { get; init; }
     public              bool                 IsValid        => !ReferenceEquals(this, Default) && this != Default;
-    [JsonIgnore] public int                  Length         => Flags.Length + 65;
+    [JsonSkip] public int                  Length         => Flags.Length + 65;
     public              int?                 Maintenance    { get; init; }
     public              int                  Major          { get; init; }
     public              int?                 MajorRevision  { get; init; }
@@ -116,6 +114,13 @@ public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormatta
     // TODO: [GeneratedRegex(@"^(\d+\.\d+\.\d+\.\d+)$", OPTIONS, 200 )] private static partial Regex GetParserRegex();
 
 
+    /// <summary> A JSON string, e.g. <c> "1.2.3" </c>; also how a <c> [JsonModel] </c> member of this type is written (it's <see cref="ISpanFormattable"/> + <see cref="ISpanParsable{TSelf}"/>). </summary>
+    public string ToJson() => Json.Serialize<AppVersion, JsonParsableConverter<AppVersion>>(this);
+
+    /// <exception cref="JsonReadException"> Not a JSON string holding a version. </exception>
+    public static AppVersion FromJson( string json ) => Json.Deserialize<AppVersion, JsonParsableConverter<AppVersion>>(json);
+
+
     /// <summary> </summary>
     /// <param name="value"> </param>
     /// <param name="version"> </param>
@@ -162,14 +167,15 @@ public sealed partial class AppVersion : IReadOnlyCollection<int>, ISpanFormatta
             if ( int.TryParse(value, NumberStyles.Integer, provider, out int n) ) { return new AppVersion(n); }
 
             AppVersionFlags flags  = AppVersionFlags.Parse(ref value);
+
+            // An empty part (1..2, 1., or 1. before a dash-less suffix such as 1.a1) isn't a version; SplitOn would skip it.
+            if ( value.IsEmpty || value[0] == SEPARATOR || value[^1] == SEPARATOR || value.Contains("..", StringComparison.Ordinal) ) { throw new FormatException($"'{original}' has an empty version part."); }
+
             int             count  = value.Count(SEPARATOR);
             Span<int>       result = stackalloc int[count + 1];
             int             i      = 0;
 
-            foreach ( ReadOnlySpan<char> span in value.SplitOn(SEPARATOR) )
-            {
-                if ( span.Length > 0 ) { result[i++] = int.Parse(span, NumberStyles.Number, provider); }
-            }
+            foreach ( ReadOnlySpan<char> span in value.SplitOn(SEPARATOR) ) { result[i++] = int.Parse(span, NumberStyles.Number, provider); }
 
             return new AppVersion(flags, result);
         }

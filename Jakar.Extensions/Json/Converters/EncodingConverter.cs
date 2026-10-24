@@ -4,34 +4,37 @@
 namespace Jakar.Extensions;
 
 
-/// <summary> Writes an <see cref="Encoding"/> as its <see cref="Encoding.WebName"/> (canonical, stable, lowercase) and reads it back with <see cref="Encoding.GetEncoding(string)"/>. </summary>
-public sealed class EncodingConverter : JsonConverter<Encoding>
+/// <summary> Writes an <see cref="Encoding"/> as its <see cref="Encoding.WebName"/> (canonical, stable, lowercase) and reads it back with <see cref="Encoding.GetEncoding(string)"/>. <c> null </c> and <c> "" </c> read as <see langword="null"/>. </summary>
+public readonly struct EncodingConverter : IJsonConverter<Encoding?>
 {
-    public static readonly EncodingConverter Instance = new();
-
-
-    public override Encoding? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
+    public static void Write<TWriter>( ref TWriter writer, scoped in Encoding? value )
+        where TWriter : IJsonWriter, allows ref struct
     {
-        if ( reader.TokenType is JsonTokenType.Null ) { return null; }
-
-        if ( reader.TokenType is not JsonTokenType.String ) { throw new JsonException($"Unexpected token {reader.TokenType} when parsing Encoding. Expected a string."); }
-
-        string? name = reader.GetString();
-        if ( string.IsNullOrWhiteSpace(name) ) { return null; }
-
-        try { return Encoding.GetEncoding(name); }
-        catch ( ArgumentException e ) { throw new JsonException($"Unknown encoding '{name}'.", e); }
+        if ( value is null ) { writer.WriteNull(); }
+        else { writer.WriteString(value.WebName); }
     }
 
 
-    public override void Write( Utf8JsonWriter writer, Encoding? value, JsonSerializerOptions options )
+    public static bool TryRead<TReader>( ref TReader reader, out Encoding? value )
+        where TReader : IJsonReader, allows ref struct
     {
-        if ( value is null )
-        {
-            writer.WriteNullValue();
-            return;
-        }
+        value = null;
+        if ( reader.TryReadNull() ) { return true; }
 
-        writer.WriteStringValue(value.WebName);
+        JsonReaderCheckpoint mark = reader.Checkpoint();
+        if ( !reader.TryReadString(out string? name) ) { return false; }
+
+        if ( string.IsNullOrWhiteSpace(name) ) { return true; }
+
+        try
+        {
+            value = Encoding.GetEncoding(name);
+            return true;
+        }
+        catch ( ArgumentException )
+        {
+            reader.Rewind(mark);
+            return reader.Fail(JsonErrorKind.InvalidValue);
+        }
     }
 }

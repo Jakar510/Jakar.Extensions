@@ -190,7 +190,7 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        try { SetBlockedPasswords(content.FromJson<string[]>()); }
+        try { SetBlockedPasswords(Json.Deserialize<string[], JsonArrayConverter<string, JsonStringConverter>>(content)); }
         catch ( Exception ) { SetBlockedPasswords(content.SplitAndTrimLines()); }
     }
 

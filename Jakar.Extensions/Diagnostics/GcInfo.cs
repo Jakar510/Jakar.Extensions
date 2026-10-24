@@ -9,9 +9,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public readonly partial struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, GcMemoryInformation memoryInfo ) : IJsonModel<GcInfo>
+[method: JsonCreator]
+[JsonModel]
+public readonly partial struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, GcMemoryInformation memoryInfo )
 {
     public readonly long                TotalMemory                    = totalMemory;
     public readonly TimeSpan            TotalPauseDuration             = totalPauseDuration;
@@ -68,8 +68,9 @@ public readonly partial struct GcInfo( long totalMemory, long totalAllocatedByte
 /// <summary> Provides a set of APIs that can be used to retrieve garbage collection information. </summary>
 /// <remarks> A GC is identified by its Index. which starts from 1 and increases with each GC (see more explanation of it in the Index prooperty). If you are asking for a GC that does not exist, eg, you called the GC.GetGCMemoryInfo API before a GC happened, or you are asking for a GC of GCKind.FullBlocking and no full blocking GCs have happened, you will get all 0's in the info, including the Index. So you can use Index 0 to detect that no GCs, or no GCs of the kind you specified have happened. </remarks>
 [Serializable]
-[method: JsonConstructor]
-public readonly struct GcMemoryInformation( bool                      compacted,
+[JsonModel]
+[method: JsonCreator]
+public readonly partial struct GcMemoryInformation( bool                      compacted,
                                             bool                      concurrent,
                                             long                      finalizationPendingCount,
                                             long                      fragmentedBytes,
@@ -222,8 +223,9 @@ public readonly struct GcMemoryInformation( bool                      compacted,
 
 
 [Serializable]
-[method: JsonConstructor]
-public readonly struct GcGenerationInformation( long fragmentationAfterBytes, long fragmentationBeforeBytes, long sizeAfterBytes, long sizeBeforeBytes ) : IEquatable<GcGenerationInformation>
+[JsonModel]
+[method: JsonCreator]
+public readonly partial struct GcGenerationInformation( long fragmentationAfterBytes, long fragmentationBeforeBytes, long sizeAfterBytes, long sizeBeforeBytes ) : IEquatable<GcGenerationInformation>
 {
     /// <summary> Size in bytes on entry to the reported collection. </summary>
     public readonly long SizeBeforeBytes = sizeBeforeBytes;

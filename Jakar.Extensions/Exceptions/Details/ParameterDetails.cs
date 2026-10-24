@@ -5,8 +5,8 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-[JsonModel(typeof(JakarExtensionsContext))]
-public sealed partial class ParameterDetails : BaseClass<ParameterDetails>, IEqualComparable<ParameterDetails>, IJsonModel<ParameterDetails>
+[JsonModel]
+public sealed partial class ParameterDetails : BaseClass<ParameterDetails>, IEqualComparable<ParameterDetails>
 {
     public bool    HasDefaultValue { get; init; }
     public bool    IsIn            { get; init; }

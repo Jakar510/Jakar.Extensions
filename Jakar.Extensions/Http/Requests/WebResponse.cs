@@ -26,7 +26,7 @@ public sealed class WebResponse<TValue>
     public readonly Uri?              URL;
 
 
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload => Payload is not null;
+    [JsonSkip] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload => Payload is not null;
 
 
     public bool IsSuccessStatusCode { [MemberNotNullWhen(true, nameof(Payload))] get => Payload is not null && StatusCode < Status.BadRequest; }
@@ -133,7 +133,7 @@ public sealed class WebResponse<TValue>
 
         static Errors fromString( WebResponse<TValue> response, string     value )  => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: value);
         static Errors fromTags( WebResponse<TValue>   response, StringTags tags )   => Error.Create(response.StatusCode, response.ErrorMessage(), instance: response.URL?.OriginalString, details: tags);
-        static Errors fromNode( WebResponse<TValue>   response, JsonNode   node )   => fromString(response, node.ToJson());
+        static Errors fromNode( WebResponse<TValue>   response, JNode      node )   => fromString(response, node.ToJson());
         static Errors fromErrors( WebResponse<TValue> response, Errors     errors ) => Extensions.Errors.Create([Error.Create(response.StatusCode), .. errors.Details]);
     }
     public string ErrorMessage() => StatusCode.GetErrorTitle();

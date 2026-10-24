@@ -12,23 +12,23 @@ public sealed partial class IniConfig
 
     /// <summary>
     ///     <c> {"Section": {"key": "value"}} </c>. INI values are text: <c> true </c>/<c> false </c> become JSON booleans when <paramref name="inferBooleans"/> is set
-    ///     (System.Text.Json won't read a string as a bool); everything else stays a string (numbers in strings are read with <see cref="JsonNumberHandling.AllowReadingFromString"/>).
+    ///     (Jakar.Json won't read a string as a bool); everything else stays a string (the models read numbers from strings: <c> NumbersFromStrings = Allow </c>).
     /// </summary>
-    public JsonObject ToJsonObject( bool inferBooleans = true )
+    public JObjectNode ToJsonObject( bool inferBooleans = true )
     {
-        JsonObject root = new(Json.NodeOptions);
+        JObjectNode root = [];
 
         foreach ( ( string name, Section section ) in this )
         {
-            JsonObject values = new(Json.NodeOptions);
+            JObjectNode values = [];
 
             foreach ( ( string key, string? value ) in section )
             {
                 values[key] = value is null
                                   ? null
                                   : inferBooleans && bool.TryParse(value, out bool flag)
-                                      ? JsonValue.Create(flag)
-                                      : JsonValue.Create(value);
+                                      ? flag
+                                      : value;
             }
 
             root[name] = values;
@@ -39,17 +39,17 @@ public sealed partial class IniConfig
 
 
     /// <summary> The reverse of <see cref="ToJsonObject"/>: nested objects become sections, top-level scalars go into <see cref="DEFAULT_SECTION"/>; strings are written as-is, other values as JSON. </summary>
-    public static IniConfig FromJsonObject( JsonObject json )
+    public static IniConfig FromJsonObject( JObjectNode json )
     {
         ArgumentNullException.ThrowIfNull(json);
         IniConfig config = new();
 
-        foreach ( ( string name, JsonNode? node ) in json )
+        foreach ( ( string name, JNode? node ) in json )
         {
-            if ( node is JsonObject obj )
+            if ( node is JObjectNode obj )
             {
                 Section section = config[name];
-                foreach ( ( string key, JsonNode? value ) in obj ) { section[key] = ToText(value); }
+                foreach ( ( string key, JNode? value ) in obj ) { section[key] = ToText(value); }
             }
             else { config[DEFAULT_SECTION][name] = ToText(node); }
         }
@@ -58,10 +58,10 @@ public sealed partial class IniConfig
     }
 
 
-    private static string? ToText( JsonNode? node ) => node switch
-                                                       {
-                                                           null                                                              => null,
-                                                           JsonValue value when value.GetValueKind() == JsonValueKind.String => value.GetValue<string>(),
-                                                           _                                                                 => node.ToJsonString()
-                                                       };
+    private static string? ToText( JNode? node ) => node switch
+                                                    {
+                                                        null                                         => null,
+                                                        JValueNode { Kind: JNodeKind.String } value => value.GetString(),
+                                                        _                                            => node.ToJson(false)
+                                                    };
 }

@@ -188,68 +188,77 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
         try
         {
             JsonCodec.WriteJson(in value, ref output, settings); // UTF-8
-
-            byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
-                              ? output.ToArray()
-                              : encoding.GetBytes(Encoding.UTF8.GetString(output.Values)); // GetBytes never writes a preamble
-
-            ByteArrayContent content = new(body);
-            content.Headers.ContentType = new MediaTypeHeaderValue(MimeTypeNames.Application.JSON) { CharSet = encoding.WebName };
-            return content;
+            return CreateContent(output.Values, encoding);
         }
         finally { output.Dispose(); }
     }
 
-    /// <summary> Serializes <paramref name="value"/> with System.Text.Json and <paramref name="info"/>, compact, straight to bytes in <paramref name="encoding"/> (default <see cref="Encoding.Default"/>, UTF-8). </summary>
-    /// <remarks> No byte order mark is ever sent (RFC 8259 §8.1). Non-ASCII text is written as-is (<see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/>). </remarks>
-    public static ByteArrayContent CreateJsonContent<TValue>( TValue value, JsonTypeInfo<TValue> info, Encoding? encoding = null ) =>
-        CreateContent(info.Options, ( value, info ), static ( writer, state ) => JsonSerializer.Serialize(writer, state.value, state.info), encoding);
+    /// <summary> A JSON array body of <paramref name="values"/>, like <see cref="CreateJsonContent{TValue}(TValue, Jakar.Json.JsonWriterOptions?, Encoding?)"/>. </summary>
+    public static ByteArrayContent CreateJsonArrayContent<TValue>( IEnumerable<TValue> values, Jakar.Json.JsonWriterOptions? options = null, Encoding? encoding = null )
+        where TValue : IJsonSerializable<TValue>
+    {
+        Jakar.Json.JsonWriterOptions settings = options ?? TValue.DefaultWriterOptions with { Indented = false };
+        Buffer<byte>                 output   = new();
 
-    /// <summary> A JSON array body, written element by element with only the element's metadata (no collection type needs registering). </summary>
-    public static ByteArrayContent CreateJsonArrayContent<TValue>( IEnumerable<TValue> values, JsonTypeInfo<TValue> info, Encoding? encoding = null ) =>
-        CreateContent(info.Options, ( values, info ), static ( writer, state ) => JsonModel.WriteArray(writer, state.values, state.info), encoding);
+        try
+        {
+            JsonCodec.WriteJsonArray(values, ref output, settings);
+            return CreateContent(output.Values, encoding ?? Encoding.Default);
+        }
+        finally { output.Dispose(); }
+    }
 
-    /// <summary> Serializes <paramref name="value"/> as its <b> runtime </b> type (e.g. a <see cref="BaseClass"/>-typed argument holding a <c> UserModel </c>), resolved with <see cref="Json.GetTypeInfo(Type)"/>. </summary>
+    /// <summary> Serializes <paramref name="value"/> as its <b> runtime </b> type (e.g. a <see cref="BaseClass"/>-typed argument holding a <c> UserModel </c>), resolved with <see cref="JsonCodecRegistry"/>. </summary>
+    /// <exception cref="NotSupportedException"> The runtime type isn't a registered <c> [JsonModel] </c> type. </exception>
     public static ByteArrayContent CreateJsonContentOfRuntimeType( object value, Encoding? encoding = null )
     {
         ArgumentNullException.ThrowIfNull(value);
-        JsonTypeInfo info = Json.GetTypeInfo(value.GetType());
-        return CreateContent(info.Options, ( value, info ), static ( writer, state ) => JsonSerializer.Serialize(writer, state.value, state.info), encoding);
+        JsonTypeCodec codec  = GetCodec(value.GetType());
+        Buffer<byte>  output = new();
+
+        try
+        {
+            codec.Write(value, ref output, codec.DefaultWriterOptions with { Indented = false });
+            return CreateContent(output.Values, encoding ?? Encoding.Default);
+        }
+        finally { output.Dispose(); }
     }
 
     /// <summary> A JSON array of <paramref name="values"/>, each serialized as its <b> runtime </b> type. </summary>
-    public static ByteArrayContent CreateJsonArrayContentOfRuntimeType( IEnumerable<object?> values, Encoding? encoding = null ) =>
-        CreateContent(Json.Options,
-                      values,
-                      static ( writer, values ) =>
-                      {
-                          writer.WriteStartArray();
-
-                          foreach ( object? value in values )
-                          {
-                              if ( value is null ) { writer.WriteNullValue(); }
-                              else { JsonSerializer.Serialize(writer, value, Json.GetTypeInfo(value.GetType())); }
-                          }
-
-                          writer.WriteEndArray();
-                      },
-                      encoding);
-
-
-    private static ByteArrayContent CreateContent<TState>( JsonSerializerOptions options, TState state, Action<Utf8JsonWriter, TState> write, Encoding? encoding )
+    /// <exception cref="NotSupportedException"> A runtime type isn't a registered <c> [JsonModel] </c> type. </exception>
+    public static ByteArrayContent CreateJsonArrayContentOfRuntimeType( IEnumerable<object?> values, Encoding? encoding = null )
     {
-        encoding ??= Encoding.Default;
+        ArgumentNullException.ThrowIfNull(values);
+        JsonUtf8Writer writer = new(256, Jakar.Json.JsonWriterOptions.Default);
 
-        // System.Text.Json writes UTF-8 natively; always compact, whatever the context's WriteIndented.
-        JsonWriterOptions writerOptions = options.GetWriterOptions(false);
-        writerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+        try
+        {
+            writer.WriteStartArray();
 
-        ArrayBufferWriter<byte> buffer = new(256);
-        using ( Utf8JsonWriter writer = new(buffer, writerOptions) ) { write(writer, state); }
+            foreach ( object? value in values )
+            {
+                if ( value is null ) { writer.WriteNull(); }
+                else { GetCodec(value.GetType()).WriteValue(value, ref writer); }
+            }
 
+            writer.WriteEndArray();
+            return CreateContent(writer.Written, encoding ?? Encoding.Default);
+        }
+        finally { writer.Dispose(); }
+    }
+
+
+    private static JsonTypeCodec GetCodec( Type type ) => JsonCodecRegistry.TryGet(type, out JsonTypeCodec? codec)
+                                                              ? codec
+                                                              : throw new NotSupportedException($"'{type.Name}' isn't a [JsonModel] type, so it can't be sent as JSON.");
+
+
+    /// <summary> No byte order mark is ever sent (RFC 8259 §8.1). </summary>
+    private static ByteArrayContent CreateContent( scoped ReadOnlySpan<byte> utf8, Encoding encoding )
+    {
         byte[] body = encoding.CodePage == Encoding.UTF8.CodePage
-                          ? [.. buffer.WrittenSpan]
-                          : encoding.GetBytes(Encoding.UTF8.GetString(buffer.WrittenSpan)); // GetBytes never writes a preamble
+                          ? utf8.ToArray()
+                          : encoding.GetBytes(Encoding.UTF8.GetString(utf8)); // GetBytes never writes a preamble
 
         ByteArrayContent content = new(body);
         content.Headers.ContentType = new MediaTypeHeaderValue(MimeTypeNames.Application.JSON) { CharSet = encoding.WebName };
@@ -276,9 +285,9 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Delete( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Delete, value);
     public WebHandler Delete( Uri    url ) => CreateHandler(url, HttpMethod.Delete);
     public WebHandler Delete<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Delete(relativePath, CreateJsonContent(value, null, Encoding));
     public WebHandler Delete<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Delete(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Delete(relativePath, CreateJsonArrayContent(value, null, Encoding));
 
 
     public WebHandler Get( Uri    url )          => CreateHandler(url, HttpMethod.Get);
@@ -298,9 +307,9 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Patch( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Patch, value);
     public WebHandler Patch( Uri    url ) => CreateHandler(url, HttpMethod.Patch);
     public WebHandler Patch<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Patch(relativePath, CreateJsonContent(value, null, Encoding));
     public WebHandler Patch<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Patch(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Patch(relativePath, CreateJsonArrayContent(value, null, Encoding));
 
 
     public WebHandler Post( string relativePath, byte[]                      value )   => Post(relativePath,            new ByteArrayContent(value));
@@ -316,9 +325,9 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Post( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Post, value);
     public WebHandler Post( Uri    url ) => CreateHandler(url, HttpMethod.Post);
     public WebHandler Post<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Post(relativePath, CreateJsonContent(value, null, Encoding));
     public WebHandler Post<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Post(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Post(relativePath, CreateJsonArrayContent(value, null, Encoding));
 
 
     public WebHandler Put( string relativePath, byte[]                      value )   => Put(relativePath,            new ByteArrayContent(value));
@@ -334,9 +343,9 @@ public sealed partial class WebRequester : IAsyncDisposable, IDisposable
     public WebHandler Put( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Put, value);
     public WebHandler Put( Uri    url ) => CreateHandler(url, HttpMethod.Put);
     public WebHandler Put<TValue>( string relativePath, TValue value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Put(relativePath, CreateJsonContent(value, null, Encoding));
     public WebHandler Put<TValue>( string relativePath, IEnumerable<TValue> value )
-        where TValue : IJsonModel<TValue> => Put(relativePath, CreateJsonArrayContent(value, TValue.JsonTypeInfo, Encoding));
+        where TValue : IJsonSerializable<TValue> => Put(relativePath, CreateJsonArrayContent(value, null, Encoding));
 
 
 

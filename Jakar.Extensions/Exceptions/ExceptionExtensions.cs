@@ -41,13 +41,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static void Details( this Exception e, out JObjectNode dict, bool includeFullMethodInfo )
     {
-        JsonArray            array = [];
+        JArrayNode           array = [];
         ReadOnlySpan<string> lines = e.StackTrace?.SplitAndTrimLines();
-        foreach ( string line in lines ) { array.Add((JsonNode?)JsonValue.Create(line)); }
+        foreach ( string line in lines ) { array.Add(line); }
 
-        dict = new JsonObject(Json.NodeOptions)
+        dict = new JObjectNode
                {
                    [nameof(Type)]                 = e.GetType().FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
@@ -58,7 +58,7 @@ public static class ExceptionExtensions
                    [nameof(Exception.StackTrace)] = array
                };
 
-        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo()?.ToJsonNode(); }
+        if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo() is { } info ? JNode.FromModel(info) : null; }
         else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
         e.GetProperties(ref dict);
@@ -66,35 +66,33 @@ public static class ExceptionExtensions
 
 
     /// <summary> A JSON value for an arbitrary object without reflection-based serialization: primitives keep their JSON type, nodes are cloned, anything else becomes its <see cref="object.ToString"/>. </summary>
-    public static JsonNode? ToJsonValue( object? value ) => value switch
-                                                            {
-                                                                null => null,
-                                                                JsonNode node => node.Parent is null
-                                                                                     ? node
-                                                                                     : node.DeepClone(),
-                                                                JsonElement e    => JsonValue.Create(e),
-                                                                string str       => JsonValue.Create(str),
-                                                                bool b           => JsonValue.Create(b),
-                                                                char c           => JsonValue.Create(c),
-                                                                byte n           => JsonValue.Create(n),
-                                                                sbyte n          => JsonValue.Create(n),
-                                                                short n          => JsonValue.Create(n),
-                                                                ushort n         => JsonValue.Create(n),
-                                                                int n            => JsonValue.Create(n),
-                                                                uint n           => JsonValue.Create(n),
-                                                                long n           => JsonValue.Create(n),
-                                                                ulong n          => JsonValue.Create(n),
-                                                                float n          => JsonValue.Create(n),
-                                                                double n         => JsonValue.Create(n),
-                                                                decimal n        => JsonValue.Create(n),
-                                                                Guid g           => JsonValue.Create(g),
-                                                                DateTime d       => JsonValue.Create(d),
-                                                                DateTimeOffset d => JsonValue.Create(d),
-                                                                Enum en          => JsonValue.Create(en.ToString()),
-                                                                IFormattable f   => JsonValue.Create(f.ToString(null, CultureInfo.InvariantCulture)),
-                                                                _                => JsonValue.Create(value.ToString())
-                                                            };
-
+    public static JNode? ToJsonValue( object? value ) => value switch
+                                                         {
+                                                             null => null,
+                                                             JNode node => node.Parent is null
+                                                                               ? node
+                                                                               : node.DeepClone(),
+                                                             string str       => str,
+                                                             bool b           => b,
+                                                             char c           => c.ToString(),
+                                                             byte n           => n,
+                                                             sbyte n          => n,
+                                                             short n          => n,
+                                                             ushort n         => n,
+                                                             int n            => n,
+                                                             uint n           => n,
+                                                             long n           => n,
+                                                             ulong n          => n,
+                                                             float n          => n,
+                                                             double n         => n,
+                                                             decimal n        => n,
+                                                             Guid g           => g,
+                                                             DateTime d       => d,
+                                                             DateTimeOffset d => d,
+                                                             Enum en          => en.ToString(),
+                                                             IFormattable f   => f.ToString(null, CultureInfo.InvariantCulture),
+                                                             _                => value.ToString()
+                                                         };
 
 
     extension( Exception e )
@@ -144,9 +142,9 @@ public static class ExceptionExtensions
 
 
         /// <summary> <see cref="Exception.Data"/> as a JSON object (no reflection-based serialization; see <see cref="ToJsonValue"/>). </summary>
-        public JsonObject GetData()
+        public JObjectNode GetData()
         {
-            JsonObject result = new(Json.NodeOptions);
+            JObjectNode result = [];
             foreach ( DictionaryEntry entry in self.Data ) { result[entry.Key.ToString() ?? EMPTY] = ToJsonValue(entry.Value); }
 
             return result;
@@ -227,7 +225,7 @@ public static class ExceptionExtensions
         }
 
 
-        public void GetProperties( ref JsonObject dictionary )
+        public void GetProperties( ref JObjectNode dictionary )
         {
             foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
             {
@@ -238,48 +236,4 @@ public static class ExceptionExtensions
             }
         }
     }
-
-
-
-    /*
-        public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref JObject dictionary )
-            where TValue : Exception
-        {
-            foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
-            {
-                string key = info.AppName;
-
-                if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
-
-
-                dictionary[key] = info.GetValue( e, null )?.ToJson();
-            }
-        }
-
-
-        [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-        public static void Details( this Exception e, out JObject dict, bool includeFullMethodInfo )
-        {
-            dict = new JObject
-                   {
-                       [nameof(Type)] = e.GetType().FullName,
-                       [nameof(Exception.HResult)] = e.HResult,
-                       [nameof(Exception.HelpLink)] = e.HelpLink,
-                       [nameof(Exception.Source)] = e.Source,
-                       [nameof(Exception.Message)] = e.Message,
-                       [nameof(Exception.Data)] = e.GetData().ToJson(),
-                       [nameof(Exception.StackTrace)] = (e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>()).ToJson()
-                   };
-
-
-            if ( includeFullMethodInfo )
-            {
-                MethodDetails? info = e.MethodInfo();
-                dict[nameof(Exception.TargetSite)] = JsonSerializer.SerializeToNode( info, MethodDetailsContext.MethodDetails );
-            }
-            else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
-
-            e.GetProperties( ref dict );
-        }
-    */
 }

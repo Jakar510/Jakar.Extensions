@@ -8,15 +8,15 @@ using Microsoft.Extensions.Primitives;
 namespace Jakar.Extensions;
 
 
+/// <remarks> Missing or <c> null </c> <see cref="Tags"/> / <see cref="Entries"/> read as empty. </remarks>
 [DefaultValue(nameof(Empty))]
-[JsonConverter(typeof(StringTagsJsonConverter))]
-[method: JsonConstructor]
-[JsonModel(typeof(JakarExtensionsContext))]
-public readonly partial struct StringTags( Pair[] tags, string[] entries ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
+[method: JsonCreator]
+[JsonModel(ReadOnlyMembers = JsonReadOnlyMembers.Ignore)]
+public readonly partial struct StringTags( Pair[]? tags = null, string[]? entries = null ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>, ISpanFormattable
 {
-    public static readonly StringTags Empty   = new();
-    public readonly        Pair[]     Tags    = tags;
-    public readonly        string[]   Entries = entries;
+    public static readonly                                                                                      StringTags Empty   = new();
+    [JsonMember(Converter = typeof(NullAsEmptyArrayConverter<Pair, JsonModelConverter<Pair>>))] public readonly Pair[]     Tags    = tags    ?? [];
+    [JsonMember(Converter = typeof(NullAsEmptyArrayConverter<string, JsonStringConverter>))]    public readonly string[]   Entries = entries ?? [];
 
 
     public bool IsEmpty { [MemberNotNullWhen(false, nameof(Tags))] [MemberNotNullWhen(false, nameof(Entries))] get => Tags?.Length is null or <= 0 && Entries?.Length is null or <= 0; }

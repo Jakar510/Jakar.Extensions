@@ -4,9 +4,22 @@
 namespace Jakar.Extensions;
 
 
+/// <summary>
+///     The prerelease part of an <see cref="AppVersion"/>: a label (<c>alpha</c>, <c>beta</c>, <c>rc</c>, or any other) and an optional iteration, written SemVer style as
+///     <c>-beta.1</c> (<c>10.1.0-beta.1</c>), or <c>-beta</c> when <see cref="Iteration"/> is 0. <see cref="Stable"/> (no label) is a release.
+/// </summary>
+/// <remarks>
+///     <para> Parsing also accepts the older spellings: <c>-beta1</c>, <c>beta</c> / <c>rc</c> / <c>alpha</c> without the dash (<c>1.1rc</c>), and <c>a</c> / <c>b</c> for alpha / beta. </para>
+///     <para> Ordering follows SemVer and NuGet: a prerelease comes before its release, labels compare alphabetically (<c>alpha</c> &lt; <c>beta</c> &lt; <c>rc</c>), then iterations numerically. </para>
+/// </remarks>
 [DefaultValue(nameof(Stable))]
 public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualityOperators<AppVersionFlags>, IComparisonOperators<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
 {
+    private const           char               ITERATION_SEPARATOR = '.';
+    private const           char               METADATA_SEPARATOR  = '+';
+    private static readonly SearchValues<char> __letters           = SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+
+
     public static readonly AppVersionFlags Stable    = new(EMPTY, 0);
     public readonly        string          Flag      = flag;
     public readonly        uint            Iteration = iteration;
@@ -34,22 +47,27 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> buffer, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
-        Debug.Assert(buffer.Length > Length);
+        charsWritten = 0;
+        if ( IsEmpty ) { return true; }
 
-        if ( IsEmpty )
+        // -label, then .iteration when there is one: too small a buffer is a false return, as ISpanFormattable expects.
+        if ( buffer.Length < Flag.Length + 1 ) { return false; }
+
+        buffer[0] = FLAG_SEPARATOR;
+        Flag.CopyTo(buffer[1..]);
+        int written = Flag.Length + 1;
+
+        if ( Iteration > 0 )
         {
-            charsWritten = 0;
-            return true;
+            if ( buffer.Length == written ) { return false; }
+
+            buffer[written++] = ITERATION_SEPARATOR; // -beta.1
+            if ( !Iteration.TryFormat(buffer[written..], out int intCharsWritten, default, CultureInfo.InvariantCulture) ) { return false; }
+
+            written += intCharsWritten;
         }
 
-
-        charsWritten           = 0;
-        buffer[charsWritten++] = FLAG_SEPARATOR;
-        foreach ( char t in Flag ) { buffer[charsWritten++] = t; }
-
-        if ( Iteration > 0 && Iteration.TryFormat(buffer[charsWritten..], out int intCharsWritten, format, provider) ) { charsWritten += intCharsWritten; }
-
-        buffer.WriteToDebug();
+        charsWritten = written;
         return true;
     }
     public static AppVersionFlags ReleaseCandidate( uint iteration = 0 ) => new(RC, iteration);
@@ -57,80 +75,56 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     public static AppVersionFlags Beta( uint             iteration = 0 ) => new(BETA, iteration);
 
 
+    /// <summary>
+    ///     Removes the prerelease part from the end of <paramref name="value"/> and returns it: everything after the first <c>-</c> (<c>10.1.0-beta.1</c>), or, without a dash, from the first
+    ///     letter (<c>1.1rc</c>). SemVer build metadata (<c>+sha</c>) is dropped. <paramref name="value"/> keeps the numeric part; <see cref="Stable"/> when there's no prerelease part.
+    /// </summary>
+    /// <exception cref="FormatException"> The prerelease part isn't a label with an optional iteration (<c>beta</c>, <c>beta.1</c>, <c>beta1</c>). </exception>
     public static AppVersionFlags Parse( scoped ref ReadOnlySpan<char> value )
     {
-        if ( value.EndsWith("-rc", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("-rc", StringComparison.OrdinalIgnoreCase)];
-            return ReleaseCandidate();
-        }
+        int metadata = value.IndexOf(METADATA_SEPARATOR);
+        if ( metadata >= 0 ) { value = value[..metadata]; }
 
-        if ( value.EndsWith("rc", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("rc", StringComparison.OrdinalIgnoreCase)];
-            return ReleaseCandidate();
-        }
+        int  end    = value.IndexOf(FLAG_SEPARATOR);
+        bool dashed = end >= 0;
+        if ( !dashed ) { end = value.IndexOfAny(__letters); } // 1.1rc, 1.1beta2
 
-        if ( value.EndsWith("-beta", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("-beta", StringComparison.OrdinalIgnoreCase)];
-            return Beta();
-        }
+        if ( end < 0 ) { return Stable; }
 
-        if ( value.EndsWith("-alpha", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("-alpha", StringComparison.OrdinalIgnoreCase)];
-            return Alpha();
-        }
+        ReadOnlySpan<char> prerelease = value[( dashed ? end + 1 : end )..];
+        value = value[..end];
+        return ParsePrerelease(prerelease);
+    }
 
-        if ( value.EndsWith("beta", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("beta", StringComparison.OrdinalIgnoreCase)];
-            return Beta();
-        }
+    /// <summary> <c>beta</c>, <c>beta.1</c> or <c>beta1</c>: a label of letters, then an optional iteration. </summary>
+    private static AppVersionFlags ParsePrerelease( ReadOnlySpan<char> prerelease )
+    {
+        int digits = prerelease.IndexOfAnyExcept(__letters);
 
-        if ( value.EndsWith("alpha", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("alpha", StringComparison.OrdinalIgnoreCase)];
-            return Alpha();
-        }
+        ReadOnlySpan<char> label = digits < 0
+                                       ? prerelease
+                                       : prerelease[..digits];
 
-        if ( value.EndsWith("-b", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("-b", StringComparison.OrdinalIgnoreCase)];
-            return Beta();
-        }
+        ReadOnlySpan<char> number = digits < 0
+                                        ? default
+                                        : prerelease[digits..];
 
-        if ( value.EndsWith("b", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("b", StringComparison.OrdinalIgnoreCase)];
-            return Beta();
-        }
+        if ( number.StartsWith(ITERATION_SEPARATOR) ) { number = number[1..]; }
 
-        if ( value.EndsWith("-a", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("-a", StringComparison.OrdinalIgnoreCase)];
-            return Alpha();
-        }
+        if ( label.IsEmpty ) { throw new FormatException($"'{prerelease}' has no prerelease label (e.g. beta.1)."); }
 
-        if ( value.EndsWith("a", StringComparison.OrdinalIgnoreCase) )
-        {
-            value = value[..value.IndexOf("a", StringComparison.OrdinalIgnoreCase)];
-            return Alpha();
-        }
+        uint iteration = 0;
+        if ( !number.IsEmpty && !uint.TryParse(number, NumberStyles.None, CultureInfo.InvariantCulture, out iteration) ) { throw new FormatException($"'{prerelease}' isn't a prerelease label with an optional iteration (e.g. beta.1)."); }
 
-        if ( !value.Contains(FLAG_SEPARATOR) ) { return Stable; }
+        string flag = label switch
+                      {
+                          _ when label.Equals(ALPHA, StringComparison.OrdinalIgnoreCase) || label.Equals("a", StringComparison.OrdinalIgnoreCase) => ALPHA,
+                          _ when label.Equals(BETA,  StringComparison.OrdinalIgnoreCase) || label.Equals("b", StringComparison.OrdinalIgnoreCase) => BETA,
+                          _ when label.Equals(RC,    StringComparison.OrdinalIgnoreCase)                                                         => RC,
+                          _                                                                                                                       => label.ToString()
+                      };
 
-        int                index = value.IndexOf(FLAG_SEPARATOR);
-        ReadOnlySpan<char> flag  = value[( index - 1 )..];
-        flag  = flag.Trim(FLAG_SEPARATOR);
-        value = value[..index];
-
-        int end = flag.IndexOfAny(Randoms.Numeric);
-
-        return end < 0
-                   ? new AppVersionFlags(flag.ToString(),        0)
-                   : new AppVersionFlags(flag[..end].ToString(), uint.Parse(flag[end..]));
+        return new AppVersionFlags(flag, iteration);
     }
     public static AppVersionFlags Parse( string flag, IFormatProvider? provider )
     {
@@ -139,20 +133,24 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     }
     public static bool TryParse( string? flag, IFormatProvider? provider, out AppVersionFlags result )
     {
-        if ( string.IsNullOrEmpty(flag) )
-        {
-            result = default;
-            return false;
-        }
+        if ( !string.IsNullOrEmpty(flag) ) { return TryParse(flag.AsSpan(), provider, out result); }
 
-        result = Parse(flag, provider);
-        return true;
+        result = default;
+        return false;
     }
     public static AppVersionFlags Parse( ReadOnlySpan<char> flag, IFormatProvider? provider ) => Parse(ref flag);
     public static bool TryParse( ReadOnlySpan<char> flag, IFormatProvider? provider, out AppVersionFlags result )
     {
-        result = Parse(flag, provider);
-        return true;
+        try
+        {
+            result = Parse(flag, provider);
+            return true;
+        }
+        catch ( FormatException )
+        {
+            result = default;
+            return false;
+        }
     }
 
 
@@ -162,48 +160,17 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
 
         return CompareTo(other.Value);
     }
+    /// <summary> SemVer / NuGet order: a release (<see cref="Stable"/>) follows every prerelease; labels compare alphabetically (<c>alpha</c> &lt; <c>beta</c> &lt; <c>rc</c>), then iterations numerically. </summary>
     public int CompareTo( AppVersionFlags other )
     {
-        int flagComparison = Flag switch
-                             {
-                                 EMPTY => other.Flag switch
-                                          {
-                                              EMPTY => 0,
-                                              RC    => 1,
-                                              ALPHA => 1,
-                                              BETA  => 1,
-                                              _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
-                                          },
-                                 RC => other.Flag switch
-                                       {
-                                           EMPTY => -1,
-                                           RC    => 0,
-                                           ALPHA => 1,
-                                           BETA  => 1,
-                                           _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
-                                       },
-                                 ALPHA => other.Flag switch
-                                          {
-                                              EMPTY => -1,
-                                              RC    => -1,
-                                              ALPHA => 0,
-                                              BETA  => 1,
-                                              _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
-                                          },
-                                 BETA => other.Flag switch
-                                         {
-                                             EMPTY => -1,
-                                             RC    => -1,
-                                             ALPHA => -1,
-                                             BETA  => 0,
-                                             _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
-                                         },
-                                 _ => string.Compare(Flag, other.Flag, StringComparison.Ordinal)
-                             };
+        if ( IsEmpty ) { return other.IsEmpty ? 0 : 1; }
 
+        if ( other.IsEmpty ) { return -1; }
 
-        return flagComparison != 0
-                   ? flagComparison
+        int labelComparison = string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase);
+
+        return labelComparison != 0
+                   ? labelComparison
                    : Iteration.CompareTo(other.Iteration);
     }
     public int CompareTo( object? other ) => other switch
@@ -220,8 +187,8 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
         return Equals(flags);
     }
     public override bool Equals( [NotNullWhen(true)] object? other ) => other is AppVersionFlags flags                                      && Equals(flags);
-    public          bool Equals( AppVersionFlags             other ) => string.Equals(Flag, other.Flag, StringComparison.OrdinalIgnoreCase) && Iteration.Equals(other.Iteration);
-    public override int  GetHashCode()                               => Flag.GetHashCode();
+    public          bool Equals( AppVersionFlags             other ) => IsEmpty ? other.IsEmpty : string.Equals(Flag, other.Flag, StringComparison.OrdinalIgnoreCase) && Iteration.Equals(other.Iteration); // default and Stable are both a release
+    public override int  GetHashCode()                               => HashCode.Combine(IsEmpty ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(Flag), Iteration); // matches Equals: case-insensitive label
 
 
     public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => Nullable.Equals(left, right);

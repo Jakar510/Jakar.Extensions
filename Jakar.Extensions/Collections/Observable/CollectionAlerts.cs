@@ -51,7 +51,7 @@ public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValue
 
 
 
-public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IEqualComparable<TSelf>
     where TSelf : ICollectionAlerts<TSelf, TValue>
 {
     public abstract static implicit operator TSelf( List<TValue>           values );

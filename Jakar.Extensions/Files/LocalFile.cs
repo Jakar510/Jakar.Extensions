@@ -11,15 +11,15 @@ using Microsoft.Extensions.FileProviders;
 namespace Jakar.Extensions;
 
 
+/// <summary> JSON: <c> {"FullPath" : "...", "FileEncoding" : "utf-8"} </c>. The computed members aren't serialized: <see cref="Length"/> throws for a missing file, and reading the rest touches the disk. </summary>
 [Serializable]
-[JsonConverter(typeof(LocalFileJsonConverter))]
-[JsonModel(typeof(JakarExtensionsContext))]
-public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile> // , IContentTypeProvider
+[JsonModel(ReadOnlyMembers = JsonReadOnlyMembers.Ignore)]
+public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, IFileInfo, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile> // , IContentTypeProvider
 {
-    public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
-    [JsonIgnore] public readonly FileInfo Info         = info;
-    public readonly              string   FullPath     = info.FullName;
-    private                      bool     __isTemporary;
+    [JsonMember(Converter = typeof(EncodingConverter))] public readonly Encoding FileEncoding = encoding ?? Encoding.Default;
+    [JsonSkip]                                          public readonly FileInfo Info         = info;
+    public readonly                                                     string   FullPath     = info.FullName;
+    private                                                             bool     __isTemporary;
 
 
     public string           ContentType     => Mime.ToContentType();
@@ -36,7 +36,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
     public MimeType         Mime            => Extension.FromExtension();
     public string           Name            => Info.Name;
 
-    [JsonIgnore] public LocalDirectory? Parent
+    [JsonSkip] public LocalDirectory? Parent
     {
         get
         {
@@ -51,13 +51,13 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
     public string  Root         => Directory.GetDirectoryRoot(FullPath);
 
 
-    public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
-    public LocalFile( FileSystemInfo path, Encoding?                   encoding = null ) : this(path.FullName, encoding) { }
-    public LocalFile( string         path, params ReadOnlySpan<string> subFolders ) : this(path, Encoding.Default, subFolders) { }
-    public LocalFile( string         path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this(path.Combine(subFolders), encoding) { }
-    public LocalFile( DirectoryInfo  path, string                      fileName, Encoding?                   encoding = null ) : this(path.Combine(fileName), encoding) { }
-    public LocalFile( string         path, string                      fileName, Encoding?                   encoding = null ) : this(new DirectoryInfo(path), fileName, encoding) { }
-    public LocalFile( string         path, Encoding?                   encoding = null ) : this(new FileInfo(path), encoding) { }
+    public LocalFile( Uri                  path,     Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
+    public LocalFile( FileSystemInfo       path,     Encoding?                   encoding = null ) : this(path.FullName, encoding) { }
+    public LocalFile( string               path,     params ReadOnlySpan<string> subFolders ) : this(path, Encoding.Default, subFolders) { }
+    public LocalFile( string               path,     Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this(path.Combine(subFolders), encoding) { }
+    public LocalFile( DirectoryInfo        path,     string                      fileName, Encoding?                   encoding = null ) : this(path.Combine(fileName), encoding) { }
+    public LocalFile( string               path,     string                      fileName, Encoding?                   encoding = null ) : this(new DirectoryInfo(path), fileName, encoding) { }
+    [JsonCreator] public LocalFile( string fullPath, Encoding?                   fileEncoding = null ) : this(new FileInfo(fullPath), fileEncoding) { }
 
 
     protected override void Dispose( bool disposing )
@@ -944,7 +944,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         ///     <typeparamref name="TValue"/>
         /// </returns>
         ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
-            where TValue : notnull;
+            where TValue : IJsonSerializable<TValue>;
     }
 
 
@@ -991,7 +991,7 @@ public partial class LocalFile( FileInfo info, Encoding? encoding = null ) : Bas
         ///     <see cref="string"/>
         /// </returns>
         TValue AsJson<TValue>( in TelemetrySpan parent = default )
-            where TValue : notnull;
+            where TValue : IJsonSerializable<TValue>;
     }
 
 

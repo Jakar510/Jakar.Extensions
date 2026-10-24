@@ -30,7 +30,7 @@ public interface IResxString : IUniqueID<long>
 
 
 [Serializable]
-[method: JsonConstructor]
+[method: JsonCreator]
 public sealed class ResxString( string neutral,
                                 string arabic,
                                 string chinese,

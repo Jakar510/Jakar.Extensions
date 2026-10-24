@@ -3,7 +3,8 @@
 
 [Serializable]
 [DebuggerDisplay(nameof(DisplayName))]
-public sealed class Language : BaseClass, IEqualComparable<Language>
+[JsonModel]
+public sealed partial class Language : BaseClass, IEqualComparable<Language>
 {
     private readonly CultureInfo __culture;
 
@@ -136,8 +137,6 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
 
 [Serializable]
-[JsonConverter(typeof(CollectionAlertsJsonConverter<LanguageCollection, Language>))]
-[JsonModel(typeof(JakarExtensionsContext))]
 public partial class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
 {
     public LanguageCollection() : base(DEFAULT_CAPACITY) { }

@@ -5,373 +5,132 @@ namespace Jakar.Extensions;
 
 
 /// <summary>
-///     Typed get / add / update / delete helpers for <see cref="JsonNode"/> and <see cref="JsonElement"/> (AOT-plan §2.11).
-///     <para> Every member that takes a <c> T </c> has an overload with a <see cref="JsonTypeInfo{T}"/> and one without (resolved by <see cref="GetTypeInfo{T}"/>). </para>
+///     Typed get / add / update / delete helpers for <see cref="JNode"/> trees.
+///     <para> <c> TryGet </c> / <c> Get </c> / <c> GetOrDefault </c> / <c> As </c> read <c> [JsonModel] </c> types (<see cref="IJsonSerializable{TSelf}"/>) straight from the tree, with no intermediate text; <c> TryGetValue </c> reads scalars (<see cref="ISpanParsable{TSelf}"/>: numbers, dates, <see cref="Guid"/>, ...). </para>
 ///     <list type="table">
 ///         <listheader> <term> Case </term> <description> TryGet / Get / GetOrDefault </description> </listheader>
 ///         <item> <term> key/index missing, or not an object/array </term> <description> <see langword="false"/> / throws <see cref="KeyNotFoundException"/> / <c> defaultValue </c> </description> </item>
-///         <item> <term> present, JSON <c> null </c> </term> <description> <see langword="true"/> with <c> default </c> / <c> default </c> / <c> defaultValue </c> </description> </item>
-///         <item> <term> present, wrong shape </term> <description> <see langword="false"/> / throws <see cref="JsonException"/> / <c> defaultValue </c> </description> </item>
+///         <item> <term> present, JSON <c> null </c> </term> <description> <see langword="false"/> / <c> default </c> / <c> defaultValue </c> </description> </item>
+///         <item> <term> present, wrong shape </term> <description> <see langword="false"/> / throws <see cref="JsonReadException"/> / <c> defaultValue </c> </description> </item>
 ///     </list>
-///     <para> Writing a node that already has a parent clones it. <see cref="JsonElement"/> is immutable, so its write helpers take it by <see langword="ref"/> and replace it (O(n) each: convert to a <see cref="JsonObject"/> for several edits). Not thread-safe. </para>
+///     <para> Writing a node that already has a parent clones it. Not thread-safe. </para>
 /// </summary>
 public static partial class Json
 {
-    // ─── Reading: JsonNode ────────────────────────────────────────────────────
+    // ─── Reading ──────────────────────────────────────────────────────────────
 
 
 
-    extension( JsonNode? self )
+    extension( JNode? self )
     {
-        public bool Contains( string key ) => self is JsonObject obj && obj.ContainsKey(key);
+        public bool Contains( string key ) => self is JObjectNode obj && obj.ContainsKey(key);
 
 
-        public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value )
+        public bool TryGet<T>( string key, [NotNullWhen(true)] out T? value )
+            where T : IJsonSerializable<T>
         {
-            value = default;
-            if ( self is not JsonObject obj || !obj.TryGetPropertyValue(key, out JsonNode? node) ) { return false; }
+            if ( self is JObjectNode obj && obj.TryGetValue(key, out JNode? node) ) { return TryConvert(node, out value); }
 
-            return TryConvert(node, info, out value);
+            value = default;
+            return false;
         }
 
-        public bool TryGet<T>( string key, out T? value )
-            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value);
-
-
-        public bool TryGet<T>( int index, JsonTypeInfo<T> info, out T? value )
+        public bool TryGet<T>( int index, [NotNullWhen(true)] out T? value )
+            where T : IJsonSerializable<T>
         {
+            if ( self is JArrayNode array && (uint)index < (uint)array.Count ) { return TryConvert(array[index], out value); }
+
             value = default;
-            if ( self is not JsonArray array || (uint)index >= (uint)array.Count ) { return false; }
-
-            return TryConvert(array[index], info, out value);
+            return false;
         }
-
-        public bool TryGet<T>( int index, out T? value )
-            where T : notnull => self.TryGet(index, GetTypeInfo<T>(), out value);
 
 
         /// <exception cref="KeyNotFoundException"> <paramref name="key"/> is missing. </exception>
-        /// <exception cref="JsonException"> The value has the wrong shape for <typeparamref name="T"/>. </exception>
-        public T? Get<T>( string key, JsonTypeInfo<T> info )
-        {
-            if ( self is not JsonObject obj || !obj.TryGetPropertyValue(key, out JsonNode? node) ) { throw new KeyNotFoundException(key); }
-
-            return Convert(node, info);
-        }
-
+        /// <exception cref="JsonReadException"> The value has the wrong shape for <typeparamref name="T"/>. </exception>
         public T? Get<T>( string key )
-            where T : notnull => self.Get(key, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self is JObjectNode obj && obj.TryGetValue(key, out JNode? node)
+                                                  ? node is null
+                                                        ? default
+                                                        : node.ToModel<T>()
+                                                  : throw new KeyNotFoundException(key);
 
-
-        public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default ) => self.TryGet(key, info, out T? value) && value is not null
-                                                                                                        ? value
-                                                                                                        : defaultValue;
 
         public T? GetOrDefault<T>( string key, T? defaultValue = default )
-            where T : notnull => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue);
+            where T : IJsonSerializable<T> => self.TryGet(key, out T? value)
+                                                  ? value
+                                                  : defaultValue;
 
 
         /// <summary> The node itself as <typeparamref name="T"/>. </summary>
-        public T? As<T>( JsonTypeInfo<T> info ) => Convert(self, info);
-
+        /// <exception cref="JsonReadException"> The node has the wrong shape for <typeparamref name="T"/>. </exception>
         public T? As<T>()
-            where T : notnull => self.As(GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self is null
+                                                  ? default
+                                                  : self.ToModel<T>();
+
+
+        /// <summary> A scalar member (string, number or boolean) parsed as <typeparamref name="T"/>. </summary>
+        public bool TryGetValue<T>( string key, [NotNullWhen(true)] out T? value )
+            where T : ISpanParsable<T>
+        {
+            value = default;
+            if ( self is not JObjectNode obj || !obj.TryGetValue(key, out JNode? node) || node is not JValueNode scalar ) { return false; }
+
+            try
+            {
+                value = scalar.GetValue<T>()!;
+                return true;
+            }
+            catch ( Exception e ) when ( e is FormatException or OverflowException or InvalidOperationException )
+            {
+                value = default;
+                return false;
+            }
+        }
     }
 
 
 
-    // ─── Writing: JsonObject / JsonArray (in place) ───────────────────────────
+    // ─── Writing (in place) ───────────────────────────────────────────────────
 
 
 
-    extension( JsonObject self )
+    extension( JObjectNode self )
     {
         /// <summary> <see langword="false"/> if <paramref name="key"/> already exists. </summary>
-        public bool TryAdd<T>( string key, T value, JsonTypeInfo<T> info )
-        {
-            if ( self.ContainsKey(key) ) { return false; }
-
-            self[key] = ToNode(value, info);
-            return true;
-        }
-
         public bool TryAdd<T>( string key, T value )
-            where T : notnull => self.TryAdd(key, value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.TryAdd(key, JNode.FromModel(value));
 
 
         /// <summary> <see langword="false"/> if <paramref name="key"/> is missing. </summary>
-        public bool TryUpdate<T>( string key, T value, JsonTypeInfo<T> info )
+        public bool TryUpdate( string key, JNode? value )
         {
             if ( !self.ContainsKey(key) ) { return false; }
 
-            self[key] = ToNode(value, info);
+            self[key] = value.Adopt();
             return true;
         }
 
+        /// <inheritdoc cref="TryUpdate(JObjectNode, string, JNode?)"/>
         public bool TryUpdate<T>( string key, T value )
-            where T : notnull => self.TryUpdate(key, value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.TryUpdate(key, JNode.FromModel(value));
 
 
         /// <summary> Adds or updates. </summary>
-        public void Set<T>( string key, T value, JsonTypeInfo<T> info ) => self[key] = ToNode(value, info);
-
         public void Set<T>( string key, T value )
-            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
-
-
-        public bool Remove( string key, out JsonNode? removed ) => self.Remove(key, out removed, out _);
-
-        public bool Remove( string key, out JsonNode? removed, out bool existed )
-        {
-            existed = self.TryGetPropertyValue(key, out removed);
-            if ( !existed ) { return false; }
-
-            self.Remove(key);
-            removed = removed?.DeepClone();
-            return true;
-        }
-
-
-        public JsonElement ToJsonElement() => JsonSerializer.SerializeToElement(self, JakarExtensionsContext.Default.JsonObject);
+            where T : IJsonSerializable<T> => self[key] = JNode.FromModel(value);
     }
 
 
 
-    extension( JsonArray self )
+    extension( JArrayNode self )
     {
-        public void Add<T>( T      value, JsonTypeInfo<T> info )                        => self.Add(ToNode(value,           info));
-        public void Insert<T>( int index, T               value, JsonTypeInfo<T> info ) => self.Insert(index, ToNode(value, info));
-        public void Set<T>( int    index, T               value, JsonTypeInfo<T> info ) => self[index] = ToNode(value, info);
-
         public void Add<T>( T value )
-            where T : notnull => self.Add(value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.Add(JNode.FromModel(value));
         public void Insert<T>( int index, T value )
-            where T : notnull => self.Insert(index, value, GetTypeInfo<T>());
+            where T : IJsonSerializable<T> => self.Insert(index, JNode.FromModel(value));
         public void Set<T>( int index, T value )
-            where T : notnull => self.Set(index, value, GetTypeInfo<T>());
-    }
-
-
-
-    // ─── Reading: JsonElement ─────────────────────────────────────────────────
-
-
-
-    extension( ref readonly JsonElement self )
-    {
-        public bool Contains( string key, StringComparison comparison = StringComparison.Ordinal ) => self.TryFind(key, comparison, out _);
-
-
-        public bool TryGet<T>( string key, JsonTypeInfo<T> info, out T? value, StringComparison comparison = StringComparison.Ordinal )
-        {
-            value = default;
-            return self.TryFind(key, comparison, out JsonElement element) && TryConvert(in element, info, out value);
-        }
-
-        public bool TryGet<T>( string key, out T? value, StringComparison comparison = StringComparison.Ordinal )
-            where T : notnull => self.TryGet(key, GetTypeInfo<T>(), out value, comparison);
-
-
-        public bool TryGet<T>( int index, JsonTypeInfo<T> info, out T? value )
-        {
-            value = default;
-            if ( self.ValueKind != JsonValueKind.Array || (uint)index >= (uint)self.GetArrayLength() ) { return false; }
-
-            JsonElement element = self[index];
-            return element.TryConvert(info, out value);
-        }
-
-        public bool TryGet<T>( int index, out T? value )
-            where T : notnull => self.TryGet(index, GetTypeInfo<T>(), out value);
-
-
-        /// <exception cref="KeyNotFoundException"> <paramref name="key"/> is missing. </exception>
-        /// <exception cref="JsonException"> The value has the wrong shape for <typeparamref name="T"/>. </exception>
-        public T? Get<T>( string key, JsonTypeInfo<T> info, StringComparison comparison = StringComparison.Ordinal ) => self.TryFind(key, comparison, out JsonElement element)
-                                                                                                                            ? element.Deserialize(info)
-                                                                                                                            : throw new KeyNotFoundException(key);
-
-        public T? Get<T>( string key, StringComparison comparison = StringComparison.Ordinal )
-            where T : notnull => self.Get(key, GetTypeInfo<T>(), comparison);
-
-
-        public T? GetOrDefault<T>( string key, JsonTypeInfo<T> info, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal ) => self.TryGet(key, info, out T? value, comparison) && value is not null
-                                                                                                                                                                ? value
-                                                                                                                                                                : defaultValue;
-
-        public T? GetOrDefault<T>( string key, T? defaultValue = default, StringComparison comparison = StringComparison.Ordinal )
-            where T : notnull => self.GetOrDefault(key, GetTypeInfo<T>(), defaultValue, comparison);
-
-
-        public T? As<T>( JsonTypeInfo<T> info ) => self.Deserialize(info);
-        public T? As<T>()
-            where T : notnull => self.Deserialize(GetTypeInfo<T>());
-
-
-        public JsonObject? ToJsonObject() => self.ValueKind == JsonValueKind.Object
-                                                 ? JsonObject.Create(self, NodeOptions)
-                                                 : null;
-
-
-        /// <summary> Duplicate keys: the last one wins, as in deserialization. </summary>
-        private bool TryFind( string key, StringComparison comparison, out JsonElement value )
-        {
-            value = default;
-            if ( self.ValueKind != JsonValueKind.Object ) { return false; }
-
-            if ( comparison == StringComparison.Ordinal )
-            {
-                bool found = false;
-
-                foreach ( JsonProperty property in self.EnumerateObject() )
-                {
-                    if ( !property.NameEquals(key) ) { continue; }
-
-                    value = property.Value;
-                    found = true;
-                }
-
-                return found;
-            }
-
-            bool any = false;
-
-            foreach ( JsonProperty property in self.EnumerateObject() )
-            {
-                if ( !string.Equals(property.Name, key, comparison) ) { continue; }
-
-                value = property.Value;
-                any   = true;
-            }
-
-            return any;
-        }
-
-        /// <summary> <paramref name="removeAt"/> &lt; 0 appends <paramref name="append"/>; otherwise removes that index. </summary>
-        private JsonElement RewriteArray( int removeAt, JsonElement? append )
-        {
-            ArrayBufferWriter<byte> buffer = new(256);
-
-            using ( Utf8JsonWriter writer = new(buffer) )
-            {
-                writer.WriteStartArray();
-                int i = 0;
-
-                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-                foreach ( JsonElement item in self.EnumerateArray() )
-                {
-                    if ( i++ == removeAt ) { continue; }
-
-                    item.WriteTo(writer);
-                }
-
-                append?.WriteTo(writer);
-                writer.WriteEndArray();
-            }
-
-            return Parse(buffer.WrittenSpan);
-        }
-    }
-
-
-
-    // ─── Writing: JsonElement (immutable, so the receiver is replaced) ────────
-
-
-
-    extension( ref JsonElement self )
-    {
-        /// <summary> <see langword="false"/> if <paramref name="key"/> already exists, or the element isn't an object. </summary>
-        public bool TryAdd<T>( string key, T value, JsonTypeInfo<T> info )
-        {
-            if ( self.ValueKind != JsonValueKind.Object || self.Contains(key) ) { return false; }
-
-            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
-            return true;
-        }
-
-        /// <summary> <see langword="false"/> if <paramref name="key"/> is missing. Updates every duplicate. </summary>
-        public bool TryUpdate<T>( string key, T value, JsonTypeInfo<T> info )
-        {
-            if ( !self.Contains(key) ) { return false; }
-
-            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
-            return true;
-        }
-
-        /// <summary> Adds or updates. </summary>
-        /// <exception cref="InvalidOperationException"> The element isn't a JSON object. </exception>
-        public void Set<T>( string key, T value, JsonTypeInfo<T> info )
-        {
-            if ( self.ValueKind != JsonValueKind.Object ) { throw new InvalidOperationException($"Expected a JSON object, but found {self.ValueKind}."); }
-
-            self.RewriteObject(key, JsonSerializer.SerializeToElement(value, info));
-        }
-
-        /// <summary> Removes every occurrence of <paramref name="key"/>. </summary>
-        public bool Remove( string key )
-        {
-            if ( !self.Contains(key) ) { return false; }
-
-            self.RewriteObject(key, null);
-            return true;
-        }
-
-        /// <summary> Appends to a JSON array. </summary>
-        /// <exception cref="InvalidOperationException"> The element isn't a JSON array. </exception>
-        public void Add<T>( T value, JsonTypeInfo<T> info )
-        {
-            if ( self.ValueKind != JsonValueKind.Array ) { throw new InvalidOperationException($"Expected a JSON array, but found {self.ValueKind}."); }
-
-            self = self.RewriteArray(-1, JsonSerializer.SerializeToElement(value, info));
-        }
-
-        public bool RemoveAt( int index )
-        {
-            if ( self.ValueKind != JsonValueKind.Array || (uint)index >= (uint)self.GetArrayLength() ) { return false; }
-
-            self = self.RewriteArray(index, null);
-            return true;
-        }
-
-        public bool TryAdd<T>( string key, T value )
-            where T : notnull => self.TryAdd(key, value, GetTypeInfo<T>());
-        public bool TryUpdate<T>( string key, T value )
-            where T : notnull => self.TryUpdate(key, value, GetTypeInfo<T>());
-        public void Set<T>( string key, T value )
-            where T : notnull => self.Set(key, value, GetTypeInfo<T>());
-        public void Add<T>( T value )
-            where T : notnull => self.Add(value, GetTypeInfo<T>());
-
-
-        /// <summary> Copies every property except <paramref name="key"/>, then writes <paramref name="replacement"/> under it (or nothing, to remove). The result owns its memory. </summary>
-        private void RewriteObject( string key, JsonElement? replacement )
-        {
-            ArrayBufferWriter<byte> buffer = new(256);
-
-            using ( Utf8JsonWriter writer = new(buffer) )
-            {
-                writer.WriteStartObject();
-
-                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-                foreach ( JsonProperty property in self.EnumerateObject() )
-                {
-                    if ( property.NameEquals(key) ) { continue; }
-
-                    property.WriteTo(writer);
-                }
-
-                if ( replacement is { } value )
-                {
-                    writer.WritePropertyName(key);
-                    value.WriteTo(writer);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            self = Parse(buffer.WrittenSpan);
-        }
+            where T : IJsonSerializable<T> => self[index] = JNode.FromModel(value);
     }
 
 
@@ -379,54 +138,27 @@ public static partial class Json
     // ─── Internals ────────────────────────────────────────────────────────────
 
 
-    private static JsonElement Parse( ReadOnlySpan<byte> utf8 )
-    {
-        Utf8JsonReader reader = new(utf8);
-        return JsonElement.ParseValue(ref reader);
-    }
-
-
     /// <summary> Writing a node that already has a parent would throw; clone it instead. </summary>
-    private static JsonNode? ToNode<T>( T value, JsonTypeInfo<T> info ) => value switch
-                                                                           {
-                                                                               null                            => null,
-                                                                               JsonNode { Parent: not null } n => n.DeepClone(),
-                                                                               JsonNode n                      => n,
-                                                                               _                               => JsonSerializer.SerializeToNode(value, info)
-                                                                           };
+    private static JNode? Adopt( this JNode? node ) => node is { Parent: not null }
+                                                          ? node.DeepClone()
+                                                          : node;
 
 
-    private static T? Convert<T>( JsonNode? node, JsonTypeInfo<T> info ) => node is null
-                                                                                ? default
-                                                                                : node.Deserialize(info);
-
-
-    private static bool TryConvert<T>( JsonNode? node, JsonTypeInfo<T> info, out T? value )
+    private static bool TryConvert<T>( JNode? node, [NotNullWhen(true)] out T? value )
+        where T : IJsonSerializable<T>
     {
-        try
-        {
-            value = Convert(node, info);
-            return true;
-        }
-        catch ( Exception e ) when ( e is JsonException or FormatException or InvalidOperationException or NotSupportedException )
+        if ( node is null )
         {
             value = default;
             return false;
         }
-    }
 
-
-    private static bool TryConvert<T>( this ref readonly JsonElement element, JsonTypeInfo<T> info, out T? value )
-    {
         try
         {
-            value = element.ValueKind == JsonValueKind.Null
-                        ? default
-                        : element.Deserialize(info);
-
+            value = node.ToModel<T>()!;
             return true;
         }
-        catch ( Exception e ) when ( e is JsonException or FormatException or InvalidOperationException )
+        catch ( JsonReadException )
         {
             value = default;
             return false;

@@ -58,7 +58,7 @@ public interface IUserModel : IUserData<long>, IEscalateToUser, ICreatedByUser, 
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel(GenerateToString = JsonToggle.Off)] // UserAddress<TSelf, TID>.ToString() is the formatted address, which Address falls back to
 public sealed partial class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IAddress, IEqualComparable<UserAddress>
 {
     public UserAddress() : base() { }
@@ -104,11 +104,11 @@ public sealed partial class UserAddress : UserAddress<UserAddress, long>, IAddre
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel]
 public sealed partial class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IGroupModel, IEqualComparable<GroupModel>
 {
     /// <summary> For System.Text.Json: the other constructors take a differently typed <c> rights </c> or an interface. </summary>
-    [JsonConstructor] public GroupModel() : this(EMPTY, null, null, default, EMPTY) { }
+    [JsonCreator] public GroupModel() : this(EMPTY, null, null, default, EMPTY) { }
     public GroupModel( string                            nameOfGroup, long? ownerID, long? createdBy, long id, string rights ) : base(nameOfGroup, ownerID, createdBy, id, rights) { }
     public GroupModel( IGroupModel<long>                 model ) : base(model) { }
     public static   GroupModel Create( IGroupModel<long> model )            => new(model);
@@ -125,11 +125,11 @@ public sealed partial class GroupModel : GroupModel<GroupModel, long>, IGroupMod
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel]
 public sealed partial class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IRoleModel, IEqualComparable<RoleModel>
 {
     /// <summary> For System.Text.Json: the other constructors take a differently typed <c> rights </c> or an interface. </summary>
-    [JsonConstructor] public RoleModel() : this(EMPTY, EMPTY, default) { }
+    [JsonCreator] public RoleModel() : this(EMPTY, EMPTY, default) { }
     public RoleModel( string                           nameOfRole, string rights, long id ) : base(nameOfRole, rights, id) { }
     public RoleModel( IRoleModel<long>                 model ) : base(model) { }
     public static   RoleModel Create( IRoleModel<long> model )            => new(model);
@@ -147,7 +147,7 @@ public sealed partial class RoleModel : RoleModel<RoleModel, long>, IRoleModel<R
 
 [Serializable]
 [method: SetsRequiredMembers]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel]
 public sealed partial class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IFileData, IEqualComparable<FileData>
 {
     [SetsRequiredMembers] public FileData( IFileData<long, FileMetaData> file ) : this(file, file.MetaData) { }
@@ -169,8 +169,8 @@ public sealed partial class FileData( long fileSize, string hash, string payload
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
-public sealed partial class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation, IJsonModel<CurrentLocation>
+[JsonModel]
+public sealed partial class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation
 {
     public       double?           Accuracy                { get; init; }
     public       double?           Altitude                { get; init; }
@@ -326,7 +326,7 @@ public sealed partial class CurrentLocation : BaseClass<CurrentLocation>, ICurre
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel]
 public sealed partial class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public UserModel() : base() { }
@@ -362,7 +362,7 @@ public sealed partial class UserModel : UserModel<UserModel, long, UserAddress, 
 
 
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
+[JsonModel]
 public sealed partial class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public CreateUserModel() : base() { }
@@ -425,8 +425,8 @@ public class UserDevice : DeviceInformation, IUserDevice
 
 /// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 [Serializable]
-[JsonModel(typeof(UserLongJsonContext))]
-public sealed partial class SessionToken : BaseClass<SessionToken>, IValidator, ISessionID, IJsonModel<SessionToken>
+[JsonModel]
+public sealed partial class SessionToken : BaseClass<SessionToken>, IValidator, ISessionID
 {
     public string     AccessToken  { get; set; } = EMPTY;
     public string     DeviceID     { get; set; } = EMPTY;
@@ -454,11 +454,11 @@ public sealed partial class SessionToken : BaseClass<SessionToken>, IValidator, 
 
 
 [Serializable]
-[method: JsonConstructor]
-[JsonModel(typeof(UserLongJsonContext))]
-public sealed partial class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>, IEqualComparable<UserLoginRequest>
+[method: JsonCreator]
+[JsonModel]
+public sealed partial class UserLoginRequest( string userLogin, string userPassword, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userLogin, userPassword, data), IEqualComparable<UserLoginRequest>
 {
-    [JsonIgnore] public override bool IsValid => this.IsValid();
+    [JsonSkip] public override bool IsValid => this.IsValid();
 
 
     public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserLogin, request.UserPassword, data) { }
