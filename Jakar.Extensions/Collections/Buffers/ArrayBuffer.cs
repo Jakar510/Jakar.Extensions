@@ -21,10 +21,15 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
     private         int __index;
 
 
-    public          int                  Length { get; internal set; } = 0;
-    public readonly Memory<TValue>       Memory => new(__array, 0, Length);
-    public readonly Span<TValue>         Span   => new(__array, 0, Capacity);
+    public          int            Length { get; internal set; } = 0;
+    public readonly Memory<TValue> Memory => new(__array, 0, Length);
+
+    /// <summary> The whole backing storage (<see cref="Capacity"/> elements), like <see cref="Buffer{TValue}.Span"/>; <see cref="Add(TValue)"/> writes into it. Use <see cref="Values"/> for the <see cref="Length"/> written elements. </summary>
+    public readonly Span<TValue> Span => new(__array, 0, Capacity);
+
+    /// <summary> The written elements (<see cref="Length"/> elements). </summary>
     public readonly ReadOnlySpan<TValue> Values => Span[..Length];
+
     public ref readonly TValue this[ int index ] => ref Values[index];
     int IReadOnlyCollection<TValue>.Count => Length;
 
@@ -75,9 +80,8 @@ public struct ArrayBuffer<TValue>( int capacity ) : IReadOnlyCollection<TValue>,
         }
 
 
+        // The count is unknown, so TryCopyTo can't be used: it may succeed after copying fewer items than the span holds and doesn't report how many.
         Buffer<TValue> buffer = new(64);
-        if ( enumerator.TryCopyTo(buffer.Span, 0) ) { return new ArrayBuffer<TValue>(buffer.Span); }
-
         while ( enumerator.TryGetNext(out TValue item) ) { buffer.Add(item); }
 
         return buffer.ToArrayBuffer();
