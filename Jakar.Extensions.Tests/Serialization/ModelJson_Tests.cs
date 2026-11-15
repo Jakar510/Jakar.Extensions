@@ -1,9 +1,8 @@
-// Jakar.Extensions :: Jakar.Extensions.Tests
+﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 // 10/02/2026
 
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,27 +63,6 @@ public sealed class ModelJson_Tests
     }
 
 
-    [Test] public void LoginRequestValue_CarriesAnyJson()
-    {
-        LoginRequestValue request = new("tyler", "hunter2", "{\"Token\":\"abc\",\"Ttl\":30}".FromJson());
-        LoginRequestValue back    = LoginRequestValue.FromJson(request.ToJson());
-
-        Assert.That(back.UserPassword,                             Is.EqualTo("hunter2"));
-        Assert.That(back.Data.TryGetValue("Token", out string? token), Is.True);
-        Assert.That(token,                                         Is.EqualTo("abc"));
-        Assert.That(new LoginRequestValue().ToJson(),              Does.Contain("\"Data\" : null"));
-    }
-
-
-    [Test] public void LoginRequest_CopyConstructors_KeepThePassword()
-    {
-        LoginRequest        source  = new("tyler", "hunter2");
-        LoginRequestVersion version = new(new LoginRequestVersion(source, AppVersion.Default));
-        Assert.That(version.UserPassword,                                                                    Is.EqualTo("hunter2"));
-        Assert.That(version.Equals((object)new LoginRequestVersion("tyler", "hunter2", AppVersion.Default)), Is.True);
-    }
-
-
     [Test] public void Email_SerializesAsAString_AndTryParseValidates()
     {
         Assert.That(Json.Serialize<Email, JsonParsableConverter<Email>>(new Email("a@b.test")),     Is.EqualTo("\"a@b.test\""));
@@ -141,17 +119,6 @@ public sealed class ModelJson_Tests
     }
 
 
-    [Test] public void UserModel_ObservableProperties_RoundTrip()
-    {
-        UserGuid.UserModel user = GoldenSamples.User();
-        UserGuid.UserModel back = UserGuid.UserModel.FromJson(user.ToJson());
-
-        Assert.That(back.Addresses.Single().City,     Is.EqualTo("Springfield"));
-        Assert.That(back.Groups.Single().NameOfGroup, Is.EqualTo("Admins"));
-        Assert.That(back.Roles.Single().NameOfRole,   Is.EqualTo("Admin"));
-    }
-
-
     [Test] public void ConcurrentObservableCollection_ToJson_IsAConsistentSnapshot()
     {
         ConcurrentObservableCollection<int> collection = new(Enumerable.Range(0, 1000).ToArray());
@@ -179,19 +146,6 @@ public sealed class ModelJson_Tests
             stop.Cancel();
             writer.Wait();
         }
-    }
-
-
-    // ─── HTTP bodies: runtime type ────────────────────────────────────────────
-
-    [Test] public async Task JsonBody_UsesTheRuntimeType()
-    {
-        BaseClass              model   = GoldenSamples.Alert();
-        using ByteArrayContent content = WebRequester.CreateJsonContentOfRuntimeType(model);
-        string                 json    = await content.ReadAsStringAsync();
-
-        Assert.That(json, Does.Contain("\"Title\" : \"Heads up\""), "serialized as Alert, not as BaseClass");
-        Assert.That(json, Does.Not.Contain("\n"),                   "compact");
     }
 
 

@@ -1,9 +1,4 @@
-﻿using Serilog.Core;
-using Serilog.Events;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public interface IDeviceID
@@ -60,13 +55,12 @@ public interface IUserDevice<out TID> : IDeviceInformation, IUniqueID<TID>
 
 
 [Serializable]
-public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnricher
+public class DeviceInformation : BaseClass, IDeviceInformation
 {
     protected AppVersion?       _appVersion;
     protected DeviceCategory    _category = DeviceCategory.Unknown;
     protected DevicePlatform    _platform = DevicePlatform.Unknown;
     protected DeviceTypes       _type;
-    protected LogEventProperty? _property;
     protected string            _deviceID = EMPTY;
     protected string?           _deviceName;
     protected string?           _ip;
@@ -117,23 +111,6 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
         PackageName  = device.PackageName;
     }
     public void SetDeviceID( string id ) => DeviceID = id;
-
-
-    public virtual LogEventProperty ToProperty() =>
-        _property ??= new LogEventProperty(nameof(DeviceInformation),
-                                           new StructureValue([
-                                                                  Enricher.GetProperty(Category,     nameof(Category)),
-                                                                  Enricher.GetProperty(DeviceID,     nameof(DeviceID)),
-                                                                  Enricher.GetProperty(DeviceName,   nameof(DeviceName)),
-                                                                  Enricher.GetProperty(Manufacturer, nameof(Manufacturer)),
-                                                                  Enricher.GetProperty(Model,        nameof(Model)),
-                                                                  Enricher.GetProperty(OsVersion,    nameof(OsVersion)),
-                                                                  Enricher.GetProperty(PackageName,  nameof(PackageName)),
-                                                                  Enricher.GetProperty(Platform,     nameof(Platform)),
-                                                                  Enricher.GetProperty(Type,         nameof(Type)),
-                                                                  Enricher.GetProperty(Version,      nameof(Version))
-                                                              ]));
-    public void Enrich( LogEvent log, ILogEventPropertyFactory propertyFactory ) => log.AddPropertyIfAbsent(ToProperty());
 
 
     public static bool operator ==( DeviceInformation? left, DeviceInformation? right ) => Equals(left, right);

@@ -26,7 +26,6 @@ global using Bogus;
 global using Experiments;
 global using Experiments.Benchmarks;
 global using Jakar.Extensions;
-global using Jakar.Extensions.UserGuid;
 global using JetBrains.Annotations;
 global using Newtonsoft.Json;
 global using static Jakar.Extensions.Constants;

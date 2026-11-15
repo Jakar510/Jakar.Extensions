@@ -5,11 +5,3 @@ BenchmarkSwitcher.FromAssembly(typeof(BenchmarkConfig).Assembly)
                  .Run(args is ["--bench", ..]
                           ? args[1..]
                           : args);
-
-
-// SharedUserModel model = new();
-// Console.WriteLine(model.ToJson());                     // [JsonModel]: Jakar.Json
-// Console.WriteLine(Jakar.Json.JsonCodec.ToJson(model)); // [GenerateJson] part: Jakar.Json
-
-
-// Console.WriteLine(SharedUserModel.FromJson(Jakar.Json.JsonCodec.ToJson(model)).UserID == Jakar.Json.JsonCodec.FromJson<SharedUserModel>(model.ToJson()).UserID); // each reads the other's output

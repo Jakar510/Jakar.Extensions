@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/29/2025  15:01
 
-using Serilog.Events;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -20,10 +16,6 @@ public readonly partial struct AppInformation( AppVersion version, Guid appID, s
     public readonly        Guid           AppID       = appID;
     public readonly        string         AppName     = appName;
     public readonly        string?        PackageName = packageName;
-
-
-    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Version, nameof(Version)), Enricher.GetProperty(AppID, nameof(AppID)), Enricher.GetProperty(AppName, nameof(AppName)), Enricher.GetProperty(PackageName, nameof(PackageName))]);
-    public LogEventProperty GetProperty()       => new(nameof(AppInformation), GetStructureValue());
 
 
     public int CompareTo( object? other ) => other is AppInformation app

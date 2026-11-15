@@ -1,6 +1,6 @@
 # Jakar.Extensions
 
-Extensions and helpers for .NET 10: observable and concurrent collections, HTTP, files, security, async LINQ, span and hashing helpers, users and logins, and view models. It is trim and Native AOT compatible. **Contributions and ideas are welcome.**
+Extensions and helpers for .NET 10: observable and concurrent collections, files, security, async LINQ, span and hashing helpers, JSON models, diagnostics and view models. It is trim and Native AOT compatible. **Contributions and ideas are welcome.**
 
 ## Installation
 
@@ -10,6 +10,18 @@ dotnet add package Jakar.Extensions
 
 It brings in [Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) (JSON, including the `[JsonModel]` source generator) and [Jakar.Spans](https://www.nuget.org/packages/Jakar.Spans/) (`ValueStringBuilder` and other span primitives).
 
+## Related packages
+
+Since 10.12 these live in their own packages. They depend on Jakar.Extensions and keep the `Jakar.Extensions` namespace, so code that used them only needs the package reference (and a recompile):
+
+| Package | What it is |
+|---|---|
+| [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`: RFC 7807-style errors and results. |
+| [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, networking exceptions. Depends on Jakar.ErrorOr. |
+| [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | `UserModel`, `GroupModel`, `RoleModel`, `UserAddress`, `LoginRequest*`, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `EmailBuilder`. |
+| [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging: `AppLoggerOptions`, `FileLoggerProvider`, `Enricher`, `OpenTelemetryActivityEnricher`, `ScreenShot`, and the Serilog properties of `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation`. |
+
+`Status`, `Statuses`, the MIME types, `StringTags`, `IErrorDetails`, `IErrorTitles`, `None`, `Email`, `IUserName` and `SelfLogger` stay in Jakar.Extensions.
 ## JSON
 
 Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) only**: source-generated readers and writers, no System.Text.Json, no Newtonsoft.Json and no reflection.
@@ -28,7 +40,7 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
   ```
 
 - **Generic helpers:** `Json.Serialize(value)` / `json.FromJson<T>()` for models; `Json.Serialize<T, TConverter>` / `Json.Deserialize<T, TConverter>` for any other shape (e.g. `JsonArrayConverter<string, JsonStringConverter>`).
-- **Root-level arrays:** `Json.Serialize(invoices)`, `JsonCodec.FromJsonList<Invoice>(json)`, `WebHandler.AsJsonList<Invoice>(token)`.
+- **Root-level arrays:** `Json.Serialize(invoices)`, `JsonCodec.FromJsonList<Invoice>(json)` (and `WebHandler.AsJsonList<Invoice>(token)` in Jakar.Http).
 - **Untyped JSON** is a `JNode` tree (`JObjectNode`, `JArrayNode`, `JValueNode`): `json.FromJson()`, and the helpers `Get<T>`, `TryGet<T>`, `GetOrDefault<T>`, `As<T>`, `TryGetValue<T>`, `TryAdd`, `TryUpdate`, `Set`.
 - **Older JSON still reads.** The library's models accept JSON written by 10.10 and earlier: case-insensitive property names, numbers in strings, comments and trailing commas (`[assembly: JsonDefaults]`). Declare the same `JsonDefaults` in your assembly for your own models.
 
@@ -43,6 +55,14 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 - Observable collections implement `IJsonCollection<TSelf, T>`: as `[JsonModel]` members they write their unfiltered contents and read in bulk. As a root, `ToJson()` / `FromJson(json)` need `[JsonModel]` elements; use `ObservableJson.ToJson<TSelf, TValue, TConverter>` for others.
 - `LocalFile` / `LocalDirectory` serialize as `{"FullPath", "FileEncoding"}` / `{"FullPath"}`; a plain path string no longer reads.
 - `WebRequester`: `CreateJsonContent` / `CreateJsonArrayContent` take Jakar.Json writer options; `WebHandler.AsJson<T>`, `AsJsonArray<T>` and `AsJsonList<T>` take no `JsonTypeInfo`.
+
+### Migrating from 10.11
+
+- Add the package for the types you use (table above): Jakar.ErrorOr, Jakar.Http, Jakar.Users or Jakar.Logging. It's a binary break: recompile against 10.12.
+- Jakar.Extensions no longer depends on Serilog, `Microsoft.IdentityModel.*` or `Microsoft.Extensions.Http`; they come with Jakar.Logging, Jakar.Users and Jakar.Http.
+- `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation` lost their Serilog members: Jakar.Logging adds `GetProperty()` / `ToProperty()` back as extension members. `DeviceInformation` is no longer an `ILogEventEnricher`: use `device.ToEnricher()` (`DeviceInformationEnricher`).
+- `Error.TryCreate(WebResponse<T>, ...)` is in Jakar.Http; `global using static Jakar.Extensions.WebRequester` / `Claims` no longer come from Jakar.Extensions.
+
 ## Base classes
 
 - `BaseClass` / `BaseClass<TSelf>`: a model base with property change notifications (`INotifyPropertyChanging`, `INotifyPropertyChanged`), JSON extension data (`AdditionalData`), and equality and comparison for `TSelf`.
@@ -54,12 +74,10 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 - **Queues and stacks:** `ConcurrentDeque<T>`, `FixedSizedDeque<T>`, `FixedSizedQueue<T>`, `LockFreeDeque<T>`, `LockFreeStack<T>`.
 - **Other:** `ArrayBuffer<T>` (a growable buffer struct), `AsyncChannel<T>`, `ValueLinkedList<T>`, `MultiDict<TKey>`.
 
-## HTTP
+## Status codes and MIME types
 
-- `WebRequester`: a wrapper around `HttpClient` that builds requests against a base URI (`IHostInfo`), with retries (`RetryPolicy`).
-- `WebHandler`: one request. Every `As*` call sends it, retries per the requester's policy, and returns a `WebResponse<T>`.
-- `WebResponse<T>`: the result: status, value or error details.
-- `Status`, `MimeType`, `MimeTypeNames`: HTTP status codes, MIME types and their names.
+- `Status`, `Statuses`: HTTP status codes, their titles (`IErrorTitles`) and the status for an exception.
+- `MimeType`, `MimeTypeNames`: MIME types, their names and file extensions.
 
 ## Files
 
@@ -78,18 +96,17 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 
 ## Errors
 
-- `ErrorOrResult<T>` and `Error`: a value or errors (inspired by [ErrorOr](https://github.com/amantinband/error-or)).
 - `ExceptionDetails`: exceptions as serializable data.
+- `StringTags`, `IErrorDetails`: the details shared with Jakar.ErrorOr's `Error` (inspired by [ErrorOr](https://github.com/amantinband/error-or)).
 
 ## Miscellaneous
 
 - `Validate`: string and state validation.
 - `Tasks`: task helpers such as `SafeFireAndForget`.
 - `Types`: type inspection (`IsBuiltInType`, `IsNullableType`, `IsCollection`, `IsDictionary`, `IsList`, `IsSet`, `HasInterface`, `TryGetUnderlyingEnumType`, `MethodName`, `MethodSignature`, ...).
-- `LoginRequest`, `UserModel`, `JwtParser`: users, logins and tokens.
 - `AppVersion`: application versions with formatting and parsing.
 - `BaseViewModel` and the `Command` / `IAsyncCommand` types: view models.
-- `TelemetrySource`, `StopWatch`: diagnostics.
+- `TelemetrySource`, `StopWatch`, `SelfLogger`: diagnostics.
 
 ## Method lists
 

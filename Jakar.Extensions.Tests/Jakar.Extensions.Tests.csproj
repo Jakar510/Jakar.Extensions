@@ -15,11 +15,6 @@
 	  <LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <Compile Remove="Http\Requests\**" />
-	  <EmbeddedResource Remove="Http\Requests\**" />
-	  <None Remove="Http\Requests\**" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="Golden\v10\*.json" CopyToOutputDirectory="PreserveNewest" />

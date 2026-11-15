@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/29/2025  14:44
 
-using Serilog.Events;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -22,14 +18,6 @@ public readonly partial struct GcInfo( long totalMemory, long totalAllocatedByte
 
     public GcInfo() : this(GC.GetTotalMemory(false), GC.GetTotalAllocatedBytes(), GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalPauseDuration(), GC.GetGCMemoryInfo()) { }
     public static GcInfo Create() => new();
-    public LogEventProperty GetProperty() => new(nameof(GcInfo),
-                                                 new StructureValue([
-                                                                        Enricher.GetProperty(TotalMemory,                    nameof(TotalMemory)),
-                                                                        Enricher.GetProperty(TotalPauseDuration,             nameof(TotalPauseDuration)),
-                                                                        Enricher.GetProperty(TotalAllocatedBytes,            nameof(TotalAllocatedBytes)),
-                                                                        Enricher.GetProperty(AllocatedBytesForCurrentThread, nameof(AllocatedBytesForCurrentThread)),
-                                                                        MemoryInfo.GetProperty(nameof(MemoryInfo))
-                                                                    ]));
 
 
     public int CompareTo( object? other ) => other is GcInfo app
@@ -157,25 +145,6 @@ public readonly partial struct GcMemoryInformation( bool                      co
     public static implicit operator GcMemoryInformation( GCMemoryInfo info ) => new(in info);
 
 
-    public StructureValue GetProperty() =>
-        new([
-                Enricher.GetProperty(Compacted,                    nameof(Compacted)),
-                Enricher.GetProperty(HighMemoryLoadThresholdBytes, nameof(HighMemoryLoadThresholdBytes)),
-                Enricher.GetProperty(MemoryLoadBytes,              nameof(MemoryLoadBytes)),
-                Enricher.GetProperty(TotalAvailableMemoryBytes,    nameof(TotalAvailableMemoryBytes)),
-                Enricher.GetProperty(HeapSizeBytes,                nameof(HeapSizeBytes)),
-                Enricher.GetProperty(FragmentedBytes,              nameof(FragmentedBytes)),
-                Enricher.GetProperty(Generation,                   nameof(Generation)),
-                Enricher.GetProperty(Concurrent,                   nameof(Concurrent)),
-                Enricher.GetProperty(TotalCommittedBytes,          nameof(TotalCommittedBytes)),
-                Enricher.GetProperty(PromotedBytes,                nameof(PromotedBytes)),
-                Enricher.GetProperty(PinnedObjectsCount,           nameof(PinnedObjectsCount)),
-                Enricher.GetProperty(FinalizationPendingCount,     nameof(FinalizationPendingCount)),
-                Enricher.GetProperty(PauseTimePercentage,          nameof(PauseTimePercentage)),
-                Enricher.GetProperty(GenerationInfo,               nameof(GenerationInfo)),
-                Enricher.GetProperty(PauseDurations,               nameof(PauseDurations))
-            ]);
-    public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
 
     public bool Equals( GcMemoryInformation other ) => HighMemoryLoadThresholdBytes == other.HighMemoryLoadThresholdBytes &&
@@ -244,8 +213,6 @@ public readonly partial struct GcGenerationInformation( long fragmentationAfterB
     public static implicit operator GcGenerationInformation( GCGenerationInfo info ) => new(in info);
 
 
-    public StructureValue   GetProperty()              => new([Enricher.GetProperty(SizeBeforeBytes, nameof(SizeBeforeBytes)), Enricher.GetProperty(FragmentationBeforeBytes, nameof(FragmentationBeforeBytes)), Enricher.GetProperty(SizeAfterBytes, nameof(SizeAfterBytes)), Enricher.GetProperty(FragmentationAfterBytes, nameof(FragmentationAfterBytes))]);
-    public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
     public          bool Equals( GcGenerationInformation other )                                    => SizeBeforeBytes == other.SizeBeforeBytes && FragmentationBeforeBytes == other.FragmentationBeforeBytes && SizeAfterBytes == other.SizeAfterBytes && FragmentationAfterBytes == other.FragmentationAfterBytes;
     public override bool Equals( object?                 obj )                                      => obj is GcGenerationInformation other     && Equals(other);
