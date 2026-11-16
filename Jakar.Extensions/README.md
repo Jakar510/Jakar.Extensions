@@ -17,12 +17,12 @@ Since 10.12 these live in their own packages. They depend on Jakar.Extensions an
 | Package | What it is |
 |---|---|
 | [Jakar.Files](https://github.com/Jakar510/Jakar.Files) | `LocalFile`, `LocalDirectory`, `LocalFileWatcher`, `TempFile`, `FilePaths`, `FileData`/`FileMetaData`, `EmbeddedResources<T>`, `IniConfig`, `PreferenceFile<TSelf>`, `AppPreference`, plus `IAppInfo`, `AppSettings`, `LanguageApi` and the `LocalFile` / `EmbeddedResources` overloads of `IDataProtector`, `DataProtector` and `PasswordRequirements` (as extension members). |
-| [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`: RFC 7807-style errors and results. |
+| [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`: RFC 7807-style errors and results. Since 10.12.1 it is a dependency of Jakar.Extensions (it depends on Jakar.Json only), so it comes with this package. |
 | [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, networking exceptions. Depends on Jakar.ErrorOr and Jakar.Files. |
 | [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | `UserModel`, `GroupModel`, `RoleModel`, `UserAddress`, `LoginRequest*`, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `EmailBuilder`. Depends on Jakar.Files. |
 | [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging: `AppLoggerOptions`, `FileLoggerProvider`, `Enricher`, `OpenTelemetryActivityEnricher`, `ScreenShot`, and the Serilog properties of `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation`. Depends on Jakar.Files. |
 
-`Status`, `Statuses`, the MIME types, `StringTags`, `IErrorDetails`, `IErrorTitles`, `None`, `Email`, `IUserName` and `SelfLogger` stay in Jakar.Extensions.
+`Pair`, `StringTags`, `Status`, `Statuses`, `IErrorDetails`, `IErrorTitles`/`ErrorTitles` and `NullAsEmptyArrayConverter` live in Jakar.ErrorOr since 10.12.1 and are type-forwarded from here (no source or binary change). The MIME types, `None`, `Email`, `IUserName` and `SelfLogger` stay in Jakar.Extensions.
 ## JSON
 
 Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) only**: source-generated readers and writers, no System.Text.Json, no Newtonsoft.Json and no reflection.
@@ -90,7 +90,7 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 ## Errors
 
 - `ExceptionDetails`: exceptions as serializable data.
-- `StringTags`, `IErrorDetails`: the details shared with Jakar.ErrorOr's `Error` (inspired by [ErrorOr](https://github.com/amantinband/error-or)).
+- `StringTags`, `IErrorDetails` (from Jakar.ErrorOr): the details of an `Error` (inspired by [ErrorOr](https://github.com/amantinband/error-or)).
 
 ## Miscellaneous
 

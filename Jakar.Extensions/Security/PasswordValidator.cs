@@ -92,6 +92,32 @@ public readonly ref struct PasswordValidator
         public readonly bool LowerPassed   = lowerPassed;
         public readonly bool UpperPassed   = upperPassed;
         public readonly bool BlockedPassed = blockedPassed;
+
+        public StringTags ToStringTags()
+        {
+            using IMemoryOwner<string> owner  = MemoryPool<string>.Shared.Rent(10);
+            Span<string>               errors = owner.Memory.Span;
+            int                        count  = 0;
+            IErrorTitles               titles = IErrorTitles.Current;
+            if ( LengthPassed ) { errors[count++] = titles.BlockedPassed; }
+
+            if ( MustBeTrimmed ) { errors[count++] = titles.MustBeTrimmed; }
+
+            if ( SpecialPassed ) { errors[count++] = titles.SpecialPassed; }
+
+            if ( NumericPassed ) { errors[count++] = titles.NumericPassed; }
+
+            if ( LowerPassed ) { errors[count++] = titles.LowerPassed; }
+
+            if ( UpperPassed ) { errors[count++] = titles.UpperPassed; }
+
+            if ( BlockedPassed ) { errors[count] = titles.BlockedPassed; }
+
+            string[] values = [.. errors[..count]];
+            return values;
+        }
+
+
         public static   bool operator true( Results  x ) => x.HasPassed;
         public static   bool operator false( Results x ) => !x.HasPassed;
     }

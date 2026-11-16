@@ -19,16 +19,22 @@ Jakar.Extensions builds on two packages that have their own repositories:
 
 They're referenced as NuGet packages. Until they're on nuget.org, `nuget.config` also reads the local feed `W:\WorkSpace\LocalNuGet`.
 
+Jakar.ErrorOr sits below Jakar.Extensions (since 10.12.1): it depends on Jakar.Json only, owns `Pair`, `StringTags`, `Status`, `Statuses`, `IErrorDetails` and `IErrorTitles`/`ErrorTitles`, and Jakar.Extensions references it and type-forwards those types.
+
+| Package | Repository | What it is | Depends on |
+|---|---|---|---|
+| Jakar.ErrorOr 10.1.0 | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`, and the types they're built on (`Pair`, `StringTags`, `Status`). | Jakar.Json |
+
 These packages were split out of Jakar.Extensions in 10.12 and build on it, each in its own repository (the types keep the `Jakar.Extensions` namespace):
 
 | Package | Repository | What it is | Depends on |
 |---|---|---|---|
-| Jakar.Files 10.1.0 | [Jakar510/Jakar.Files](https://github.com/Jakar510/Jakar.Files) | Files, directories, watchers, embedded resources, INI and preference files. | Jakar.Extensions | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`. | Jakar.Extensions |
+| Jakar.Files 10.1.0 | [Jakar510/Jakar.Files](https://github.com/Jakar510/Jakar.Files) | Files, directories, watchers, embedded resources, INI and preference files. | Jakar.Extensions |
 | Jakar.Http 10.1.0 | [Jakar510/Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`. | Jakar.Extensions, Jakar.ErrorOr, Jakar.Files |
 | Jakar.Users 10.1.0 | [Jakar510/Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User, group, role and address models, logins, claims, permissions, JWT parsing. | Jakar.Extensions, Jakar.Files |
 | Jakar.Logging 10.1.0 | [Jakar510/Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging, OpenTelemetry activity enrichment. | Jakar.Extensions, Jakar.Files |
 
-Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.Json.AspNetCore and Jakar.Extensions → Jakar.Files and Jakar.ErrorOr → Jakar.Users, Jakar.Logging and Jakar.Http**.
+Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.ErrorOr and Jakar.Json.AspNetCore → Jakar.Extensions → Jakar.Files → Jakar.Users, Jakar.Logging and Jakar.Http**.
 
 ## Versioning
 
@@ -41,7 +47,7 @@ Every package version is **`<.NET major>.<library major>.<library minor>`**:
 | Library minor | New features and fixes that don't break existing code. | 10.10.**0** → 10.10.**1** |
 
 - A new package starts at `<.NET major>.1.0`: Jakar.Spans, Jakar.Json, Jakar.Json.AspNetCore, Jakar.Files, Jakar.ErrorOr, Jakar.Http, Jakar.Users and Jakar.Logging start at 10.1.0.
-- Packages released together depend on each other at the versions they were released with, as a minimum: Jakar.Extensions 10.12.0 needs Jakar.Json 10.3.0 or later, and Jakar.ErrorOr 10.1.0 needs Jakar.Extensions 10.12.0 or later.
+- Packages released together depend on each other at the versions they were released with, as a minimum: Jakar.Extensions 10.12.1 needs Jakar.Json 10.3.0 and Jakar.ErrorOr 10.1.0 or later, and Jakar.Files 10.1.0 needs Jakar.Extensions 10.12.1 or later. Use Jakar.Extensions 10.12.1 or later with Jakar.ErrorOr: 10.12.0 defines `Pair`, `StringTags` and `Status` itself.
 - Jakar.Extensions.Blazor 9.1.0 and Jakar.Extensions.Blazor.Syncfusion 9.0.0 predate this scheme; their next releases are 10.1.0.
 
 ## Repository
