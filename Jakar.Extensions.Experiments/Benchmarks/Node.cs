@@ -69,55 +69,13 @@ public sealed partial record Node : BaseRecord<Node>
 [JsonModel]
 public sealed partial class TestJson : BaseClass<TestJson>
 {
-    internal static readonly TestJson Debug = new()
-                                              {
-                                                  Nodes  = [.. Node.NodeFaker.Instance.Generate(5)],
-                                                  Errors = Errors.Create(Error.Accepted(), Error.BadRequest()),
-                                                  Files  = [new FileData(0, "Hash", "payload", new FileMetaData("file.dat", MimeTypeNames.Application.BINARY, MimeType.Binary))],
-                                                  Location = new CurrentLocation
-                                                             {
-                                                                 Altitude         = Random.Shared.NextDouble() * 20000,
-                                                                 Latitude         = Random.Shared.NextDouble() * 20000,
-                                                                 Longitude        = Random.Shared.NextDouble() * 20000,
-                                                                 Accuracy         = Random.Shared.NextDouble() * 100,
-                                                                 VerticalAccuracy = Random.Shared.NextDouble() * 100,
-                                                                 Speed            = Random.Shared.NextDouble() * 100,
-                                                                 Course           = Random.Shared.NextDouble() * 360,
-                                                                 InstanceID       = Guid.NewGuid(),
-                                                                 ID               = Guid.NewGuid(),
-                                                                 Timestamp        = DateTimeOffset.UtcNow
-                                                             },
-                                                  CreateUser = new CreateUserModel
-                                                               {
-                                                                   ID        = Guid.NewGuid(),
-                                                                   UserID    = Guid.NewGuid(),
-                                                                   UserName  = "Jonny",
-                                                                   FirstName = "John",
-                                                                   LastName  = "Doe",
-                                                                   Email     = "john.doe@mail.com"
-                                                               },
-                                                  User = new UserModel
-                                                         {
-                                                             ID        = Guid.NewGuid(),
-                                                             UserID    = Guid.NewGuid(),
-                                                             UserName  = "Jonny",
-                                                             FirstName = "John",
-                                                             LastName  = "Doe",
-                                                             Email     = "john.doe@mail.com"
-                                                         }
-                                              };
-    public Email Email         = new("bite@me.com");
-    public Error MutableError  = Error.InternalServerError();
-    public Error ReadOnlyError = Error.InternalServerError();
-    public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
+    // Jakar.Extensions types only: the user, error and file models moved to Jakar.Users / Jakar.ErrorOr in 10.12.
+    internal static readonly TestJson Debug = new() { Nodes = [.. Node.NodeFaker.Instance.Generate(5)] };
+    public Email Email = new("bite@me.com");
+    public Pair  Pair  = new("date", DateTime.Now.ToLongDateString());
 
 
-    public CreateUserModel                                 CreateUser { get; set; } = new();
-    public Errors                                          Errors     { get; set; } = Errors.Empty;
-    public Jakar.Extensions.ObservableCollection<FileData> Files      { get; set; } = [];
-    public CurrentLocation                                 Location   { get; set; } = new();
-    public Node[]                                          Nodes      { get; set; } = [];
-    public UserModel                                       User       { get; set; } = new();
+    public Node[] Nodes { get; set; } = [];
 
 
     public static void Print()

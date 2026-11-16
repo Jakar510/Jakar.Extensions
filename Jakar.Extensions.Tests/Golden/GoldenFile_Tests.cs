@@ -1,4 +1,4 @@
-// Jakar.Extensions :: Jakar.Extensions.Tests
+﻿// Jakar.Extensions :: Jakar.Extensions.Tests
 // 10/02/2026
 
 // Release gate for AOT-plan decision 2 ("11.0 must read JSON written by 10.x"):
@@ -10,7 +10,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Jakar.Extensions.UserGuid;
 
 
 
@@ -26,21 +25,10 @@ public sealed class GoldenFile_Tests
     /// <summary> File name → (read with 11.0, write with 11.0). </summary>
     private static readonly Dictionary<string, Func<string, string>> __readers = new()
                                                                                  {
-                                                                                     ["AppVersion"]          = static json => AppVersion.FromJson(json).ToJson(),
-                                                                                     ["AppInformation"]      = static json => AppInformation.FromJson(json).ToJson(),
-                                                                                     ["Pair"]                = static json => Pair.FromJson(json).ToJson(),
-                                                                                     ["StringTags"]          = static json => StringTags.FromJson(json).ToJson(),
-                                                                                     ["Error"]               = static json => Json.Serialize(json.FromJson<Error>()),
-                                                                                     ["Errors"]              = static json => Errors.FromJson(json).ToJson(),
-                                                                                     ["Alert"]               = static json => Alert.FromJson(json).ToJson(),
-                                                                                     ["ErrorResponse"]       = static json => ErrorResponse.FromJson(json).ToJson(),
-                                                                                     ["FileMetaData"]        = static json => FileMetaData.FromJson(json).ToJson(),
-                                                                                     ["LoginRequest"]        = static json => LoginRequest.FromJson(json).ToJson(),
-                                                                                     ["LoginRequestVersion"] = static json => LoginRequestVersion.FromJson(json).ToJson(),
-                                                                                     ["UserAddress"]         = static json => UserAddress.FromJson(json).ToJson(),
-                                                                                     ["GroupModel"]          = static json => GroupModel.FromJson(json).ToJson(),
-                                                                                     ["RoleModel"]           = static json => RoleModel.FromJson(json).ToJson(),
-                                                                                     ["UserModel"]           = static json => UserModel.FromJson(json).ToJson()
+                                                                                     ["AppVersion"]     = static json => AppVersion.FromJson(json).ToJson(),
+                                                                                     ["AppInformation"] = static json => AppInformation.FromJson(json).ToJson(),
+                                                                                     ["Pair"]           = static json => Pair.FromJson(json).ToJson(),
+                                                                                     ["StringTags"]     = static json => StringTags.FromJson(json).ToJson()
                                                                                  };
 
 
