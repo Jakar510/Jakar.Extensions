@@ -45,7 +45,7 @@
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
     <PackageVersion Include="Jakar.Extensions" Version="10.9.3" />
-    <PackageVersion Include="Jakar.ErrorOr" Version="10.1.0" />
+    <PackageVersion Include="Jakar.ErrorOr" Version="10.2.0" />
     <PackageVersion Include="Jakar.Json" Version="10.3.0" />
     <PackageVersion Include="Jakar.Spans" Version="10.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
