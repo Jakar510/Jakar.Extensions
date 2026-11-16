@@ -28,8 +28,7 @@ public sealed class GoldenFile_Tests
                                                                                      ["AppVersion"]     = static json => AppVersion.FromJson(json).ToJson(),
                                                                                      ["AppInformation"] = static json => AppInformation.FromJson(json).ToJson(),
                                                                                      ["Pair"]           = static json => Pair.FromJson(json).ToJson(),
-                                                                                     ["StringTags"]     = static json => StringTags.FromJson(json).ToJson(),
-                                                                                     ["FileMetaData"]   = static json => FileMetaData.FromJson(json).ToJson()
+                                                                                     ["StringTags"]     = static json => StringTags.FromJson(json).ToJson()
                                                                                  };
 
 

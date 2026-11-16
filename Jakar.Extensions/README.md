@@ -1,6 +1,6 @@
 # Jakar.Extensions
 
-Extensions and helpers for .NET 10: observable and concurrent collections, files, security, async LINQ, span and hashing helpers, JSON models, diagnostics and view models. It is trim and Native AOT compatible. **Contributions and ideas are welcome.**
+Extensions and helpers for .NET 10: observable and concurrent collections, security, async LINQ, span and hashing helpers, JSON models, diagnostics and view models. It is trim and Native AOT compatible. **Contributions and ideas are welcome.**
 
 ## Installation
 
@@ -16,10 +16,11 @@ Since 10.12 these live in their own packages. They depend on Jakar.Extensions an
 
 | Package | What it is |
 |---|---|
+| [Jakar.Files](https://github.com/Jakar510/Jakar.Files) | `LocalFile`, `LocalDirectory`, `LocalFileWatcher`, `TempFile`, `FilePaths`, `FileData`/`FileMetaData`, `EmbeddedResources<T>`, `IniConfig`, `PreferenceFile<TSelf>`, `AppPreference`, plus `IAppInfo`, `AppSettings`, `LanguageApi` and the `LocalFile` / `EmbeddedResources` overloads of `IDataProtector`, `DataProtector` and `PasswordRequirements` (as extension members). |
 | [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`: RFC 7807-style errors and results. |
-| [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, networking exceptions. Depends on Jakar.ErrorOr. |
-| [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | `UserModel`, `GroupModel`, `RoleModel`, `UserAddress`, `LoginRequest*`, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `EmailBuilder`. |
-| [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging: `AppLoggerOptions`, `FileLoggerProvider`, `Enricher`, `OpenTelemetryActivityEnricher`, `ScreenShot`, and the Serilog properties of `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation`. |
+| [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, networking exceptions. Depends on Jakar.ErrorOr and Jakar.Files. |
+| [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | `UserModel`, `GroupModel`, `RoleModel`, `UserAddress`, `LoginRequest*`, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `EmailBuilder`. Depends on Jakar.Files. |
+| [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging: `AppLoggerOptions`, `FileLoggerProvider`, `Enricher`, `OpenTelemetryActivityEnricher`, `ScreenShot`, and the Serilog properties of `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation`. Depends on Jakar.Files. |
 
 `Status`, `Statuses`, the MIME types, `StringTags`, `IErrorDetails`, `IErrorTitles`, `None`, `Email`, `IUserName` and `SelfLogger` stay in Jakar.Extensions.
 ## JSON
@@ -58,8 +59,8 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 
 ### Migrating from 10.11
 
-- Add the package for the types you use (table above): Jakar.ErrorOr, Jakar.Http, Jakar.Users or Jakar.Logging. It's a binary break: recompile against 10.12.
-- Jakar.Extensions no longer depends on Serilog, `Microsoft.IdentityModel.*` or `Microsoft.Extensions.Http`; they come with Jakar.Logging, Jakar.Users and Jakar.Http.
+- Add the package for the types you use (table above): Jakar.Files, Jakar.ErrorOr, Jakar.Http, Jakar.Users or Jakar.Logging. It's a binary break: recompile against 10.12.
+- Jakar.Extensions no longer depends on Serilog, `Microsoft.IdentityModel.*`, `Microsoft.Extensions.Http` or `ZLinq.FileSystem`; they come with Jakar.Logging, Jakar.Users, Jakar.Http and Jakar.Files.
 - `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation` lost their Serilog members: Jakar.Logging adds `GetProperty()` / `ToProperty()` back as extension members. `DeviceInformation` is no longer an `ILogEventEnricher`: use `device.ToEnricher()` (`DeviceInformationEnricher`).
 - `Error.TryCreate(WebResponse<T>, ...)` is in Jakar.Http; `global using static Jakar.Extensions.WebRequester` / `Claims` no longer come from Jakar.Extensions.
 
@@ -78,14 +79,6 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 
 - `Status`, `Statuses`: HTTP status codes, their titles (`IErrorTitles`) and the status for an exception.
 - `MimeType`, `MimeTypeNames`: MIME types, their names and file extensions.
-
-## Files
-
-- `LocalFile`, `LocalDirectory`: read, write, create, delete and enumerate local files and directories.
-- `LocalFileWatcher`: an observable collection of a directory's files.
-- `TempFile`, `EmbeddedResources`, `FilePaths`.
-- `PreferenceFile<TSelf>`: typed preferences persisted as JSON.
-- `IniConfig`: parses and formats INI files.
 
 ## Security
 

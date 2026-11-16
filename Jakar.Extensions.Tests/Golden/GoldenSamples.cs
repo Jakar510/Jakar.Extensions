@@ -20,7 +20,6 @@ public static class GoldenSamples
     public static AppInformation AppInformation() => new(AppVersion(), ID_1, "Jakar", "com.jakar.app");
     public static Pair           Pair()           => new("key", "value");
     public static StringTags     StringTags()     => new([new Pair("field", "notes"), new Pair("nullable", null)], ["must be 5 characters or fewer", "required"]);
-    public static FileMetaData   FileMetaData()   => new("report.txt", "text/plain", null, "a report");
 
 
     /// <summary> File name → JSON, written with the serializer of the build this is compiled into. </summary>
@@ -30,6 +29,5 @@ public static class GoldenSamples
         yield return ( "AppInformation", AppInformation().ToJson() );
         yield return ( "Pair", Pair().ToJson() );
         yield return ( "StringTags", StringTags().ToJson() );
-        yield return ( "FileMetaData", FileMetaData().ToJson() );
     }
 }

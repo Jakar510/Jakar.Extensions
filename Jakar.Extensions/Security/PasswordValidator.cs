@@ -212,11 +212,4 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
 
         SetBlockedPasswords(content);
     }
-
-    public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        SetBlockedPasswords(await file.ReadAsync().AsString(token).ConfigureAwait(false));
-    }
 }

@@ -6,7 +6,7 @@ Extensions and helpers for .NET 10, plus Blazor packages. **Contributions and id
 
 | Package | Version | What it is | Depends on |
 |---|---|---|---|
-| [Jakar.Extensions](./Jakar.Extensions/README.md) | 10.12.0 | Extensions and helpers: observable and concurrent collections, files, security, async LINQ, spans, hashing, JSON models, diagnostics, view models. | Jakar.Json, Jakar.Spans |
+| [Jakar.Extensions](./Jakar.Extensions/README.md) | 10.12.0 | Extensions and helpers: observable and concurrent collections, security, async LINQ, spans, hashing, JSON models, diagnostics, view models. | Jakar.Json, Jakar.Spans |
 | [Jakar.Extensions.Blazor](./Jakar.Extensions.Blazor/README.md) | 9.1.0 | Blazor base components and services. | Jakar.Extensions (10.9.3) |
 | [Jakar.Extensions.Blazor.Syncfusion](./Jakar.Extensions.Blazor.Syncfusion/README.md) | 9.0.0 | Syncfusion Blazor helpers. | Syncfusion.Blazor |
 
@@ -23,12 +23,12 @@ These packages were split out of Jakar.Extensions in 10.12 and build on it, each
 
 | Package | Repository | What it is | Depends on |
 |---|---|---|---|
-| Jakar.ErrorOr 10.1.0 | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`. | Jakar.Extensions |
-| Jakar.Http 10.1.0 | [Jakar510/Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`. | Jakar.Extensions, Jakar.ErrorOr |
-| Jakar.Users 10.1.0 | [Jakar510/Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User, group, role and address models, logins, claims, permissions, JWT parsing. | Jakar.Extensions |
-| Jakar.Logging 10.1.0 | [Jakar510/Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging, OpenTelemetry activity enrichment. | Jakar.Extensions |
+| Jakar.Files 10.1.0 | [Jakar510/Jakar.Files](https://github.com/Jakar510/Jakar.Files) | Files, directories, watchers, embedded resources, INI and preference files. | Jakar.Extensions | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`. | Jakar.Extensions |
+| Jakar.Http 10.1.0 | [Jakar510/Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`. | Jakar.Extensions, Jakar.ErrorOr, Jakar.Files |
+| Jakar.Users 10.1.0 | [Jakar510/Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User, group, role and address models, logins, claims, permissions, JWT parsing. | Jakar.Extensions, Jakar.Files |
+| Jakar.Logging 10.1.0 | [Jakar510/Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging, OpenTelemetry activity enrichment. | Jakar.Extensions, Jakar.Files |
 
-Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.Json.AspNetCore and Jakar.Extensions → Jakar.ErrorOr, Jakar.Users, Jakar.Logging → Jakar.Http**.
+Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.Json.AspNetCore and Jakar.Extensions → Jakar.Files and Jakar.ErrorOr → Jakar.Users, Jakar.Logging and Jakar.Http**.
 
 ## Versioning
 
@@ -40,7 +40,7 @@ Every package version is **`<.NET major>.<library major>.<library minor>`**:
 | Library major | Breaking changes: removed or changed public API, or a different wire format. | 10.**9**.3 → 10.**10**.0 drops Newtonsoft.Json |
 | Library minor | New features and fixes that don't break existing code. | 10.10.**0** → 10.10.**1** |
 
-- A new package starts at `<.NET major>.1.0`: Jakar.Spans, Jakar.Json, Jakar.Json.AspNetCore, Jakar.ErrorOr, Jakar.Http, Jakar.Users and Jakar.Logging start at 10.1.0.
+- A new package starts at `<.NET major>.1.0`: Jakar.Spans, Jakar.Json, Jakar.Json.AspNetCore, Jakar.Files, Jakar.ErrorOr, Jakar.Http, Jakar.Users and Jakar.Logging start at 10.1.0.
 - Packages released together depend on each other at the versions they were released with, as a minimum: Jakar.Extensions 10.12.0 needs Jakar.Json 10.3.0 or later, and Jakar.ErrorOr 10.1.0 needs Jakar.Extensions 10.12.0 or later.
 - Jakar.Extensions.Blazor 9.1.0 and Jakar.Extensions.Blazor.Syncfusion 9.0.0 predate this scheme; their next releases are 10.1.0.
 

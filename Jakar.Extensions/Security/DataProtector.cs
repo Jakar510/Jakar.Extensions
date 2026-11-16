@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/29/2023  10:47 PM
 
-using Microsoft.Extensions.Configuration;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -27,42 +23,12 @@ public interface IDataProtector : IDisposable
     public byte[] Encrypt( scoped in    ReadOnlySpan<byte> value );
     public string Encrypt( string                          value );
     public string Encrypt( string                          value, Encoding encoding );
-    public void   Encrypt( LocalFile                       file,  string   value );
-    public void   Encrypt( LocalFile                       file,  string   value, Encoding encoding );
-    public void   Encrypt( LocalFile                       file,  byte[]   value );
-
-
-    public ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken token                                                         = default );
-    public ValueTask<string> EncryptAsync( LocalFile value, Encoding          encoding, CancellationToken token                             = default );
-    public ValueTask         DecryptAsync( LocalFile input, LocalFile         output,   Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile file,  string            value,    CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile file,  string            value,    Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile file,  byte[]            value,    CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile input, LocalFile         output,   CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile input, LocalFile         output,   Encoding          encoding, CancellationToken token = default );
 
 
     public bool   TryDecrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten );
     public byte[] Decrypt( scoped in    ReadOnlySpan<byte> value );
     public string Decrypt( string                          value );
     public string Decrypt( string                          value, Encoding encoding );
-    public byte[] Decrypt( LocalFile                       file );
-    public string Decrypt( LocalFile                       file, Encoding          encoding );
-    public TValue Decrypt<TValue>( LocalFile               file, Decryptor<TValue> func );
-
-
-    public ValueTask<byte[]> DecryptAsync( LocalFile         file,  CancellationToken      token                             = default );
-    public ValueTask<string> DecryptAsync( LocalFile         file,  Encoding               encoding, CancellationToken token = default );
-    public ValueTask<TValue> DecryptAsync<TValue>( LocalFile file,  DecryptorAsync<TValue> func,     CancellationToken token = default );
-    public ValueTask         DecryptAsync( LocalFile         input, LocalFile              output,   CancellationToken token = default );
-
-
-
-    public delegate TValue Decryptor<out TValue>( LocalFile.IReadHandler handler, IDataProtector dataProtector );
-
-
-
-    public delegate ValueTask<TValue> DecryptorAsync<TValue>( LocalFile.IAsyncReadHandler handler, IDataProtector dataProtector, CancellationToken token );
 }
 
 
@@ -87,7 +53,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
     public DataProtector WithKey( scoped in ReadOnlySpan<char> pem )
     {
-        if ( __keyIsSet ) { throw new WarningException($"{nameof(WithKey)} or {nameof(WithKeyAsync)} has already been called"); }
+        if ( __keyIsSet ) { throw new WarningException($"{nameof(WithKey)} or WithKeyAsync has already been called"); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         __rsa.ImportFromPem(pem);
@@ -96,7 +62,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
     public DataProtector WithKey( scoped in ReadOnlySpan<char> pem, scoped in ReadOnlySpan<char> password )
     {
-        if ( __keyIsSet ) { throw new WarningException($"{nameof(WithKey)} or {nameof(WithKeyAsync)}  has already been called"); }
+        if ( __keyIsSet ) { throw new WarningException($"{nameof(WithKey)} or WithKeyAsync  has already been called"); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         __rsa.ImportFromEncryptedPem(pem, password);
@@ -104,96 +70,6 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         return this;
     }
 
-
-    public DataProtector WithKey<TValue>( EmbeddedResources<TValue> resources, string name )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return WithKey(resources.GetResourceText(name));
-    }
-    public DataProtector WithKey<TValue>( EmbeddedResources<TValue> resources, string name, SecuredString password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return WithKey(resources.GetResourceText(name), password);
-    }
-    public DataProtector WithKey<TValue>( EmbeddedResources<TValue> resources, string name, scoped in ReadOnlySpan<char> password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return WithKey(resources.GetResourceText(name), password);
-    }
-    public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false));
-    }
-    public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name, string password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false), password);
-    }
-    public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name, SecuredString password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await resources.GetResourceTextAsync(name).ConfigureAwait(false), password);
-    }
-
-
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
-    public async ValueTask<DataProtector> WithKeyAsync<TValue>( EmbeddedResources<TValue> resources, string name, SecuredString.ResolverOptions password, IConfiguration configuration, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return await WithKeyAsync(resources, name, await password.GetSecuredStringAsync(configuration, token).ConfigureAwait(false)).ConfigureAwait(false);
-    }
-
-
-    public DataProtector WithKeyFile( LocalFile pem )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(pem.Read().AsString());
-    }
-    public DataProtector WithKeyFile( LocalFile pem, scoped in ReadOnlySpan<char> password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(pem.Read().AsString(), password);
-    }
-    public DataProtector WithKeyFile( LocalFile pem, SecuredString password )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(pem.Read().AsString(), password);
-    }
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false));
-    }
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string password, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false), password);
-    }
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString password, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return WithKey(await pem.ReadAsync().AsString(token).ConfigureAwait(false), password);
-    }
-
-
-    [RequiresUnreferencedCode("Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)")]
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString.ResolverOptions password, IConfiguration configuration, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return await WithKeyAsync(pem, await password.GetSecuredStringAsync(configuration, token).ConfigureAwait(false), token).ConfigureAwait(false);
-    }
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )
@@ -230,7 +106,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     [MethodImpl(MethodImplOptions.AggressiveInlining)] private void ValidateState()
     {
         ObjectDisposedException.ThrowIf(__disposed, this);
-        if ( !__keyIsSet ) { throw new InvalidOperationException($"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first"); }
+        if ( !__keyIsSet ) { throw new InvalidOperationException($"Must call {nameof(WithKey)} or WithKeyAsync  first"); }
     }
 
 
@@ -278,73 +154,6 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         using ArrayBuffer<byte> owner         = GetBytes(value, encoding, out int bytesWritten);
         return encoding.GetString(Decrypt(owner.Span[..bytesWritten]));
     }
-    public byte[] Decrypt( LocalFile file )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        byte[] raw = file.Read().AsBytes();
-
-        byte[] result = Decrypt(raw);
-        return result;
-    }
-    public string Decrypt( LocalFile file, Encoding encoding )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string raw = file.Read().AsString();
-
-        string result = Decrypt(raw, encoding);
-        return result;
-    }
-    public TValue Decrypt<TValue>( LocalFile file, IDataProtector.Decryptor<TValue> func )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return func(file.Read(), this);
-    }
-    public async ValueTask<byte[]> DecryptAsync( LocalFile file, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        byte[] raw = await file.ReadAsync().AsBytes(token).ConfigureAwait(false);
-
-        byte[] result = Decrypt(raw);
-        return result;
-    }
-    public async ValueTask<string> DecryptAsync( LocalFile file, Encoding encoding, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string raw = await file.ReadAsync().AsString(token).ConfigureAwait(false);
-
-        string result = Decrypt(raw, encoding);
-        return result;
-    }
-    public async ValueTask<TValue> DecryptAsync<TValue>( LocalFile file, IDataProtector.DecryptorAsync<TValue> func, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        return await func(file.ReadAsync(), this, token).ConfigureAwait(false);
-    }
-    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        byte[] raw = await input.ReadAsync().AsBytes(token).ConfigureAwait(false);
-
-        byte[] result = Decrypt(raw);
-
-        await output.WriteAsync(result, token).ConfigureAwait(false);
-    }
-    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string raw = await input.ReadAsync().AsString(token).ConfigureAwait(false);
-
-        string result = Decrypt(raw, encoding);
-
-        await output.WriteAsync(result, token).ConfigureAwait(false);
-    }
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool TryEncrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten )
@@ -390,76 +199,5 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         using TelemetrySpan     telemetrySpan = TelemetrySpan.Create();
         using ArrayBuffer<byte> owner         = GetBytes(value, encoding, out int bytesWritten);
         return Convert.ToBase64String(Encrypt(owner.Span[..bytesWritten]));
-    }
-    public void Encrypt( LocalFile file, string value )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        Encrypt(file, value, Encoding.Default);
-    }
-    public void Encrypt( LocalFile file, string value, Encoding encoding )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        file.Write(Encrypt(value, encoding));
-    }
-    public void Encrypt( LocalFile file, byte[] value )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        file.Write(Encrypt(value));
-    }
-    public async ValueTask EncryptAsync( LocalFile file, string value, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        await EncryptAsync(file, value, Encoding.Default, token).ConfigureAwait(false);
-    }
-    public async ValueTask EncryptAsync( LocalFile file, string value, Encoding encoding, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        await file.WriteAsync(Encrypt(value, encoding), token).ConfigureAwait(false);
-    }
-    public async ValueTask EncryptAsync( LocalFile file, byte[] value, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        await file.WriteAsync(Encrypt(value), token).ConfigureAwait(false);
-    }
-    public async ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        byte[] raw = await value.ReadAsync().AsBytes(token).ConfigureAwait(false);
-
-        byte[] result = Encrypt(raw);
-        return result;
-    }
-    public async ValueTask<string> EncryptAsync( LocalFile value, Encoding encoding, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string raw = await value.ReadAsync().AsString(token).ConfigureAwait(false);
-
-        string result = Encrypt(raw, encoding);
-        return result;
-    }
-    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        byte[] raw = await input.ReadAsync().AsBytes(token).ConfigureAwait(false);
-
-        byte[] result = Encrypt(raw);
-
-        await output.WriteAsync(result, token).ConfigureAwait(false);
-    }
-    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        string raw = await input.ReadAsync().AsString(token).ConfigureAwait(false);
-
-        string result = Encrypt(raw, encoding);
-
-        await output.WriteAsync(result, token).ConfigureAwait(false);
     }
 }

@@ -33,8 +33,9 @@ Check("GcInfo",         () => GcInfo.FromJson(GcInfo.Create().ToJson()).TotalMem
 Check("Extension data",
       () =>
       {
-          FileMetaData file = FileMetaData.FromJson("{\"FileName\":\"t\",\"FileType\":\"text/plain\",\"MimeType\":null,\"Unknown\":{\"x\":[1,2]}}");
-          return file.AdditionalData!.ContainsKey("Unknown") && file.ToJson().Contains("Unknown");
+          // BaseClass.AdditionalData's [JsonOverflow] lives in Jakar.Extensions; the generator sees it on a model in this assembly.
+          Note note = Note.FromJson("{\"Text\":\"t\",\"Unknown\":{\"x\":[1,2]}}");
+          return note.AdditionalData!.ContainsKey("Unknown") && note.ToJson().Contains("Unknown");
       });
 
 // ─── App-defined models: generator + registry ───────────────────────────────
@@ -47,7 +48,7 @@ Check("App [JsonModel]",
                    .Total ==
             9.5m);
 
-Check("Registry lookup", () => JsonCodecRegistry.IsRegistered(typeof(Invoice)) && JsonCodecRegistry.IsRegistered(typeof(FileMetaData)));
+Check("Registry lookup", () => JsonCodecRegistry.IsRegistered(typeof(Invoice)) && JsonCodecRegistry.IsRegistered(typeof(StringTags)));
 
 // ─── Root arrays, collections ───────────────────────────────────────────────
 Check("FromJsonList", () => JsonCodec.FromJsonList<Invoice>("[{\"Id\":\"a\"},{\"Id\":\"b\"}]").Count == 2);
@@ -79,13 +80,12 @@ Check("Exception.GetData",
 
 // ─── Converters ──────────────────────────────────────────────────────────────
 Check("Email as a string", () => Json.Serialize<Email, JsonParsableConverter<Email>>(new Email("a@b.test")) == "\"a@b.test\"");
-Check("Encoding",          () => new LocalFile(Path.Combine(Path.GetTempPath(), "x.txt")).ToJson().Contains("\"FileEncoding\" : \"utf-8\""));
 
 // ─── Other dependencies ──────────────────────────────────────────────────────
 Check("OTP QR code (ZXing)", () => OneTimePassword.Create("Jakar").GetContent("ada").StartsWith("otpauth://"));
 Check("IPAddress parse",     () => IPAddress.Parse("127.0.0.1").ToString() == "127.0.0.1");
 
-// The Jakar.ErrorOr, Jakar.Http, Jakar.Users and Jakar.Logging types moved to their own repositories in 10.12; this app checks Jakar.Extensions only.
+// The Jakar.ErrorOr, Jakar.Files, Jakar.Http, Jakar.Users and Jakar.Logging types moved to their own repositories in 10.12; this app checks Jakar.Extensions only.
 
 
 Console.WriteLine(failures == 0
@@ -110,5 +110,13 @@ namespace AotCompatibility.TestApp
         public bool Equals( Invoice? other ) => other is not null && Id == other.Id && Total == other.Total;
         public override bool Equals( object? obj ) => obj is Invoice other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(Id, Total);
+    }
+
+
+
+    [JsonModel]
+    public sealed partial class Note : BaseClass
+    {
+        public string Text { get; init; } = "";
     }
 }
