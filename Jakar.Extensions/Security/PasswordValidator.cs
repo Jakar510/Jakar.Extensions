@@ -239,3 +239,15 @@ public sealed class PasswordRequirements : IOptions<PasswordRequirements>
         SetBlockedPasswords(content);
     }
 }
+
+
+
+/// <summary> <see cref="Error"/> factories for <see cref="PasswordValidator.Results"/> (Jakar.ErrorOr can't see <see cref="PasswordValidator"/>). </summary>
+public static class PasswordValidatorErrors
+{
+    extension( Error )
+    {
+        /// <summary> <see cref="Error.Unauthorized(StringTags, string?, string?, string?, string?)"/> with the failed password rules (<see cref="PasswordValidator.Results.ToStringTags"/>) and <see cref="IErrorTitles.PasswordValidation"/> as the title. </summary>
+        public static Error Unauthorized( ref readonly PasswordValidator.Results results, string? instance = null, string? description = null, string? type = null ) => Error.Unauthorized(results.ToStringTags(), instance, description, IErrorTitles.Current.PasswordValidation, type);
+    }
+}
