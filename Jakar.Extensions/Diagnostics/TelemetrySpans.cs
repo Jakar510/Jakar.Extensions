@@ -2,7 +2,6 @@
 // 01/05/2025  13:01
 
 using OpenTelemetry.Trace;
-using Serilog.Context;
 
 
 
@@ -19,7 +18,7 @@ public interface IActivityTracer
 
 
 /// <summary>
-///     <see cref="LogContext"/>
+///     Helpers for starting <see cref="TelemetrySpan"/>s from an <see cref="Activity"/> or a <see cref="TelemetrySource"/>.
 /// </summary>
 public static class TelemetrySpans
 {

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/29/2025  14:45
 
-using Serilog.Events;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -24,10 +20,6 @@ public readonly partial struct ThreadInformation( string name, int managedThread
 
 
     public static ThreadInformation Create() => new();
-
-
-    public StructureValue   GetStructureValue() => new([Enricher.GetProperty(Name, nameof(Name)), Enricher.GetProperty(ManagedThreadID, nameof(ManagedThreadID)), Enricher.GetProperty(CurrentCulture.DisplayName, nameof(CurrentCulture)), Enricher.GetProperty(CurrentUICulture.DisplayName, nameof(CurrentUICulture))]);
-    public LogEventProperty GetProperty()       => new(nameof(ThreadInformation), GetStructureValue());
 
 
     public int CompareTo( object? other ) => other is ThreadInformation info

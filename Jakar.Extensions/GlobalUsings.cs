@@ -1,4 +1,4 @@
-﻿global using System;
+﻿﻿global using System;
 global using System.Buffers;
 global using System.Collections;
 global using System.Collections.Concurrent;
@@ -48,9 +48,7 @@ global using Nito.Collections;
 global using OneOf;
 global using ZLinq;
 global using ZLinq.Linq;
-global using static Jakar.Extensions.Claims;
 global using static Jakar.Extensions.Constants;
 global using static Jakar.Extensions.Validate;
-global using static Jakar.Extensions.WebRequester;
 global using ErrorEventArgs = System.IO.ErrorEventArgs;
 global using ILogger = Microsoft.Extensions.Logging.ILogger;
