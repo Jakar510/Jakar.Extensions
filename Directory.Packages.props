@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
@@ -44,7 +44,13 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.8-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="10.9.3" />
+    <PackageVersion Include="Jakar.Extensions" Version="10.13.0" />
+    <PackageVersion Include="Jakar.Core" Version="10.1.0" />
+    <PackageVersion Include="Jakar.Logging" Version="10.3.0" />
+    <PackageVersion Include="Jakar.Collections" Version="10.1.0" />
+    <PackageVersion Include="Jakar.Files" Version="10.2.0" />
+    <PackageVersion Include="Jakar.Users" Version="10.2.0" />
+    <PackageVersion Include="Jakar.Http" Version="10.2.0" />
     <PackageVersion Include="Jakar.ErrorOr" Version="10.2.0" />
     <PackageVersion Include="Jakar.Json" Version="10.3.0" />
     <PackageVersion Include="Jakar.Spans" Version="10.1.0" />

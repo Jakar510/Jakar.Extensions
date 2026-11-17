@@ -74,11 +74,17 @@ public static class Strings
 
         [Pure] [MustDisposeResource] public ArrayBuffer<byte> AsSpanBytes( Encoding encoding )
         {
-            int               length = encoding.GetByteCount(input);
-            ArrayBuffer<byte> span   = new(length);
-            encoding.GetBytes(input, span.Span);
-            span.Length = length;
-            return span;
+            int    length = encoding.GetByteCount(input);
+            byte[] rented = ArrayPool<byte>.Shared.Rent(length);
+
+            try
+            {
+                int               written = encoding.GetBytes(input, rented);
+                ArrayBuffer<byte> span    = new(written);
+                span.Add(rented.AsSpan(0, written));
+                return span;
+            }
+            finally { ArrayPool<byte>.Shared.Return(rented); }
         }
     }
 

@@ -1,0 +1,33 @@
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 11/16/2026
+
+// These types live in Jakar.Logging (github.com/Jakar510/Jakar.Logging), which Jakar.Extensions references: code compiled against
+// an older Jakar.Extensions still finds them here.
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.AppInformation))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.AppVersion))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.AppVersionFlags))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.AppVersionFormat))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.AppVersionTypeConverter))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.DeviceCategory))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.DeviceInformation))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.DevicePlatform))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.DeviceTypes))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.ExceptionDetails))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.FuzzyEqualizer<>))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.GcGenerationInformation))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.GcInfo))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.GcMemoryInformation))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.IDeviceID))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.IDeviceInformation))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.IDeviceName))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.IFuzzyEquals<>))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.ISessionID<>))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.ITelemetrySource))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.IUserDevice<>))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.MethodDetails))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.ParameterDetails))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.SelfLogger))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.SpanDuration))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.StopWatch))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.TelemetrySource))]
+[assembly: TypeForwardedTo(typeof(Jakar.Extensions.TelemetrySpan))]

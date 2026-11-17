@@ -1,4 +1,4 @@
-# Jakar.Extensions
+﻿# Jakar.Extensions
 
 Extensions and helpers for .NET 10: observable and concurrent collections, security, async LINQ, span and hashing helpers, JSON models, diagnostics and view models. It is trim and Native AOT compatible. **Contributions and ideas are welcome.**
 
@@ -12,17 +12,26 @@ It brings in [Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) (JSON, inc
 
 ## Related packages
 
-Since 10.12 these live in their own packages. They depend on Jakar.Extensions and keep the `Jakar.Extensions` namespace, so code that used them only needs the package reference (and a recompile):
+Since 10.13 Jakar.Extensions is built on these packages and references them all, so they come with it. They keep the `Jakar.Extensions` namespace and Jakar.Extensions type-forwards the types that moved:
 
 | Package | What it is |
 |---|---|
-| [Jakar.Files](https://github.com/Jakar510/Jakar.Files) | `LocalFile`, `LocalDirectory`, `LocalFileWatcher`, `TempFile`, `FilePaths`, `FileData`/`FileMetaData`, `EmbeddedResources<T>`, `IniConfig`, `PreferenceFile<TSelf>`, `AppPreference`, plus `IAppInfo`, `AppSettings`, `LanguageApi` and the `LocalFile` / `EmbeddedResources` overloads of `IDataProtector`, `DataProtector` and `PasswordRequirements` (as extension members). |
-| [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`: RFC 7807-style errors and results. Since 10.12.1 it is a dependency of Jakar.Extensions (it depends on Jakar.Json only), so it comes with this package. |
-| [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, networking exceptions. Depends on Jakar.ErrorOr and Jakar.Files. |
-| [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | `UserModel`, `GroupModel`, `RoleModel`, `UserAddress`, `LoginRequest*`, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `EmailBuilder`. Depends on Jakar.Files. |
-| [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging: `AppLoggerOptions`, `FileLoggerProvider`, `Enricher`, `OpenTelemetryActivityEnricher`, `ScreenShot`, and the Serilog properties of `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation`. Depends on Jakar.Files. |
+| [Jakar.Core](https://github.com/Jakar510/Jakar.Core) | `BaseClass`, `BaseRecord`, `IObservableObject`, `IJsonModel`, `IUniqueID`, equality/comparison interfaces, `ExpectedValueTypeException`, `OutOfRangeException`. |
+| [Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`, `Pair`, `StringTags`, `Status`, `Statuses`. |
+| [Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog setup and enrichers (`AppLoggerOptions`, `ActivityEnricher`, `OpenTelemetryActivityEnricher`, `LogEventProperties`), `TelemetrySource`, `TelemetrySpan`, `AppVersion`, `AppInformation`, `DeviceInformation`, `GcInfo`, `StopWatch`, `SelfLogger`, `ExceptionDetails`. |
+| [Jakar.Collections](https://github.com/Jakar510/Jakar.Collections) | The observable/concurrent collections, `ArrayBuffer<T>`, `Buffer<T>`, `Disposables`, `Guids`, `ToArrayBuffer()`. |
+| [Jakar.Files](https://github.com/Jakar510/Jakar.Files) | `LocalFile`, `LocalDirectory`, `LocalFileWatcher`, `FilePaths`, `FileData`, `EmbeddedResources<T>`, `IniConfig`, `PreferenceFile<TSelf>`, `AppPreference`, `IAppInfo`, `MimeType`/`MimeTypes`/`MimeTypeNames`. |
+| [Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User models, logins, `Claims`, `Permissions`, `UserRights`, `JwtParser`, `PasswordValidator`/`PasswordRequirements`, `Email`, `Regexes`, `UnitConverters`. |
+| [Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `HeaderCollection`, `IHostInfo`. |
 
-`Pair`, `StringTags`, `Status`, `Statuses`, `IErrorDetails`, `IErrorTitles`/`ErrorTitles` and `NullAsEmptyArrayConverter` live in Jakar.ErrorOr since 10.12.1 and are type-forwarded from here (no source or binary change). The MIME types, `None`, `Email`, `IUserName` and `SelfLogger` stay in Jakar.Extensions.
+What stays here bridges them: `DataProtectorFiles` (the `LocalFile`/`EmbeddedResources` overloads of `IDataProtector`/`DataProtector`/`PasswordRequirements`), `AppSettings`, `IWebAppSettings` (and `JwtParser`'s `IWebAppSettings` overloads), `LanguageApi`, `PasswordValidatorErrors` (`Error.Unauthorized(PasswordValidator.Results)`, `Results.ToStringTags()`), plus everything not listed above.
+
+### Migrating from 10.12
+
+- Jakar.Extensions 10.13 brings Serilog back (through Jakar.Logging); Jakar.Logging.Serilog is retired, its types are in Jakar.Logging 10.3.0.
+- `AsyncLinq.ToArrayBuffer()` is `ArrayBuffers.ToArrayBuffer()` (Jakar.Collections), and `PasswordValidator.Results.ToStringTags()` is an extension member: same call syntax, recompile.
+- Don't mix with the 10.12-era packages (Jakar.Files/Users/Http 10.1.0, Jakar.Logging 10.2.0): they depend on Jakar.Extensions, which now holds fewer of the types they need.
+
 ## JSON
 
 Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/packages/Jakar.Json/) only**: source-generated readers and writers, no System.Text.Json, no Newtonsoft.Json and no reflection.
@@ -61,7 +70,7 @@ Since 10.11 the library serializes with **[Jakar.Json](https://www.nuget.org/pac
 
 - Add the package for the types you use (table above): Jakar.Files, Jakar.ErrorOr, Jakar.Http, Jakar.Users or Jakar.Logging. It's a binary break: recompile against 10.12.
 - Jakar.Extensions no longer depends on Serilog, `Microsoft.IdentityModel.*`, `Microsoft.Extensions.Http` or `ZLinq.FileSystem`; they come with Jakar.Logging, Jakar.Users, Jakar.Http and Jakar.Files.
-- `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation` lost their Serilog members: Jakar.Logging adds `GetProperty()` / `ToProperty()` back as extension members. `DeviceInformation` is no longer an `ILogEventEnricher`: use `device.ToEnricher()` (`DeviceInformationEnricher`).
+- `AppInformation`, `DeviceInformation`, `GcInfo` and `ThreadInformation` lost their Serilog members: Jakar.Logging.Serilog adds `GetProperty()` / `ToProperty()` back as extension members (Jakar.Logging 10.1.0 had them). `DeviceInformation` is no longer an `ILogEventEnricher`: use `device.ToEnricher()` (`DeviceInformationEnricher`).
 - `Error.TryCreate(WebResponse<T>, ...)` is in Jakar.Http; `global using static Jakar.Extensions.WebRequester` / `Claims` no longer come from Jakar.Extensions.
 
 ## Base classes

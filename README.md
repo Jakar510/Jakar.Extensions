@@ -1,4 +1,4 @@
-# Jakar.Extensions
+﻿# Jakar.Extensions
 
 Extensions and helpers for .NET 10, plus Blazor packages. **Contributions and ideas are welcome.**
 
@@ -19,22 +19,19 @@ Jakar.Extensions builds on two packages that have their own repositories:
 
 They're referenced as NuGet packages. Until they're on nuget.org, `nuget.config` also reads the local feed `W:\WorkSpace\LocalNuGet`.
 
-Jakar.ErrorOr sits below Jakar.Extensions (since 10.12.1): it depends on Jakar.Json only, owns `Pair`, `StringTags`, `Status`, `Statuses`, `IErrorDetails` and `IErrorTitles`/`ErrorTitles`, and Jakar.Extensions references it and type-forwards those types.
+Since 10.13 Jakar.Extensions sits on top of these packages, each in its own repository. None of them depends on Jakar.Extensions; the types keep the `Jakar.Extensions` namespace and Jakar.Extensions type-forwards the ones that moved, so code compiled against an older Jakar.Extensions still finds them.
 
 | Package | Repository | What it is | Depends on |
 |---|---|---|---|
-| Jakar.ErrorOr 10.2.0 | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`, and the types they're built on (`Pair`, `StringTags`, `Status`). | Jakar.Json |
+| Jakar.Core 10.1.0 | [Jakar510/Jakar.Core](https://github.com/Jakar510/Jakar.Core) | `BaseClass`, `BaseRecord`, `IObservableObject`, `IJsonModel`, `IUniqueID`, the equality/comparison interfaces, `ExpectedValueTypeException`, `OutOfRangeException`. | Jakar.Json |
+| Jakar.ErrorOr 10.2.0 | [Jakar510/Jakar.ErrorOr](https://github.com/Jakar510/Jakar.ErrorOr) | `Error`, `Errors`, `Alert`, `ErrorOrResult<T>`, `Pair`, `StringTags`, `Status`. | Jakar.Json |
+| Jakar.Logging 10.3.0 | [Jakar510/Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog setup and enrichers, `TelemetrySource`/`TelemetrySpan`, `AppVersion`, `AppInformation`, `DeviceInformation`, `GcInfo`, `SelfLogger`, `ExceptionDetails`. | Jakar.Core, Serilog |
+| Jakar.Collections 10.1.0 | [Jakar510/Jakar.Collections](https://github.com/Jakar510/Jakar.Collections) | Observable and concurrent collections, `ArrayBuffer<T>`/`Buffer<T>`, `Disposables`, `Guids`. | Jakar.Core, Jakar.Logging |
+| Jakar.Files 10.2.0 | [Jakar510/Jakar.Files](https://github.com/Jakar510/Jakar.Files) | Files, directories, watchers, embedded resources, INI and preference files, MIME types. | Jakar.Core, Jakar.Logging, Jakar.Collections |
+| Jakar.Users 10.2.0 | [Jakar510/Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User, group, role and address models, logins, claims, permissions, JWT parsing, `PasswordValidator`, `Email`, `Regexes`. | Jakar.Files (+ Core, Logging, Collections) |
+| Jakar.Http 10.2.0 | [Jakar510/Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`, `IHostInfo`. | Jakar.Files, Jakar.ErrorOr (+ Core, Logging, Collections) |
 
-These packages were split out of Jakar.Extensions in 10.12 and build on it, each in its own repository (the types keep the `Jakar.Extensions` namespace):
-
-| Package | Repository | What it is | Depends on |
-|---|---|---|---|
-| Jakar.Files 10.1.0 | [Jakar510/Jakar.Files](https://github.com/Jakar510/Jakar.Files) | Files, directories, watchers, embedded resources, INI and preference files. | Jakar.Extensions |
-| Jakar.Http 10.1.0 | [Jakar510/Jakar.Http](https://github.com/Jakar510/Jakar.Http) | `WebRequester`, `WebHandler`, `WebResponse<T>`, `ErrorResponse`. | Jakar.Extensions, Jakar.ErrorOr, Jakar.Files |
-| Jakar.Users 10.1.0 | [Jakar510/Jakar.Users](https://github.com/Jakar510/Jakar.Users) | User, group, role and address models, logins, claims, permissions, JWT parsing. | Jakar.Extensions, Jakar.Files |
-| Jakar.Logging 10.1.0 | [Jakar510/Jakar.Logging](https://github.com/Jakar510/Jakar.Logging) | Serilog and file logging, OpenTelemetry activity enrichment. | Jakar.Extensions, Jakar.Files |
-
-Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.ErrorOr and Jakar.Json.AspNetCore → Jakar.Extensions → Jakar.Files → Jakar.Users, Jakar.Logging and Jakar.Http**.
+Release in dependency order: **Jakar.Spans → Jakar.Json → Jakar.Core and Jakar.ErrorOr → Jakar.Logging → Jakar.Collections → Jakar.Files → Jakar.Users and Jakar.Http → Jakar.Extensions → Jakar.Database**. Jakar.Logging.Serilog (10.1.0 on nuget.org) is retired: its types are in Jakar.Logging 10.3.0.
 
 ## Versioning
 

@@ -119,8 +119,6 @@ public static partial class AsyncLinq
         return buffer.ToArray();
     }
 
-    [Pure] [MustDisposeResource] public static ArrayBuffer<TValue> ToArrayBuffer<TEnumerator, TValue>( this in ValueEnumerable<TEnumerator, TValue> source )
-        where TEnumerator : struct, IValueEnumerator<TValue>, allows ref struct => ArrayBuffer<TValue>.Create(source);
 
 
 
